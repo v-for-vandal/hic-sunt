@@ -1,0 +1,11 @@
+[wrap-git]
+directory = godot-cpp-3.5
+url = https://github.com/godotengine/godot-cpp.git
+revision = 3.5
+clone-recursive= true
+wrapdb_version = '3.5-0'
+patch_directory=godot-cpp-3.5
+
+
+[provide]
+godot_cpp = godot_cpp_dep

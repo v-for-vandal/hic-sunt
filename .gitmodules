@@ -1,0 +1,7 @@
+[submodule "submodules/mdspan"]
+	path = submodules/mdspan
+	url = git@github.com:kokkos/mdspan.git
+[submodule "submodules/godot-4.2"]
+	path = submodules/godot-4.2
+	url = https://github.com/godotengine/godot-cpp
+	branch = 4.2
