@@ -1,7 +1,6 @@
 #pragma once
 
-
-namespace hi::terra {
+namespace hs::terra {
   enum class Terrain {
     Plains = 0,
     Hills,

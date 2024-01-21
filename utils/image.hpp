@@ -16,7 +16,7 @@ class Image {
   auto get(int x, int y, int channel) const { return data_ref_(x, y, channel); }
 
   auto get(int x, int y) const {
-    return stdex::submdspan(data_ref_, x, y, stdex::full_extent);
+    return std::submdspan(data_ref_, x, y, std::full_extent);
   }
 
   bool Contains(int x, int y) const noexcept {
@@ -54,11 +54,11 @@ class Image {
   };
 
   using DataPtr = std::unique_ptr<unsigned char, DataDeleter>;
-  using ImageView = stdex::mdspan<
+  using ImageView = std::mdspan<
       const unsigned char,
-      stdex::extents<size_t, stdex::dynamic_extent, stdex::dynamic_extent,
-                     stdex::dynamic_extent>,
-      stdex::layout_right>;
+      std::extents<size_t, std::dynamic_extent, std::dynamic_extent,
+                     std::dynamic_extent>,
+      std::layout_right>;
 
   Image(DataPtr data, const ImageView& data_ref)
       : data_(std::move(data)), data_ref_(data_ref) {}

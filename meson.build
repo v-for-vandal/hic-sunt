@@ -12,6 +12,15 @@ spdlog_dep = dependency('spdlog')
 
 flatbuffer_dep = dependency('flatbuffers')
 
+flatc_prg = find_program('flatc')
+
+flatc_gen = generator(flatc_prg,
+  output : '@BASENAME@_generated.h',
+  arguments: ['--cpp', '-o', 'fbs', '@INPUT@']
+  )
+
+fbs_generated = flatc_gen.process('fbs/world.fbs')
+
 common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep]
 
 gtest_dep = dependency('gtest')
@@ -23,8 +32,8 @@ gtest_dep = dependency('gtest')
 
 root_include = include_directories([
     '.',
-    'submodules/mdspan/include/experimental'
-    'submodules/godot-cpp-4.2'
+    'submodules/mdspan/include/experimental',
+    'submodules/godot-4.2',
     ])
 
 test_resources_dir = meson.source_root() / 'test-resources'

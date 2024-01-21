@@ -8,10 +8,10 @@ namespace geometry {
 
 template<typename Cell>
 using CellsArrayView =
-    stdex::mdspan<Cell,
-                  stdex::extents<int, stdex::dynamic_extent,
-                                 stdex::dynamic_extent, stdex::dynamic_extent>,
-                  stdex::layout_left>;
+    std::mdspan<Cell,
+                  std::extents<int, std::dynamic_extent,
+                                 std::dynamic_extent, std::dynamic_extent>,
+                  std::layout_left>;
 
 template<typename Cell, typename CoordinateSystem>
 class SurfaceView {
@@ -46,7 +46,7 @@ class Surface {
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
 
-  Surface(SCS::QDelta q_size, SCS::RDelta r_size);
+  Surface(typename SCS::QDelta q_size, typename SCS::RDelta r_size);
 
   View view() { return cells_; }
 

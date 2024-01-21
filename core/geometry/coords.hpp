@@ -20,7 +20,7 @@ namespace details {
 
     QAxis q() const noexcept { return q_; }
     RAxis r() const noexcept { return r_; }
-    SAxis s() const noexcept { return SAxis{0 - q.ToUnderlying() - r.ToUnderlying()}; }
+    SAxis s() const noexcept { return SAxis{0 - q().ToUnderlying() - r().ToUnderlying()}; }
 
     bool operator==(const QRSCompact&) const noexcept = default;
 
@@ -33,12 +33,13 @@ namespace details {
 
 /* Axial coordinate system */
 template <typename CoordinateSystem>
-class DeltaCoords : {
+class DeltaCoords {
 public:
   using QDelta = typename CoordinateSystem::QDelta;
   using RDelta = typename CoordinateSystem::RDelta;
   using SDelta = typename CoordinateSystem::SDelta;
 
+  DeltaCoords() noexcept;
   DeltaCoords(QDelta q, RDelta r):
     data_(q,r) {}
 
@@ -48,10 +49,12 @@ public:
 
   bool operator==(const DeltaCoords&) const noexcept = default;
 
+  /*
   static DeltaCoords GetUndefinedDelta();
+  */
 
 private:
-  QRSCompact<QDelta, RDelta, SDelta
+  details::QRSCompact<QDelta, RDelta, SDelta
     > data_;
 };
 
@@ -62,10 +65,17 @@ public:
   using QAxis = typename CoordinateSystem::QAxis;
   using RAxis = typename CoordinateSystem::RAxis;
   using SAxis = typename CoordinateSystem::SAxis;
+  using QDelta = typename CoordinateSystem::QDelta;
+  using RDelta = typename CoordinateSystem::RDelta;
+  using SDelta = typename CoordinateSystem::SDelta;
 
 
-  Coords(QAxir q, RAxis r):
+  Coords(QAxis q, RAxis r):
     data_(q,r) {}
+
+  QAxis q() const noexcept { return data_.q(); }
+  RAxis r() const noexcept { return data_.r(); }
+  SAxis s() const noexcept { return data_.s(); }
 
   bool IsUndefined() const noexcept;
   void SetUndefined() noexcept;
@@ -86,7 +96,7 @@ public:
   DeltaCoords operator-(const Coords& second) const noexcept;
 
 private:
-  QRSCompact<QDelta, RDelta, SDelta
+  details::QRSCompact<QAxis, RAxis, SAxis
     > data_;
 };
 

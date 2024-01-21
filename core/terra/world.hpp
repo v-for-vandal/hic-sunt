@@ -4,6 +4,7 @@
 #include <core/terra/cell.hpp>
 
 #include <flatbuffers/flatbuffers.h>
+#include <fbs/world_generated.h>
 
 namespace hs::terra {
 

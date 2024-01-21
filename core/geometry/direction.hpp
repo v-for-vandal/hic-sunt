@@ -11,12 +11,12 @@ namespace geometry {
 
 enum class Direction : uint_fast8_t {
   kFirst = 0,
-  kXNegative = kFirst,
-  kXPositive,
-  kYNegative,
-  kYPositive,
-  kZNegative,
-  kZPositive,
+  kQNegative = kFirst,
+  kQPositive,
+  kRNegative,
+  kRPositive,
+  kSNegative,
+  kSPositive,
 
   kSize
 };
@@ -24,18 +24,18 @@ enum class Direction : uint_fast8_t {
 inline constexpr std::string_view ToString(Direction direction) {
   using namespace std::literals;
   switch (direction) {
-    case Direction::kXNegative:
-      return "kXNegative"sv;
-    case Direction::kXPositive:
-      return "kXPositive"sv;
-    case Direction::kYNegative:
-      return "kYNegative"sv;
-    case Direction::kYPositive:
-      return "kYPositive"sv;
-    case Direction::kZNegative:
-      return "kZNegative"sv;
-    case Direction::kZPositive:
-      return "kZPositive"sv;
+    case Direction::kQNegative:
+      return "kQNegative"sv;
+    case Direction::kQPositive:
+      return "kQPositive"sv;
+    case Direction::kRNegative:
+      return "kRNegative"sv;
+    case Direction::kRPositive:
+      return "kRPositive"sv;
+    case Direction::kSNegative:
+      return "kSNegative"sv;
+    case Direction::kSPositive:
+      return "kSPositive"sv;
     default:
       CHECK(false);
       return "UB"sv;
@@ -45,25 +45,25 @@ inline constexpr std::string_view ToString(Direction direction) {
 inline constexpr auto GetAllDirections() noexcept {
   // TODO: ranges!
   constexpr const std::array directions_{
-      Direction::kXNegative, Direction::kXPositive, Direction::kYNegative,
-      Direction::kYPositive, Direction::kZNegative, Direction::kZPositive};
+      Direction::kQNegative, Direction::kQPositive, Direction::kRNegative,
+      Direction::kRPositive, Direction::kSNegative, Direction::kSPositive};
   return directions_;
 }
 
 inline constexpr Direction GetReverseDirection(Direction input) noexcept {
   switch (input) {
-    case Direction::kXNegative:
-      return Direction::kXPositive;
-    case Direction::kXPositive:
-      return Direction::kXNegative;
-    case Direction::kYNegative:
-      return Direction::kYPositive;
-    case Direction::kYPositive:
-      return Direction::kYNegative;
-    case Direction::kZNegative:
-      return Direction::kZPositive;
-    case Direction::kZPositive:
-      return Direction::kZNegative;
+    case Direction::kQNegative:
+      return Direction::kQPositive;
+    case Direction::kQPositive:
+      return Direction::kQNegative;
+    case Direction::kRNegative:
+      return Direction::kRPositive;
+    case Direction::kRPositive:
+      return Direction::kRNegative;
+    case Direction::kSNegative:
+      return Direction::kSPositive;
+    case Direction::kSPositive:
+      return Direction::kSNegative;
     default:
       CHECK(false);
       return Direction::kSize;
@@ -75,12 +75,12 @@ inline constexpr Direction GetReverseDirection(Direction input) noexcept {
 inline constexpr std::array<Direction, 2> GetAxisDirections(
     Axis axis) noexcept {
   switch (axis) {
-    case Axis::kX:
-      return std::array{Direction::kXNegative, Direction::kXPositive};
-    case Axis::kY:
-      return std::array{Direction::kYNegative, Direction::kYPositive};
-    case Axis::kZ:
-      return std::array{Direction::kZNegative, Direction::kZPositive};
+    case Axis::kQ:
+      return std::array{Direction::kQNegative, Direction::kQPositive};
+    case Axis::kR:
+      return std::array{Direction::kRNegative, Direction::kRPositive};
+    case Axis::kS:
+      return std::array{Direction::kSNegative, Direction::kSPositive};
     default:
       CHECK(false);
       return std::array{Direction::kSize, Direction::kSize};
@@ -91,12 +91,12 @@ inline constexpr std::array<Direction, 2> GetAxisDirections(
 
 inline Direction GetNegativeDirection(Axis axis) noexcept {
   switch (axis) {
-    case Axis::kX:
-      return Direction::kXNegative;
-    case Axis::kY:
-      return Direction::kYNegative;
-    case Axis::kZ:
-      return Direction::kZNegative;
+    case Axis::kQ:
+      return Direction::kQNegative;
+    case Axis::kR:
+      return Direction::kRNegative;
+    case Axis::kS:
+      return Direction::kSNegative;
     default:
       CHECK(false);
       std::unreachable();
@@ -108,12 +108,12 @@ inline Direction GetNegativeDirection(Axis axis) noexcept {
 
 inline Direction GetPositiveDirection(Axis axis) noexcept {
   switch (axis) {
-    case Axis::kX:
-      return Direction::kXPositive;
-    case Axis::kY:
-      return Direction::kYPositive;
-    case Axis::kZ:
-      return Direction::kZPositive;
+    case Axis::kQ:
+      return Direction::kQPositive;
+    case Axis::kR:
+      return Direction::kRPositive;
+    case Axis::kS:
+      return Direction::kSPositive;
     default:
       CHECK(false);
       return Direction::kSize;
@@ -124,13 +124,13 @@ inline Direction GetPositiveDirection(Axis axis) noexcept {
 
 inline bool IsPositiveDirection(Direction direction) noexcept {
   switch (direction) {
-    case Direction::kXNegative:
-    case Direction::kYNegative:
-    case Direction::kZNegative:
+    case Direction::kQNegative:
+    case Direction::kRNegative:
+    case Direction::kSNegative:
       return false;
-    case Direction::kZPositive:
-    case Direction::kXPositive:
-    case Direction::kYPositive:
+    case Direction::kSPositive:
+    case Direction::kQPositive:
+    case Direction::kRPositive:
       return true;
     default:
       CHECK(false);

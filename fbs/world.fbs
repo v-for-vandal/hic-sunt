@@ -1,0 +1,7 @@
+namespace hic_sunt;
+
+table World {
+  id:string;
+}
+
+root_type World;
