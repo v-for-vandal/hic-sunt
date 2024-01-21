@@ -10,27 +10,27 @@ namespace geometry {
 
 enum class Axis : uint_fast8_t {
   kBegin,
-  kX = kBegin,
-  kY,
-  kZ,
+  kQ = kBegin,
+  kR,
+  kS,
 
   kSize
 };
 
 constexpr auto AllAxes() noexcept {
-  constexpr const auto all_axis_ = std::array{Axis::kX, Axis::kY, Axis::kZ};
+  constexpr const auto all_axis_ = std::array{Axis::kQ, Axis::kR, Axis::kS};
   return all_axis_;
 }
 
 inline constexpr std::string_view ToString(Axis axis) {
   using namespace std::literals;
   switch (axis) {
-    case Axis::kX:
-      return "X"sv;
-    case Axis::kY:
-      return "Y"sv;
-    case Axis::kZ:
-      return "Z"sv;
+    case Axis::kQ:
+      return "Q"sv;
+    case Axis::kR:
+      return "R"sv;
+    case Axis::kS:
+      return "S"sv;
     default:
       return "UB"sv;
   }

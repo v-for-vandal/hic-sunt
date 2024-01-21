@@ -94,101 +94,70 @@ class IntAxis {
 namespace details {
 
 template <typename T>
-struct XAxisTag {};
+struct QAxisTag {};
 
 template <typename T>
-struct YAxisTag {};
+struct RAxisTag {};
 
 template <typename T>
-struct ZAxisTag {};
+struct SAxisTag {};
 
 }  // namespace details
 template <typename CoordinateSystem>
-using XAxisBase = IntAxis<details::XAxisTag<CoordinateSystem>>;
+using QAxisBase = IntAxis<details::QAxisTag<CoordinateSystem>>;
 
 template <typename CoordinateSystem>
-using XDeltaBase = typename XAxisBase<CoordinateSystem>::Delta;
+using QDeltaBase = typename QAxisBase<CoordinateSystem>::Delta;
 
 template <typename CoordinateSystem>
-using YAxisBase = IntAxis<details::YAxisTag<CoordinateSystem>>;
+using RAxisBase = IntAxis<details::RAxisTag<CoordinateSystem>>;
 
 template <typename CoordinateSystem>
-using YDeltaBase = typename YAxisBase<CoordinateSystem>::Delta;
+using RDeltaBase = typename RAxisBase<CoordinateSystem>::Delta;
 
 template <typename CoordinateSystem>
-using ZAxisBase = IntAxis<details::ZAxisTag<CoordinateSystem>>;
+using SAxisBase = IntAxis<details::SAxisTag<CoordinateSystem>>;
 
 template <typename CoordinateSystem>
-using ZDeltaBase = typename ZAxisBase<CoordinateSystem>::Delta;
+using SDeltaBase = typename SAxisBase<CoordinateSystem>::Delta;
 
-template <class TranslationVector, class ScaleVector>
-struct CoordSystem {
-  /*
-  using TranslationVector = TranslationVector;
-  using ScaleVector = ScaleVector;
-  */
-#define TRANSFORM_MACRO(a) \
-  static int transform_ ## a(int val) noexcept { \
-    return TranslationVector::  a + ScaleVector::  a * val;\
-  }
-
-#define REVERSE_TRANSFORM_MACRO(a) \
-  static std::optional<int> reverse_transform_ ## a(int val) noexcept {\
-    if (val % ScaleVector:: a != 0) {\
-      return std::nullopt;\
-    }\
-    return val / ScaleVector::  a - TranslationVector::  a;\
-  }
-
-  TRANSFORM_MACRO(x)
-  TRANSFORM_MACRO(y)
-  TRANSFORM_MACRO(z)
-  REVERSE_TRANSFORM_MACRO(x)
-  REVERSE_TRANSFORM_MACRO(y)
-  REVERSE_TRANSFORM_MACRO(z)
-
-#undef TRANSFORM_MACRO
-#undef REVERSE_TRANSFORM_MACRO
-
-  using XAxis = XAxisBase<CoordSystem>;
-  using YAxis = YAxisBase<CoordSystem>;
-  using ZAxis = ZAxisBase<CoordSystem>;
-  using XDelta = XDeltaBase<CoordSystem>;
-  using YDelta = YDeltaBase<CoordSystem>;
-  using ZDelta = ZDeltaBase<CoordSystem>;
+struct QRSCoordinateSystem {
+  using QAxis = QAxisBase<QRSCoordinateSystem>;
+  using RAxis = RAxisBase<QRSCoordinateSystem>;
+  using SAxis = SAxisBase<QRSCoordinateSystem>;
+  using QDelta = QDeltaBase<QRSCoordinateSystem>;
+  using RDelta = RDeltaBase<QRSCoordinateSystem>;
+  using SDelta = SDeltaBase<QRSCoordinateSystem>;
 };
 
 
-using RawCoordinateSystem =
-    ::geometry::CoordSystem<::geometry::ZeroIntVectorConstant, ::geometry::OnesIntVectorConstant>;
-
 namespace literals {
-  inline RawCoordinateSystem::XAxis operator"" _x(unsigned long long int value) {
-    return RawCoordinateSystem::XAxis{static_cast<int>(value)};
+  inline QRSCoordinateSystem::QAxis operator"" _q(unsigned long long int value) {
+    return QRSCoordinateSystem::QAxis{static_cast<int>(value)};
   }
-  inline RawCoordinateSystem::YAxis operator"" _y(unsigned long long int value) {
-    return RawCoordinateSystem::YAxis{static_cast<int>(value)};
+  inline QRSCoordinateSystem::RAxis operator"" _r(unsigned long long int value) {
+    return QRSCoordinateSystem::RAxis{static_cast<int>(value)};
   }
-  inline RawCoordinateSystem::ZAxis operator"" _z(unsigned long long int value) {
-    return RawCoordinateSystem::ZAxis{static_cast<int>(value)};
+  inline QRSCoordinateSystem::SAxis operator"" _s(unsigned long long int value) {
+    return QRSCoordinateSystem::SAxis{static_cast<int>(value)};
   }
 
-  inline RawCoordinateSystem::XDelta operator"" _dx(
+  inline QRSCoordinateSystem::QDelta operator"" _dq(
       unsigned long long int value) {
-    return RawCoordinateSystem::XDelta{static_cast<int>(value)};
+    return QRSCoordinateSystem::QDelta{static_cast<int>(value)};
   }
-  inline RawCoordinateSystem::YDelta operator"" _dy(
+  inline QRSCoordinateSystem::RDelta operator"" _dr(
       unsigned long long int value) {
-    return RawCoordinateSystem::YDelta{static_cast<int>(value)};
+    return QRSCoordinateSystem::RDelta{static_cast<int>(value)};
   }
-  inline RawCoordinateSystem::ZDelta operator"" _dz(
+  inline QRSCoordinateSystem::SDelta operator"" _ds(
       unsigned long long int value) {
-    return RawCoordinateSystem::ZDelta{static_cast<int>(value)};
+    return QRSCoordinateSystem::SDelta{static_cast<int>(value)};
   }
 
 }
 
-}  // namespace terra
+}  // namespace geometry
 
 template <typename T>
 struct fmt::formatter<geometry::IntAxis<T>> {

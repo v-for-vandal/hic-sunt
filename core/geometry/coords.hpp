@@ -9,58 +9,72 @@
 
 namespace geometry {
 
+namespace details {
+
+
+  template<typename QAxis, typename RAxis, typename SAxis>
+  class QRSCompact {
+  public:
+    QRSCompact(QAxis q, RAxis r):
+      q_(q), r_(r) {}
+
+    QAxis q() const noexcept { return q_; }
+    RAxis r() const noexcept { return r_; }
+    SAxis s() const noexcept { return SAxis{0 - q.ToUnderlying() - r.ToUnderlying()}; }
+
+    bool operator==(const QRSCompact&) const noexcept = default;
+
+    QAxis q_{0};
+    RAxis r_{0};
+  };
+
+} // namespace details
+
+
+/* Axial coordinate system */
 template <typename CoordinateSystem>
-struct DeltaCoords {
-  using XDelta = typename CoordinateSystem::XDelta;
-  using YDelta = typename CoordinateSystem::YDelta;
-  using ZDelta = typename CoordinateSystem::ZDelta;
-  XDelta x{0};
-  YDelta y{0};
-  ZDelta z{0};
+class DeltaCoords : {
+public:
+  using QDelta = typename CoordinateSystem::QDelta;
+  using RDelta = typename CoordinateSystem::RDelta;
+  using SDelta = typename CoordinateSystem::SDelta;
 
-  bool IsSingleAxis() const noexcept {
-    int count{0};
-    if (x != 0) count++;
-    if (y != 0) count++;
-    if (z != 0) count++;
+  DeltaCoords(QDelta q, RDelta r):
+    data_(q,r) {}
 
-    return count == 1;
-  }
+  QDelta q() const noexcept { return data_.q(); }
+  RDelta r() const noexcept { return data_.r(); }
+  SDelta s() const noexcept { return data_.s(); }
 
-  Direction GetSingleDirection() const noexcept {
-    CHECK(IsSingleAxis());
-    if (x != 0) {
-      return std::array{Direction::kXNegative, Direction::kXPositive}[x > 0];
-    }
-    if (y != 0) {
-      return std::array{Direction::kXNegative, Direction::kXPositive}[y > 0];
-    }
-    if (z != 0) {
-      return std::array{Direction::kXNegative, Direction::kXPositive}[z > 0];
-    }
+  bool operator==(const DeltaCoords&) const noexcept = default;
 
-    std::unreachable();
-    return Direction::kSize;
-  }
+  static DeltaCoords GetUndefinedDelta();
+
+private:
+  QRSCompact<QDelta, RDelta, SDelta
+    > data_;
 };
 
 template <typename CoordinateSystem>
-struct Coords {
+class Coords {
+public:
   using DeltaCoords = ::geometry::DeltaCoords<CoordinateSystem>;
-  using XAxis = typename CoordinateSystem::XAxis;
-  using YAxis = typename CoordinateSystem::YAxis;
-  using ZAxis = typename CoordinateSystem::ZAxis;
+  using QAxis = typename CoordinateSystem::QAxis;
+  using RAxis = typename CoordinateSystem::RAxis;
+  using SAxis = typename CoordinateSystem::SAxis;
 
-  XAxis x{std::numeric_limits<int>::max()};
-  YAxis y{std::numeric_limits<int>::max()};
-  ZAxis z{std::numeric_limits<int>::max()};
+
+  Coords(QAxir q, RAxis r):
+    data_(q,r) {}
 
   bool IsUndefined() const noexcept;
-  void SetUndefined() { *this = Coords{}; }
+  void SetUndefined() noexcept;
+
+  bool operator==(const Coords&) const noexcept = default;
 
 #define COORDS_CMP(op)                                   \
   bool operator op(const Coords& other) const noexcept { \
-    return x op other.x && y op other.y && z op other.z; \
+    return q() op other.q() && r() op other.r() && s() op other.s(); \
   }
 
   COORDS_CMP(<)
@@ -68,19 +82,13 @@ struct Coords {
   COORDS_CMP(>)
   COORDS_CMP(>=)
 
-#undef COORDS_CMP
-
-  bool operator==(const Coords&) const noexcept = default;
-  bool operator!=(const Coords&) const noexcept = default;
-
-  Coords<RawCoordinateSystem> ToRaw() const;
-  // Coords GetNeighbour(Direction ... direction) const noexcept;
-  Coords operator+(Direction second) const noexcept;
   Coords operator+(const DeltaCoords& second) const noexcept;
   DeltaCoords operator-(const Coords& second) const noexcept;
-};
 
-using RawCoords = Coords<RawCoordinateSystem>;
+private:
+  QRSCompact<QDelta, RDelta, SDelta
+    > data_;
+};
 
 }  // namespace geometry
 
@@ -98,8 +106,8 @@ struct fmt::formatter<geometry::Coords<T>> {
 
   template <typename FormatCtx>
   auto format(const geometry::Coords<T>& coords, FormatCtx& ctx) {
-    return fmt::format_to(ctx.out(), "({},{},{})", coords.x.ToUnderlying(),
-                          coords.y.ToUnderlying(), coords.z.ToUnderlying());
+    return fmt::format_to(ctx.out(), "({},{},{})", coords.q().ToUnderlying(),
+                          coords.r().ToUnderlying(), coords.s().ToUnderlying());
   }
 };
 
