@@ -1,5 +1,13 @@
 #pragma once
 
+#include <string>
+#include <string_view>
+
+
+#include <core/utils/serialize.hpp>
+
+#include <fbs/world_generated.hpp>
+
 namespace hs::terra {
   enum class Terrain {
     Plains = 0,
@@ -10,10 +18,14 @@ namespace hs::terra {
   class Cell {
 
   public:
-    Terrain GetTerrain() const { return terrain_type_; }
-    auto SetTerrain(Terrain terrain) { terrain_type_ = terrain; }
+    std::string_view GetTerrain() const { return terrain_type_; }
+    void SetTerrain(std::string_view terrain) { terrain_type_ = terrain; }
 
   private:
-    Terrain terrain_type_;
+    std::string terrain_type_;
   };
+
+flatbuffers::Offset<fbs::Cell> SerializeTo(const Cell& source, fbs::CellBuilder& builder, ::flatbuffers::FlatBufferBuilder& fbb);
+Cell ParseFrom( const fbs::Cell& fbs_class);
+
 }

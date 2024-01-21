@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/geometry/coords.hpp>
+#include <core/utils/serialize.hpp>
 
 #include <mdspan>
 
@@ -40,15 +41,28 @@ private:
 };
 
 template<typename Cell, typename CoordinateSystem>
+class Surface;
+
+template<typename Cell, typename CoordinateSystem>
+void SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, ::flatbuffers::FlatBufferBuilder& fbb);
+
+template<typename Cell, typename CoordinateSystem>
+Surface<Cell, CoordinateSystem> ParseFrom(const auto& fbs_class, serialize::To<Surface<Cell, CoordinateSystem>>);
+
+template<typename Cell, typename CoordinateSystem>
 class Surface {
+public:
 
   using View = SurfaceView<Cell, CoordinateSystem>;
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
 
-  Surface(typename SCS::QDelta q_size, typename SCS::RDelta r_size);
+  Surface(typename SCS::QDelta q_size = 1, typename SCS::RDelta r_size = 1);
 
   View view() { return cells_; }
+
+  auto begin();
+  auto end();
 
 #define WRLD_REDIRECT_VIEW_CONST_FUNCTION(func)      \
   template <typename... Args>                        \
@@ -68,10 +82,19 @@ class Surface {
 #undef WRLD_REDIRECT_VIEW_CONST_FUNCTION
 
 private:
-  const size_t data_size_;
+  friend Surface<Cell,CoordinateSystem> ParseFrom(const auto& fbs_class,
+    serialize::To<Surface<Cell, CoordinateSystem>>);
+  friend void SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, ::flatbuffers::FlatBufferBuilder& fbb);
+
+  size_t data_size_;
   std::unique_ptr<Cell[]> data_storage_;
   SurfaceView<Cell, CoordinateSystem> cells_;
 };
+
+template<typename Cell, typename CoordinateSystem>
+void SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, ::flatbuffers::FlatBufferBuilder& fbb);
+
+void ParseFrom(World& target, const auto& fbs_class);
 
 }
 
