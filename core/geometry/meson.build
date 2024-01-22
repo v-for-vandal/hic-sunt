@@ -6,6 +6,7 @@ core_geometry_lib = static_library('core_geometry_lib',
 
 core_geometry_tests = executable('unit_tests',
   'coords_test.cpp',
+  'surface_test.cpp',
   'test_main.cpp',
   dependencies : common_deps + gtest_dep,
   include_directories: root_include,

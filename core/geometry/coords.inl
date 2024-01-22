@@ -1,6 +1,6 @@
 #pragma once
 
-namespace geometry {
+namespace hs::geometry {
 
 #if 0
 template<typename S>

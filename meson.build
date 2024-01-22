@@ -12,14 +12,13 @@ spdlog_dep = dependency('spdlog')
 
 flatbuffer_dep = dependency('flatbuffers')
 
-flatc_prg = find_program('flatc')
 
-flatc_gen = generator(flatc_prg,
-  output : '@BASENAME@_generated.h',
-  arguments: ['--cpp', '-o', 'fbs', '@INPUT@']
-  )
-
-fbs_generated = flatc_gen.process('fbs/world.fbs')
+#flatc_gen = generator(flatc_prg,
+#  output : '@BASENAME@_generated.h',
+#  arguments: ['--cpp', '-o', 'fbs', '@INPUT@']
+#  )
+#
+#fbs_generated = flatc_gen.process('fbs/world.fbs')
 
 common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep]
 
@@ -30,8 +29,11 @@ gtest_dep = dependency('gtest')
 #absl_dep = dependency('abseil-cpp', modules: ['absl::log'])
 #absl_dep = dependency('absl', modules: ['log']) # not in ubuntu yet
 
+subdir('fbs')
+
 root_include = include_directories([
     '.',
+    'fbs',
     'submodules/mdspan/include/experimental',
     'submodules/godot-4.2',
     ])

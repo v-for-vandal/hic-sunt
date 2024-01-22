@@ -5,6 +5,8 @@
 namespace hs::serialize {
 
   template<typename T>
-  struct To {};
+  struct To {
+    using Target = T;
+  };
 
 }

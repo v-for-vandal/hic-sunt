@@ -5,17 +5,18 @@
 
 #include <mdspan>
 
-namespace geometry {
+namespace hs::geometry {
 
 template<typename Cell>
 using CellsArrayView =
     std::mdspan<Cell,
                   std::extents<int, std::dynamic_extent,
-                                 std::dynamic_extent, std::dynamic_extent>,
+                                 std::dynamic_extent>,
                   std::layout_left>;
 
 template<typename Cell, typename CoordinateSystem>
 class SurfaceView {
+public:
   using ViewCoords = geometry::Coords<CoordinateSystem>;
 
   SurfaceView() = default;
@@ -36,6 +37,16 @@ class SurfaceView {
     return target(coords.q(), coords.r());
   }
 
+  auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
+  auto r_size() const { return typename CoordinateSystem::RDelta{target_.extent(1)}; }
+
+  /*
+  auto begin() { return target_.begin(); }
+  auto end() { return target_.end(); }
+  auto begin() const { return target_.begin(); }
+  auto end() const { return target_.end(); }
+  */
+
 private:
   CellsArrayView<Cell> target_;
 };
@@ -43,11 +54,13 @@ private:
 template<typename Cell, typename CoordinateSystem>
 class Surface;
 
+/* TODO: RM
 template<typename Cell, typename CoordinateSystem>
-void SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, ::flatbuffers::FlatBufferBuilder& fbb);
+auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::FlatBufferBuilder& fbb, auto to);
 
 template<typename Cell, typename CoordinateSystem>
 Surface<Cell, CoordinateSystem> ParseFrom(const auto& fbs_class, serialize::To<Surface<Cell, CoordinateSystem>>);
+*/
 
 template<typename Cell, typename CoordinateSystem>
 class Surface {
@@ -57,12 +70,27 @@ public:
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
 
-  Surface(typename SCS::QDelta q_size = 1, typename SCS::RDelta r_size = 1);
+  Surface(typename SCS::QDelta q_size = typename SCS::QDelta{1}, typename SCS::RDelta r_size = typename SCS::RDelta{1});
+  Surface(const Surface&) = delete;
+  Surface(Surface&&) = default;
+  Surface& operator=(const Surface&) = delete;
+  Surface& operator=(Surface&&) = default;
 
   View view() { return cells_; }
 
-  auto begin();
-  auto end();
+  /*
+  auto begin() { return cells_.begin(); }
+  auto begin() const { return cells_.begin(); }
+  auto end() { return cells_.end(); }
+  auto end() const { return cells_.end(); }
+  */
+
+  size_t data_size() const { return data_size_; }
+  const Cell& GetCell(size_t idx) const { return data_storage_[idx]; }
+  Cell& GetCell(size_t idx) { return data_storage_[idx]; }
+
+  auto q_size() const { return cells_.q_size(); }
+  auto r_size() const { return cells_.r_size(); }
 
 #define WRLD_REDIRECT_VIEW_CONST_FUNCTION(func)      \
   template <typename... Args>                        \
@@ -82,19 +110,16 @@ public:
 #undef WRLD_REDIRECT_VIEW_CONST_FUNCTION
 
 private:
+    /*
   friend Surface<Cell,CoordinateSystem> ParseFrom(const auto& fbs_class,
     serialize::To<Surface<Cell, CoordinateSystem>>);
-  friend void SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, ::flatbuffers::FlatBufferBuilder& fbb);
+  friend auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::FlatBufferBuilder& fbb, auto to);
+  */
 
   size_t data_size_;
   std::unique_ptr<Cell[]> data_storage_;
   SurfaceView<Cell, CoordinateSystem> cells_;
 };
-
-template<typename Cell, typename CoordinateSystem>
-void SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, ::flatbuffers::FlatBufferBuilder& fbb);
-
-void ParseFrom(World& target, const auto& fbs_class);
 
 }
 

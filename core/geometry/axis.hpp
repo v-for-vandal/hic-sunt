@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace geometry {
+namespace hs::geometry {
 
 enum class Axis : uint_fast8_t {
   kBegin,
@@ -38,7 +38,7 @@ inline constexpr std::string_view ToString(Axis axis) {
 }  // namespace terra
 
 template <>
-struct fmt::formatter<geometry::Axis> {
+struct fmt::formatter<::hs::geometry::Axis> {
   constexpr auto parse(format_parse_context& ctx) const
       -> decltype(ctx.begin()) {
     auto it = ctx.begin(), end = ctx.end();
@@ -51,7 +51,7 @@ struct fmt::formatter<geometry::Axis> {
   }
 
   template <typename FormatCtx>
-  auto format(geometry::Axis axis, FormatCtx& ctx) {
+  auto format(::hs::geometry::Axis axis, FormatCtx& ctx) {
     // for some reason, constexpr doesn't work here
     return fmt::format_to(ctx.out(), fmt::runtime(ToString(axis)));
   }

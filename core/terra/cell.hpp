@@ -6,7 +6,7 @@
 
 #include <core/utils/serialize.hpp>
 
-#include <fbs/world_generated.hpp>
+#include <fbs/world_generated.h>
 
 namespace hs::terra {
   enum class Terrain {
@@ -26,6 +26,6 @@ namespace hs::terra {
   };
 
 flatbuffers::Offset<fbs::Cell> SerializeTo(const Cell& source, fbs::CellBuilder& builder, ::flatbuffers::FlatBufferBuilder& fbb);
-Cell ParseFrom( const fbs::Cell& fbs_class);
+Cell ParseFrom( const fbs::Cell& fbs_class, serialize::To<Cell>);
 
 }

@@ -4,7 +4,7 @@ namespace hs::terra {
 
 flatbuffers::Offset<fbs::Cell> SerializeTo(const Cell& source, fbs::CellBuilder& builder, ::flatbuffers::FlatBufferBuilder& fbb)
 {
-  builder.add_terrain(fbb.CreateSharedString(source.terrain));
+  builder.add_terrain(fbb.CreateSharedString(source.GetTerrain()));
 
   return builder.Finish();
 }

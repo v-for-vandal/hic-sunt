@@ -1,6 +1,6 @@
 #pragma once
 
-namespace geometry {
+namespace hs::geometry {
 
     enum class Rotation {
       kNoRotation,

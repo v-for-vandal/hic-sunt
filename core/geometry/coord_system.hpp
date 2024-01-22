@@ -3,7 +3,7 @@
 #include <compare>
 #include <fmt/format.h>
 
-namespace geometry {
+namespace hs::geometry {
 
 template <int xt, int yt, int zt>
 struct IntVectorConstant {
@@ -157,10 +157,10 @@ namespace literals {
 
 }
 
-}  // namespace geometry
+}  // namespace hs::geometry
 
 template <typename T>
-struct fmt::formatter<geometry::IntAxis<T>> {
+struct fmt::formatter<::hs::geometry::IntAxis<T>> {
   constexpr auto parse(format_parse_context& ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
@@ -172,13 +172,13 @@ struct fmt::formatter<geometry::IntAxis<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const geometry::IntAxis<T>& v, FormatCtx& ctx) {
+  auto format(const ::hs::geometry::IntAxis<T>& v, FormatCtx& ctx) {
     return fmt::format_to(ctx.out(), "{}", v.ToUnderlying());
   }
 };
 
 template <typename T>
-struct fmt::formatter<geometry::IntDelta<T>> {
+struct fmt::formatter<::hs::geometry::IntDelta<T>> {
   constexpr auto parse(format_parse_context& ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
@@ -190,7 +190,7 @@ struct fmt::formatter<geometry::IntDelta<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const geometry::IntDelta<T>& v, FormatCtx& ctx) {
+  auto format(const ::hs::geometry::IntDelta<T>& v, FormatCtx& ctx) {
     return fmt::format_to(ctx.out(), "{}", v.ToUnderlying());
   }
 };

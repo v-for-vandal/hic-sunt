@@ -1,22 +1,24 @@
 #pragma once
 
-namespace geometry {
+namespace hs::geometry {
 
 template<typename Cell, typename CoordinateSystem>
 Surface<Cell, CoordinateSystem>::Surface(typename SCS::QDelta q_size, typename SCS::RDelta r_size):
   data_size_(q_size.ToUnderlying() * r_size.ToUnderlying()),
   data_storage_(new Cell[data_size_]),
-  cells_(CellsArrayView<Cell>(data_storage_.get(), q_size, r_size))
+  cells_(CellsArrayView<Cell>(data_storage_.get(), q_size.ToUnderlying(), r_size.ToUnderlying()))
 {
 
 }
 
 template<typename Cell, typename CoordinateSystem>
-auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, ::flatbuffers::FlatBufferBuilder& fbb)
+auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::FlatBufferBuilder& fbb, auto to)
 {
   // Deduce cell fb builder type by our builder type
   // first, get fb class by fb builder
-  using BuilderType = std::decay_t<decltype(builder)>;
+  using BuilderType = std::decay_t<typename decltype(to)::Target>;
+  BuilderType builder(fbb);
+
   using SurfaceFbClass = typename BuilderType::Table;
 
   // fb class must have method 'cells'
@@ -27,19 +29,19 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, :
   // Now, we can actually get 'Cell' from vector because flatbuffer internally 
   // has this nice function IndirectHelper and Vector::return_type will be
   // exactly Cell
-  using CellType = std::decay_t<typename VectorOfOfsettOfCell::return_type>>;
+  using CellType = std::remove_cv_t<std::remove_pointer_t<std::decay_t<typename VectorOfOfsettOfCell::return_type>>>;
 
   // Now, we can get CellBuilder
   using CellBuilderType = typename CellType::Builder;
 
-  auto serialize_cell_fn = [&source, &fbb](size_t idx) {
+  std::function<flatbuffers::Offset<CellType>(size_t)> serialize_cell_fn = [&source, &fbb](size_t idx) {
     CellBuilderType cell_builder(fbb);
-    auto offset = SerializeTo(source.data_storage_[idx], cell_builder, fbb);
+    flatbuffers::Offset<CellType> offset = SerializeTo(source.GetCell(idx), cell_builder, fbb);
     return offset;
     };
 
-  auto cells_offset = fbb.CreateVector<flatbuffer::Offset<CellType>>(
-    source.data_size_,
+  auto cells_offset = fbb.CreateVector<::flatbuffers::Offset<CellType>>(
+    source.data_size(),
     serialize_cell_fn
     );
 
@@ -53,22 +55,23 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& builder, :
 template<typename Cell, typename CoordinateSystem>
 inline Surface<Cell, CoordinateSystem> ParseFrom(const auto& fbs_class, serialize::To<Surface<Cell, CoordinateSystem>>)
 {
-  Surface<Cell, CoordinateSystem> result(
-    CoordinateSystem::QDelta{fbs_class.q_size()},
-    CoordinateSystem::RDelta{fbs_class.r_size()});
+  Surface<Cell, CoordinateSystem> result{
+    typename CoordinateSystem::QDelta{fbs_class.q_size()},
+    typename CoordinateSystem::RDelta{fbs_class.r_size()}};
 
   auto cells = fbs_class.cells();
   if(cells) {
-    auto out_it = result.begin();
+    size_t out_it = 0;
     for(auto fbs_elem : *cells) {
-      *out_it = ParseFrom(fbs_elem, serialize::To<Cell>);
+      if(fbs_elem) {
+        result.GetCell(out_it) = ParseFrom(*fbs_elem, serialize::To<Cell>{});
+      }
       out_it++;
     }
 
   }
 
   return result;
-  
 }
 
 }

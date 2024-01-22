@@ -7,7 +7,7 @@
 #include <core/geometry/coord_system.hpp>
 #include <core/geometry/direction.hpp>
 
-namespace geometry {
+namespace hs::geometry {
 
 namespace details {
 
@@ -61,7 +61,7 @@ private:
 template <typename CoordinateSystem>
 class Coords {
 public:
-  using DeltaCoords = ::geometry::DeltaCoords<CoordinateSystem>;
+  using DeltaCoords = ::hs::geometry::DeltaCoords<CoordinateSystem>;
   using QAxis = typename CoordinateSystem::QAxis;
   using RAxis = typename CoordinateSystem::RAxis;
   using SAxis = typename CoordinateSystem::SAxis;
@@ -100,10 +100,10 @@ private:
     > data_;
 };
 
-}  // namespace geometry
+}  // namespace hs::geometry
 
 template <typename T>
-struct fmt::formatter<geometry::Coords<T>> {
+struct fmt::formatter<hs::geometry::Coords<T>> {
   constexpr auto parse(format_parse_context& ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
@@ -115,7 +115,7 @@ struct fmt::formatter<geometry::Coords<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const geometry::Coords<T>& coords, FormatCtx& ctx) {
+  auto format(const hs::geometry::Coords<T>& coords, FormatCtx& ctx) {
     return fmt::format_to(ctx.out(), "({},{},{})", coords.q().ToUnderlying(),
                           coords.r().ToUnderlying(), coords.s().ToUnderlying());
   }

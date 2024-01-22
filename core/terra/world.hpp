@@ -11,7 +11,7 @@ namespace hs::terra {
 
 class World;
 
-::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, fbs::WorldBuilder& builder);
+::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, ::flatbuffers::FlatBufferBuilder& fbb);
 World ParseFrom(const fbs::World& world, serialize::To<World>);
 
 class World {
@@ -24,14 +24,14 @@ public:
   World(const World&) = delete;
   World(World&&) = default;
   World& operator=(const World&) = delete;
-  World& operator==(World&&) = default;
+  World& operator=(World&&) = default;
 
   World(QRSCoordinateSystem::QDelta q_size, QRSCoordinateSystem::RDelta r_size);
 
   const SurfaceView& GetSurface() const { return surface_; }
 
 private:
-  friend ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, fbs::WorldBuilder& builder);
+  friend ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, ::flatbuffers::FlatBufferBuilder& fbb);
   friend World ParseFrom(const fbs::World& world, serialize::To<World>);
 
 private:

@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-namespace geometry {
+namespace hs::geometry {
 
 TEST(Coords, Comparing) {
   using namespace literals;

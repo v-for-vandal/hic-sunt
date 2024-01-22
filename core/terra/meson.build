@@ -1,6 +1,9 @@
 core_terra_lib = static_library('core_terra_lib',
+  sources: [
   'cell.cpp',
   'world.cpp',
+  fbs_generated,
+  ],
   dependencies : common_deps,
   link_with: [utils_lib],
   include_directories: root_include)

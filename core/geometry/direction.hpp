@@ -7,7 +7,7 @@
 #include <core/geometry/axis.hpp>
 #include <string_view>
 
-namespace geometry {
+namespace hs::geometry {
 
 enum class Direction : uint_fast8_t {
   kFirst = 0,
@@ -147,7 +147,7 @@ inline bool IsNegativeDirection(Direction direction) noexcept {
 }  // namespace terra
 
 template <>
-struct fmt::formatter<geometry::Direction> {
+struct fmt::formatter<::hs::geometry::Direction> {
   constexpr auto parse(format_parse_context& ctx) const
       -> decltype(ctx.begin()) {
     auto it = ctx.begin(), end = ctx.end();
@@ -160,7 +160,7 @@ struct fmt::formatter<geometry::Direction> {
   }
 
   template <typename FormatCtx>
-  auto format(geometry::Direction direction, FormatCtx& ctx) {
+  auto format(::hs::geometry::Direction direction, FormatCtx& ctx) {
     // for some reason, constexpr doesn't work here
     return fmt::format_to(ctx.out(), fmt::runtime(ToString(direction)));
   }

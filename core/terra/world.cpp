@@ -4,11 +4,11 @@
 
 namespace hs::terra {
 
-::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, fbs::WorldBuilder& builder, ::flatbuffers::FlatBufferBuilder& fbb)
+::flatbuffers::Offset<fbs::World> SerializeTo(const World& source,  ::flatbuffers::FlatBufferBuilder& fbb)
 {
+  hs::fbs::WorldBuilder builder(fbb);
   builder.add_id(fbb.CreateString("test_id"));
-  builder.add_surface(SerializeTo(source.surface_, fbs::SurfaceBuilder(fbb), fbb);
-
+  builder.add_surface(SerializeTo(source.surface_, fbb, serialize::To<fbs::SurfaceBuilder>{}));
   return builder.Finish();
 }
 
@@ -19,6 +19,6 @@ World ParseFrom(const fbs::World& world, serialize::To<World>)
     result.surface_ = ParseFrom(*world.surface(), serialize::To<World::Surface>{});
   }
 
-  return std::move(result);
+  return result;
 }
 }
