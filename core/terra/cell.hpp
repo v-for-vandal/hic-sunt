@@ -25,7 +25,7 @@ namespace hs::terra {
     std::string terrain_type_;
   };
 
-flatbuffers::Offset<fbs::Cell> SerializeTo(const Cell& source, fbs::CellBuilder& builder, ::flatbuffers::FlatBufferBuilder& fbb);
+flatbuffers::Offset<fbs::Cell> SerializeTo(const Cell& source, ::flatbuffers::FlatBufferBuilder& fbb);
 Cell ParseFrom( const fbs::Cell& fbs_class, serialize::To<Cell>);
 
 }

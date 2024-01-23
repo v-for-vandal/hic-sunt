@@ -17,7 +17,6 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::F
   // Deduce cell fb builder type by our builder type
   // first, get fb class by fb builder
   using BuilderType = std::decay_t<typename decltype(to)::Target>;
-  BuilderType builder(fbb);
 
   using SurfaceFbClass = typename BuilderType::Table;
 
@@ -31,12 +30,8 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::F
   // exactly Cell
   using CellType = std::remove_cv_t<std::remove_pointer_t<std::decay_t<typename VectorOfOfsettOfCell::return_type>>>;
 
-  // Now, we can get CellBuilder
-  using CellBuilderType = typename CellType::Builder;
-
   std::function<flatbuffers::Offset<CellType>(size_t)> serialize_cell_fn = [&source, &fbb](size_t idx) {
-    CellBuilderType cell_builder(fbb);
-    flatbuffers::Offset<CellType> offset = SerializeTo(source.GetCell(idx), cell_builder, fbb);
+    flatbuffers::Offset<CellType> offset = SerializeTo(source.GetCell(idx), fbb);
     return offset;
     };
 
@@ -45,6 +40,7 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::F
     serialize_cell_fn
     );
 
+  BuilderType builder(fbb);
   builder.add_cells(cells_offset);
   builder.add_q_size(source.q_size().ToUnderlying());
   builder.add_r_size(source.r_size().ToUnderlying());

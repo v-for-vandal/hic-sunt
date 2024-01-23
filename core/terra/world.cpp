@@ -4,11 +4,18 @@
 
 namespace hs::terra {
 
+World::World(QRSCoordinateSystem::QDelta q_size, QRSCoordinateSystem::RDelta r_size):
+  surface_(q_size, r_size)
+  {
+  }
+
 ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source,  ::flatbuffers::FlatBufferBuilder& fbb)
 {
+  auto id_offset = fbb.CreateString("test_id");
+  auto surface_offset = SerializeTo(source.surface_, fbb, serialize::To<fbs::SurfaceBuilder>{});
   hs::fbs::WorldBuilder builder(fbb);
-  builder.add_id(fbb.CreateString("test_id"));
-  builder.add_surface(SerializeTo(source.surface_, fbb, serialize::To<fbs::SurfaceBuilder>{}));
+  builder.add_id(id_offset);
+  builder.add_surface(surface_offset);
   return builder.Finish();
 }
 

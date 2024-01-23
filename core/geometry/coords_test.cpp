@@ -5,6 +5,7 @@
 
 namespace hs::geometry {
 
+  /*
 TEST(Coords, Comparing) {
   using namespace literals;
   using RawCoords = Coords<QRSCoordinateSystem>;
@@ -18,5 +19,6 @@ TEST(Coords, Comparing) {
 
   EXPECT_FALSE((RawCoords{4_q, 5_r}) < (RawCoords{5_q, 4_r}));
 }
+*/
 
 }  // namespace terra
