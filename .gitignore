@@ -37,3 +37,6 @@ build*/*
 # subprojects
 subprojects/*/*
 subprojects/godot-cpp-4.2
+
+# temp files
+*.png~

@@ -4,7 +4,7 @@ url = https://github.com/godotengine/godot-cpp.git
 revision = 4.2
 clone-recursive= true
 wrapdb_version = '4.2-0'
-#patch_directory=godot-cpp-4.2
+patch_directory=godot-cpp-4.2
 
 
 [provide]

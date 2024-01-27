@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://dxuoujwpadbf1"]
+[gd_scene load_steps=5 format=3 uid="uid://dxuoujwpadbf1"]
 
 [ext_resource type="Texture2D" uid="uid://7ckpuwrt1n25" path="res://resources/simple_atlas.png" id="1_8f55w"]
+[ext_resource type="PackedScene" uid="uid://xbdd74ccg32f" path="res://ui/world_ui.tscn" id="2_2e47t"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yctrf"]
 resource_name = "terrain"
@@ -23,3 +24,7 @@ sources/0 = SubResource("TileSetAtlasSource_yctrf")
 tile_set = SubResource("TileSet_wnhj7")
 format = 2
 layer_0/tile_data = PackedInt32Array(0, 0, 0, 65536, 196608, 0, 1, 196608, 0, 65537, 131072, 0, 2, 131072, 0, -65535, 131072, 0, -65536, 131072, 0, 65538, 65536, 0, 3, 65536, 0, -65534, 65536, 0, -131070, 65536, 0, -131071, 65536, 0, 131074, 65536, 0)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="WorldUI" parent="CanvasLayer" instance=ExtResource("2_2e47t")]

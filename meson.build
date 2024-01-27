@@ -2,6 +2,10 @@ project('hic-sunt', 'cpp', version: '0.0.1',
   default_options : ['cpp_std=c++20', 'warning_level=3'])
 # TODO: set warning_level=everything when next version of meson is released
 
+# Alas, godot has a low of these
+
+cmake = import('cmake')
+
 boost_dep = dependency('boost')
 
 fmt_dep = dependency('fmt', version: '>=9.1')
@@ -12,19 +16,9 @@ spdlog_dep = dependency('spdlog')
 
 flatbuffer_dep = dependency('flatbuffers')
 
-
-#flatc_gen = generator(flatc_prg,
-#  output : '@BASENAME@_generated.h',
-#  arguments: ['--cpp', '-o', 'fbs', '@INPUT@']
-#  )
-#
-#fbs_generated = flatc_gen.process('fbs/world.fbs')
-
 common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep]
 
 gtest_dep = dependency('gtest')
-
-#godot_cpp_dep = dependency('godot-cpp')
 
 #absl_dep = dependency('abseil-cpp', modules: ['absl::log'])
 #absl_dep = dependency('absl', modules: ['log']) # not in ubuntu yet
@@ -43,4 +37,9 @@ test_env = {'TEST_RESOURCES_DIR' :  test_resources_dir}
 
 subdir('utils')
 subdir('core')
+
+godot_dep = dependency('godot-cpp')
+#godot_subproj=cmake.subproject('godot-cpp')
+#godot_dep = godot_subproj.dependency('godot-cpp')
+
 subdir('ui/godot/')
