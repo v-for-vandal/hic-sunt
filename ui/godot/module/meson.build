@@ -1,5 +1,6 @@
 hic_sunt_godot = shared_library('hic_sunt_godot',
-  'init.cpp',
+  'register_types.cpp',
+  'system/system.cpp',
   'terra/world_object.cpp',
   #'terra/cell_object.cpp',
   link_args: ['-static-libstdc++'],

@@ -4,6 +4,9 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
+#include <ui/godot/module/terra/world_object.hpp>
+#include <ui/godot/module/system/system.hpp>
+
 using namespace godot;
 
 void initialize_example_module(ModuleInitializationLevel p_level) {
@@ -11,7 +14,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     return;
   }
 
-  //ClassDB::register_class<GDExample>();
+  ClassDB::register_class<WorldObject>();
+  ClassDB::register_class<System>();
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {
@@ -22,7 +26,7 @@ void uninitialize_example_module(ModuleInitializationLevel p_level) {
 
 extern "C" {
 // Initialization.
-GDExtensionBool GDE_EXPORT example_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
+GDExtensionBool GDE_EXPORT sichunt_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address, const GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
   godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 
   init_obj.register_initializer(initialize_example_module);

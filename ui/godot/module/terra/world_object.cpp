@@ -1,15 +1,12 @@
 #include "world_object.hpp"
 
-void WorldObject::_register_methods() {
-  /*
-  register_method("get_dimensions", &WorldObject::GetDimensions);
-  register_method("get_start_point", &WorldObject::GetStartPoint);
-  register_method("get_end_point", &WorldObject::GetEndPoint);
-  register_method("get_mc_start_point", &WorldObject::GetMcStartPoint);
-  register_method("get_mc_end_point", &WorldObject::GetMcEndPoint);
-  register_method("get_cell", &WorldObject::GetCellObject);
-  register_method("is_main_level", &WorldObject::IsMainLevel);
-  */
+void WorldObject::_bind_methods() {
+  ClassDB::bind_method(D_METHOD("get_dimensions"), &WorldObject::get_dimensions);
+}
+
+Vector2 WorldObject::get_dimensions() const {
+  // TODO: Implement
+  return Vector2{2,2};
 }
 
 #if 0

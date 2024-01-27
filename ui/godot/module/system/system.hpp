@@ -2,19 +2,21 @@
 
 #include <memory>
 
-#include <core/terra/world.hpp>
-
 #include <godot_cpp/classes/ref.hpp>
+
+#include <ui/godot/module/terra/world_object.hpp>
+
+#include <core/system/system.hpp>
+
 
 using namespace godot;
 
-class WorldObject : public RefCounted {
-  GDCLASS(WorldObject, RefCounted);
+class System : public RefCounted {
+  GDCLASS(System, RefCounted);
 
 public:
-  WorldObject() {}
-  WorldObject(hs::terra::World&& data):
-    data_(std::move(data)) {}
+  System():
+    system_(std::make_unique<hs::system::System>()) {}
 
   void _init() {
   }
@@ -25,8 +27,11 @@ public:
 
 
 private:
-  hs::terra::World data_;
-  Vector2 get_dimensions() const;
+
+  std::unique_ptr<hs::system::System> system_;
+
+private:
+  Ref<WorldObject> load_world(String filename);
   /*
   Vector3 GetDimensions() const { return end_point_ - start_point_; }
   Vector3 GetStartPoint() const { return start_point_; }
@@ -44,5 +49,6 @@ private:
   */
 
 };
+
 
 

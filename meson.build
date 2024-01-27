@@ -1,10 +1,6 @@
 project('hic-sunt', 'cpp', version: '0.0.1',
-  default_options : ['cpp_std=c++20', 'warning_level=3'])
+  default_options : ['cpp_std=c++20', 'warning_level=3', 'prefix='])
 # TODO: set warning_level=everything when next version of meson is released
-
-# Alas, godot has a low of these
-
-cmake = import('cmake')
 
 boost_dep = dependency('boost')
 
@@ -14,7 +10,7 @@ entt_dep = dependency('entt')
 
 spdlog_dep = dependency('spdlog')
 
-flatbuffer_dep = dependency('flatbuffers')
+flatbuffer_dep = dependency('flatbuffers', static: true)
 
 common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep]
 

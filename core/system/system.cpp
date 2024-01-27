@@ -7,7 +7,7 @@
 
 namespace hs::system {
 
-std::shared_ptr<terra::World> System::LoadWorld(std::string_view filename) {
+terra::World System::LoadWorld(std::string_view filename) {
   /* TODO: Implement reading from mmap file */
   /*
   int fd = open(filename, O_RDONLY);
@@ -22,7 +22,7 @@ std::shared_ptr<terra::World> System::LoadWorld(std::string_view filename) {
     return {};
   }
 
-  return std::make_shared<terra::World>(ParseFrom(*fbs_world, serialize::To<terra::World>{}));
+  return ParseFrom(*fbs_world, serialize::To<terra::World>{});
 
 }
 
