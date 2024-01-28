@@ -16,6 +16,9 @@ public:
   WorldObject(hs::terra::World&& data):
     data_(std::move(data)) {}
 
+  using QRSCoordinateSystem = hs::terra::World::QRSCoordinateSystem;
+  using QRSCoords = hs::terra::World::QRSCoords;
+
   void _init() {
   }
 
@@ -26,7 +29,17 @@ public:
 
 private:
   hs::terra::World data_;
-  Vector2 get_dimensions() const;
+
+public:
+  Vector2i get_dimensions() const;
+  String get_cell_terrain(Vector2i coords) const;
+
+  static QRSCoords to_qrs(Vector2i coords) {
+    return QRSCoords{
+      QRSCoordinateSystem::QAxis{coords.x},
+      QRSCoordinateSystem::RAxis{coords.y}
+    };
+  }
   /*
   Vector3 GetDimensions() const { return end_point_ - start_point_; }
   Vector3 GetStartPoint() const { return start_point_; }

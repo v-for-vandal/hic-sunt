@@ -14,8 +14,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     return;
   }
 
+  ClassDB::register_class<HicSuntSystem>();
   ClassDB::register_class<WorldObject>();
-  ClassDB::register_class<System>();
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {

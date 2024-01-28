@@ -4,4 +4,4 @@ entry_symbol = "sichunt_library_init"
 compatibility_minimum = "4.1"
 
 [libraries]
-linux.debug.x86_64=
+linux.debug.x86_64="res://module/libhic_sunt_godot.so"

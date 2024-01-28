@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/node.hpp>
 
 #include <ui/godot/module/terra/world_object.hpp>
 
@@ -11,11 +12,11 @@
 
 using namespace godot;
 
-class System : public RefCounted {
-  GDCLASS(System, RefCounted);
+class HicSuntSystem : public Node {
+  GDCLASS(HicSuntSystem, Node);
 
 public:
-  System():
+  HicSuntSystem():
     system_(std::make_unique<hs::system::System>()) {}
 
   void _init() {
@@ -32,6 +33,7 @@ private:
 
 private:
   Ref<WorldObject> load_world(String filename);
+  Ref<WorldObject> create_world(Vector2i size);
   /*
   Vector3 GetDimensions() const { return end_point_ - start_point_; }
   Vector3 GetStartPoint() const { return start_point_; }

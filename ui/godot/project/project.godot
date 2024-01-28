@@ -11,6 +11,11 @@ config_version=5
 [application]
 
 config/name="Hic Sunt"
-run/main_scene="res://world_map.tscn"
+run/main_scene="res://ui/MainScreen.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+CentralSystem="*res://central/central_system.gd"
+LoadManager="*res://central/load_manager.gd"

@@ -2,11 +2,24 @@
 
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &WorldObject::get_dimensions);
+  ClassDB::bind_method(D_METHOD("get_cell_terrain", "coords"), &WorldObject::get_cell_terrain);
 }
 
-Vector2 WorldObject::get_dimensions() const {
-  // TODO: Implement
-  return Vector2{2,2};
+Vector2i WorldObject::get_dimensions() const {
+  return Vector2i{
+    data_.GetSurface().q_size().ToUnderlying(),
+    data_.GetSurface().r_size().ToUnderlying()
+  };
+}
+
+String WorldObject::get_cell_terrain(Vector2i coords) const {
+  auto qrs_coords = to_qrs(coords);
+
+  if (!data_.GetSurface().Contains(qrs_coords)) {
+    return {};
+  }
+
+  return data_.GetSurface().GetCell(qrs_coords).GetTerrain().data();
 }
 
 #if 0

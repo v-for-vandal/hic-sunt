@@ -30,15 +30,28 @@ public:
 
 
   Cell& GetCell(ViewCoords coords) {
-    return target(coords.q(), coords.r());
+    return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
   }
 
   const Cell& GetCell(ViewCoords coords) const {
-    return target(coords.q(), coords.r());
+    return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
   }
 
   auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
   auto r_size() const { return typename CoordinateSystem::RDelta{target_.extent(1)}; }
+
+  auto q_end() const { return typename CoordinateSystem::QAxis{0} + q_size(); }
+  auto r_end() const { return typename CoordinateSystem::RAxis{0} + r_size(); }
+
+  auto q_start() const { return typename CoordinateSystem::QAxis{0}; }
+  auto r_start() const { return typename CoordinateSystem::RAxis{0}; }
+
+  bool Contains(ViewCoords coords) const {
+    return coords.q() < q_end() && coords.r() < r_end();
+  }
+  bool Contains(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
+    return Contains(ViewCoords{q,r});
+  }
 
   /*
   auto begin() { return target_.begin(); }
@@ -77,6 +90,7 @@ public:
   Surface& operator=(Surface&&) = default;
 
   View view() { return cells_; }
+  View view() const { return cells_; }
 
   /*
   auto begin() { return cells_.begin(); }

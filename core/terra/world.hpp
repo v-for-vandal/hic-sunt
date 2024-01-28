@@ -17,8 +17,9 @@ World ParseFrom(const fbs::World& world, serialize::To<World>);
 class World {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
+  using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using Surface = geometry::Surface<Cell, QRSCoordinateSystem>;
-  using SurfaceView = geometry::Surface<Cell, QRSCoordinateSystem>;
+  using SurfaceView = geometry::SurfaceView<Cell, QRSCoordinateSystem>;
 
   World() = default;
   World(const World&) = delete;
@@ -28,7 +29,8 @@ public:
 
   World(QRSCoordinateSystem::QDelta q_size, QRSCoordinateSystem::RDelta r_size);
 
-  const SurfaceView& GetSurface() const { return surface_; }
+  SurfaceView GetSurface() const { return surface_.view(); }
+  SurfaceView GetSurface() { return surface_.view(); }
 
 private:
   friend ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, ::flatbuffers::FlatBufferBuilder& fbb);
