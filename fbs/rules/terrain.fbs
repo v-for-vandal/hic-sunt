@@ -1,0 +1,9 @@
+namespace hs.fbs;
+
+table Terrain {
+ id: string;
+}
+
+table TerrainSet {
+  terrains: [Terrain];
+}

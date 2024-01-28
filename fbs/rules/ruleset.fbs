@@ -1,0 +1,9 @@
+include "terrain.fbs";
+
+namespace hs.fbs;
+
+table RulesSet {
+  terrain: TerrainSet;
+}
+
+root_type RulesSet;

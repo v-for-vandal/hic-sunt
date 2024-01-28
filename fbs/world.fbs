@@ -1,0 +1,19 @@
+namespace hs.fbs;
+
+table Cell {
+  terrain: string;
+}
+
+table Surface {
+  cells: [Cell];
+  q_size: int;
+  r_size: int;
+}
+
+table World {
+  id:string;
+  surface: Surface;
+}
+
+
+root_type World;

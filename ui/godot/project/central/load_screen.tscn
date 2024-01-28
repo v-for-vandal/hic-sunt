@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://crdlr0t75jj5e"]
+
+[ext_resource type="Script" path="res://central/load_screen.gd" id="1_bvq50"]
+
+[node name="LoadScreen" type="CanvasLayer"]
+script = ExtResource("1_bvq50")
+
+[node name="PlaceholderText" type="RichTextLabel" parent="."]
+z_index = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/normal_font_size = 30
+theme_override_font_sizes/bold_font_size = 30
+text = "Loading screen"
+scroll_active = false
+shortcut_keys_enabled = false
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.254902, 0.0823529, 0.207843, 1)

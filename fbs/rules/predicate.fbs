@@ -1,0 +1,36 @@
+/*
+
+placement rules
+SUBJECT PREDICATE VALUE
+
+lumber_mill count_neighbours(terrain=forest)  1
+temple count_neighbours(terrain=forest nas_improvement(camp) 2
+
+lumber_mill placement rules
+expression predicate
+
+count_neighbours (terrain=forest) ge 1
+
+
+
+train station
+this_cell_has_feature(railroad) is_true
+this_cell_get_feature_properties(railroad, "is_connected") is_true
+count_neighbours (predicate) eq 1
+custom_script("script_name") is_true
+
+build-rules vs active-rules
+
+improvement:
+  build-rules:
+     can_be_active is_true
+  active-rules:
+  yield-rules:
+    has_neighbour( has_terrain(forest) ) eq true | production(gold) | 10%
+    has_neighbour( :
+
+problem - there is no way to 'update' rules
+*/
+
+namespace hs.fbs;
+

@@ -1,0 +1,18 @@
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://cpsnh1wxdj7sd"]
+
+[ext_resource type="Texture2D" uid="uid://7ckpuwrt1n25" path="res://resources/simple_atlas.png" id="1_qd0ft"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yctrf"]
+resource_name = "terrain"
+texture = ExtResource("1_qd0ft")
+texture_region_size = Vector2i(55, 64)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+
+[resource]
+tile_shape = 3
+tile_size = Vector2i(55, 64)
+sources/0 = SubResource("TileSetAtlasSource_yctrf")

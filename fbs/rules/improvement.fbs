@@ -1,0 +1,8 @@
+namespace hs.fbs;
+
+message BuildRules {
+}
+
+message Improvement {
+  build_rules: BuildRules;
+  }

@@ -1,0 +1,11 @@
+[wrap-file]
+directory = flatbuffers-23.3.3
+source_url = https://github.com/google/flatbuffers/archive/v23.3.3.tar.gz
+source_filename = flatbuffers-23.3.3.tar.gz
+source_hash = 8aff985da30aaab37edf8e5b02fda33ed4cbdd962699a8e2af98fdef306f4e4d
+wrapdb_version = 23.3.3-1
+patch_directory=flatbuffers-23.3.3
+
+[provide]
+flatbuffers = flatbuffers_dep
+program_names = flatc, flathash

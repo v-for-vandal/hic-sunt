@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3 uid="uid://xbdd74ccg32f"]
+
+[ext_resource type="PackedScene" uid="uid://ccnpnxy6gvlwm" path="res://ui/options_dialog.tscn" id="1_8kfrc"]
+[ext_resource type="Script" path="res://ui/world_ui.gd" id="1_xc8cv"]
+
+[node name="WorldUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_xc8cv")
+
+[node name="TopPanel" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+
+[node name="OptionsButton" type="Button" parent="TopPanel"]
+layout_mode = 2
+toggle_mode = true
+text = "Options"
+
+[node name="OptionsDialog" parent="." instance=ExtResource("1_8kfrc")]
+visible = false
+layout_mode = 1
+anchor_left = 0.435
+anchor_top = 0.451
+anchor_right = 0.542
+anchor_bottom = 0.572
+offset_left = 74.88
+offset_top = 31.752
+offset_right = -48.384
+offset_bottom = -46.656
+
+[connection signal="toggled" from="TopPanel/OptionsButton" to="." method="_on_options_button_toggled"]
