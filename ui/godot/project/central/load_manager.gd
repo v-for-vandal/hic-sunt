@@ -56,7 +56,7 @@ func _process(_delta):
 	
 	_debug_timer += _delta;
 		
-	if _debug_timer > 3.0:
+	if _debug_timer > 1.0:
 	#if _world_object != null:
 		set_process(false)
 		emit_signal("progress_changed", 1.0)
