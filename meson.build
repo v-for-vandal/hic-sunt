@@ -10,6 +10,8 @@ entt_dep = dependency('entt')
 
 spdlog_dep = dependency('spdlog')
 
+proto = dependency('protobuf')
+
 flatbuffer_dep = dependency('flatbuffers', static: true)
 
 common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep]

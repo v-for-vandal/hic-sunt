@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hs.city.placement_rules;
+
+import "city/placement_rules.proto";
+
+message Improvement {
+  string id = 1;
+
+  repeated city.placement_rules.PlacementRule placement_rules = 2;
+}
+
+
+
+
