@@ -1,6 +1,10 @@
 project('hic-sunt', 'cpp', version: '0.0.1',
   default_options : ['cpp_std=c++20', 'warning_level=3', 'prefix='])
 # TODO: set warning_level=everything when next version of meson is released
+#
+add_project_arguments([
+  '-Wno-gcc-compat',
+  ], language: 'cpp', )
 
 boost_dep = dependency('boost')
 
@@ -10,11 +14,8 @@ entt_dep = dependency('entt')
 
 spdlog_dep = dependency('spdlog')
 
-proto = dependency('protobuf')
-
 flatbuffer_dep = dependency('flatbuffers', static: true)
 
-common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep]
 
 gtest_dep = dependency('gtest')
 
@@ -22,6 +23,9 @@ gtest_dep = dependency('gtest')
 #absl_dep = dependency('absl', modules: ['log']) # not in ubuntu yet
 
 subdir('fbs')
+subdir('proto')
+
+common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep, protobuf_dep]
 
 root_include = include_directories([
     '.',
