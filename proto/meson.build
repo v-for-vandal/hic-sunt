@@ -19,8 +19,8 @@ proto_gen_hh = generator(protoc_prg,
   arguments : ['--proto_path=@CURRENT_SOURCE_DIR@', '--cpp_out=@BUILD_DIR@', '@INPUT@'])
 
 hs_proto_schemas = [
-  'city/placement_rules.proto',
-  'city/improvements.proto',
+  'region/placement_rules.proto',
+  'region/improvements.proto',
   'l10n/localized_name.proto',
   ]
 

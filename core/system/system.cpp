@@ -42,6 +42,8 @@ terra::World System::NewWorld(NewWorldParameters params) {
     }
   }
 
+  result.SetRuleSet(active_rule_set_);
+
   return result;
 
 }
@@ -55,6 +57,12 @@ void System::SaveWorld(const terra::World& target, std::string_view filename) {
   out.write( (char*)fbb.GetBufferPointer(), fbb.GetSize());
   out.close();
 
+}
+
+bool System::LoadRuleSet(const std::filesystem::path& path,
+  ErrorsCollection& errors) {
+  const bool result = active_rule_set_.Load(path, errors);
+  return result;
 }
 
 

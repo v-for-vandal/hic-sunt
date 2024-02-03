@@ -2,6 +2,7 @@
 
 #include <core/geometry/surface.hpp>
 #include <core/terra/cell.hpp>
+#include <core/ruleset/ruleset.hpp>
 #include <core/utils/serialize.hpp>
 
 #include <flatbuffers/flatbuffers.h>
@@ -32,12 +33,19 @@ public:
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
 
+  void SetRuleSet(ruleset::RuleSet rules) {
+    ruleset_ = std::move(rules);
+  }
+
+  const auto& GetRuleSet() const { return ruleset_; }
+
 private:
   friend ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, ::flatbuffers::FlatBufferBuilder& fbb);
   friend World ParseFrom(const fbs::World& world, serialize::To<World>);
 
 private:
   Surface surface_;
+  ruleset::RuleSet ruleset_;
 };
 
 

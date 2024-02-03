@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package hs.city.placement_rules;
+package hs.region.placement_rules;
 
 message NeighbourRule {
   string id = 1;

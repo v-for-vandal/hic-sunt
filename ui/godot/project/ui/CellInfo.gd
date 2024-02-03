@@ -17,6 +17,10 @@ func _clear():
 func _on_world_cell_selected(world_object: WorldObject, qr: Vector2i):
 	_clear()
 	
+	if world_object == null:
+		print("Unset world object")
+		return
+	
 	_add_text_label("QR coords")
 
 	_add_text_label("%d,%d,%d" % [ qr[0], qr[1], 0 - qr[0] - qr[1] ])

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package hs.city.improvements;
+package hs.region;
 
-import "city/placement_rules.proto";
+import "region/placement_rules.proto";
 import "l10n/localized_name.proto";
 
 message Improvement {
@@ -12,6 +12,9 @@ message Improvement {
   repeated placement_rules.PlacementRule placement_rules = 3;
 }
 
+message Improvements {
+  repeated Improvement improvements = 1;
+}
 
 
 

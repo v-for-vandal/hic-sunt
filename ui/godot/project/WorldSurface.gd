@@ -33,6 +33,7 @@ func load_world(world_object : WorldObject):
 	_world_object = world_object
 	
 	print("type of world object:", type_string(typeof(world_object)))
+	print("improvements:" , world_object.get_region_improvements())
 	
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system
@@ -46,10 +47,10 @@ func load_world(world_object : WorldObject):
 		for r in r_len:
 
 			var terrain = world_object.get_cell_terrain(Vector2i(q,r))
-			print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
+			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 			# convert to xy dimensions
 			var xy_coords = QrsCoordsLibrary.qrs_to_xy(Vector2i(q,r))
 			# fill cell
 			if terrain_mapping.has(terrain):
-				print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
+				#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
 				set_cell(0, xy_coords, 0, terrain_mapping[terrain],0)
