@@ -9,6 +9,11 @@ World::World(QRSCoordinateSystem::QDelta q_size, QRSCoordinateSystem::RDelta r_s
   {
   }
 
+World::World(QRSSize size):
+  surface_(size)
+  {
+  }
+/*
 ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source,  ::flatbuffers::FlatBufferBuilder& fbb)
 {
   auto id_offset = fbb.CreateString("test_id");
@@ -28,4 +33,21 @@ World ParseFrom(const fbs::World& world, serialize::To<World>)
 
   return result;
 }
+*/
+
+void SerializeTo(const World& source, proto::terra::World& target)
+{
+  target.set_id("test_id");
+  SerializeTo(source.surface_, *target.mutable_surface());
+}
+
+World ParseFrom(const proto::terra::World& source, serialize::To<World>)
+{
+  World result;
+  if(source.has_surface()) {
+    result.surface_ = ParseFrom(source.surface(), serialize::To<World::Surface>{});
+  }
+  return result;
+}
+
 }

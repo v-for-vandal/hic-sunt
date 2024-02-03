@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hs.proto.region;
+
+message Cell {
+  string terrain = 1;
+
+  // list of improvements present on this cell
+  repeated string improvements = 2;
+
+  // list of features present on this cell
+  repeated string features = 3;
+}
+

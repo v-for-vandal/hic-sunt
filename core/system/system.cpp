@@ -14,15 +14,11 @@ terra::World System::LoadWorld(std::string_view filename) {
 
   */
   std::ifstream in(filename, std::ios::binary);
-  std::vector<char> buffer{ std::istreambuf_iterator<char>(in),
-                      std::istreambuf_iterator<char>()};
 
-  const fbs::World* fbs_world = fbs::GetWorld(buffer.data());
-  if(fbs_world == nullptr) {
-    return {};
-  }
+  proto::terra::World proto_world;
+  proto_world.ParseFromIstream(&in);
 
-  return ParseFrom(*fbs_world, serialize::To<terra::World>{});
+  return ParseFrom(proto_world, serialize::To<terra::World>{});
 
 }
 
@@ -30,14 +26,14 @@ terra::World System::LoadWorld(std::string_view filename) {
 terra::World System::NewWorld(NewWorldParameters params) {
   static std::array terrain_types = { "coast", "plains", "sand", "ocean", "snow" };
 
-  auto result = terra::World{params.q_size, params.r_size};
+  auto result = terra::World{params.world_size};
   auto surface = result.GetSurface();
   /* randomize terrain for now */
   for(auto q_pos = surface.q_start(); q_pos < surface.q_end(); q_pos++) {
     for( auto r_pos = surface.r_start(); r_pos < surface.r_end(); r_pos++) {
       auto coords = terra::World::QRSCoords{q_pos, r_pos};
       if(surface.Contains(coords)) {
-        surface.GetCell(coords).SetTerrain( terrain_types[ std::rand() % terrain_types.size() ] );
+        //surface.GetCell(coords).SetTerrain( terrain_types[ std::rand() % terrain_types.size() ] );
       }
     }
   }
@@ -49,14 +45,12 @@ terra::World System::NewWorld(NewWorldParameters params) {
 }
 
 void System::SaveWorld(const terra::World& target, std::string_view filename) {
-  ::flatbuffers::FlatBufferBuilder fbb{};
-  auto offset = SerializeTo(target, fbb);
-  fbb.Finish(offset);
+  proto::terra::World proto_world;
+  SerializeTo(target, proto_world);
 
   std::ofstream out(filename, std::ios::binary);
-  out.write( (char*)fbb.GetBufferPointer(), fbb.GetSize());
+  proto_world.SerializeToOstream(&out);
   out.close();
-
 }
 
 bool System::LoadRuleSet(const std::filesystem::path& path,

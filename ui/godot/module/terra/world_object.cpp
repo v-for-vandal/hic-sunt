@@ -14,6 +14,9 @@ Vector2i WorldObject::get_dimensions() const {
 }
 
 String WorldObject::get_cell_terrain(Vector2i coords) const {
+  return "plains";
+  // TODO: FIX
+  /*
   auto qrs_coords = to_qrs(coords);
 
   if (!data_.GetSurface().Contains(qrs_coords)) {
@@ -21,6 +24,7 @@ String WorldObject::get_cell_terrain(Vector2i coords) const {
   }
 
   return data_.GetSurface().GetCell(qrs_coords).GetTerrain().data();
+  */
 }
 
 Array WorldObject::get_region_improvements() const {

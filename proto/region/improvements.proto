@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package hs.region;
+package hs.proto.region;
 
 import "region/placement_rules.proto";
 import "l10n/localized_name.proto";

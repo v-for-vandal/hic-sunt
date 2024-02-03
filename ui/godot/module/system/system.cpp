@@ -11,8 +11,10 @@ Ref<WorldObject> HicSuntSystem::load_world(String filename) {
 
 Ref<WorldObject> HicSuntSystem::create_world(Vector2i size) {
   hs::system::NewWorldParameters params;
-  params.q_size = typename hs::terra::World::QRSCoordinateSystem::QDelta{size.x};
-  params.r_size = typename hs::terra::World::QRSCoordinateSystem::RDelta{size.y};
+  auto q_size = typename hs::terra::World::QRSCoordinateSystem::QDelta{size.x};
+  auto r_size = typename hs::terra::World::QRSCoordinateSystem::RDelta{size.y};
+
+  params.world_size = typename hs::terra::World::QRSSize{q_size, r_size};
   Ref<WorldObject> result(memnew(WorldObject(system_->NewWorld(params))));
   //result.reference_ptr());
   ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new world");

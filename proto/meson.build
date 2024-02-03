@@ -6,10 +6,6 @@ endif
 
 protoc_prg = find_program('protoc')
 
-message('protobuf dep is found: ', protobuf_dep.found())
-message('protoc full path: ', protoc_prg.full_path())
-message('build dir: ', meson.current_build_dir())
-
 proto_gen = generator(protoc_prg,
   output    : ['@BASENAME@.pb.cc', '@BASENAME@.pb.h'],
   arguments : ['--proto_path=@CURRENT_SOURCE_DIR@', '--cpp_out=@BUILD_DIR@', '@INPUT@'])
@@ -21,7 +17,11 @@ proto_gen_hh = generator(protoc_prg,
 hs_proto_schemas = [
   'region/placement_rules.proto',
   'region/improvements.proto',
+  'region/cell.proto',
+  'region/region.proto',
   'l10n/localized_name.proto',
+  'terra/cell.proto',
+  'terra/world.proto',
   ]
 
 hs_proto_generated = proto_gen.process(

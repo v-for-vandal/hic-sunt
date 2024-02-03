@@ -20,7 +20,7 @@ public:
 
 
 private:
-  region::Improvements improvements_;
+  proto::region::Improvements improvements_;
 
   static inline std::filesystem::path improvements_file{"improvements.txt"};
 };

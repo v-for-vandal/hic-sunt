@@ -9,8 +9,11 @@
 namespace hs::system {
 
 struct NewWorldParameters {
-  terra::World::QRSCoordinateSystem::QDelta q_size{0};
-  terra::World::QRSCoordinateSystem::RDelta r_size{0};
+  using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
+  using QRSSize = geometry::DeltaCoords<QRSCoordinateSystem>;
+
+  QRSSize world_size;
+  QRSSize region_size;
 };
 
 /* Central component for game */

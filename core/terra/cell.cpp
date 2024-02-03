@@ -2,20 +2,19 @@
 
 namespace hs::terra {
 
-flatbuffers::Offset<fbs::Cell> SerializeTo(const Cell& source, ::flatbuffers::FlatBufferBuilder& fbb)
+void SerializeTo(const Cell& source, proto::terra::Cell& proto_destination)
 {
-  auto terrain_offset = fbb.CreateSharedString(source.GetTerrain());
+  proto_destination.Clear();
 
-  fbs::CellBuilder builder(fbb);
-  builder.add_terrain(terrain_offset);
+  SerializeTo(source.GetRegion(), *proto_destination.mutable_region());
 
-  return builder.Finish();
+  return;
 }
 
-Cell ParseFrom( const fbs::Cell& fbs_class, serialize::To<Cell>) {
+Cell ParseFrom( const proto::terra::Cell& source, serialize::To<Cell>) {
   Cell result;
-  if(fbs_class.terrain()) {
-    result.SetTerrain(fbs_class.terrain()->string_view());
+  if(source.has_region()) {
+    result.SetRegion(ParseFrom(source.region(), serialize::To<region::Region>{}));
   }
 
   return result;

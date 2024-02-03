@@ -82,8 +82,10 @@ public:
   using View = SurfaceView<Cell, CoordinateSystem>;
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
+  using SCSize = DeltaCoords<CoordinateSystem>;
 
   Surface(typename SCS::QDelta q_size = typename SCS::QDelta{1}, typename SCS::RDelta r_size = typename SCS::RDelta{1});
+  explicit Surface(SCSize size);
   Surface(const Surface&) = delete;
   Surface(Surface&&) = default;
   Surface& operator=(const Surface&) = delete;
@@ -133,6 +135,19 @@ private:
   size_t data_size_;
   std::unique_ptr<Cell[]> data_storage_;
   SurfaceView<Cell, CoordinateSystem> cells_;
+
+private:
+  // checks that everything is > 0, if not - makes it equal to 1
+  // and logs critical error
+  static auto make_size_sane(auto coord_elem) {
+    auto result = coord_elem.ToUnderlying();
+    if(result <= 0) {
+      spdlog::critical("size is <= 0");
+      result = 1;
+    }
+
+    return result;
+  }
 };
 
 }

@@ -11,18 +11,17 @@ using namespace ::hs::geometry::literals;
 TEST(World, Serialize) {
   World ref_world(4_dq, 4_dr);
 
-  ::flatbuffers::FlatBufferBuilder fbb{};
-  auto offset = SerializeTo(ref_world, fbb);
-  fbb.Finish(offset);
+  std::string storage;
 
-  auto data_ptr = fbb.GetBufferPointer();
-  auto data_size = fbb.GetSize();
+  proto::terra::World proto_world;
+  SerializeTo(ref_world, proto_world);
+  proto_world.SerializeToString(&storage);
 
-  const fbs::World* fbs_world = fbs::GetWorld(data_ptr);
 
-  ASSERT_NE(fbs_world, nullptr);
+  proto::terra::World proto_read_world;
+  ASSERT_TRUE(proto_read_world.ParseFromString(storage));
 
-  auto parse_world = ParseFrom(*fbs_world, serialize::To<World>{});
+  auto parse_world = ParseFrom(proto_read_world, serialize::To<World>{});
 
   // TODO: Compare ref and parse
 
