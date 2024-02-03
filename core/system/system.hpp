@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <core/system/ruleset.hpp>
 #include <core/terra/world.hpp>
 
 namespace hs::system {
@@ -17,6 +18,7 @@ public:
   terra::World LoadWorld(std::string_view filename);
   terra::World NewWorld(NewWorldParameters params);
   void SaveWorld(const terra::World&, std::string_view filename);
+
 
 private:
 

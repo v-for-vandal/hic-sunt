@@ -32,14 +32,21 @@ table ImprovementRule {
   distance: int;
 }
 
-table ImprovementRule {
+table ImprovementClassRule {
   id: string;
   // improvement: string;
 
   // any one from list
-  improvements: [string];
+  improvements_classes: [string];
   distance: int;
 }
+
+table FeatureRules {
+
+table NeighbourRule {
+  id: string;
+  distance: int;
+  target: union {
 
 union BuildRuleU {
   TerrainRule,

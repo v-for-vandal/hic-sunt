@@ -15,6 +15,7 @@ message PresentRule {
 }
 
 message FeatureTarget {
+  // Any feature from this set
   repeated string features_set = 1;
 }
 

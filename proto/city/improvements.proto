@@ -1,13 +1,15 @@
 syntax = "proto3";
 
-package hs.city.placement_rules;
+package hs.city.improvements;
 
 import "city/placement_rules.proto";
+import "l10n/localized_name.proto";
 
 message Improvement {
   string id = 1;
+  l10n.LocalizedName name = 2;
 
-  repeated city.placement_rules.PlacementRule placement_rules = 2;
+  repeated placement_rules.PlacementRule placement_rules = 3;
 }
 
 

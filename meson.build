@@ -1,12 +1,16 @@
 project('hic-sunt', 'cpp', version: '0.0.1',
-  default_options : ['cpp_std=c++20', 'warning_level=3', 'prefix='])
+  default_options : [
+    'cpp_std=c++20',
+    'warning_level=3',
+    'prefix=',
+    'wrap_mode=forcefallback',
+
+    ])
 # TODO: set warning_level=everything when next version of meson is released
 #
 add_project_arguments([
   '-Wno-gcc-compat',
   ], language: 'cpp', )
-
-boost_dep = dependency('boost')
 
 fmt_dep = dependency('fmt', version: '>=9.1')
 
@@ -25,7 +29,7 @@ gtest_dep = dependency('gtest')
 subdir('fbs')
 subdir('proto')
 
-common_deps = [boost_dep, fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep, protobuf_dep]
+common_deps = [fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep, protobuf_dep]
 
 root_include = include_directories([
     '.',
