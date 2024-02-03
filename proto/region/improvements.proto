@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package hs.region;
+
+import "region/placement_rules.proto";
+import "l10n/localized_name.proto";
+
+message Improvement {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+
+  repeated placement_rules.PlacementRule placement_rules = 3;
+}
+
+message Improvements {
+  repeated Improvement improvements = 1;
+}
+
+
+

@@ -34,12 +34,17 @@ public:
   Vector2i get_dimensions() const;
   String get_cell_terrain(Vector2i coords) const;
 
+  //Dictionary get_improvement_info(region::
+  Array get_region_improvements() const;
+
   static QRSCoords to_qrs(Vector2i coords) {
     return QRSCoords{
       QRSCoordinateSystem::QAxis{coords.x},
       QRSCoordinateSystem::RAxis{coords.y}
     };
   }
+
+
   /*
   Vector3 GetDimensions() const { return end_point_ - start_point_; }
   Vector3 GetStartPoint() const { return start_point_; }

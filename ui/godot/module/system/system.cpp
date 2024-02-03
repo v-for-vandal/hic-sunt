@@ -20,7 +20,23 @@ Ref<WorldObject> HicSuntSystem::create_world(Vector2i size) {
 
 }
 
+Dictionary HicSuntSystem::load_ruleset(String folder_path) {
+  hs::utils::ErrorsCollection errors;
+  const bool success = system_->LoadRuleSet(folder_path.utf8().get_data(), errors);
+  Dictionary result;
+  Array errors_godot;
+  for(auto& error_msg: errors.errors) {
+    errors_godot.append(String(error_msg.message.c_str()));
+  }
+  result[String("errors")] = errors_godot;
+  result[String("success")] = success;
+
+  return result;
+
+}
+
 void HicSuntSystem::_bind_methods() {
   ClassDB::bind_method(D_METHOD("load_world", "filename"), &HicSuntSystem::load_world);
   ClassDB::bind_method(D_METHOD("create_world", "size"), &HicSuntSystem::create_world);
+  ClassDB::bind_method(D_METHOD("load_ruleset", "folder_path"), &HicSuntSystem::load_ruleset);
 }

@@ -1,0 +1,6 @@
+namespace hs.fbs;
+
+message L10Name {
+  key: string; // localization key
+  fallback: string; // in case localization is missing entirely
+}

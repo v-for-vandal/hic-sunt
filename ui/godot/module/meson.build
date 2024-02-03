@@ -1,8 +1,12 @@
+godot_module_sources = [
+    'register_types.cpp',
+    'system/system.cpp',
+    'terra/world_object.cpp',
+]
+
+
 hic_sunt_godot = shared_library('hic_sunt_godot',
-  'register_types.cpp',
-  'system/system.cpp',
-  'terra/world_object.cpp',
-  #'terra/cell_object.cpp',
+  sources: godot_module_sources + hs_proto_generated_headers,
   link_args: ['-static-libstdc++'],
   dependencies : [common_deps, godot_dep],
   link_whole: [core_lib],

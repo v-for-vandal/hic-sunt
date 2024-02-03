@@ -1,8 +1,69 @@
 namespace hs.fbs;
 
-message BuildRules {
+table AllRules {
+  rules: [BuildRule];
 }
 
-message Improvement {
+table AnyRules {
+  rules: [BuildRule];
+}
+
+table TerrainRule {
+  id: string;
+  // terrain: string; // syntax sugar
+  terrains: [string];
+  distance: int;
+}
+
+table FeatureRule {
+  id: string;
+  // feature: string; // syntax sugar?
+  // behavious - any one from list
+  features: [string];
+  distance: int;
+}
+
+table ImprovementRule {
+  id: string;
+  // improvement: string;
+
+  // any one from list
+  improvements: [string];
+  distance: int;
+}
+
+table ImprovementClassRule {
+  id: string;
+  // improvement: string;
+
+  // any one from list
+  improvements_classes: [string];
+  distance: int;
+}
+
+table FeatureRules {
+
+table NeighbourRule {
+  id: string;
+  distance: int;
+  target: union {
+
+union BuildRuleU {
+  TerrainRule,
+  FeatureRule
+}
+
+table BuildRule {
+  data: BuildRuleU;
+}
+
+table BuildRules {
+  rules: [BuildRule];
+}
+
+table Improvement {
+  id: string;
+  l10n_name: string; // key for localization
+  l10n_fallback: string; // name if localization is missing
   build_rules: BuildRules;
-  }
+}
