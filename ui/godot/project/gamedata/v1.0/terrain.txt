@@ -1,0 +1,8 @@
+terrain_types : [
+	{ id : "core.plains", name : { key : "core.terrain.plains", fallback_name: "plains" }},
+	{ id : "core.ocean", name : { key : "core.terrain.ocean", fallback_name: "ocean" }},
+],
+
+terrain_features : [
+	{ id : "core.forest", name: { key: "core.terrain.forest, fallback_name: "forest" "}}
+]

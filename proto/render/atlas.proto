@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package hs.proto.render;
+
+message AtlasRender {
+  string ressource = 1;
+  string source_id = 2;
+  string x = 3;
+  string y = 4;
+
+}
+

@@ -5,6 +5,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include <ui/godot/module/terra/world_object.hpp>
+#include <ui/godot/module/region/region_object.hpp>
 #include <ui/godot/module/system/system.hpp>
 
 using namespace godot;
@@ -15,6 +16,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
   }
 
   ClassDB::register_class<HicSuntSystem>();
+  ClassDB::register_class<RegionObject>();
   ClassDB::register_class<WorldObject>();
 }
 

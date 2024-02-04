@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://dyp7yp0fqe876"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="RegionSurface" type="TileMap" parent="."]
+format = 2
+
+[node name="RegionViewCamera" type="Camera2D" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]

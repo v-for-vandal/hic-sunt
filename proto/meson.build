@@ -15,13 +15,15 @@ proto_gen_hh = generator(protoc_prg,
   arguments : ['--proto_path=@CURRENT_SOURCE_DIR@', '--cpp_out=@BUILD_DIR@', '@INPUT@'])
 
 hs_proto_schemas = [
-  'region/placement_rules.proto',
-  'region/improvements.proto',
   'region/cell.proto',
   'region/region.proto',
   'l10n/localized_name.proto',
   'terra/cell.proto',
   'terra/world.proto',
+  'ruleset/region_improvements.proto',
+  'ruleset/placement_rules.proto',
+  'ruleset/terrain.proto',
+  'render/atlas.proto',
   ]
 
 hs_proto_generated = proto_gen.process(

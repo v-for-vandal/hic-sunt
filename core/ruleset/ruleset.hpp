@@ -5,7 +5,8 @@
 
 #include <core/utils/error_message.hpp>
 
-#include <region/improvements.pb.h>
+#include <ruleset/region_improvements.pb.h>
+#include <ruleset/terrain.pb.h>
 
 namespace hs::ruleset {
 
@@ -20,9 +21,11 @@ public:
 
 
 private:
-  proto::region::Improvements improvements_;
+  proto::ruleset::RegionImprovements improvements_;
+  proto::ruleset::Terrain terrain_;
 
-  static inline std::filesystem::path improvements_file{"improvements.txt"};
+  static inline std::filesystem::path improvements_file{"region_improvements.txt"};
+  static inline std::filesystem::path terrain_file{"terrain.txt"};
 };
 
 }

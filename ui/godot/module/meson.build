@@ -2,6 +2,7 @@ godot_module_sources = [
     'register_types.cpp',
     'system/system.cpp',
     'terra/world_object.cpp',
+    'region/region_object.cpp',
 ]
 
 

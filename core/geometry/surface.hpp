@@ -80,6 +80,7 @@ class Surface {
 public:
 
   using View = SurfaceView<Cell, CoordinateSystem>;
+  using ViewCoords = geometry::Coords<CoordinateSystem>;
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
   using SCSize = DeltaCoords<CoordinateSystem>;
@@ -104,6 +105,7 @@ public:
   size_t data_size() const { return data_size_; }
   const Cell& GetCell(size_t idx) const { return data_storage_[idx]; }
   Cell& GetCell(size_t idx) { return data_storage_[idx]; }
+  bool Contains(ViewCoords coords) const { return cells_.Contains(coords); }
 
   auto q_size() const { return cells_.q_size(); }
   auto r_size() const { return cells_.r_size(); }
@@ -121,6 +123,7 @@ public:
   }
 
   WRLD_REDIRECT_VIEW_CONST_FUNCTION(GetCell)
+  WRLD_REDIRECT_VIEW_FUNCTION(GetCell)
 
 #undef WRLD_REDIRECT_VIEW_FUNCTION
 #undef WRLD_REDIRECT_VIEW_CONST_FUNCTION

@@ -1,5 +1,0 @@
-improvements : [
-	{ id: "core.lumber_mill"},
-	{ id: "core.wind_mill"}
-	
-]
