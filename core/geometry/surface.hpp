@@ -32,9 +32,15 @@ public:
   Cell& GetCell(ViewCoords coords) {
     return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
   }
+  Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) {
+    return GetCell(ViewCoords{q,r});
+  }
 
   const Cell& GetCell(ViewCoords coords) const {
     return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
+  }
+  const Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
+    return GetCell(ViewCoords{q,r});
   }
 
   auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }

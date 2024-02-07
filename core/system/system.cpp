@@ -1,6 +1,7 @@
 #include "system.hpp"
 
 #include <fstream>
+#include <vector>
 
 #include <core/utils/serialize.hpp>
 
@@ -24,7 +25,21 @@ terra::World System::LoadWorld(std::string_view filename) {
 
 
 terra::World System::NewWorld(NewWorldParameters params) {
-  static std::array terrain_types = { "coast", "plains", "sand", "ocean", "snow" };
+  std::vector<std::string> terrain_types;
+  for(const auto& terrain_type: active_rule_set_.GetTerrain().terrain_types()) {
+    terrain_types.push_back(terrain_type.id());
+  }
+
+  auto randomize_region = [&terrain_types](region::Region& region) {
+    for(auto q_pos = region.GetSurface().q_start(); q_pos < region.GetSurface().q_end(); q_pos++) {
+      for( auto r_pos = region.GetSurface().r_start(); r_pos < region.GetSurface().r_end(); r_pos++) {
+        auto coords = terra::World::QRSCoords{q_pos, r_pos};
+        if(region.GetSurface().Contains(coords)) {
+          region.SetTerrain( coords, terrain_types[ std::rand() % terrain_types.size() ] );
+        }
+      }
+    }
+  };
 
   auto result = terra::World{params.world_size};
   auto surface = result.GetSurface();
@@ -33,7 +48,11 @@ terra::World System::NewWorld(NewWorldParameters params) {
     for( auto r_pos = surface.r_start(); r_pos < surface.r_end(); r_pos++) {
       auto coords = terra::World::QRSCoords{q_pos, r_pos};
       if(surface.Contains(coords)) {
-        //surface.GetCell(coords).SetTerrain( terrain_types[ std::rand() % terrain_types.size() ] );
+        // initialize region
+        auto& cell = surface.GetCell(coords);
+        region::Region region{params.region_size};
+        randomize_region(region);
+        cell.SetRegion(std::move(region));
       }
     }
   }

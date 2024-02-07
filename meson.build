@@ -23,8 +23,13 @@ flatbuffer_dep = dependency('flatbuffers', static: true)
 
 gtest_dep = dependency('gtest')
 
-#absl_dep = dependency('abseil-cpp', modules: ['absl::log'])
-#absl_dep = dependency('absl', modules: ['log']) # not in ubuntu yet
+# TODO: Fix - our build type is neither debug nor release :(
+if get_option('buildtype') == 'release'
+  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_WARN', language:'cpp')
+else
+  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG', language:'cpp')
+endif
+
 
 subdir('fbs')
 subdir('proto')

@@ -3,6 +3,7 @@
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &WorldObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_region", "coords"), &WorldObject::get_region);
+  ClassDB::bind_method(D_METHOD("get_region_info", "coords"), &WorldObject::get_region_info);
   ClassDB::bind_method(D_METHOD("get_region_improvements"), &WorldObject::get_region_improvements);
 }
 
@@ -17,6 +18,7 @@ Ref<RegionObject> WorldObject::get_region(Vector2i coords) const {
   auto qrs_coords = to_qrs(coords);
 
   if (!data_.GetSurface().Contains(qrs_coords)) {
+    SPDLOG_INFO("no region at coords {},{}", qrs_coords.q(), qrs_coords.r());
     return {};
   }
 
@@ -26,6 +28,18 @@ Ref<RegionObject> WorldObject::get_region(Vector2i coords) const {
 
   return result;
 
+}
+
+Dictionary WorldObject::get_region_info(Vector2i coords) const {
+  auto qrs_coords = to_qrs(coords);
+
+  if (!data_.GetSurface().Contains(qrs_coords)) {
+    SPDLOG_INFO("no region at coords {},{}", qrs_coords.q(), qrs_coords.r());
+    return {};
+  }
+
+  auto& region = data_.GetSurface().GetCell(qrs_coords).GetRegion();
+  return RegionObject::make_region_info(region);
 }
 
 Array WorldObject::get_region_improvements() const {

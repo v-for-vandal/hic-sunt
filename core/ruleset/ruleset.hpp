@@ -19,6 +19,8 @@ public:
 
   auto& GetRegionImprovements() const { return improvements_; }
 
+  auto& GetTerrain() const { return terrain_; }
+
 
 private:
   proto::ruleset::RegionImprovements improvements_;

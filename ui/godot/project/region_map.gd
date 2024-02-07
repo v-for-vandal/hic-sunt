@@ -1,11 +1,12 @@
 extends Node2D
 
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
+signal exit_reqion_request()
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+func load_region(region_object : RegionObject):
+	$RegionSurface.load_region(region_object)
+
+
+func _on_region_ui_close_requested():
+	print("emiting exit region request") # TODO: RM
+	exit_reqion_request.emit()

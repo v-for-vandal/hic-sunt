@@ -2,6 +2,7 @@
 
 #include <core/geometry/surface.hpp>
 #include <core/region/cell.hpp>
+#include <core/utils/comb.hpp>
 
 #include <region/region.pb.h>
 
@@ -34,13 +35,17 @@ public:
 
 
   bool SetTerrain(QRSCoords coords, std::string_view terrain);
+  std::vector<std::pair<std::string, int>> GetTopKTerrain(int k) const {
+    return terrain_count_.TopK(k);
+  }
   bool SetFeature(QRSCoords coords, std::string_view terrain);
   bool SetImprovement(QRSCoords coords, std::string_view terrain);
 
 private:
   Surface surface_;
-  std::unordered_map<std::string, size_t> terrain_count_;
+  utils::Comb terrain_count_;
   std::unordered_map<std::string, size_t> feature_count_;
+
 
 private:
   friend void SerializeTo(const Region& source, proto::region::Region& to);

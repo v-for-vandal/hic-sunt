@@ -26,6 +26,8 @@ public:
 
   static void _bind_methods();
 
+  static Dictionary make_region_info(const hs::region::Region& region);
+
 
 private:
   std::shared_ptr<hs::region::Region> region_; // never null

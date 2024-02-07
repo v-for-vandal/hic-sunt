@@ -65,3 +65,20 @@ bool RegionObject::set_feature(Vector2i coords, String feature) const
 
   return region_->SetFeature(qrs_coords, feature.utf8().get_data());
 }
+
+Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
+  Dictionary result;
+  // Build top terrain
+  {
+    Array top_terrain_result;
+    auto top_terrain = region.GetTopKTerrain(3);
+    for(auto& [terrain, count] : top_terrain) {
+      top_terrain_result.append(count);
+      top_terrain_result.append(String(terrain.c_str()));
+    }
+    result["top_terrain"] = std::move(top_terrain_result);
+  }
+  //result["size"] = region.GetSurface().size();
+
+  return result;
+}

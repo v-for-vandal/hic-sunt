@@ -33,7 +33,7 @@ private:
 
 private:
   Ref<WorldObject> load_world(String filename);
-  Ref<WorldObject> create_world(Vector2i size);
+  Ref<WorldObject> create_world(Vector2i world_size, Vector2i region_size);
   Dictionary load_ruleset(String folder_path);
   /*
   Vector3 GetDimensions() const { return end_point_ - start_point_; }
