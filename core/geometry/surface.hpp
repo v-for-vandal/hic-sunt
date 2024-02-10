@@ -32,9 +32,15 @@ public:
   Cell& GetCell(ViewCoords coords) {
     return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
   }
+  Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) {
+    return GetCell(ViewCoords{q,r});
+  }
 
   const Cell& GetCell(ViewCoords coords) const {
     return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
+  }
+  const Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
+    return GetCell(ViewCoords{q,r});
   }
 
   auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
@@ -47,7 +53,7 @@ public:
   auto r_start() const { return typename CoordinateSystem::RAxis{0}; }
 
   bool Contains(ViewCoords coords) const {
-    return coords.q() < q_end() && coords.r() < r_end();
+    return coords.q() >= q_start() && coords.q() < q_end() && coords.r() >= r_start() && coords.r() < r_end();
   }
   bool Contains(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
     return Contains(ViewCoords{q,r});
@@ -80,10 +86,13 @@ class Surface {
 public:
 
   using View = SurfaceView<Cell, CoordinateSystem>;
+  using ViewCoords = geometry::Coords<CoordinateSystem>;
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
+  using SCSize = DeltaCoords<CoordinateSystem>;
 
   Surface(typename SCS::QDelta q_size = typename SCS::QDelta{1}, typename SCS::RDelta r_size = typename SCS::RDelta{1});
+  explicit Surface(SCSize size);
   Surface(const Surface&) = delete;
   Surface(Surface&&) = default;
   Surface& operator=(const Surface&) = delete;
@@ -102,6 +111,7 @@ public:
   size_t data_size() const { return data_size_; }
   const Cell& GetCell(size_t idx) const { return data_storage_[idx]; }
   Cell& GetCell(size_t idx) { return data_storage_[idx]; }
+  bool Contains(ViewCoords coords) const { return cells_.Contains(coords); }
 
   auto q_size() const { return cells_.q_size(); }
   auto r_size() const { return cells_.r_size(); }
@@ -119,6 +129,7 @@ public:
   }
 
   WRLD_REDIRECT_VIEW_CONST_FUNCTION(GetCell)
+  WRLD_REDIRECT_VIEW_FUNCTION(GetCell)
 
 #undef WRLD_REDIRECT_VIEW_FUNCTION
 #undef WRLD_REDIRECT_VIEW_CONST_FUNCTION
@@ -133,6 +144,19 @@ private:
   size_t data_size_;
   std::unique_ptr<Cell[]> data_storage_;
   SurfaceView<Cell, CoordinateSystem> cells_;
+
+private:
+  // checks that everything is > 0, if not - makes it equal to 1
+  // and logs critical error
+  static auto make_size_sane(auto coord_elem) {
+    auto result = coord_elem.ToUnderlying();
+    if(result <= 0) {
+      spdlog::critical("size is <= 0");
+      result = 1;
+    }
+
+    return result;
+  }
 };
 
 }

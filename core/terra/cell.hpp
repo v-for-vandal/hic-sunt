@@ -1,31 +1,52 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <string_view>
 
-
 #include <core/utils/serialize.hpp>
+#include <core/region/region.hpp>
 
-#include <fbs/world_generated.h>
+#include <terra/cell.pb.h>
+
 
 namespace hs::terra {
-  enum class Terrain {
-    Plains = 0,
-    Hills,
-    Mountain
-  };
 
   class Cell {
-
   public:
-    std::string_view GetTerrain() const { return terrain_type_; }
-    void SetTerrain(std::string_view terrain) { terrain_type_ = terrain; }
+    Cell():
+      region_(std::make_shared<region::Region>()) {}
+
+    Cell(const Cell&) = delete;
+    Cell& operator=(const Cell&) = delete;
+    Cell(Cell&& other):
+      region_(std::move(other.region_))
+    {
+      // don't leave other in invalid form
+      other.region_ = std::make_shared<region::Region>();
+    }
+    Cell& operator=(Cell&& other) {
+      region_ = other.region_;
+      other.region_ = std::make_shared<region::Region>();
+      return *this;
+    }
+
+
+    auto& GetRegion() const { return *region_; }
+    auto& GetRegion() { return *region_; }
+    auto& GetRegionPtr() const { return region_; }
+    const auto& GetRegionPtr() { return region_; }
+    auto SetRegion(region::Region region) {
+      *region_ = std::move(region);
+    }
+
 
   private:
-    std::string terrain_type_;
+    std::shared_ptr<region::Region> region_;
+
   };
 
-flatbuffers::Offset<fbs::Cell> SerializeTo(const Cell& source, ::flatbuffers::FlatBufferBuilder& fbb);
-Cell ParseFrom( const fbs::Cell& fbs_class, serialize::To<Cell>);
+void SerializeTo(const Cell& source, proto::terra::Cell& proto_destination);
+Cell ParseFrom( const proto::terra::Cell& source,  serialize::To<Cell>);
 
 }

@@ -1,0 +1,26 @@
+[gd_resource type="TileSet" load_steps=5 format=3 uid="uid://bh71lah81sad2"]
+
+[ext_resource type="Texture2D" uid="uid://k7k1olchl2td" path="res://resources/atlas_advanced.png" id="1_qsh6j"]
+[ext_resource type="Texture2D" uid="uid://stfyi3j88edb" path="res://resources/atlas_features.png" id="2_2g644"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v2jbb"]
+texture = ExtResource("1_qsh6j")
+texture_region_size = Vector2i(520, 600)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rnydf"]
+texture = ExtResource("2_2g644")
+texture_region_size = Vector2i(520, 600)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+
+[resource]
+tile_shape = 3
+tile_size = Vector2i(520, 600)
+sources/0 = SubResource("TileSetAtlasSource_v2jbb")
+sources/2 = SubResource("TileSetAtlasSource_rnydf")

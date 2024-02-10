@@ -1,0 +1,24 @@
+[gd_scene load_steps=6 format=3 uid="uid://dyp7yp0fqe876"]
+
+[ext_resource type="Script" path="res://region_map.gd" id="1_5bqhm"]
+[ext_resource type="TileSet" uid="uid://cpsnh1wxdj7sd" path="res://resources/world/terrain_tile_set.tres" id="2_c3lht"]
+[ext_resource type="Script" path="res://RegionSurface.gd" id="2_paq3v"]
+[ext_resource type="PackedScene" uid="uid://brhsewnl00nkp" path="res://ui/region_ui.tscn" id="3_ltroy"]
+[ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="4_tsfj2"]
+
+[node name="RegionMap" type="Node2D"]
+script = ExtResource("1_5bqhm")
+
+[node name="RegionSurface" type="TileMap" parent="."]
+tile_set = ExtResource("2_c3lht")
+format = 2
+script = ExtResource("2_paq3v")
+
+[node name="RegionViewCamera" parent="." instance=ExtResource("4_tsfj2")]
+position = Vector2(480, 269)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="RegionUI" parent="CanvasLayer" instance=ExtResource("3_ltroy")]
+
+[connection signal="close_requested" from="CanvasLayer/RegionUI" to="." method="_on_region_ui_close_requested"]

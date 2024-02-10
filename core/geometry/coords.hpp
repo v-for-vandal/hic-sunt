@@ -18,6 +18,8 @@ namespace details {
     QRSCompact(QAxis q, RAxis r):
       q_(q), r_(r) {}
 
+    QRSCompact() noexcept = default;
+
     QAxis q() const noexcept { return q_; }
     RAxis r() const noexcept { return r_; }
     SAxis s() const noexcept { return SAxis{0 - q().ToUnderlying() - r().ToUnderlying()}; }
@@ -39,7 +41,7 @@ public:
   using RDelta = typename CoordinateSystem::RDelta;
   using SDelta = typename CoordinateSystem::SDelta;
 
-  DeltaCoords() noexcept;
+  DeltaCoords() noexcept = default;
   DeltaCoords(QDelta q, RDelta r):
     data_(q,r) {}
 

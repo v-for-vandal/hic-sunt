@@ -1,6 +1,7 @@
 #include "system.hpp"
 
 #include <fstream>
+#include <vector>
 
 #include <core/utils/serialize.hpp>
 
@@ -14,30 +15,44 @@ terra::World System::LoadWorld(std::string_view filename) {
 
   */
   std::ifstream in(filename, std::ios::binary);
-  std::vector<char> buffer{ std::istreambuf_iterator<char>(in),
-                      std::istreambuf_iterator<char>()};
 
-  const fbs::World* fbs_world = fbs::GetWorld(buffer.data());
-  if(fbs_world == nullptr) {
-    return {};
-  }
+  proto::terra::World proto_world;
+  proto_world.ParseFromIstream(&in);
 
-  return ParseFrom(*fbs_world, serialize::To<terra::World>{});
+  return ParseFrom(proto_world, serialize::To<terra::World>{});
 
 }
 
 
 terra::World System::NewWorld(NewWorldParameters params) {
-  static std::array terrain_types = { "coast", "plains", "sand", "ocean", "snow" };
+  std::vector<std::string> terrain_types;
+  for(const auto& terrain_type: active_rule_set_.GetTerrain().terrain_types()) {
+    terrain_types.push_back(terrain_type.id());
+  }
 
-  auto result = terra::World{params.q_size, params.r_size};
+  auto randomize_region = [&terrain_types](region::Region& region) {
+    for(auto q_pos = region.GetSurface().q_start(); q_pos < region.GetSurface().q_end(); q_pos++) {
+      for( auto r_pos = region.GetSurface().r_start(); r_pos < region.GetSurface().r_end(); r_pos++) {
+        auto coords = terra::World::QRSCoords{q_pos, r_pos};
+        if(region.GetSurface().Contains(coords)) {
+          region.SetTerrain( coords, terrain_types[ std::rand() % terrain_types.size() ] );
+        }
+      }
+    }
+  };
+
+  auto result = terra::World{params.world_size};
   auto surface = result.GetSurface();
   /* randomize terrain for now */
   for(auto q_pos = surface.q_start(); q_pos < surface.q_end(); q_pos++) {
     for( auto r_pos = surface.r_start(); r_pos < surface.r_end(); r_pos++) {
       auto coords = terra::World::QRSCoords{q_pos, r_pos};
       if(surface.Contains(coords)) {
-        surface.GetCell(coords).SetTerrain( terrain_types[ std::rand() % terrain_types.size() ] );
+        // initialize region
+        auto& cell = surface.GetCell(coords);
+        region::Region region{params.region_size};
+        randomize_region(region);
+        cell.SetRegion(std::move(region));
       }
     }
   }
@@ -49,14 +64,12 @@ terra::World System::NewWorld(NewWorldParameters params) {
 }
 
 void System::SaveWorld(const terra::World& target, std::string_view filename) {
-  ::flatbuffers::FlatBufferBuilder fbb{};
-  auto offset = SerializeTo(target, fbb);
-  fbb.Finish(offset);
+  proto::terra::World proto_world;
+  SerializeTo(target, proto_world);
 
   std::ofstream out(filename, std::ios::binary);
-  out.write( (char*)fbb.GetBufferPointer(), fbb.GetSize());
+  proto_world.SerializeToOstream(&out);
   out.close();
-
 }
 
 bool System::LoadRuleSet(const std::filesystem::path& path,

@@ -8,17 +8,25 @@
 #include <flatbuffers/flatbuffers.h>
 #include <fbs/world_generated.h>
 
+#include <terra/world.pb.h>
+
 namespace hs::terra {
 
 class World;
 
+/*
 ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, ::flatbuffers::FlatBufferBuilder& fbb);
 World ParseFrom(const fbs::World& world, serialize::To<World>);
+*/
+
+void SerializeTo(const World& source, proto::terra::World& target);
+World ParseFrom(const proto::terra::World& world, serialize::To<World>);
 
 class World {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
+  using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
   using Surface = geometry::Surface<Cell, QRSCoordinateSystem>;
   using SurfaceView = geometry::SurfaceView<Cell, QRSCoordinateSystem>;
 
@@ -29,6 +37,7 @@ public:
   World& operator=(World&&) = default;
 
   World(QRSCoordinateSystem::QDelta q_size, QRSCoordinateSystem::RDelta r_size);
+  explicit World(QRSSize size);
 
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
@@ -40,8 +49,8 @@ public:
   const auto& GetRuleSet() const { return ruleset_; }
 
 private:
-  friend ::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, ::flatbuffers::FlatBufferBuilder& fbb);
-  friend World ParseFrom(const fbs::World& world, serialize::To<World>);
+  friend void SerializeTo(const World& source, proto::terra::World& target);
+  friend World ParseFrom(const proto::terra::World& world, serialize::To<World>);
 
 private:
   Surface surface_;

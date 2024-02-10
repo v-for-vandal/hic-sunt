@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <core/terra/world.hpp>
+#include <ui/godot/module/region/region_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 
@@ -32,34 +33,23 @@ private:
 
 public:
   Vector2i get_dimensions() const;
-  String get_cell_terrain(Vector2i coords) const;
+  Ref<RegionObject> get_region(Vector2i coords) const;
+  Dictionary get_region_info(Vector2i coords) const;
+  bool contains(Vector2i coords) const;
+  //String get_cell_terrain(Vector2i coords) const;
 
-  //Dictionary get_improvement_info(region::
+  // TODO: Move this method to System ?
   Array get_region_improvements() const;
+  Array get_terrain_types() const;
+  static Dictionary convert_terrain_type(const hs::proto::ruleset::TerrainType& terrain_type);
+  static Dictionary convert_render(const hs::proto::render::AtlasRender& render);
 
-  static QRSCoords to_qrs(Vector2i coords) {
+  static QRSCoords cast_qrs(Vector2i coords) {
     return QRSCoords{
       QRSCoordinateSystem::QAxis{coords.x},
       QRSCoordinateSystem::RAxis{coords.y}
     };
   }
-
-
-  /*
-  Vector3 GetDimensions() const { return end_point_ - start_point_; }
-  Vector3 GetStartPoint() const { return start_point_; }
-  Vector3 GetEndPoint() const { return end_point_; }
-  Vector3 GetMcStartPoint() const { return mc_start_point_; }
-  Vector3 GetMcEndPoint() const { return mc_end_point_; }
-  Ref<CellObject> GetCellObject(Vector3 coords) const;
-  bool IsMainLevel(int level) const;
-
-  Vector3 start_point_{0,0,0};
-  Vector3 end_point_{0,0,0};
-  Vector3 mc_start_point_{0,0,0};
-  Vector3 mc_end_point_{0,0,0};
-  std::shared_ptr<terra::World> world_ptr_;
-  */
 
 };
 

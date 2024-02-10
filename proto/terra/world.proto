@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "terra/cell.proto";
+
+package hs.proto.terra;
+
+message Surface {
+  repeated Cell cells = 1;
+  int32 q_size = 2;
+  int32 r_size = 3;
+}
+
+message World {
+  string id = 1;
+  Surface surface = 2;
+}
+

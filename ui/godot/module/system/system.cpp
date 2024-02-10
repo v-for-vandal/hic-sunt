@@ -1,5 +1,15 @@
 #include "system.hpp"
 
+namespace {
+  auto to_qrs_size(Vector2i size) {
+    auto q_size = typename hs::terra::World::QRSCoordinateSystem::QDelta{size.x};
+    auto r_size = typename hs::terra::World::QRSCoordinateSystem::RDelta{size.y};
+
+    return typename hs::terra::World::QRSSize{q_size, r_size};
+  }
+
+}
+
 Ref<WorldObject> HicSuntSystem::load_world(String filename) {
 
   Ref<WorldObject> result;
@@ -9,10 +19,11 @@ Ref<WorldObject> HicSuntSystem::load_world(String filename) {
 
 }
 
-Ref<WorldObject> HicSuntSystem::create_world(Vector2i size) {
+Ref<WorldObject> HicSuntSystem::create_world(Vector2i world_size, Vector2i region_size) {
   hs::system::NewWorldParameters params;
-  params.q_size = typename hs::terra::World::QRSCoordinateSystem::QDelta{size.x};
-  params.r_size = typename hs::terra::World::QRSCoordinateSystem::RDelta{size.y};
+
+  params.world_size = to_qrs_size(world_size);
+  params.region_size = to_qrs_size(region_size);
   Ref<WorldObject> result(memnew(WorldObject(system_->NewWorld(params))));
   //result.reference_ptr());
   ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new world");
@@ -37,6 +48,6 @@ Dictionary HicSuntSystem::load_ruleset(String folder_path) {
 
 void HicSuntSystem::_bind_methods() {
   ClassDB::bind_method(D_METHOD("load_world", "filename"), &HicSuntSystem::load_world);
-  ClassDB::bind_method(D_METHOD("create_world", "size"), &HicSuntSystem::create_world);
+  ClassDB::bind_method(D_METHOD("create_world", "world_size", "region_size"), &HicSuntSystem::create_world);
   ClassDB::bind_method(D_METHOD("load_ruleset", "folder_path"), &HicSuntSystem::load_ruleset);
 }

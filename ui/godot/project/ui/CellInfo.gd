@@ -25,7 +25,7 @@ func _on_world_cell_selected(world_object: WorldObject, qr: Vector2i):
 
 	_add_text_label("%d,%d,%d" % [ qr[0], qr[1], 0 - qr[0] - qr[1] ])
 	_add_text_label("Terrain")
-	_add_text_label(world_object.get_cell_terrain(qr))
+	#_add_text_label(world_object.get_cell_terrain(qr))
 
 	
 	# show cell properties

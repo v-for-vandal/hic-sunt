@@ -6,7 +6,7 @@ signal load_done()
 var _load_screen_path : String = "res://central/load_screen.tscn"
 var _load_screen = load(_load_screen_path)
 
-var _world_scene_resource : PackedScene = ResourceLoader.load("res://world_map.tscn")
+var _world_scene_resource : PackedScene = ResourceLoader.load("res://root_map.tscn")
 var _loaded_resource: PackedScene
 #var _scene_path: String
 var _world_path : String
@@ -30,7 +30,7 @@ func load_world(world_path: String) -> void:
 	get_tree().current_scene = _loading_screen_instance
 	
 	# hide main screen
-	get_tree().root.get_node('MainScreen').visible = false
+	get_tree().root.get_node('/root/MainScreen').visible = false
 	_debug_timer = 0.0
 	
 	self.progress_changed.connect(_loading_screen_instance._update_progress_bar)
@@ -41,10 +41,11 @@ func load_world(world_path: String) -> void:
 	start_load()
 	
 func start_load()-> void:
-	_world_object = CentralSystem.create_world(Vector2i(10, 5))
+	_world_object = CentralSystem.create_world(Vector2i(10, 5), Vector2i(5,5))
 	print("Returned type is: ", type_string(typeof(_world_object)))
 	assert(_world_object != null, "Failed to create world")
 	_new_scene = _world_scene_resource.instantiate()
+	_new_scene.root_load()
 	_new_scene.load_world(_world_object)
 	set_process(true)
 	
@@ -66,8 +67,8 @@ func _process(_delta):
 
 		
 func _defered_goto_scene():
-		var current_world_scene = get_node("/root/World")
-		if current_world_scene != null:
+		if has_node("/root/World"):
+			var current_world_scene = get_node("/root/World")
 			current_world_scene.free()
 
 		get_tree().root.add_child(_new_scene)
