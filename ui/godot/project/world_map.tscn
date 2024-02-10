@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://xbdd74ccg32f" path="res://ui/world_ui.tscn" id="2_2e47t"]
 [ext_resource type="TileSet" uid="uid://cpsnh1wxdj7sd" path="res://resources/world/terrain_tile_set.tres" id="2_tsa0d"]
 [ext_resource type="Script" path="res://WorldSurface.gd" id="3_tkt8m"]
-[ext_resource type="Script" path="res://WorldViewCamera.gd" id="5_wpesy"]
+[ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="4_qv3c5"]
 
 [node name="WorldMap" type="Node2D"]
 script = ExtResource("1_v7u0n")
@@ -15,8 +15,7 @@ format = 2
 layer_0/tile_data = PackedInt32Array(0, 0, 0, 65536, 196608, 0, 1, 196608, 0, 65537, 131072, 0, 2, 131072, 0, -65535, 131072, 0, -65536, 131072, 0, 65538, 65536, 0, 3, 65536, 0, -65534, 65536, 0, -131070, 65536, 0, -131071, 65536, 0, 131074, 65536, 0)
 script = ExtResource("3_tkt8m")
 
-[node name="WorldViewCamera" type="Camera2D" parent="."]
-script = ExtResource("5_wpesy")
+[node name="WorldViewCamera" parent="." instance=ExtResource("4_qv3c5")]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

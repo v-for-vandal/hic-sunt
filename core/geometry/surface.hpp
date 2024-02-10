@@ -53,7 +53,7 @@ public:
   auto r_start() const { return typename CoordinateSystem::RAxis{0}; }
 
   bool Contains(ViewCoords coords) const {
-    return coords.q() < q_end() && coords.r() < r_end();
+    return coords.q() >= q_start() && coords.q() < q_end() && coords.r() >= r_start() && coords.r() < r_end();
   }
   bool Contains(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
     return Contains(ViewCoords{q,r});

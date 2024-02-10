@@ -27,7 +27,8 @@ func _unhandled_input(event) -> void:
 			var tile_xy = local_to_map(to_local(event.position))
 			var tile_qr = QrsCoordsLibrary.xy_to_qrs(tile_xy)
 			print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
-			enter_region.emit(_world_object, tile_qr)
+			if _world_object.contains(tile_qr):
+				enter_region.emit(_world_object, tile_qr)
 			#print("Pressed button. event position: ", event.position, " in local: ", to_local(event.position))
 
 
@@ -64,8 +65,8 @@ func load_world(world_object : WorldObject):
 			var xy_coords = QrsCoordsLibrary.qrs_to_xy(qr_coords)
 			# fill cell
 			if terrain_mapping.has(terrain):
-				print("setting terrail of tile map xy=", xy_coords, " qr=", qr_coords, " to ",
-					terrain_mapping[terrain])
+				#print("setting terrail of tile map xy=", xy_coords, " qr=", qr_coords, " to ",
+				#	terrain_mapping[terrain])
 				set_cell(0, xy_coords, 0, terrain_mapping[terrain],0)
 			else:
 				print("unknown terrain", terrain)

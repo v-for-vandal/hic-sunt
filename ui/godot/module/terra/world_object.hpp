@@ -35,12 +35,16 @@ public:
   Vector2i get_dimensions() const;
   Ref<RegionObject> get_region(Vector2i coords) const;
   Dictionary get_region_info(Vector2i coords) const;
+  bool contains(Vector2i coords) const;
   //String get_cell_terrain(Vector2i coords) const;
 
   // TODO: Move this method to System ?
   Array get_region_improvements() const;
+  Array get_terrain_types() const;
+  static Dictionary convert_terrain_type(const hs::proto::ruleset::TerrainType& terrain_type);
+  static Dictionary convert_render(const hs::proto::render::AtlasRender& render);
 
-  static QRSCoords to_qrs(Vector2i coords) {
+  static QRSCoords cast_qrs(Vector2i coords) {
     return QRSCoords{
       QRSCoordinateSystem::QAxis{coords.x},
       QRSCoordinateSystem::RAxis{coords.y}

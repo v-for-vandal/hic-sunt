@@ -56,5 +56,5 @@ func load_region(region_object : RegionObject):
 			var xy_coords = QrsCoordsLibrary.qrs_to_xy(Vector2i(q,r))
 			# fill cell
 			if terrain_mapping.has(terrain):
-				print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
+				#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
 				set_cell(0, xy_coords, 0, terrain_mapping[terrain],0)

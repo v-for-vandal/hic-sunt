@@ -35,15 +35,19 @@ bool RuleSet::Load(const std::filesystem::path& path,
   ErrorsCollection& errors) {
   // TODO: Skip files that are not present
     // TODO: Must actually merge rules, not overwrite them
+  SPDLOG_INFO("Parsing improvements file");
   bool success = ReadFromFile( path / improvements_file, improvements_, errors);
   if(!success) {
     return false;
   }
 
+  SPDLOG_INFO("Parsing terrain file file");
   success = ReadFromFile( path / terrain_file, terrain_, errors);
   if(!success) {
     return false;
   }
+
+  return true;
 
 }
 

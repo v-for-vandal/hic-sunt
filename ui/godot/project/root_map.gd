@@ -11,17 +11,33 @@ var _region_map: Node
 func root_load():
 	_world_map = _world_map_scene.instantiate()
 	_region_map = _region_map_scene.instantiate()
-	print("region map is: ", _region_map)
-	print("world map is: ", _world_map)
 	_world_map.show_region_request.connect(_on_world_map_show_region_request)
 	_region_map.exit_reqion_request.connect(_on_region_map_exit_reqion_request)
 	_switch_to_world()
 	_loaded = true
 	
+func _build_tileset(sources: Array):
+	pass
+	
+func _build_tiles_mapping(world_object: WorldObject):
+	assert(world_object != null)
+	var terrain_types:Array = world_object.get_terrain_types()
+	var result := {}
+	
+	for terrain in terrain_types:
+		result[terrain.id] = terrain.render.atlas_coords
+	
+	return result
+		
+	
 
 
 func load_world(world_object : WorldObject):
 	assert(_loaded, "You can't call methods on root-map before it is fully loaded")
+	assert(world_object != null)
+	var terrain_mapping = _build_tiles_mapping(world_object)
+	_world_map.set_terrain_visualization(terrain_mapping)
+	_region_map.set_terrain_visualization(terrain_mapping)
 	_world_map.load_world(world_object)
 	_switch_to_world()
 
