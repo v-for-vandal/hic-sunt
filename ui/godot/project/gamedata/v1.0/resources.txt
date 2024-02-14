@@ -1,0 +1,3 @@
+{ id: "core.res.logs", name : {key: "core.res.log", fallback_name: "log"} }
+{ id: "core.res.plank", name : {key: "core.res.plank", fallback_name: "plank"} }
+{ id: "core.res.stone", name : {key: "core.res.stone", fallback_name: "stone"} }

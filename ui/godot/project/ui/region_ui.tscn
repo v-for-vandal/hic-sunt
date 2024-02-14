@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://brhsewnl00nkp"]
+[gd_scene load_steps=5 format=3 uid="uid://brhsewnl00nkp"]
 
 [ext_resource type="Script" path="res://ui/region_ui.gd" id="1_j578s"]
 [ext_resource type="Script" path="res://ui/InfoTabContainer.gd" id="2_b3ivv"]
 [ext_resource type="Script" path="res://ui/CellInfo.gd" id="3_6gntf"]
+[ext_resource type="PackedScene" uid="uid://dcacdldp7pmxy" path="res://ui/buildings/building_list.tscn" id="4_0x70n"]
 
 [node name="RegionUI" type="Control"]
 layout_mode = 3
@@ -27,7 +28,6 @@ layout_mode = 2
 text = "Close"
 
 [node name="InfoTabContainer" type="TabContainer" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.691
@@ -42,5 +42,14 @@ script = ExtResource("2_b3ivv")
 layout_mode = 2
 columns = 2
 script = ExtResource("3_6gntf")
+
+[node name="Buildings" parent="InfoTabContainer" instance=ExtResource("4_0x70n")]
+visible = false
+layout_mode = 2
+
+[node name="Resources" type="GridContainer" parent="InfoTabContainer"]
+visible = false
+layout_mode = 2
+columns = 2
 
 [connection signal="pressed" from="PanelContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]

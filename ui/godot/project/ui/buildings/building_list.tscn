@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://dcacdldp7pmxy"]
+
+[ext_resource type="Texture2D" uid="uid://cuxhfkb6y8882" path="res://icon.svg" id="1_p7ulc"]
+[ext_resource type="Script" path="res://ui/buildings/building_list.gd" id="2_xavib"]
+
+[node name="BuildingList" type="ItemList"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -661.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+item_count = 2
+item_0/text = "Lumber mill"
+item_0/icon = ExtResource("1_p7ulc")
+item_1/text = "Quarry"
+item_1/icon = ExtResource("1_p7ulc")
+script = ExtResource("2_xavib")

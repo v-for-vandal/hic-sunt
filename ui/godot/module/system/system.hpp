@@ -6,6 +6,7 @@
 #include <godot_cpp/classes/node.hpp>
 
 #include <ui/godot/module/terra/world_object.hpp>
+#include <ui/godot/module/game/ruleset_object.hpp>
 
 #include <core/system/system.hpp>
 
@@ -33,7 +34,7 @@ private:
 
 private:
   Ref<WorldObject> load_world(String filename);
-  Ref<WorldObject> create_world(Vector2i world_size, Vector2i region_size);
+  Ref<WorldObject> create_world(Vector2i world_size, Vector2i region_size, RulesetObject* active_ruleset);
   Dictionary load_ruleset(String folder_path);
   /*
   Vector3 GetDimensions() const { return end_point_ - start_point_; }

@@ -22,16 +22,11 @@ public:
   using ErrorsCollection = utils::ErrorsCollection;
 
   terra::World LoadWorld(std::string_view filename);
-  terra::World NewWorld(NewWorldParameters params);
+  terra::World NewWorld(NewWorldParameters params, const ruleset::RuleSet& active_rule_set);
   void SaveWorld(const terra::World&, std::string_view filename);
 
-  bool LoadRuleSet(const std::filesystem::path& path,
+  std::optional<ruleset::RuleSet> LoadRuleSet(const std::filesystem::path& path,
     ErrorsCollection& errors);
-
-
-private:
-  ruleset::RuleSet active_rule_set_;
-
 };
 
 }

@@ -41,7 +41,6 @@ func load_world(world_object : WorldObject):
 	_world_object = world_object
 	
 	print("type of world object:", type_string(typeof(world_object)))
-	print("improvements:" , world_object.get_region_improvements())
 	
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system

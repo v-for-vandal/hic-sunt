@@ -24,9 +24,9 @@ terra::World System::LoadWorld(std::string_view filename) {
 }
 
 
-terra::World System::NewWorld(NewWorldParameters params) {
+terra::World System::NewWorld(NewWorldParameters params, const ruleset::RuleSet& active_rule_set) {
   std::vector<std::string> terrain_types;
-  for(const auto& terrain_type: active_rule_set_.GetTerrain().terrain_types()) {
+  for(const auto& terrain_type: active_rule_set.GetTerrain().terrain_types()) {
     terrain_types.push_back(terrain_type.id());
   }
 
@@ -57,8 +57,6 @@ terra::World System::NewWorld(NewWorldParameters params) {
     }
   }
 
-  result.SetRuleSet(active_rule_set_);
-
   return result;
 
 }
@@ -72,10 +70,15 @@ void System::SaveWorld(const terra::World& target, std::string_view filename) {
   out.close();
 }
 
-bool System::LoadRuleSet(const std::filesystem::path& path,
+std::optional<ruleset::RuleSet> System::LoadRuleSet(const std::filesystem::path& path,
   ErrorsCollection& errors) {
-  const bool result = active_rule_set_.Load(path, errors);
-  return result;
+  ruleset::RuleSet result;
+  const bool success = result.Load(path, errors);
+  if(!success) {
+    return std::nullopt;
+  } else {
+    return std::move(result);
+  }
 }
 
 

@@ -37,6 +37,7 @@ public:
   Dictionary get_cell_info(Vector2i coords) const;
   bool set_terrain(Vector2i coords, String terrain) const;
   bool set_feature(Vector2i coords, String feature) const;
+  Array get_available_improvements() const;
 
   //Array get_region_improvements() const;
 

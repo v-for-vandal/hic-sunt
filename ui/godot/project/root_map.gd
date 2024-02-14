@@ -21,7 +21,7 @@ func _build_tileset(sources: Array):
 	
 func _build_tiles_mapping(world_object: WorldObject):
 	assert(world_object != null)
-	var terrain_types:Array = world_object.get_terrain_types()
+	var terrain_types:Array = CurrentGame.current_player_ruleset.get_terrain_types()
 	var result := {}
 	
 	for terrain in terrain_types:

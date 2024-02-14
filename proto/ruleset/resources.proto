@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package hs.proto.ruleset;
+
+import "l10n/localized_name.proto";
+
+message Resource {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+}
+
+// root value for this object
+message Resources {
+  repeated Resource resources = 1;
+}
+
+

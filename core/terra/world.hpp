@@ -42,11 +42,13 @@ public:
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
 
+  /* not part of the world now 
   void SetRuleSet(ruleset::RuleSet rules) {
     ruleset_ = std::move(rules);
   }
 
   const auto& GetRuleSet() const { return ruleset_; }
+  */
 
 private:
   friend void SerializeTo(const World& source, proto::terra::World& target);
@@ -54,7 +56,7 @@ private:
 
 private:
   Surface surface_;
-  ruleset::RuleSet ruleset_;
+  //ruleset::RuleSet ruleset_;
 };
 
 

@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 CentralSystem="*res://central/central_system.gd"
 LoadManager="*res://central/load_manager.gd"
+CurrentGame="*res://game/current_game.gd"
 
 [display]
 

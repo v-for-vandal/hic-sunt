@@ -41,9 +41,22 @@ func load_world(world_path: String) -> void:
 	start_load()
 	
 func start_load()-> void:
-	_world_object = CentralSystem.create_world(Vector2i(10, 5), Vector2i(5,5))
-	print("Returned type is: ", type_string(typeof(_world_object)))
+
+	var core_ruleset_path = ProjectSettings.globalize_path('res://gamedata/v1.0')
+	var _ruleset_dict : Dictionary = CentralSystem.load_ruleset(core_ruleset_path)
+	# TODO: Process loading errors properly
+	var _ruleset_object = _ruleset_dict.ruleset
+	if _ruleset_dict.success:
+		print("Successfully loaded core ruleset: ", _ruleset_dict.success)
+	else:
+		print("While loading core ruleset, there were errors: ", _ruleset_dict.errors)
+	assert(_ruleset_object != null, "Failed to load ruleset")
+		
+	_world_object = CentralSystem.create_world(Vector2i(10, 5), Vector2i(5,5), _ruleset_object)
+	
 	assert(_world_object != null, "Failed to create world")
+
+	CurrentGame.init_game(_world_object, _ruleset_object)
 	_new_scene = _world_scene_resource.instantiate()
 	_new_scene.root_load()
 	_new_scene.load_world(_world_object)

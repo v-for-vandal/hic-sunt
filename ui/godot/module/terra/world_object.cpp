@@ -5,8 +5,6 @@ void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_region", "coords"), &WorldObject::get_region);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &WorldObject::contains);
   ClassDB::bind_method(D_METHOD("get_region_info", "coords"), &WorldObject::get_region_info);
-  ClassDB::bind_method(D_METHOD("get_terrain_types"), &WorldObject::get_terrain_types);
-  ClassDB::bind_method(D_METHOD("get_region_improvements"), &WorldObject::get_region_improvements);
 }
 
 Vector2i WorldObject::get_dimensions() const {
@@ -31,47 +29,6 @@ Ref<RegionObject> WorldObject::get_region(Vector2i coords) const {
   return result;
 }
 
-Array WorldObject::get_terrain_types() const {
-  Array result;
-
-  const auto& ruleset = data_.GetRuleSet();
-
-  const auto& terrain = ruleset.GetTerrain();
-
-  for(const auto& terrain_type : terrain.terrain_types()) {
-    result.append(convert_terrain_type(terrain_type));
-  }
-
-  return result;
-}
-
-Dictionary WorldObject::convert_terrain_type(const hs::proto::ruleset::TerrainType& terrain_type) {
-  Dictionary result;
-  result["id"] = terrain_type.id().c_str();
-  result["render"] = convert_render(terrain_type.render());
-
-  return result;
-}
-
-Dictionary WorldObject::convert_render(const hs::proto::render::AtlasRender& render) {
-  Dictionary result;
-  result["resource"] = render.resource().c_str();
-  //render["source_id"] = terrain_type.render().resource();
-  {
-    int x = 0;
-    int y = 0;
-    if (render.atlas_coords_size() > 0) {
-      x = render.atlas_coords(0);
-    }
-    if (render.atlas_coords_size() > 0) {
-      y = render.atlas_coords(1);
-    }
-    result["atlas_coords"] = Vector2i(x,y);
-  }
-
-  return result;
-}
-
 bool WorldObject::contains(Vector2i coords) const {
   auto qrs_coords = cast_qrs(coords);
 
@@ -88,23 +45,6 @@ Dictionary WorldObject::get_region_info(Vector2i coords) const {
 
   auto& region = data_.GetSurface().GetCell(qrs_coords).GetRegion();
   return RegionObject::make_region_info(region);
-}
-
-Array WorldObject::get_region_improvements() const {
-  const auto& ruleset = data_.GetRuleSet();
-
-  const auto& improvements = ruleset.GetRegionImprovements();
-
-  Array result;
-
-  for(auto& improvement: improvements.improvements()) {
-    Dictionary godot_improvement_info;
-    godot_improvement_info["id"] = improvement.id().c_str();
-
-    result.append(std::move(godot_improvement_info));
-  }
-
-  return result;
 }
 
 #if 0

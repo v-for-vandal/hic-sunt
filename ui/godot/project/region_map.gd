@@ -5,6 +5,7 @@ signal exit_reqion_request()
 
 func load_region(region_object : RegionObject):
 	$RegionSurface.load_region(region_object)
+	$CanvasLayer/RegionUI.load_region(region_object)
 
 func set_terrain_visualization(vis_table: Dictionary):
 	$RegionSurface.terrain_mapping = vis_table
