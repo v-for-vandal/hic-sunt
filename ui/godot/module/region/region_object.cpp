@@ -85,5 +85,6 @@ Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
 }
 
 Array RegionObject::get_available_improvements() const {
+  return {};
 
 }

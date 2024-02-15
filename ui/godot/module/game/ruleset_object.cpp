@@ -3,6 +3,7 @@
 void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_all_region_improvements"), &RulesetObject::get_all_region_improvements);
   ClassDB::bind_method(D_METHOD("get_terrain_types"), &RulesetObject::get_terrain_types);
+  ClassDB::bind_method(D_METHOD("get_all_resources"), &RulesetObject::get_all_resources);
 }
 
 Array RulesetObject::get_terrain_types() const {
@@ -61,5 +62,19 @@ Array RulesetObject::get_all_region_improvements() const {
   return result;
 }
 
+Array RulesetObject::get_all_resources() const {
+
+  const auto& resources = ruleset_.GetResources();
+  Array result;
+
+  for(const auto& res: resources.resources()) {
+    Dictionary resource_info;
+    resource_info["id"] = res.id().c_str();
+    result.append(std::move(resource_info));
+  }
+
+  return result;
+
+}
 
 

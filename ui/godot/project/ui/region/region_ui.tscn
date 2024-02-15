@@ -1,0 +1,109 @@
+[gd_scene load_steps=6 format=3 uid="uid://brhsewnl00nkp"]
+
+[ext_resource type="Script" path="res://ui/region/region_ui.gd" id="1_j578s"]
+[ext_resource type="Script" path="res://ui/InfoTabContainer.gd" id="2_b3ivv"]
+[ext_resource type="Script" path="res://ui/CellInfo.gd" id="3_6gntf"]
+[ext_resource type="PackedScene" uid="uid://dcacdldp7pmxy" path="res://ui/region/buildings/building_list.tscn" id="4_0x70n"]
+[ext_resource type="Script" path="res://ui/region/Resources.gd" id="5_wjejd"]
+
+[node name="RegionUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_j578s")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "Close"
+
+[node name="InfoButton" type="Button" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+toggle_mode = true
+text = "Info"
+
+[node name="BuildButton" type="Button" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+toggle_mode = true
+text = "Build"
+
+[node name="InfoTabContainer" type="TabContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.062
+anchor_right = 0.296
+anchor_bottom = 1.0
+offset_top = -2.48
+offset_right = -0.160004
+grow_vertical = 2
+script = ExtResource("2_b3ivv")
+
+[node name="CellInfo" type="GridContainer" parent="InfoTabContainer"]
+layout_mode = 2
+columns = 2
+script = ExtResource("3_6gntf")
+
+[node name="Buildings" parent="InfoTabContainer" instance=ExtResource("4_0x70n")]
+visible = false
+layout_mode = 2
+
+[node name="Resources" type="GridContainer" parent="InfoTabContainer"]
+visible = false
+layout_mode = 2
+columns = 2
+script = ExtResource("5_wjejd")
+
+[node name="Name" type="Label" parent="InfoTabContainer/Resources"]
+layout_mode = 2
+text = "wood"
+
+[node name="Number" type="Label" parent="InfoTabContainer/Resources"]
+layout_mode = 2
+text = "0"
+
+[node name="Name2" type="Label" parent="InfoTabContainer/Resources"]
+layout_mode = 2
+text = "long resource name"
+
+[node name="Number2" type="Label" parent="InfoTabContainer/Resources"]
+layout_mode = 2
+text = "100983"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.805
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.199951
+offset_top = 34.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+
+[node name="BuildingList" parent="ScrollContainer/VBoxContainer" instance=ExtResource("4_0x70n")]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+
+[connection signal="region_cell_selected" from="." to="InfoTabContainer/CellInfo" method="_on_region_cell_selected"]
+[connection signal="region_selected" from="." to="InfoTabContainer/Resources" method="load_region"]
+[connection signal="region_selected" from="." to="ScrollContainer/VBoxContainer/BuildingList" method="load_region"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]
+[connection signal="toggled" from="PanelContainer/HBoxContainer/InfoButton" to="." method="_on_info_button_toggled"]
+[connection signal="toggled" from="PanelContainer/HBoxContainer/BuildButton" to="." method="_on_build_button_toggled"]

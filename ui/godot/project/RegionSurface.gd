@@ -23,7 +23,7 @@ func _unhandled_input(event) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed:
 			#print("Pressed button. event position: ", event.position, " in local: ", to_local(event.position))
-			
+			event = make_input_local(event)
 			var tile_xy = local_to_map(to_local(event.position))
 			var tile_qr = QrsCoordsLibrary.xy_to_qrs(tile_xy)
 			print("RegionSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
