@@ -13,7 +13,7 @@ struct NewWorldParameters {
   using QRSSize = geometry::DeltaCoords<QRSCoordinateSystem>;
 
   QRSSize world_size;
-  QRSSize region_size;
+  int region_size{1};
 };
 
 /* Central component for game */

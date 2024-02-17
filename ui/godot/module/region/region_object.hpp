@@ -40,6 +40,7 @@ public:
   bool set_improvement(Vector2i coords, String improvement) const;
   bool contains(Vector2i coords) const;
   Array get_available_improvements() const;
+  String get_id() const;
 
   //Array get_region_improvements() const;
 

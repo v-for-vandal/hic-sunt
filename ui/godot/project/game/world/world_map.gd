@@ -1,4 +1,4 @@
-extends Node2D
+extends Node
 
 var _world_object: WorldObject
 
@@ -7,7 +7,6 @@ signal show_region_request(world_object: WorldObject,  qr_position: Vector2i)
 
 func _ready() -> void:
 	$WorldViewCamera.cell_size = $WorldSurface.tile_set.tile_size.x
-	GameUiEventBus.add_consumer(self)
 
 func load_world(world_object : WorldObject):
 	_world_object = world_object

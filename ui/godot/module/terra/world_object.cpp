@@ -1,5 +1,7 @@
 #include "world_object.hpp"
 
+#include <ui/godot/module/utils/to_string.hpp>
+
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &WorldObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_region", "coords"), &WorldObject::get_region);
@@ -17,16 +19,31 @@ Vector2i WorldObject::get_dimensions() const {
 Ref<RegionObject> WorldObject::get_region(Vector2i coords) const {
   auto qrs_coords = cast_qrs(coords);
 
+  ERR_FAIL_COND_V_MSG(!data_.GetSurface().Contains(qrs_coords),
+    Ref<RegionObject>{}, utils::to_string(fmt::format("no region at coords {}", qrs_coords)));
+
+  /* TODO: check above should take care of that
   if (!data_.GetSurface().Contains(qrs_coords)) {
     SPDLOG_INFO("no region at coords {},{}", qrs_coords.q(), qrs_coords.r());
     return {};
   }
+  */
 
   Ref<RegionObject> result(memnew(RegionObject(
       data_.GetSurface().GetCell(qrs_coords).GetRegionPtr()
         )));
 
   return result;
+}
+
+Ref<RegionObject> WorldObject::get_region_by_id(String region_id) const {
+  std::string std_region_id = region_id.utf8().get_data();
+  ERR_FAIL_COND_V_MSG(!data_.HasRegion(std_region_id),
+    Ref<RegionObject>{}, utils::to_string(fmt::format("no region with id {}", std_region_id)));
+
+  Ref<RegionObject> result(memnew(RegionObject(
+      data_.GetRegionById(std_region_id)
+        )));
 }
 
 bool WorldObject::contains(Vector2i coords) const {

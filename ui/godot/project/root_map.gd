@@ -13,6 +13,9 @@ func root_load():
 	_region_map = _region_map_scene.instantiate()
 	_world_map.show_region_request.connect(_on_world_map_show_region_request)
 	_region_map.exit_reqion_request.connect(_on_region_map_exit_reqion_request)
+	
+	GameUiEventBus.set_world_interaction(_world_map)
+	GameUiEventBus.set_region_interaction(_region_map)
 	_switch_to_world()
 	_loaded = true
 	
@@ -78,4 +81,9 @@ func _on_region_map_exit_reqion_request():
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action("ui_cancel"):
-		GameUiEventBus.emit_cancellation()
+		if event.is_action_released("ui_cancel"):
+			#print("sending cancellation event")
+			GameUiEventBus.emit_cancellation()
+		get_viewport().set_input_as_handled()
+		
+		

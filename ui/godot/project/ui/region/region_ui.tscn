@@ -38,6 +38,10 @@ layout_mode = 2
 toggle_mode = true
 text = "Build"
 
+[node name="CityButton" type="Button" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "City"
+
 [node name="InfoTabContainer" type="TabContainer" parent="."]
 visible = false
 layout_mode = 1
@@ -107,3 +111,5 @@ layout_mode = 2
 [connection signal="pressed" from="PanelContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]
 [connection signal="toggled" from="PanelContainer/HBoxContainer/InfoButton" to="." method="_on_info_button_toggled"]
 [connection signal="toggled" from="PanelContainer/HBoxContainer/BuildButton" to="." method="_on_build_button_toggled"]
+[connection signal="pressed" from="PanelContainer/HBoxContainer/CityButton" to="." method="_on_city_button_pressed"]
+[connection signal="building_selected" from="ScrollContainer/VBoxContainer/BuildingList" to="." method="_on_build_improvement"]

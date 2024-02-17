@@ -18,7 +18,7 @@ var terrain_mapping : Dictionary = {
 	"core.snow" : Vector2i(4,0),
 }
 
-func _ready():
+func _ready() -> void:
 	# add highlight layer
 	add_layer(-1)
 	_highlight_layer_id = get_layers_count() - 1
@@ -43,7 +43,7 @@ func _contains(tile_qr: Vector2i) -> bool:
 
 
 
-func load_world(world_object : WorldObject):
+func load_world(world_object : WorldObject) -> void:
 	assert(world_object != null, "Can't load nullptr as world")
 	clear()
 	
@@ -53,11 +53,11 @@ func load_world(world_object : WorldObject):
 	
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system
-	var qr_dimensions = world_object.get_dimensions()
+	var qr_dimensions : Vector2i = world_object.get_dimensions()
 	print("world dimensions: ", qr_dimensions)
 	
-	var q_len = qr_dimensions.x
-	var r_len = qr_dimensions.y
+	var q_len := qr_dimensions.x
+	var r_len := qr_dimensions.y
 
 	for q in q_len:
 		for r in r_len:
@@ -67,10 +67,10 @@ func load_world(world_object : WorldObject):
 				print("Can't get region at: ", qr_coords)
 				continue
 			var top_terrain: Array = region_info.top_terrain
-			var terrain = top_terrain[1]
+			var terrain : String = top_terrain[1]
 			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 			# convert to xy dimensions
-			var xy_coords = QrsCoordsLibrary.qrs_to_xy(qr_coords)
+			var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
 			# fill cell
 			if terrain_mapping.has(terrain):
 				#print("setting terrail of tile map xy=", xy_coords, " qr=", qr_coords, " to ",

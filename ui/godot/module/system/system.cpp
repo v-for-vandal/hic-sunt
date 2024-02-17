@@ -20,18 +20,15 @@ Ref<WorldObject> HicSuntSystem::load_world(String filename) {
 
 }
 
-Ref<WorldObject> HicSuntSystem::create_world(Vector2i world_size, Vector2i region_size,
+Ref<WorldObject> HicSuntSystem::create_world(Vector2i world_size, int region_radius,
   RulesetObject* ruleset) {
 
-  if(!ruleset) {
-    SPDLOG_ERROR("Nullptr as ruleset when creating world");
-    return {};
-  }
+  ERR_FAIL_NULL_V_MSG(ruleset, Ref<WorldObject>{}, "Nullptr as ruleset when creating world");
 
   hs::system::NewWorldParameters params;
 
   params.world_size = to_qrs_size(world_size);
-  params.region_size = to_qrs_size(region_size);
+  params.region_size = region_radius;
   Ref<WorldObject> result(memnew(WorldObject(system_->NewWorld(params, ruleset->GetRuleSet()))));
   //result.reference_ptr());
   ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new world");

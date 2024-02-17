@@ -9,7 +9,6 @@ void RulesetObject::_bind_methods() {
 Array RulesetObject::get_terrain_types() const {
   Array result;
 
-
   const auto& terrain = ruleset_.GetTerrain();
 
   for(const auto& terrain_type : terrain.terrain_types()) {
@@ -22,7 +21,16 @@ Array RulesetObject::get_terrain_types() const {
 Dictionary RulesetObject::convert_terrain_type(const hs::proto::ruleset::TerrainType& terrain_type) {
   Dictionary result;
   result["id"] = terrain_type.id().c_str();
-  result["render"] = convert_render(terrain_type.render());
+
+  return result;
+}
+
+Array RulesetObject::get_atlas_render() const {
+  Array result;
+
+  for(auto& render_info : ruleset_.GetRendering().atlas_rendering()) {
+    result.append(convert_render(render_info));
+  }
 
   return result;
 }

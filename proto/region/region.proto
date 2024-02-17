@@ -8,8 +8,11 @@ message Surface {
   repeated Cell cells = 1;
   int32 q_size = 2;
   int32 r_size = 3;
+  int32 s_start = 4;
+  int32 s_end = 5;
 }
 
 message Region {
-  Surface surface = 1;
+  string id = 1; // in uuid format
+  Surface surface = 2;
 }

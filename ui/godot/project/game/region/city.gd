@@ -3,18 +3,17 @@ extends RefCounted
 class_name City
 
 var _build_queue : Array
-# TODO: we should use some form of region_id instead of coords
-# because this will allow us to have some off-world regions,
-# like caves etc
-var _world_coords: Vector2i
+var _region_id : String
 var _player : int
 var _city_finance : Dictionary
-var _territory: Dictionary # dict [qr_coords -> whatever]
+var _territory: Dictionary # dict [region_id -> whatever]
 
-static func create_new_city(city_id: int, world_coords: Vector2i) -> City:
+# This constructor is used by civilization.gd. It is not supposed to be used
+# directly
+static func create_new_city(city_id: int, region_id: String) -> City:
 	var result = City.new()
-	result._world_coords = world_coords
-	result._territory[world_coords] = true
+	result._region_id = region_id
+	result._territory[region_id] = true
 	# TODO: Update region object itself
 	return result
 

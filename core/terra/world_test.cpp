@@ -9,7 +9,7 @@ namespace hs::terra {
 using namespace ::hs::geometry::literals;
 
 TEST(World, Serialize) {
-  World ref_world(4_dq, 4_dr);
+  World ref_world(-1_q, 4_q,  -2_r, 6_r, -1_s, 4_s);
 
   std::string storage;
 

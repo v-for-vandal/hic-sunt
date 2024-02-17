@@ -35,12 +35,11 @@ private:
   hs::ruleset::RuleSet ruleset_;
 
 public:
+  Array get_atlas_render() const;
   Array get_all_region_improvements() const;
   Array get_terrain_types() const;
   Array get_all_resources() const;
   static Dictionary convert_terrain_type(const hs::proto::ruleset::TerrainType& terrain_type);
   static Dictionary convert_render(const hs::proto::render::AtlasRender& render);
 };
-
-
 

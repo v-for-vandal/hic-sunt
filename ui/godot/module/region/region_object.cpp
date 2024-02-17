@@ -2,6 +2,7 @@
 
 void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
+  ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_id);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
   ClassDB::bind_method(D_METHOD("set_terrain", "coords", "terrain"), &RegionObject::set_terrain);
@@ -112,5 +113,14 @@ bool RegionObject::contains(Vector2i coords) const {
   }
 
   return region_->GetSurface().Contains(qrs_coords);
+}
+
+String RegionObject::get_id() const {
+  if(!region_) {
+    return {};
+  }
+
+  return region_->GetId().data();
+
 }
 

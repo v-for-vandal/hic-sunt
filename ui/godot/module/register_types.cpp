@@ -11,6 +11,7 @@
 #include <ui/godot/module/system/system.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
 #include <ui/godot/module/system/spdlog_sink.hpp>
+#include <ui/godot/module/system/surface_event.hpp>
 
 using namespace godot;
 

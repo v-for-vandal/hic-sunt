@@ -53,6 +53,12 @@ bool RuleSet::Load(const std::filesystem::path& path,
     return false;
   }
 
+  SPDLOG_INFO("Parsing rendering file");
+  success = ReadFromFile( path / rendering_file, rendering_, errors);
+  if(!success) {
+    return false;
+  }
+
   return true;
 
 }

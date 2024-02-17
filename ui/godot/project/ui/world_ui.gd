@@ -36,7 +36,3 @@ func on_world_cell_clicked_forward(world_object: WorldObject, qr: Vector2i):
 
 func _on_next_turn_button_pressed():
 	next_turn_requested.emit()
-
-func select_cell_and_continue(callback: Callable):
-	pass
-	

@@ -25,6 +25,7 @@ hs_proto_schemas = [
   'ruleset/terrain.proto',
   'ruleset/resources.proto',
   'render/atlas.proto',
+  'render/render.proto',
   ]
 
 hs_proto_generated = proto_gen.process(
