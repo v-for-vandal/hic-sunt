@@ -37,11 +37,13 @@ public:
   Dictionary get_cell_info(Vector2i coords) const;
   bool set_terrain(Vector2i coords, String terrain) const;
   bool set_feature(Vector2i coords, String feature) const;
+  bool set_improvement(Vector2i coords, String improvement) const;
+  bool contains(Vector2i coords) const;
   Array get_available_improvements() const;
 
   //Array get_region_improvements() const;
 
-  static QRSCoords to_qrs(Vector2i coords) {
+  static QRSCoords cast_qrs(Vector2i coords) {
     return QRSCoords{
       QRSCoordinateSystem::QAxis{coords.x},
       QRSCoordinateSystem::RAxis{coords.y}

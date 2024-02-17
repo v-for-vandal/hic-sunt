@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmguowjwau2bf"]
+
+[ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="1_n0mrv"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="TileMap" type="TileMap" parent="."]
+position = Vector2(-1, 0)
+tile_set = ExtResource("1_n0mrv")
+format = 2
+layer_0/tile_data = PackedInt32Array(65536, 131072, 0, 1, 131072, 0, 0, 131072, 0, 65535, 131072, 0, 131071, 65536, 0, 131072, 65536, 0, 65537, 65536, 0, 65538, 65536, 0, 196607, 65536, 1, 131073, 65536, 1, 131074, 65536, 0, 196608, 1, 0)
+layer_1/z_index = 1
+layer_1/tile_data = PackedInt32Array(131073, 1, 0)

@@ -38,8 +38,14 @@ bool Region::SetFeature(QRSCoords coords, std::string_view feature)
 }
 
 
-bool Region::SetImprovement(QRSCoords /*coords*/, std::string_view /*improvement*/)
+bool Region::SetImprovement(QRSCoords coords, std::string_view improvement)
 {
+  if(!surface_.Contains(coords)) {
+    return false;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  cell.SetImprovement(improvement);
   return true;
 }
 

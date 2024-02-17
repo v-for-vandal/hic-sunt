@@ -1,8 +1,8 @@
 extends Node2D
 
 var _loaded := false
-var _region_map_scene : PackedScene = load("res://region_map.tscn") 
-var _world_map_scene : PackedScene = load("res://world_map.tscn") 
+var _region_map_scene : PackedScene = load("res://game/region/region_map.tscn") 
+var _world_map_scene : PackedScene = load("res://game/world/world_map.tscn") 
 var _world_map: Node
 var _region_map: Node
 
@@ -75,3 +75,7 @@ func _on_region_map_exit_reqion_request():
 	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	print("root map: exiting region") # TODO: RM
 	_switch_to_world()
+	
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action("ui_cancel"):
+		GameUiEventBus.emit_cancellation()

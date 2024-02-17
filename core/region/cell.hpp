@@ -22,6 +22,7 @@ namespace hs::region {
   public:
     std::string_view GetTerrain() const { return terrain_type_; }
     std::string_view GetFeature() const { return feature_; }
+    std::string_view GetImprovement() const { return improvement_; }
 
     bool operator==(const Cell&) const = default;
 
@@ -33,12 +34,14 @@ namespace hs::region {
     // because region tracks some aggregated information about cells
     void SetTerrain(std::string_view terrain) { terrain_type_ = terrain; }
     void SetFeature(std::string_view feature) { feature_ = feature; }
+    void SetImprovement(std::string_view improvement) { improvement_ = improvement; }
 
   private:
     // TODO: optimize by sharing strings
     // or by replacing it with token
     std::string terrain_type_;
     std::string feature_;
+    std::string improvement_;
   };
 
 

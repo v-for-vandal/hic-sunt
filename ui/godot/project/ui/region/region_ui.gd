@@ -32,3 +32,5 @@ func _on_info_button_toggled(toggled_on):
 
 func _on_build_button_toggled(toggled_on):
 	$ScrollContainer.visible = toggled_on
+
+		

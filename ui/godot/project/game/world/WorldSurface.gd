@@ -1,9 +1,9 @@
-extends TileMap
+extends GameTileSurface
 
-signal enter_region(world_object: WorldObject, qr_position: Vector2i)
+#signal enter_region(world_object: WorldObject, qr_position: Vector2i)
+#signal region_clicked(world_object: WorldObject, qr_position: Vector2i)
 
 var _world_object : WorldObject
-var _last_moute_event_qr: Vector2i
 
 var terrain_mapping : Dictionary = {
 	"coast" : Vector2i(0,0),
@@ -18,18 +18,27 @@ var terrain_mapping : Dictionary = {
 	"core.snow" : Vector2i(4,0),
 }
 
+func _ready():
+	# add highlight layer
+	add_layer(-1)
+	_highlight_layer_id = get_layers_count() - 1
+	
+func _contains(tile_qr: Vector2i) -> bool:
+	assert(_world_object != null)
+	return _world_object.contains(tile_qr)
+	
 
-
-func _unhandled_input(event) -> void:
-	if event is InputEventMouseButton:
-		if event.double_click or event.pressed:
-			event = make_input_local(event)
-			var tile_xy = local_to_map(to_local(event.position))
-			var tile_qr = QrsCoordsLibrary.xy_to_qrs(tile_xy)
-			print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
-			if _world_object.contains(tile_qr):
-				enter_region.emit(_world_object, tile_qr)
-			#print("Pressed button. event position: ", event.position, " in local: ", to_local(event.position))
+#func _unhandled_input(event) -> void:
+	#if event is InputEventMouseButton:
+		## react on mouse release, not on mouse press
+		#if not event.pressed and not event.canceled:
+			#event = make_input_local(event)
+			#var tile_xy := local_to_map(to_local(event.position))
+			#var tile_qr := QrsCoordsLibrary.xy_to_qrs(tile_xy)
+			#print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
+			#if _world_object.contains(tile_qr):
+				#GameUiEventBus.emit_world_cell_action(tile_qr,
+				#GameUiEventBus.mouse_button_to_action_type(event.button_index))
 
 
 

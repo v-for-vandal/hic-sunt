@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=3 uid="uid://dxuoujwpadbf1"]
+
+[ext_resource type="Script" path="res://game/world/world_map.gd" id="1_v7u0n"]
+[ext_resource type="PackedScene" uid="uid://xbdd74ccg32f" path="res://ui/world_ui.tscn" id="2_2e47t"]
+[ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="2_p7kjj"]
+[ext_resource type="Script" path="res://game/world/WorldSurface.gd" id="3_tkt8m"]
+[ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="4_qv3c5"]
+
+[node name="WorldMap" type="Node2D"]
+script = ExtResource("1_v7u0n")
+
+[node name="WorldSurface" type="TileMap" parent="."]
+tile_set = ExtResource("2_p7kjj")
+format = 2
+layer_0/name = "terrain"
+layer_0/tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 0, 1, 0, 0, 65537, 131072, 0, 2, 131072, 0, -65535, 131072, 0, -65536, 131072, 0, 65538, 65536, 0, 3, 65536, 0, -65534, 65536, 0, -131070, 65536, 0, -131071, 65536, 0, 131074, 65536, 0)
+layer_1/name = "highlight"
+layer_1/z_index = 1
+layer_1/navigation_enabled = false
+layer_1/tile_data = PackedInt32Array()
+script = ExtResource("3_tkt8m")
+
+[node name="WorldViewCamera" parent="." instance=ExtResource("4_qv3c5")]
+zoom = Vector2(0.5, 0.5)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="WorldUI" parent="CanvasLayer" instance=ExtResource("2_2e47t")]
+mouse_filter = 1
+
+[connection signal="next_turn_requested" from="CanvasLayer/WorldUI" to="." method="_on_world_ui_next_turn_requested"]
