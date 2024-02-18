@@ -9,7 +9,9 @@
 #include <ui/godot/module/terra/world_object.hpp>
 #include <ui/godot/module/region/region_object.hpp>
 #include <ui/godot/module/system/system.hpp>
+#include <ui/godot/module/game/ruleset_object.hpp>
 #include <ui/godot/module/system/spdlog_sink.hpp>
+#include <ui/godot/module/system/surface_event.hpp>
 
 using namespace godot;
 
@@ -25,6 +27,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<HicSuntSystem>();
     ClassDB::register_class<RegionObject>();
     ClassDB::register_class<WorldObject>();
+    ClassDB::register_class<RulesetObject>();
   }
 }
 

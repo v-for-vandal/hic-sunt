@@ -14,18 +14,22 @@ func _clear():
 		n.queue_free()
 	
 
-func _on_world_cell_selected(world_object: WorldObject, qr: Vector2i):
+func _on_region_cell_selected(region: RegionObject, qr: Vector2i):
 	_clear()
 	
-	if world_object == null:
+	if region == null:
 		print("Unset world object")
 		return
+		
+	var cell_info = region.get_cell_info(qr)
+	if cell_info.is_empty():
+		return
+		
 	
 	_add_text_label("QR coords")
-
 	_add_text_label("%d,%d,%d" % [ qr[0], qr[1], 0 - qr[0] - qr[1] ])
 	_add_text_label("Terrain")
-	#_add_text_label(world_object.get_cell_terrain(qr))
+	_add_text_label(cell_info.terrain)
 
 	
 	# show cell properties

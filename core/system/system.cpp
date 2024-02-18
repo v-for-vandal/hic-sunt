@@ -24,9 +24,9 @@ terra::World System::LoadWorld(std::string_view filename) {
 }
 
 
-terra::World System::NewWorld(NewWorldParameters params) {
+terra::World System::NewWorld(NewWorldParameters params, const ruleset::RuleSet& active_rule_set) {
   std::vector<std::string> terrain_types;
-  for(const auto& terrain_type: active_rule_set_.GetTerrain().terrain_types()) {
+  for(const auto& terrain_type: active_rule_set.GetTerrain().terrain_types()) {
     terrain_types.push_back(terrain_type.id());
   }
 
@@ -41,7 +41,14 @@ terra::World System::NewWorld(NewWorldParameters params) {
     }
   };
 
-  auto result = terra::World{params.world_size};
+  auto result = terra::World{
+      terra::World::QRSCoordinateSystem::QAxis{0},
+      terra::World::QRSCoordinateSystem::QAxis{0} + params.world_size.q(),
+      terra::World::QRSCoordinateSystem::RAxis{0},
+      terra::World::QRSCoordinateSystem::RAxis{0} + params.world_size.r(),
+      terra::World::QRSCoordinateSystem::SAxis{0},
+      terra::World::QRSCoordinateSystem::SAxis{0} + params.world_size.s()};
+
   auto surface = result.GetSurface();
   /* randomize terrain for now */
   for(auto q_pos = surface.q_start(); q_pos < surface.q_end(); q_pos++) {
@@ -49,15 +56,12 @@ terra::World System::NewWorld(NewWorldParameters params) {
       auto coords = terra::World::QRSCoords{q_pos, r_pos};
       if(surface.Contains(coords)) {
         // initialize region
-        auto& cell = surface.GetCell(coords);
         region::Region region{params.region_size};
         randomize_region(region);
-        cell.SetRegion(std::move(region));
+        result.SetRegion(coords, std::move(region));
       }
     }
   }
-
-  result.SetRuleSet(active_rule_set_);
 
   return result;
 
@@ -72,10 +76,15 @@ void System::SaveWorld(const terra::World& target, std::string_view filename) {
   out.close();
 }
 
-bool System::LoadRuleSet(const std::filesystem::path& path,
+std::optional<ruleset::RuleSet> System::LoadRuleSet(const std::filesystem::path& path,
   ErrorsCollection& errors) {
-  const bool result = active_rule_set_.Load(path, errors);
-  return result;
+  ruleset::RuleSet result;
+  const bool success = result.Load(path, errors);
+  if(!success) {
+    return std::nullopt;
+  } else {
+    return std::move(result);
+  }
 }
 
 

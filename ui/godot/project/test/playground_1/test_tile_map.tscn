@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=3 uid="uid://cmguowjwau2bf"]
+
+[ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="1_3p2pg"]
+[ext_resource type="Script" path="res://resources/world/test_tile_map.gd" id="2_vwonc"]
+[ext_resource type="Script" path="res://test/playground_1/sub_node_1.gd" id="3_jfpfx"]
+[ext_resource type="Script" path="res://test/playground_1/test_node_1.gd" id="4_cxoia"]
+[ext_resource type="Script" path="res://test/playground_1/sub_node_2.gd" id="5_upke4"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="TileMap" type="TileMap" parent="."]
+position = Vector2(-1, 0)
+tile_set = ExtResource("1_3p2pg")
+format = 2
+layer_0/tile_data = PackedInt32Array(65536, 131072, 0, 1, 131072, 0, 0, 131072, 0, 65535, 131072, 0, 131071, 65536, 0, 131072, 65536, 0, 65537, 65536, 0, 65538, 65536, 0, 196607, 65536, 1, 131073, 65536, 1, 131074, 65536, 0, 196608, 1, 0)
+layer_1/z_index = 1
+layer_1/tile_data = PackedInt32Array(131073, 1, 0)
+script = ExtResource("2_vwonc")
+
+[node name="SubNode1" type="Node2D" parent="TileMap"]
+script = ExtResource("3_jfpfx")
+
+[node name="TestNode1" type="Node2D" parent="."]
+script = ExtResource("4_cxoia")
+
+[node name="SubNode2" type="Node2D" parent="TestNode1"]
+script = ExtResource("5_upke4")

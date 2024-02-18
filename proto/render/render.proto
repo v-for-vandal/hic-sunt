@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package hs.proto.render;
+
+import "render/atlas.proto";
+
+
+// Combined resources for rendering
+message Rendering {
+  repeated AtlasRender atlas_rendering = 1;
+}
+

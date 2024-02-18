@@ -7,6 +7,9 @@
 
 #include <ruleset/region_improvements.pb.h>
 #include <ruleset/terrain.pb.h>
+#include <ruleset/resources.pb.h>
+#include <render/render.pb.h>
+#include <render/atlas.pb.h>
 
 namespace hs::ruleset {
 
@@ -21,13 +24,21 @@ public:
 
   auto& GetTerrain() const { return terrain_; }
 
+  auto& GetResources() const { return resources_; }
+
+  auto& GetRendering() const { return rendering_; }
+
 
 private:
   proto::ruleset::RegionImprovements improvements_;
   proto::ruleset::Terrain terrain_;
+  proto::ruleset::Resources resources_;
+  proto::render::Rendering rendering_;
 
   static inline std::filesystem::path improvements_file{"region_improvements.txt"};
   static inline std::filesystem::path terrain_file{"terrain.txt"};
+  static inline std::filesystem::path resources_file{"resources.txt"};
+  static inline std::filesystem::path rendering_file{"rendering.txt"};
 };
 
 }

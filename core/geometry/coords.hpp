@@ -60,6 +60,32 @@ private:
     > data_;
 };
 
+
+#if 0
+template <typename CoordinateSystem>
+class UnboundSize {
+  using QDelta = typename CoordinateSystem::QDelta;
+  using RDelta = typename CoordinateSystem::RDelta;
+  using SDelta = typename CoordinateSystem::SDelta;
+
+  DeltaCoords() noexcept = default;
+  DeltaCoords(QDelta q, RDelta r, SDelta s):
+    q_(q), r_(r), s_(s) {}
+
+  QDelta q() const noexcept { return q_; }
+  RDelta r() const noexcept { return r_; }
+  SDelta s() const noexcept { return s_; }
+
+  bool operator==(const DeltaCoords&) const noexcept = default;
+
+private:
+  QDelta q_{0};
+  RDelta r_{0};
+  SDelta s_{0};
+}
+
+#endif
+
 template <typename CoordinateSystem>
 class Coords {
 public:

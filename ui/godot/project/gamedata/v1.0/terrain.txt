@@ -1,19 +1,15 @@
 terrain_types : [
-	{ id : "core.plains",
-	  name : { key : "core.terrain.plains", fallback_name: "plains" },
-	  render : { atlas_coords: [1, 0] } 
+	{ id : "core.terrain.plains",
+	  name : { key : "core.terrain.plains", fallback_name: "plains" }  
 	},
-	{ id : "core.ocean",
+	{ id : "core.terrain.ocean",
 	  name : { key : "core.terrain.ocean", fallback_name: "ocean" },
-	  render: { atlas_coords: [3, 0] }
 	},
-	{ id : "core.coastal_water",
+	{ id : "core.terrain.coastal_water",
 	  name : { key : "core.terrain.coastal_water", fallback_name: "coast" },
-	  render: { atlas_coords: [0, 0] }
 	},
-	{ id : "core.snow",
+	{ id : "core.terrain.snow",
 	  name : { key : "core.terrain.snow", fallback_name: "snow" },
-	  render: { atlas_coords: [4, 0] }
 	}
 ],
 

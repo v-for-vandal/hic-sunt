@@ -5,11 +5,18 @@ package hs.proto.ruleset;
 import "ruleset/placement_rules.proto";
 import "l10n/localized_name.proto";
 
+message ResourceBill {
+  map<string, int32> amounts = 1;
+}
+
 message RegionImprovement {
   string id = 1;
   l10n.LocalizedName name = 2;
 
   repeated placement_rules.PlacementRule placement_rules = 3;
+
+  ResourceBill maintainence = 4;
+  ResourceBill income = 5;
 }
 
 message RegionImprovements {

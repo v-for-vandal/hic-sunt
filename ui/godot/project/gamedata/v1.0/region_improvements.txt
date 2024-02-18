@@ -1,5 +1,21 @@
 improvements : [
-	{ id: "core.lumber_mill"},
-	{ id: "core.wind_mill"}
+	{ 
+		id: "core.bld.logging_1",
+		maintainence : {},
+		income: {
+			amounts : [
+				{ key : "core.res.logs", value: 1 }
+			]
+		}
+	},
+	{
+		id: "core.bld.quarry_1",
+		income: {
+			amounts: [
+				{ key : "core.res.stone", value: 1 }
+			]
+		}
+	},
+	{ id: "core.bld.palace "}
 	
 ]

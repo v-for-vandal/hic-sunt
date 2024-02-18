@@ -41,8 +41,20 @@ bool RuleSet::Load(const std::filesystem::path& path,
     return false;
   }
 
-  SPDLOG_INFO("Parsing terrain file file");
+  SPDLOG_INFO("Parsing terrain file");
   success = ReadFromFile( path / terrain_file, terrain_, errors);
+  if(!success) {
+    return false;
+  }
+
+  SPDLOG_INFO("Parsing resources file");
+  success = ReadFromFile( path / resources_file, resources_, errors);
+  if(!success) {
+    return false;
+  }
+
+  SPDLOG_INFO("Parsing rendering file");
+  success = ReadFromFile( path / rendering_file, rendering_, errors);
   if(!success) {
     return false;
   }

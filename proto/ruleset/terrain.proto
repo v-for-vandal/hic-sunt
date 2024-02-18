@@ -8,14 +8,12 @@ import "render/atlas.proto";
 message TerrainType {
   string id = 1;
   l10n.LocalizedName name = 2;
-  render.AtlasRender render = 3;
 }
 
 
 message TerrainFeature {
   string id = 1;
   l10n.LocalizedName name = 2;
-  render.AtlasRender render = 3;
 }
 
 // Root message

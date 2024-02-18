@@ -2,8 +2,9 @@ extends Camera2D
 
 var zoom_factor := Vector2(0.5, 0.5)
 var zoom_speed := 0.3
-var zoom_min := Vector2(0.8, 0.8)
-var zoom_max := Vector2(2.6, 2.6)
+@onready var zoom_min := Vector2(0.4, 0.4) * zoom
+@onready var zoom_max := Vector2(3.6, 3.6) * zoom
+var cell_size := 100
 
 var _zoom_tween
 
@@ -24,7 +25,7 @@ func _process(delta):
 	if Input.is_action_pressed("ui_left"):
 		displacement += Vector2.LEFT
 		
-	position += displacement * 100 * delta
+	position += displacement * cell_size * delta / zoom
 	
 func _unhandled_input(event):
 	
