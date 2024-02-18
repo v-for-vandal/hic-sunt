@@ -18,6 +18,12 @@ func get_ruleset() -> RulesetObject:
 	
 func get_current_player_civ() -> Civilisation:
 	return _current_player_civ
+	
+func get_atlas_visualization() -> Dictionary:
+	# TODO:
+	# 1. cache data
+	# 2. move to some separate class
+	return get_ruleset().get_atlas_render()
 
 func init_game(world_object: WorldObject, ruleset: RulesetObject):
 	current_world = world_object

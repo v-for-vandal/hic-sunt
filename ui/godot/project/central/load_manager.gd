@@ -53,7 +53,7 @@ func start_load()-> void:
 		print("While loading core ruleset, there were errors: ", _ruleset_dict.errors)
 	assert(_ruleset_object != null, "Failed to load ruleset")
 		
-	_world_object = CentralSystem.create_world(Vector2i(10, 5), Vector2i(5,5), _ruleset_object)
+	_world_object = CentralSystem.create_world(Vector2i(10, 5), 7, _ruleset_object)
 	
 	assert(_world_object != null, "Failed to create world")
 

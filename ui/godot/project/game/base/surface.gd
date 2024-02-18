@@ -18,7 +18,7 @@ func _ready()->void:
 			_highlight_layer_id = i
 			break
 
-func _contains(tile_qr: Vector2i):
+func _contains(tile_qr: Vector2i) -> bool:
 	printerr("Function must be overriden in child class")
 	return false
 	
@@ -70,15 +70,15 @@ func _create_action_event():
 func highlight(qr_coords: Vector2i, good: bool) -> void:
 	if !_contains(qr_coords):
 		return
-	var xy_coords = QrsCoordsLibrary.qrs_to_xy(qr_coords)
+	var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
 	# TODO: take atlas coords from user settings
-	var highlight_atlas_coords = Vector2i(0,0) if good else Vector2i(1,0)
+	var highlight_atlas_coords := Vector2i(0,0) if good else Vector2i(1,0)
 	set_cell(_highlight_layer_id, xy_coords, 1, highlight_atlas_coords, 0)
 	
 func clear_highlight(qr_coords: Vector2i) -> void:
 	if !_contains(qr_coords):
 		return
-	var xy_coords = QrsCoordsLibrary.qrs_to_xy(qr_coords)
+	var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
 	erase_cell(_highlight_layer_id, xy_coords)
 	
 func clear_all_highlight() -> void:

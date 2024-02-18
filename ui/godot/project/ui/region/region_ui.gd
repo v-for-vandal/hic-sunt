@@ -13,6 +13,7 @@ func on_region_cell_clicked_forward(region_object: RegionObject, qr: Vector2i):
 	
 func load_region(region_object: RegionObject):
 	assert(region_object != null)
+	_region = region_object
 	# get list of buildings
 	var ruleset = CurrentGame.get_current_player_ruleset()
 	# TODO: Filter only those improvements that can be build in this region
@@ -21,7 +22,16 @@ func load_region(region_object: RegionObject):
 	for bld in available_buildings:
 		$InfoTabContainer/Buildings.add_building(bld.id)
 		
-	region_selected.emit(region_object)
+	var city_id_opt = region_object.get_city_id()
+	print("Loading region ", region_object.get_region_id(), " city id: ", city_id_opt)
+	if city_id_opt.is_empty():
+		$CityNameLabel.visible = false
+	else:
+		print("Got city: ", city_id_opt)
+		$CityNameLabel.visible = true
+		$CityNameLabel.text = city_id_opt
+		
+	_region_loaded.emit(region_object)
 	
 func _on_close_button_pressed():
 	print("Close region UI requested") # TODO: RM
@@ -39,7 +49,7 @@ func _on_build_button_toggled(toggled_on):
 
 
 func _on_city_button_pressed() -> void:
-	CurrentGame.get_current_player_civ().create_city()
+	CurrentGame.get_current_player_civ().create_city(_region.get_region_id())
 	#var city_build_interaction = SelectAndBuildInteraction.new()
 	#GameUiEventBus.set_main_interaction(city_build_interaction)
 

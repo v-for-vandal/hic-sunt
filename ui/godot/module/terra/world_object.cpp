@@ -5,14 +5,21 @@
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &WorldObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_region", "coords"), &WorldObject::get_region);
+  ClassDB::bind_method(D_METHOD("get_region_by_id", "region_id"), &WorldObject::get_region_by_id);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &WorldObject::contains);
   ClassDB::bind_method(D_METHOD("get_region_info", "coords"), &WorldObject::get_region_info);
 }
 
-Vector2i WorldObject::get_dimensions() const {
-  return Vector2i{
-    data_.GetSurface().q_size().ToUnderlying(),
-    data_.GetSurface().r_size().ToUnderlying()
+Rect2i WorldObject::get_dimensions() const {
+  return Rect2i{
+    Vector2i{
+      data_.GetSurface().q_start().ToUnderlying(),
+      data_.GetSurface().r_start().ToUnderlying()
+    },
+    Vector2i{
+      data_.GetSurface().q_size().ToUnderlying(),
+      data_.GetSurface().r_size().ToUnderlying()
+    }
   };
 }
 
@@ -44,6 +51,8 @@ Ref<RegionObject> WorldObject::get_region_by_id(String region_id) const {
   Ref<RegionObject> result(memnew(RegionObject(
       data_.GetRegionById(std_region_id)
         )));
+
+  return result;
 }
 
 bool WorldObject::contains(Vector2i coords) const {

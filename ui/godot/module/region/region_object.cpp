@@ -2,7 +2,9 @@
 
 void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
-  ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_id);
+  ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id);
+  ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
+  ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
   ClassDB::bind_method(D_METHOD("set_terrain", "coords", "terrain"), &RegionObject::set_terrain);
@@ -10,14 +12,23 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
 }
 
-Vector2i RegionObject::get_dimensions() const {
+Rect2i RegionObject::get_dimensions() const {
   if(!region_) {
-    return Vector2i{0,0};
+    return Rect2i{
+      Vector2i{0,0},
+      Vector2i{1,1}
+    };
   }
 
-  return Vector2i{
-    region_->GetSurface().q_size().ToUnderlying(),
-    region_->GetSurface().r_size().ToUnderlying()
+  return Rect2i{
+    Vector2i{
+      region_->GetSurface().q_start().ToUnderlying(),
+      region_->GetSurface().r_start().ToUnderlying()
+    },
+    Vector2i {
+      region_->GetSurface().q_size().ToUnderlying(),
+      region_->GetSurface().r_size().ToUnderlying()
+    }
   };
 }
 
@@ -115,12 +126,24 @@ bool RegionObject::contains(Vector2i coords) const {
   return region_->GetSurface().Contains(qrs_coords);
 }
 
-String RegionObject::get_id() const {
+String RegionObject::get_region_id() const {
   if(!region_) {
     return {};
   }
 
   return region_->GetId().data();
 
+}
+
+String RegionObject::get_city_id() const {
+  ERR_FAIL_NULL_V_MSG(region_, String{}, "null-containing region object");
+
+  return region_->GetCityId().data();
+}
+
+bool RegionObject::set_city_id(String city_id) const {
+  ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
+
+  return region_->SetCityId(city_id.utf8().get_data());
 }
 

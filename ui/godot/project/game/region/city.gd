@@ -4,16 +4,18 @@ class_name City
 
 var _build_queue : Array
 var _region_id : String
+var _city_id : String
 var _player : int
 var _city_finance : Dictionary
 var _territory: Dictionary # dict [region_id -> whatever]
 
 # This constructor is used by civilization.gd. It is not supposed to be used
 # directly
-static func create_new_city(city_id: int, region_id: String) -> City:
+static func create_new_city(city_id: String, region_id: String) -> City:
 	var result = City.new()
 	result._region_id = region_id
 	result._territory[region_id] = true
+	result._city_id = city_id
 	# TODO: Update region object itself
 	return result
 
@@ -38,7 +40,7 @@ func next_turn():
 		var current_buildsite = _build_queue[0].add_resources(total)
 		if current_buildsite.is_ready():
 			# TODO: Support building in other regions
-			CurrentGame.current_world.get_region(_world_coords).set_improvement(current_buildsite.improvement_id())
+			CurrentGame.current_world.get_region_by_id(_region_id).set_improvement(current_buildsite.improvement_id())
 			_build_queue.pop_front()
 		
 	# Add to the city finance

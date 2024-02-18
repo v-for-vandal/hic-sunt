@@ -34,14 +34,16 @@ public:
 
 
   Cell& GetCell(ViewCoords coords) {
-    return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
+    return const_cast<Cell&>(const_cast<const SurfaceView&>(*this).GetCell(coords));
   }
   Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) {
     return GetCell(ViewCoords{q,r});
   }
 
   const Cell& GetCell(ViewCoords coords) const {
-    return target_(coords.q().ToUnderlying(), coords.r().ToUnderlying());
+    return target_(
+      (coords.q()-q_start()).ToUnderlying(),
+      (coords.r() - r_start()).ToUnderlying());
   }
   const Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
     return GetCell(ViewCoords{q,r});
@@ -59,11 +61,15 @@ public:
   auto s_start() const { return s_start_; }
 
   bool Contains(ViewCoords coords) const {
-    // TODO: Optimize it, there are better ways to check that point inside
-    // region
-    return coords.q() >= q_start() && coords.q() < q_end() 
-      && coords.r() >= r_start() && coords.r() < r_end()
-      && coords.s() >= s_start() && coords.s() < s_end();
+    /*spdlog::info("Checking {} vs {}-{},{}-{}, {}-{}",
+      coords,
+      q_start(), q_end(), r_start(), r_end(), s_start(), s_end()
+      );*/
+    return
+      CheckInRange(coords.q(), q_start(), q_end()) &&
+      CheckInRange(coords.r(), r_start(), r_end()) &&
+      CheckInRange(coords.s(), s_start(), s_end())
+      ;
   }
   bool Contains(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
     return Contains(ViewCoords{q,r});
@@ -75,6 +81,11 @@ public:
   auto begin() const { return target_.begin(); }
   auto end() const { return target_.end(); }
   */
+
+  private:
+  static bool CheckInRange(auto x, auto start, auto end) {
+    return (x.ToUnderlying() - start.ToUnderlying()) * (end.ToUnderlying() - 1 - x.ToUnderlying()) >= 0;
+  }
 
 private:
   CellsArrayView<Cell> target_;
@@ -134,7 +145,7 @@ public:
   size_t data_size() const { return data_size_; }
   const Cell& GetCell(size_t idx) const { return data_storage_[idx]; }
   Cell& GetCell(size_t idx) { return data_storage_[idx]; }
-  bool Contains(ViewCoords coords) const { return cells_.Contains(coords); }
+  //bool Contains(ViewCoords coords) const { return cells_.Contains(coords); }
 
   auto q_size() const { return cells_.q_size(); }
   auto r_size() const { return cells_.r_size(); }
@@ -153,6 +164,7 @@ public:
   }
 
   WRLD_REDIRECT_VIEW_CONST_FUNCTION(GetCell)
+  WRLD_REDIRECT_VIEW_CONST_FUNCTION(Contains)
   WRLD_REDIRECT_VIEW_FUNCTION(GetCell)
 
   WRLD_REDIRECT_VIEW_CONST_FUNCTION(q_size)

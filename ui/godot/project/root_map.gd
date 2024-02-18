@@ -22,15 +22,15 @@ func root_load():
 func _build_tileset(sources: Array):
 	pass
 	
-func _build_tiles_mapping(world_object: WorldObject):
-	assert(world_object != null)
-	var terrain_types:Array = CurrentGame.current_player_ruleset.get_terrain_types()
-	var result := {}
-	
-	for terrain in terrain_types:
-		result[terrain.id] = terrain.render.atlas_coords
-	
-	return result
+#func _build_tiles_mapping(world_object: WorldObject):
+	#assert(world_object != null)
+	#var terrain_types:Array = CurrentGame.current_player_ruleset.get_terrain_types()
+	#var result := {}
+	#
+	#for terrain in terrain_types:
+		#result[terrain.id] = terrain.render.atlas_coords
+	#
+	#return result
 		
 	
 
@@ -38,7 +38,8 @@ func _build_tiles_mapping(world_object: WorldObject):
 func load_world(world_object : WorldObject):
 	assert(_loaded, "You can't call methods on root-map before it is fully loaded")
 	assert(world_object != null)
-	var terrain_mapping = _build_tiles_mapping(world_object)
+	# TODO: Don't set up terrain mapping, instead use it as global class
+	var terrain_mapping = CurrentGame.get_atlas_visualization()
 	_world_map.set_terrain_visualization(terrain_mapping)
 	_region_map.set_terrain_visualization(terrain_mapping)
 	_world_map.load_world(world_object)
@@ -48,7 +49,6 @@ func load_world(world_object : WorldObject):
 func _on_world_map_show_region_request(world_object:  WorldObject, qr_position: Vector2i):
 	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	assert(_region_map != null, "_region_map is somehow null")
-	print("Showing region") # TOD:RM
 	var region_obj = world_object.get_region(qr_position);
 	# TODO: Check for fog
 	if region_obj != null:
@@ -76,7 +76,6 @@ func _switch_to_world():
 
 func _on_region_map_exit_reqion_request():
 	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
-	print("root map: exiting region") # TODO: RM
 	_switch_to_world()
 	
 func _unhandled_input(event: InputEvent) -> void:

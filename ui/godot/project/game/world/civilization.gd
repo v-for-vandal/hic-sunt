@@ -14,17 +14,22 @@ func create_city(region_id: String) -> City:
 	assert(can_create_city(region_id))
 	if not can_create_city(region_id):
 		return null
-	var city_id = CurrentGame.get_new_id()
+	var city_id = "City %s" % CurrentGame.get_new_id()
 	var result = City.create_new_city(city_id, region_id)
 	assert(not (city_id in _cities_by_id))
 	_cities_by_id[city_id] = result
 	_cities_by_region_id[region_id] = result
 	
+	assert(CurrentGame.current_world.get_region_by_id(region_id) != null)
+	CurrentGame.current_world.get_region_by_id(region_id).set_city_id(city_id)
+	
+	print("Created city ", city_id, " in region ", region_id)
+	
 	return result
 	
 func can_create_city(region_id: String) -> bool:
 	# check that this region is not under another civ control
-	pass
+	# TODO
 	# check that we don't have a city here
 	if region_id in _cities_by_region_id:
 		return false

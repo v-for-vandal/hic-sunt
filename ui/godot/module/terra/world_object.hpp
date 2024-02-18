@@ -32,7 +32,7 @@ private:
   hs::terra::World data_;
 
 public:
-  Vector2i get_dimensions() const;
+  Rect2i get_dimensions() const;
   Ref<RegionObject> get_region(Vector2i coords) const;
   Ref<RegionObject> get_region_by_id(String region_id) const;
   Dictionary get_region_info(Vector2i coords) const;

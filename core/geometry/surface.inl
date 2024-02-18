@@ -27,8 +27,15 @@ template<typename Cell, typename CoordinateSystem>
 inline Surface<Cell, CoordinateSystem> ParseFrom(const auto& proto_source, serialize::To<Surface<Cell, CoordinateSystem>>)
 {
   Surface<Cell, CoordinateSystem> result{
-    typename CoordinateSystem::QDelta{std::max<int>(1, proto_source.q_size())},
-    typename CoordinateSystem::RDelta{std::max<int>(1, proto_source.r_size())}};
+    typename CoordinateSystem::QAxis{std::max<int>(1, proto_source.q_start())},
+    typename CoordinateSystem::QAxis{std::max<int>(1, proto_source.q_end())},
+    typename CoordinateSystem::RAxis{std::max<int>(1, proto_source.r_start())},
+    typename CoordinateSystem::RAxis{std::max<int>(1, proto_source.r_end())},
+    typename CoordinateSystem::SAxis{std::max<int>(1, proto_source.s_start())},
+    typename CoordinateSystem::SAxis{std::max<int>(1, proto_source.s_end())}
+  };
+
+
 
   const auto& cells_handle = proto_source.cells();
   size_t out_it = 0;
@@ -54,8 +61,12 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& proto_dest
     SerializeTo(source.GetCell(idx), *new_element);
   }
 
-  proto_destination.set_q_size(source.q_size().ToUnderlying());
-  proto_destination.set_r_size(source.r_size().ToUnderlying());
+  proto_destination.set_q_start(source.q_start().ToUnderlying());
+  proto_destination.set_q_start(source.q_start().ToUnderlying());
+  proto_destination.set_r_start(source.r_start().ToUnderlying());
+  proto_destination.set_r_end(source.r_end().ToUnderlying());
+  proto_destination.set_s_start(source.r_start().ToUnderlying());
+  proto_destination.set_s_end(source.r_end().ToUnderlying());
 }
 
 }

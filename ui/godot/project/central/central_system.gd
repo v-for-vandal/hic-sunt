@@ -1,5 +1,5 @@
 extends HicSuntSystem
 
-func _ready():
+func _ready() -> void:
 	pass
 	

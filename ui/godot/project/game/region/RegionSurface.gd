@@ -35,15 +35,15 @@ func load_region(region_object : RegionObject):
 	
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system
-	var qr_dimensions = region_object.get_dimensions()
+	var qr_dimensions : Rect2i = region_object.get_dimensions()
 	print("region dimensions: ", qr_dimensions)
 	
-	var q_len = qr_dimensions.x
-	var r_len = qr_dimensions.y
 
-	for q in q_len:
-		for r in r_len:
-			update_cell(Vector2i(q,r))
+	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
+		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
+			var qr_coords = Vector2i(q,r)
+			if _contains(qr_coords):
+				update_cell(qr_coords)
 	# TODO: Connect to 'cell_updated' signal
 			
 				
@@ -55,7 +55,7 @@ func update_cell(qr_coords: Vector2i):
 	# fill cell
 	if terrain_mapping.has(terrain):
 		#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
-		set_cell(0, xy_coords, 0, terrain_mapping[terrain],0)
+		set_cell(0, xy_coords, 0, terrain_mapping[terrain].atlas_coords,0)
 	else:
 		# set cell to absent pink
 		set_cell(0, xy_coords, 0, Vector2i(0,0), 0)

@@ -24,7 +24,7 @@ static func CreateBuildSite(improvement_id: String, region: RegionObject, region
 func id() -> int:
 	return _id
 	
-func improvement_id() -> String:
+func get_improvement_id() -> String:
 	return _improvement_id
 	
 func _add_one_resource(resource_id: String, available_resources: Dictionary,
@@ -34,12 +34,12 @@ func _add_one_resource(resource_id: String, available_resources: Dictionary,
 		# value)
 		return
 	# how must do we need?
-	var need = _cost.get(resource_id, 0) - _accumulated_resources.get(resource_id, 0)
+	var need : int = _cost.get(resource_id, 0) - _accumulated_resources.get(resource_id, 0)
 	if need > 0:
 		# try to take it from available_resources
 		# TODO: For now we ignore resource flow
-		var can_have = available_resources.get(resource_id, 0)
-		var will_take = min(need, can_have)
+		var can_have : int = available_resources.get(resource_id, 0)
+		var will_take : int = min(need, can_have)
 		
 		if will_take > 0:
 			_accumulated_resources[resource_id] += will_take
@@ -53,7 +53,7 @@ func add_resources(available_resources: Dictionary,
 	for resource_id in _cost:
 		_add_one_resource(resource_id, available_resources, available_resource_flow)
 		
-	var ready = true
+	var ready := true
 	for resource_id: String in _cost:
 		if _accumulated_resources.get(resource_id, 0) < _cost[resource_id]:
 			ready = false
@@ -64,7 +64,7 @@ func add_resources(available_resources: Dictionary,
 func is_ready() -> bool:
 	return _is_ready
 	
-func next_turn():
+func next_turn() -> void:
 	# for now, we ignore build site degradation
 	_made_progress_this_turn = false
 	

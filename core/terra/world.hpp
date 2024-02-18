@@ -14,11 +14,6 @@ namespace hs::terra {
 
 class World;
 
-/*
-::flatbuffers::Offset<fbs::World> SerializeTo(const World& source, ::flatbuffers::FlatBufferBuilder& fbb);
-World ParseFrom(const fbs::World& world, serialize::To<World>);
-*/
-
 void SerializeTo(const World& source, proto::terra::World& target);
 World ParseFrom(const proto::terra::World& world, serialize::To<World>);
 
@@ -49,18 +44,11 @@ public:
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
 
-  region::RegionPtr GetRegionById(const std::string& region_id);
+  region::RegionPtr GetRegionById(const std::string& region_id) const;
   bool HasRegion(const std::string& region_id) const {
     return region_index_.contains(region_id);
   }
-
-  /* not part of the world now 
-  void SetRuleSet(ruleset::RuleSet rules) {
-    ruleset_ = std::move(rules);
-  }
-
-  const auto& GetRuleSet() const { return ruleset_; }
-  */
+  void SetRegion(QRSCoords coords, region::Region region);
 
 private:
   friend void SerializeTo(const World& source, proto::terra::World& target);

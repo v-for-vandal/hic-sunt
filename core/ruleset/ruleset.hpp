@@ -38,7 +38,7 @@ private:
   static inline std::filesystem::path improvements_file{"region_improvements.txt"};
   static inline std::filesystem::path terrain_file{"terrain.txt"};
   static inline std::filesystem::path resources_file{"resources.txt"};
-  static inline std::filesystem::path rendering_file{"rendering_.txt"};
+  static inline std::filesystem::path rendering_file{"rendering.txt"};
 };
 
 }

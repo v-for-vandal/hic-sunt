@@ -35,7 +35,7 @@ private:
   hs::ruleset::RuleSet ruleset_;
 
 public:
-  Array get_atlas_render() const;
+  Dictionary get_atlas_render() const;
   Array get_all_region_improvements() const;
   Array get_terrain_types() const;
   Array get_all_resources() const;

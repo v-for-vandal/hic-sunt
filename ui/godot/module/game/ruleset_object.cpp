@@ -4,6 +4,7 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_all_region_improvements"), &RulesetObject::get_all_region_improvements);
   ClassDB::bind_method(D_METHOD("get_terrain_types"), &RulesetObject::get_terrain_types);
   ClassDB::bind_method(D_METHOD("get_all_resources"), &RulesetObject::get_all_resources);
+  ClassDB::bind_method(D_METHOD("get_atlas_render"), &RulesetObject::get_atlas_render);
 }
 
 Array RulesetObject::get_terrain_types() const {
@@ -25,11 +26,11 @@ Dictionary RulesetObject::convert_terrain_type(const hs::proto::ruleset::Terrain
   return result;
 }
 
-Array RulesetObject::get_atlas_render() const {
-  Array result;
+Dictionary RulesetObject::get_atlas_render() const {
+  Dictionary result;
 
   for(auto& render_info : ruleset_.GetRendering().atlas_rendering()) {
-    result.append(convert_render(render_info));
+    result[render_info.id().c_str()] = convert_render(render_info);
   }
 
   return result;

@@ -41,7 +41,14 @@ terra::World System::NewWorld(NewWorldParameters params, const ruleset::RuleSet&
     }
   };
 
-  auto result = terra::World{params.world_size};
+  auto result = terra::World{
+      terra::World::QRSCoordinateSystem::QAxis{0},
+      terra::World::QRSCoordinateSystem::QAxis{0} + params.world_size.q(),
+      terra::World::QRSCoordinateSystem::RAxis{0},
+      terra::World::QRSCoordinateSystem::RAxis{0} + params.world_size.r(),
+      terra::World::QRSCoordinateSystem::SAxis{0},
+      terra::World::QRSCoordinateSystem::SAxis{0} + params.world_size.s()};
+
   auto surface = result.GetSurface();
   /* randomize terrain for now */
   for(auto q_pos = surface.q_start(); q_pos < surface.q_end(); q_pos++) {
@@ -49,10 +56,9 @@ terra::World System::NewWorld(NewWorldParameters params, const ruleset::RuleSet&
       auto coords = terra::World::QRSCoords{q_pos, r_pos};
       if(surface.Contains(coords)) {
         // initialize region
-        auto& cell = surface.GetCell(coords);
         region::Region region{params.region_size};
         randomize_region(region);
-        cell.SetRegion(std::move(region));
+        result.SetRegion(coords, std::move(region));
       }
     }
   }

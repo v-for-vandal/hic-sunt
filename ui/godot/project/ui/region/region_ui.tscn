@@ -105,9 +105,21 @@ layout_mode = 2
 custom_minimum_size = Vector2(200, 200)
 layout_mode = 2
 
+[node name="CityNameLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.054
+offset_left = 446.0
+offset_top = 38.0
+offset_right = -474.0
+offset_bottom = 31.84
+text = "Sample text"
+
+[connection signal="_region_loaded" from="." to="InfoTabContainer/Buildings" method="load_region"]
+[connection signal="_region_loaded" from="." to="InfoTabContainer/Resources" method="load_region"]
+[connection signal="_region_loaded" from="." to="ScrollContainer/VBoxContainer/BuildingList" method="load_region"]
 [connection signal="region_cell_selected" from="." to="InfoTabContainer/CellInfo" method="_on_region_cell_selected"]
-[connection signal="region_selected" from="." to="InfoTabContainer/Resources" method="load_region"]
-[connection signal="region_selected" from="." to="ScrollContainer/VBoxContainer/BuildingList" method="load_region"]
 [connection signal="pressed" from="PanelContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]
 [connection signal="toggled" from="PanelContainer/HBoxContainer/InfoButton" to="." method="_on_info_button_toggled"]
 [connection signal="toggled" from="PanelContainer/HBoxContainer/BuildButton" to="." method="_on_build_button_toggled"]

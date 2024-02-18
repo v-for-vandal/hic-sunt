@@ -33,14 +33,16 @@ private:
   std::shared_ptr<hs::region::Region> region_; // never null
 
 public:
-  Vector2i get_dimensions() const;
+  Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
   bool set_terrain(Vector2i coords, String terrain) const;
   bool set_feature(Vector2i coords, String feature) const;
   bool set_improvement(Vector2i coords, String improvement) const;
   bool contains(Vector2i coords) const;
+  String get_city_id() const;
+  bool set_city_id(String city_id) const;
   Array get_available_improvements() const;
-  String get_id() const;
+  String get_region_id() const;
 
   //Array get_region_improvements() const;
 
