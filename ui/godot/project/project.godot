@@ -21,6 +21,7 @@ GameUiEventBus="*res://game/ui_event_bus.gd"
 CentralSystem="*res://central/central_system.gd"
 LoadManager="*res://central/load_manager.gd"
 CurrentGame="*res://game/current_game.gd"
+GlobalSignalsBus="*res://game/global_signals_bus.gd"
 
 [debug]
 

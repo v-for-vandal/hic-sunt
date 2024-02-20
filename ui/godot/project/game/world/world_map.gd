@@ -8,15 +8,15 @@ signal show_region_request(world_object: WorldObject,  qr_position: Vector2i)
 func _ready() -> void:
 	$WorldViewCamera.cell_size = $WorldSurface.tile_set.tile_size.x
 
-func load_world(world_object : WorldObject):
+func load_world(world_object : WorldObject) -> void:
 	_world_object = world_object
 	$WorldSurface.load_world(world_object)
 
-func set_terrain_visualization(vis_table: Dictionary):
+func set_terrain_visualization(vis_table: Dictionary) -> void:
 	$WorldSurface.terrain_mapping = vis_table
 	
 func on_ui_event(event: GameUiEventBus.UIEvent) -> bool:
-	var as_world_event = event as GameUiEventBus.WorldUIActionEvent
+	var as_world_event := event as GameUiEventBus.WorldUIActionEvent
 	if as_world_event != null:
 		if as_world_event.action_type == GameUiEventBus.ActionType.PRIMARY:
 			show_region_request.emit(_world_object, event.qr_coords)
@@ -31,5 +31,5 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> bool:
 
 
 
-func _on_world_ui_next_turn_requested():
+func _on_world_ui_next_turn_requested() -> void:
 	CurrentGame.next_turn()

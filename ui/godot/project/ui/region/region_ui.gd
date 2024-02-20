@@ -18,9 +18,6 @@ func load_region(region_object: RegionObject):
 	var ruleset = CurrentGame.get_current_player_ruleset()
 	# TODO: Filter only those improvements that can be build in this region
 	# TODO: Move to signal
-	var available_buildings = ruleset.get_all_region_improvements()
-	for bld in available_buildings:
-		$InfoTabContainer/Buildings.add_building(bld.id)
 		
 	var city_id_opt = region_object.get_city_id()
 	print("Loading region ", region_object.get_region_id(), " city id: ", city_id_opt)
@@ -63,3 +60,6 @@ func _on_build_improvement(improvement_id: String) -> void:
 	new_build_interaction.improvement_id = improvement_id
 	_interaction = new_build_interaction
 	GameUiEventBus.set_main_interaction(new_build_interaction)
+	
+func on_region_changed(area: Rect2i) -> void:
+	pass

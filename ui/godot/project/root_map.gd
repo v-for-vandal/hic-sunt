@@ -41,7 +41,7 @@ func load_world(world_object : WorldObject):
 	# TODO: Don't set up terrain mapping, instead use it as global class
 	var terrain_mapping = CurrentGame.get_atlas_visualization()
 	_world_map.set_terrain_visualization(terrain_mapping)
-	_region_map.set_terrain_visualization(terrain_mapping)
+	_region_map.set_visualization(terrain_mapping)
 	_world_map.load_world(world_object)
 	_switch_to_world()
 
@@ -77,6 +77,7 @@ func _switch_to_world():
 func _on_region_map_exit_reqion_request():
 	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	_switch_to_world()
+
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action("ui_cancel"):

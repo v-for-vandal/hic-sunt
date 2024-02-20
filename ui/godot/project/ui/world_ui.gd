@@ -6,7 +6,7 @@ signal next_turn_requested()
 var _current_select_callback: Variant
 var _is_in_select_mode := false
 
-func _gui_input(event):
+func _gui_input(event) -> void:
 	if event.is_action("ui_cancel"):
 		if _is_in_select_mode:
 			# cancel current callback
@@ -15,14 +15,14 @@ func _gui_input(event):
 			accept_event()
 		
 		
-func _on_options_button_toggled(toggled_on):
+func _on_options_button_toggled(toggled_on) -> void:
 	if toggled_on:
 		$OptionsDialog.visible = true
 	else:
 		$OptionsDialog.visible = false
 
 
-func _on_info_button_toggled(toggled_on):
+func _on_info_button_toggled(toggled_on) -> void:
 	if toggled_on:
 		$InfoTabContainer.visible = true
 	else:

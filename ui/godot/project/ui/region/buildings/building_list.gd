@@ -12,6 +12,7 @@ func add_building(building_id: String):
 func load_region(region: RegionObject):
 	var ruleset = CurrentGame.get_current_player_ruleset()
 	var available_buildings = ruleset.get_all_region_improvements()
+	clear()
 	for bld in available_buildings:
 		add_building(bld.id)
 
