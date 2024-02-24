@@ -2,7 +2,7 @@ extends GameTileSurface
 
 signal cell_clicked(region_object: RegionObject, qr_position: Vector2i)
 
-var _region_object
+var _region_object : RegionObject
 var _improvements_layer_id : int = 0
 
 var visualization_data : Dictionary = {}
@@ -21,7 +21,7 @@ func _contains(tile_qr: Vector2i) -> bool:
 	assert(_region_object != null)
 	return _region_object.contains(tile_qr)
 
-func load_region(region_object : RegionObject):
+func load_region(region_object : RegionObject) -> void:
 	assert(region_object != null, "Can't load nullptr as region")
 	clear()
 	
@@ -33,18 +33,18 @@ func load_region(region_object : RegionObject):
 
 	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
 		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
-			var qr_coords = Vector2i(q,r)
+			var qr_coords := Vector2i(q,r)
 			if _contains(qr_coords):
 				update_cell(qr_coords)
 	# TODO: Connect to 'cell_updated' signal
 			
 				
-func update_cell(qr_coords: Vector2i):
+func update_cell(qr_coords: Vector2i) -> void:
 	var region_info : Dictionary = _region_object.get_cell_info(qr_coords)
-	var terrain = region_info.terrain
+	var terrain : String = region_info.terrain
 	#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 	# convert to xy dimensions
-	var xy_coords = QrsCoordsLibrary.qrs_to_xy(qr_coords)
+	var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
 	# fill cell
 	if visualization_data.has(terrain):
 		#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
@@ -66,7 +66,7 @@ func get_region_object() -> RegionObject:
 func on_region_changed(area: Rect2i) -> void:
 	for q in range(area.position.x, area.end.x):
 		for r in range(area.position.y, area.end.y):
-			var qr_coords = Vector2i(q,r)
+			var qr_coords := Vector2i(q,r)
 			if _contains(qr_coords):
 				update_cell(qr_coords)
 	

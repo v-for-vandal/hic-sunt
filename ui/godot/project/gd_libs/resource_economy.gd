@@ -9,10 +9,10 @@ static func combine(profit: Dictionary, loss: Dictionary) -> Dictionary:
 	return result
 	
 static func update(target: Dictionary, input: Dictionary) -> void:
-	for res_id in input:
+	for res_id : String in input:
 		target[res_id] = target[res_id] + input.get(res_id, 0)
 	
-	for res_id in input:
+	for res_id : String in input:
 		if not res_id in target:
 			target[res_id] = target[res_id]
 			

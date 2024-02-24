@@ -5,16 +5,16 @@ func _create_label(text: String) -> Label:
 	result.text = text
 	return result
 	
-func _add_text_label(text: String):
+func _add_text_label(text: String) -> void:
 		add_child(_create_label(text))
 	
-func _clear():
+func _clear() -> void:
 	for n in get_children():
 		remove_child(n)
 		n.queue_free()
 	
 
-func _on_region_cell_selected(region: RegionObject, qr: Vector2i):
+func _on_region_cell_selected(region: RegionObject, qr: Vector2i) -> void:
 	_clear()
 	
 	if region == null:

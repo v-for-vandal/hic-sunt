@@ -34,6 +34,7 @@ private:
 
 private:
   Ref<WorldObject> load_world(String filename);
+  Dictionary save_world(Ref<WorldObject> world, String filename);
   Ref<WorldObject> create_world(Vector2i world_size, int region_size, RulesetObject* active_ruleset);
   Dictionary load_ruleset(String folder_path);
   /*

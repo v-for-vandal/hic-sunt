@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://ccnpnxy6gvlwm"]
+[gd_scene load_steps=2 format=3 uid="uid://ccnpnxy6gvlwm"]
+
+[ext_resource type="Script" path="res://ui/system/options_dialog.gd" id="1_q0f3r"]
 
 [node name="OptionsDialog" type="Control"]
 layout_mode = 3
@@ -11,6 +13,7 @@ offset_top = 105.96
 offset_right = -249.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_q0f3r")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -27,3 +30,5 @@ text = "Load"
 [node name="SaveButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 text = "Save"
+
+[connection signal="pressed" from="VBoxContainer/SaveButton" to="." method="_on_save_button_pressed"]

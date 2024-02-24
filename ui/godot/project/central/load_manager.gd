@@ -18,7 +18,7 @@ var _new_scene
 
 var _debug_timer: float = 0
 
-func _ready():
+func _ready() -> void:
 	set_process(false)
 
 func load_world(world_path: String) -> void:
@@ -64,7 +64,7 @@ func start_load()-> void:
 	set_process(true)
 	
 	
-func _process(_delta):
+func _process(_delta) -> void:
 	if _loading_screen_instance == null:
 		set_process(false)
 		return
@@ -80,7 +80,7 @@ func _process(_delta):
 		call_deferred("_defered_goto_scene")
 
 		
-func _defered_goto_scene():
+func _defered_goto_scene() -> void:
 		if has_node("/root/World"):
 			var current_world_scene = get_node("/root/World")
 			current_world_scene.free()

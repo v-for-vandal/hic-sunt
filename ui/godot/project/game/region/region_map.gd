@@ -7,12 +7,12 @@ var _region_object: RegionObject
 func _ready() -> void:
 	GlobalSignalsBus.region_changed.connect(_on_region_changed)
 
-func load_region(region_object : RegionObject):
+func load_region(region_object : RegionObject) -> void:
 	_region_object = region_object
 	$RegionSurface.load_region(region_object)
 	$CanvasLayer/RegionUI.load_region(region_object)
 
-func set_visualization(vis_table: Dictionary):
+func set_visualization(vis_table: Dictionary) -> void:
 	$RegionSurface.visualization_data = vis_table
 	
 func _on_region_ui_close_requested():

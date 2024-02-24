@@ -30,7 +30,7 @@ func init_game(world_object: WorldObject, ruleset: RulesetObject):
 	current_player_ruleset = ruleset
 	_current_player_civ = Civilisation.create_civilisation()
 	
-func next_turn():
+func next_turn() -> void:
 	_current_player_civ.next_turn()
 	
 # TODO: move to ruleset?
@@ -38,8 +38,22 @@ func can_build(improvement_id: String) -> bool:
 	return true
 
 
-func get_new_id():
+func get_new_id() -> int:
 	# returns new unique id. This id is globaly unique for whole game
-	var result = _next_id
+	var result : int = _next_id
 	_next_id += 1
 	return result
+	
+func save_game(save_location: DirAccess) -> Error:
+	if current_world == null:
+		return ERR_DOES_NOT_EXIST
+
+	var world_file_path := save_location.get_current_dir() + '/' + 'world.data'
+	# TODO: Restore
+	var status := current_world.save(ProjectSettings.globalize_path(world_file_path))
+	if status != OK:
+		return status
+		
+	var game_data_path := save_location.get_current_dir() + '/' + 'game.json'
+	# TODO: save game data
+	return OK

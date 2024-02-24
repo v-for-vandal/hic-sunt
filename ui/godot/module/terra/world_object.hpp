@@ -37,6 +37,10 @@ public:
   Ref<RegionObject> get_region_by_id(String region_id) const;
   Dictionary get_region_info(Vector2i coords) const;
   bool contains(Vector2i coords) const;
+  Error save(String filename);
+  Error load(String filename);
+  static Dictionary create_error(const char* error);
+  static Dictionary create_success();
   //String get_cell_terrain(Vector2i coords) const;
 
   static QRSCoords cast_qrs(Vector2i coords) {

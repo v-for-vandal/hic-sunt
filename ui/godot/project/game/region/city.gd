@@ -37,7 +37,7 @@ func next_turn() -> void:
 				CurrentGame.get_ruleset()))
 	
 	# aggregate them
-	var total = ResourceEconomyLibrary.combine(profit_and_loss.profit, profit_and_loss.loss)
+	var total : Dictionary = ResourceEconomyLibrary.combine(profit_and_loss.profit, profit_and_loss.loss)
 	
 	# Finance build queue
 	if not _build_queue.is_empty():

@@ -20,6 +20,28 @@ Ref<WorldObject> HicSuntSystem::load_world(String filename) {
 
 }
 
+/*
+Dictionary HicSuntSystem::save_world(Ref<WorldObject> world, String filename) {
+
+  auto create_error = [](const char* error) {
+    Dictionary result;
+    result["success"] = false;
+    result["error"] = error;
+    return result;
+  };
+
+  if(world.ptr() == nullptr) {
+    return create_error("saving null world");
+  }
+
+  Ref<WorldObject> result;
+  //result.reference_ptr(new WorldObject(system_->LoadWorld(filename.utf8().get_data())));
+  //ERR_FAIL_NULL_V(result.ptr(), result);
+  return result;
+
+}
+*/
+
 Ref<WorldObject> HicSuntSystem::create_world(Vector2i world_size, int region_radius,
   RulesetObject* ruleset) {
 

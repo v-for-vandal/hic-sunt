@@ -8,7 +8,7 @@ var _region_map: Node
 
 
 # Should be called manually to propertly initialize object
-func root_load():
+func root_load() -> void:
 	_world_map = _world_map_scene.instantiate()
 	_region_map = _region_map_scene.instantiate()
 	_world_map.show_region_request.connect(_on_world_map_show_region_request)
@@ -19,7 +19,7 @@ func root_load():
 	_switch_to_world()
 	_loaded = true
 	
-func _build_tileset(sources: Array):
+func _build_tileset(sources: Array) -> void:
 	pass
 	
 #func _build_tiles_mapping(world_object: WorldObject):
@@ -35,7 +35,7 @@ func _build_tileset(sources: Array):
 	
 
 
-func load_world(world_object : WorldObject):
+func load_world(world_object : WorldObject) -> void:
 	assert(_loaded, "You can't call methods on root-map before it is fully loaded")
 	assert(world_object != null)
 	# TODO: Don't set up terrain mapping, instead use it as global class
@@ -46,7 +46,7 @@ func load_world(world_object : WorldObject):
 	_switch_to_world()
 
 
-func _on_world_map_show_region_request(world_object:  WorldObject, qr_position: Vector2i):
+func _on_world_map_show_region_request(world_object:  WorldObject, qr_position: Vector2i) -> void:
 	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	assert(_region_map != null, "_region_map is somehow null")
 	var region_obj = world_object.get_region(qr_position);
@@ -57,7 +57,7 @@ func _on_world_map_show_region_request(world_object:  WorldObject, qr_position: 
 		print("region is absent")
 	_switch_to_region()
 	
-func _switch(from: Node, to: Node):
+func _switch(from: Node, to: Node) -> void:
 	if from.get_parent() != null:
 		assert(from.get_parent() == self)
 		remove_child(from)
@@ -67,14 +67,14 @@ func _switch(from: Node, to: Node):
 	else:
 		assert(to.get_parent() == self)
 	
-func _switch_to_region():
+func _switch_to_region() -> void:
 	_switch(_world_map, _region_map)
 		
-func _switch_to_world():
+func _switch_to_world() -> void:
 	_switch(_region_map, _world_map)
 
 
-func _on_region_map_exit_reqion_request():
+func _on_region_map_exit_reqion_request() -> void:
 	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	_switch_to_world()
 
