@@ -60,7 +60,20 @@ public:
     return result;
   }
 
+  void clear() {
+    Clear();
+  }
 
+  void Clear() {
+    comb_.clear();
+    count_.clear();
+  }
+
+
+  bool operator==(const Comb& other) const;
+  bool operator!=(const Comb& other) const {
+    return !(*this == other);
+  }
 
 
 private:

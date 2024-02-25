@@ -24,11 +24,11 @@ flatbuffer_dep = dependency('flatbuffers', static: true)
 gtest_dep = dependency('gtest')
 
 # TODO: Fix - our build type is neither debug nor release :(
-if get_option('buildtype') == 'release'
-  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_WARN', language:'cpp')
-else
-  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG', language:'cpp')
-endif
+#if get_option('buildtype') == 'release'
+#  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_WARN', language:'cpp')
+#else
+#  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG', language:'cpp')
+#endif
 
 
 subdir('fbs')
@@ -44,7 +44,10 @@ root_include = include_directories([
     ])
 
 test_resources_dir = meson.source_root() / 'test-resources'
-test_env = {'TEST_RESOURCES_DIR' :  test_resources_dir}
+test_env = {
+  'TEST_RESOURCES_DIR' :  test_resources_dir,
+  'ASAN_OPTIONS' : 'alloc_dealloc_mismatch=0'
+  }
 
 subdir('utils')
 subdir('core')

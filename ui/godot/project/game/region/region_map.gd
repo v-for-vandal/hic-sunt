@@ -15,11 +15,11 @@ func load_region(region_object : RegionObject) -> void:
 func set_visualization(vis_table: Dictionary) -> void:
 	$RegionSurface.visualization_data = vis_table
 	
-func _on_region_ui_close_requested():
+func _on_region_ui_close_requested() -> void:
 	print("emiting exit region request") # TODO: RM
 	exit_reqion_request.emit()
 	
-func on_ui_event(event) -> void:
+func on_ui_event(event : Variant) -> void:
 	if event is GameUiEventBus.CancellationEvent:
 		event.accept()
 		exit_reqion_request.emit()

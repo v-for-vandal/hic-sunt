@@ -20,7 +20,7 @@ func _create_resource_count_node(count: int) -> Label:
 	result.text = str(count)
 	return result
 		
-func load_region(region: RegionObject):
+func load_region(_region: RegionObject) -> void:
 	_clear()
 	# TODO: Replace with resources of this region
 	var resources : Array = CurrentGame.get_current_player_ruleset().get_all_resources()

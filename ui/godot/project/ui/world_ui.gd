@@ -4,10 +4,12 @@ signal world_cell_selected(world_object: WorldObject, qr: Vector2i)
 signal next_turn_requested()
 
 @export var save_dialog_scene : PackedScene
+@export var load_dialog_scene : PackedScene
+
 var _current_select_callback: Variant
 var _is_in_select_mode := false
 
-func _gui_input(event) -> void:
+func _gui_input(event : InputEvent) -> void:
 	if event.is_action("ui_cancel"):
 		if _is_in_select_mode:
 			# cancel current callback
@@ -41,5 +43,5 @@ func _on_next_turn_button_pressed() -> void:
 
 
 func _on_save_requested() -> void:
-	var dialog = save_dialog_scene.instantiate()
+	var dialog : Node = save_dialog_scene.instantiate()
 	add_child(dialog)

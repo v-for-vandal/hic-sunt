@@ -14,7 +14,7 @@ func _ready() -> void:
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta) -> void:
+func _process(delta: float) -> void:
 	var displacement: Vector2 = Vector2.ZERO
 	if Input.is_action_pressed("ui_up"):
 		displacement += Vector2.UP
@@ -27,7 +27,7 @@ func _process(delta) -> void:
 		
 	position += displacement * cell_size * delta / zoom
 	
-func _unhandled_input(event) -> void:
+func _unhandled_input(event : InputEvent) -> void:
 	
 	var change_zoom := false
 	var new_zoom: Vector2

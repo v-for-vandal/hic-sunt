@@ -8,7 +8,7 @@ Region::Region():
 }
 
 Region::Region(int radius):
-  id_(fmt::format("region {}", next_id_++)),
+  id_(fmt::format("region_{}", next_id_++)),
   surface_(
     QRSCoordinateSystem::QAxis(-radius),
     QRSCoordinateSystem::QAxis(radius),
@@ -18,7 +18,58 @@ Region::Region(int radius):
     QRSCoordinateSystem::SAxis(radius)
     )
   {
+    InitNonpersistent();
   }
+
+void Region::InitNonpersistent() {
+  terrain_count_.clear();
+  feature_count_.clear();
+  auto surface = surface_.view();
+  for(auto q = surface.q_start(); q != surface.q_end(); ++q) {
+    for(auto r = surface.r_start(); r != surface.r_end(); ++r) {
+      if(surface.Contains(q, r)) {
+        auto& cell = surface.GetCell(q,r);
+        terrain_count_.Add(std::string{cell.GetTerrain()});
+        feature_count_[std::string{cell.GetFeature()}]++;
+      }
+    }
+  }
+
+}
+
+bool Region::operator==(const Region& other) const {
+  if(this == &other) {
+    return true;
+  }
+
+  if(id_ != other.id_) {
+    SPDLOG_TRACE("id not equal, {} vs {}", id_, other.id_);
+    return false;
+  }
+
+  if(city_id_ != other.city_id_) {
+    SPDLOG_TRACE("id not equal, {} vs {}", city_id_, other.city_id_);
+    return false;
+  }
+
+  if(surface_ != other.surface_) {
+    SPDLOG_TRACE("surface not equal");
+    return false;
+  }
+
+  if(terrain_count_ != other.terrain_count_) {
+    SPDLOG_TRACE("terrain_count_ comb not equal");
+    return false;
+  }
+
+  if(feature_count_ != other.feature_count_) {
+    SPDLOG_TRACE("feature_count_ not equal");
+    return false;
+  }
+
+  return true;
+}
+
 
 bool Region::SetTerrain(QRSCoords coords, std::string_view terrain)
 {
@@ -90,17 +141,8 @@ Region ParseFrom(const proto::region::Region& region, serialize::To<Region>)
   result.id_ = region.id();
   result.city_id_ = region.city_id();
 
-  // Restore data
-  auto surface = result.surface_.view();
-  for(auto q = surface.q_start(); q != surface.q_end(); ++q) {
-    for(auto r = surface.r_start(); r != surface.r_end(); ++r) {
-      if(surface.Contains(q, r)) {
-        auto& cell = surface.GetCell(q,r);
-        result.terrain_count_.Add(std::string{cell.GetTerrain()});
-        result.feature_count_[std::string{cell.GetFeature()}]++;
-      }
-    }
-  }
+  // Restore non-persistent data
+  result.InitNonpersistent();
 
   return result;
 }

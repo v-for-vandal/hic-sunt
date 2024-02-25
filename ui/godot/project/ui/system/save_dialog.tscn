@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bxc5r6hxq4tjo"]
 
 [ext_resource type="Script" path="res://ui/system/save_dialog.gd" id="1_u2bjh"]
-[ext_resource type="Script" path="res://ui/system/save_games.gd" id="2_iigat"]
+[ext_resource type="PackedScene" uid="uid://dko1560jvly1k" path="res://ui/system/save_games_list.tscn" id="2_prgj7"]
 
 [node name="SaveDialog" type="Control"]
 layout_mode = 3
@@ -34,16 +34,8 @@ custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="SaveGames" type="ItemList" parent="PanelContainer/MainContainer/ScrollContainer"]
-custom_minimum_size = Vector2(0, 400)
+[node name="SaveGames" parent="PanelContainer/MainContainer/ScrollContainer" instance=ExtResource("2_prgj7")]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 1
-allow_reselect = true
-item_count = 1
-item_0/text = "Test Item"
-script = ExtResource("2_iigat")
 
 [node name="ButtonsContainer" type="HBoxContainer" parent="PanelContainer/MainContainer"]
 layout_mode = 2
@@ -63,7 +55,6 @@ layout_mode = 2
 text = "Cancel"
 
 [connection signal="text_submitted" from="PanelContainer/MainContainer/NewGameContainer/SaveGameName" to="." method="_on_save_game_name_text_submitted"]
-[connection signal="item_selected" from="PanelContainer/MainContainer/ScrollContainer/SaveGames" to="PanelContainer/MainContainer/ScrollContainer/SaveGames" method="_on_item_selected"]
 [connection signal="savegame_selected" from="PanelContainer/MainContainer/ScrollContainer/SaveGames" to="." method="_on_savegame_selected"]
 [connection signal="pressed" from="PanelContainer/MainContainer/ButtonsContainer/SaveButton" to="." method="_on_save_button_pressed"]
 [connection signal="pressed" from="PanelContainer/MainContainer/ButtonsContainer/CancelButton" to="." method="_on_cancel_button_pressed"]

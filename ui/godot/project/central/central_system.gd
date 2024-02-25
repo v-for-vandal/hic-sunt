@@ -72,6 +72,29 @@ func save_game(savename : String) -> Error:
 	CurrentGame.save_game(savedir)
 	return OK
 	
+func load_game(savename : String, ruleset: RulesetObject) -> Error:
+	var savedir := _get_savegames_dir()
+	var status : Error
+	
+	if savedir == null:
+		push_error("Can't open savegames directory")
+		return ERR_DOES_NOT_EXIST
+		
+	status = savedir.change_dir(savename)
+	if status != OK:
+		push_error("Cant open directory %s in %s, code: %s" % 
+			[savename, ProjectSettings.globalize_path(savedir.get_current_dir()), error_string(status)]
+			)
+		return ERR_DOES_NOT_EXIST
+		
+	print("Calling CurrentGame.load_game")
+	status = CurrentGame.load_game(savedir, ruleset)
+	if status != OK:
+		push_error("Failed to load game, status: %s" % [error_string(status)])
+		return status
+	print("Returning from CentralSystem.load_game")
+	return OK
+	
 func error_report(message : String) -> void:
 		var dialog_window := AcceptDialog.new()
 		dialog_window.dialog_text = message 

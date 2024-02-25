@@ -1,7 +1,5 @@
 extends Control
 
-var _save_games_list
-
 func _ready() -> void:
 	pass
 

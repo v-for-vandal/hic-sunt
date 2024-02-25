@@ -84,6 +84,7 @@ Error WorldObject::save(String filename) {
   try {
     std::fstream output(filename.utf8().get_data(), std::ios::out | std::ios::trunc | std::ios::binary);
     if (!proto_world.SerializeToOstream(&output)) {
+      spdlog::error("Can't write filename {} as proto object", filename.utf8().get_data());
       return ERR_FILE_CANT_WRITE;
     }
   } catch(const std::exception& e) {
@@ -98,12 +99,18 @@ Error WorldObject::load(String filename) {
   try {
     std::fstream input(filename.utf8().get_data(), std::ios::in | std::ios::binary);
     if (!proto_world.ParseFromIstream(&input)) {
+      spdlog::error("Can't read filename {} as proto object", filename.utf8().get_data());
       return ERR_FILE_CANT_READ;
     }
   } catch(const std::exception& e) {
     return ERR_FILE_CANT_OPEN;
   }
-  data_ = ParseFrom(proto_world, ::hs::serialize::To<hs::terra::World>{});
+  try {
+    data_ = ParseFrom(proto_world, ::hs::serialize::To<hs::terra::World>{});
+  } catch (const std::exception&e) {
+    return ERR_FILE_CORRUPT;
+  }
+
 
   return OK;
 

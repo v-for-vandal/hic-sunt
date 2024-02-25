@@ -1,7 +1,7 @@
 extends GridContainer
 
 func _create_label(text: String) -> Label:
-	var result = Label.new()
+	var result := Label.new()
 	result.text = text
 	return result
 	
@@ -9,7 +9,7 @@ func _add_text_label(text: String) -> void:
 		add_child(_create_label(text))
 	
 func _clear() -> void:
-	for n in get_children():
+	for n : Node in get_children():
 		remove_child(n)
 		n.queue_free()
 	

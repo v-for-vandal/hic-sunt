@@ -26,6 +26,7 @@ func get_atlas_visualization() -> Dictionary:
 	return get_ruleset().get_atlas_render()
 
 func init_game(world_object: WorldObject, ruleset: RulesetObject):
+	print("Initializing game") # TODO: RM
 	current_world = world_object
 	current_player_ruleset = ruleset
 	_current_player_civ = Civilisation.create_civilisation()
@@ -44,16 +45,41 @@ func get_new_id() -> int:
 	_next_id += 1
 	return result
 	
+func _world_file_path(save_location: DirAccess) -> String:
+	return save_location.get_current_dir() + '/' + 'world.data'
+	
+func _game_file_path(save_location: DirAccess) -> String:
+	return save_location.get_current_dir() + '/' + 'game.json'
+	
+	
 func save_game(save_location: DirAccess) -> Error:
 	if current_world == null:
 		return ERR_DOES_NOT_EXIST
 
-	var world_file_path := save_location.get_current_dir() + '/' + 'world.data'
+	var world_file_path := _world_file_path(save_location)
 	# TODO: Restore
 	var status := current_world.save(ProjectSettings.globalize_path(world_file_path))
 	if status != OK:
 		return status
 		
-	var game_data_path := save_location.get_current_dir() + '/' + 'game.json'
+	var game_data_path := _game_file_path(save_location)
 	# TODO: save game data
 	return OK
+	
+func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
+	# Create empty world
+	# TODO: Have some method to create empty world
+	var world : WorldObject = CentralSystem.create_world(Vector2i(1, 1), 1, ruleset)
+	assert(world != null)
+	var world_file_path := _world_file_path(save_location)
+	var status : Error = world.load(ProjectSettings.globalize_path(world_file_path))
+	#var status := OK
+	if status != OK:
+		push_error("Can't load world from %s" % [_world_file_path(save_location)])
+		return status
+		
+	init_game(world, ruleset)
+	
+	return OK
+	
+	

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream> // TODO: RM
+
 namespace hs::geometry {
 
 template<typename Cell, typename CoordinateSystem>
@@ -24,22 +26,75 @@ Surface<Cell, CoordinateSystem>::Surface(
 }
 
 template<typename Cell, typename CoordinateSystem>
+bool SurfaceView<Cell, CoordinateSystem>::operator==(const SurfaceView& other) const {
+  if(this == &other) {
+    return true;
+  }
+
+#define _HICSUNT_CMP_VAL(func) \
+  if( func() != other.func()) {\
+    SPDLOG_TRACE(#func " not equal, {} vs {}", func(), other.func());\
+    return false;\
+  }
+
+  _HICSUNT_CMP_VAL(q_start)
+  _HICSUNT_CMP_VAL(q_end)
+  _HICSUNT_CMP_VAL(r_start)
+  _HICSUNT_CMP_VAL(r_end)
+  _HICSUNT_CMP_VAL(s_start)
+  _HICSUNT_CMP_VAL(s_end)
+
+#undef _HICSUNT_CMP_VAL
+
+  // compare cells
+  for(auto q = q_start(); q != q_end(); q++) {
+    for(auto r = r_start(); r != r_end(); r++) {
+      ViewCoords coords{q,r};
+      if(Contains(coords) != other.Contains(coords)) {
+        SPDLOG_TRACE("Different contains outcome for coords {}", coords);
+        return false;
+      }
+
+      if( Contains(coords) ) {
+        if( GetCell(coords) != other.GetCell(coords)) {
+          SPDLOG_TRACE("Cell differs for coords {}", coords);
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+
+}
+
+template<typename Cell, typename CoordinateSystem>
 inline Surface<Cell, CoordinateSystem> ParseFrom(const auto& proto_source, serialize::To<Surface<Cell, CoordinateSystem>>)
 {
   Surface<Cell, CoordinateSystem> result{
-    typename CoordinateSystem::QAxis{std::max<int>(1, proto_source.q_start())},
-    typename CoordinateSystem::QAxis{std::max<int>(1, proto_source.q_end())},
-    typename CoordinateSystem::RAxis{std::max<int>(1, proto_source.r_start())},
-    typename CoordinateSystem::RAxis{std::max<int>(1, proto_source.r_end())},
-    typename CoordinateSystem::SAxis{std::max<int>(1, proto_source.s_start())},
-    typename CoordinateSystem::SAxis{std::max<int>(1, proto_source.s_end())}
+    typename CoordinateSystem::QAxis{proto_source.q_start()},
+    typename CoordinateSystem::QAxis{proto_source.q_end()},
+    typename CoordinateSystem::RAxis{proto_source.r_start()},
+    typename CoordinateSystem::RAxis{proto_source.r_end()},
+    typename CoordinateSystem::SAxis{proto_source.s_start()},
+    typename CoordinateSystem::SAxis{proto_source.s_end()}
   };
 
 
 
+
   const auto& cells_handle = proto_source.cells();
+  if(static_cast<int>(result.data_size()) < cells_handle.size()) {
+    spdlog::error(
+      "Not enough storage in Surface. Surface data size: {} proto cells size: {}",
+      result.data_size(),
+      cells_handle.size()
+      );
+    throw std::runtime_error("Not enough storage in Surface");
+  }
+
   size_t out_it = 0;
-  for(auto elem : cells_handle) {
+  for(const auto& elem : cells_handle) {
     result.GetCell(out_it) = ParseFrom(elem, serialize::To<Cell>{});
     out_it++;
   }
@@ -62,11 +117,11 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& proto_dest
   }
 
   proto_destination.set_q_start(source.q_start().ToUnderlying());
-  proto_destination.set_q_start(source.q_start().ToUnderlying());
+  proto_destination.set_q_end(source.q_end().ToUnderlying());
   proto_destination.set_r_start(source.r_start().ToUnderlying());
   proto_destination.set_r_end(source.r_end().ToUnderlying());
-  proto_destination.set_s_start(source.r_start().ToUnderlying());
-  proto_destination.set_s_end(source.r_end().ToUnderlying());
+  proto_destination.set_s_start(source.s_start().ToUnderlying());
+  proto_destination.set_s_end(source.s_end().ToUnderlying());
 }
 
 }
