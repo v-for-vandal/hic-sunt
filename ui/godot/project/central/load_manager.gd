@@ -1,6 +1,6 @@
 extends Node
 
-signal progress_changed(progress, message)
+signal progress_changed(progress, message: String)
 signal load_done()
 
 var _load_screen_path : String = "res://central/load_screen.tscn"
@@ -9,10 +9,9 @@ var _load_screen = load(_load_screen_path)
 var _world_scene_resource : PackedScene = ResourceLoader.load("res://root_map.tscn")
 var _loaded_resource: PackedScene
 var _progress: Array = []
-var use_subthreads = true
-var _world_object : WorldObject
-var _loading_screen_instance
-var _new_scene
+var use_subthreads := true
+var _loading_screen_instance : Node
+var _new_scene : Node
 
 var _debug_timer: float = 0
 
@@ -34,7 +33,7 @@ func _prepare_loading()-> void:
 
 # TODO: Move this function to CentralSystem
 func _load_ruleset() -> RulesetObject:
-	var core_ruleset_path = ProjectSettings.globalize_path('res://gamedata/v1.0')
+	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/v1.0')
 	var _ruleset_dict : Dictionary = CentralSystem.load_ruleset(core_ruleset_path)
 	# TODO: Process loading errors properly
 	var _ruleset_object : RulesetObject
@@ -111,7 +110,7 @@ func load_game(savegame: String) -> void:
 
 	
 	
-func _process(_delta) -> void:
+func _process(_delta : float) -> void:
 	if _loading_screen_instance == null:
 		set_process(false)
 		return
@@ -130,7 +129,7 @@ func _process(_delta) -> void:
 func _defered_goto_scene() -> void:
 		print("going to world scene")
 		if has_node("/root/World"):
-			var current_world_scene = get_node("/root/World")
+			var current_world_scene := get_node("/root/World")
 			current_world_scene.queue_free()
 
 		assert(_new_scene != null)

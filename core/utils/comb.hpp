@@ -3,6 +3,8 @@
 #include <map>
 #include <unordered_set>
 
+#include <spdlog/spdlog.h>
+
 #include <core/utils/string_token.hpp>
 
 namespace hs::utils {
@@ -12,6 +14,7 @@ public:
   Comb() = default;
 
   void Add(StringTokenCRef elem) {
+    if(IsNullToken(elem) ) { return; }
     auto prev_count = count_[elem]++;
     auto curr_count = prev_count+1;
     comb_[prev_count].erase(elem);
@@ -19,6 +22,7 @@ public:
   }
 
   void Remove(StringTokenCRef elem) {
+    if(IsNullToken(elem) ) { return; }
     auto prev_count = count_[elem]--;
     auto curr_count = prev_count-1;
     comb_[prev_count].erase(elem);

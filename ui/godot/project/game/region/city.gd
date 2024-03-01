@@ -2,16 +2,32 @@ extends RefCounted
 
 class_name City
 
-var _build_queue : Array
 var _region_id : String
 var _city_id : String
-var _player : int
-var _city_finance : Dictionary
-var _territory: Dictionary # dict [region_id -> whatever]
+var _player : int = 0
+var _city_finance : Dictionary = {}
+var _territory: Dictionary = {} # dict [region_id -> whatever]
+var _build_queue : Array
 
+var _serializable_properties: Array[StringName] = [
+	"_region_id",
+	"_city_id",
+	"_player",
+	"_city_finance",
+	"_territory",
+	"_build_queue"
+	]
+
+func get_city_id() -> String:
+	return _city_id
+	
+func get_region_id() -> String:
+	return _region_id
 # This constructor is used by civilization.gd. It is not supposed to be used
 # directly
 static func create_new_city(city_id: String, region_id: String) -> City:
+	assert(!city_id.is_empty())
+	assert(!region_id.is_empty())
 	var result := City.new()
 	result._region_id = region_id
 	result._territory[region_id] = true
@@ -52,3 +68,12 @@ func next_turn() -> void:
 	# Add to the city finance
 	var new_finance := ResourceEconomyLibrary.combine(_city_finance, total)
 	_city_finance = new_finance
+	
+func get_serializable_properties() -> Array[StringName]:
+	return _serializable_properties
+
+func serialize_to_variant() -> Dictionary:
+	return SerializeLibrary.serialize_to_variant(self)
+	
+func parse_from_variant(data : Dictionary) -> void:
+	SerializeLibrary.parse_from_variant(self, data)

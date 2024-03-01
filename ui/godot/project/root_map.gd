@@ -39,7 +39,7 @@ func load_world(world_object : WorldObject) -> void:
 	assert(_loaded, "You can't call methods on root-map before it is fully loaded")
 	assert(world_object != null)
 	# TODO: Don't set up terrain mapping, instead use it as global class
-	var terrain_mapping = CurrentGame.get_atlas_visualization()
+	var terrain_mapping : Dictionary = CurrentGame.get_atlas_visualization()
 	_world_map.set_terrain_visualization(terrain_mapping)
 	_region_map.set_visualization(terrain_mapping)
 	_world_map.load_world(world_object)

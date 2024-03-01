@@ -2,7 +2,7 @@ extends ItemList
 
 signal building_selected(building_id: String);
 
-func _init():
+func _init() -> void:
 	clear()
 
 func add_building(building_id: String) -> void:

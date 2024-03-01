@@ -21,7 +21,7 @@ func _on_region_cell_selected(region: RegionObject, qr: Vector2i) -> void:
 		print("Unset world object")
 		return
 		
-	var cell_info = region.get_cell_info(qr)
+	var cell_info : Dictionary = region.get_cell_info(qr)
 	if cell_info.is_empty():
 		return
 		

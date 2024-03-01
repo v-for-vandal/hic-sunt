@@ -25,7 +25,7 @@ func get_atlas_visualization() -> Dictionary:
 	# 2. move to some separate class
 	return get_ruleset().get_atlas_render()
 
-func init_game(world_object: WorldObject, ruleset: RulesetObject):
+func init_game(world_object: WorldObject, ruleset: RulesetObject) -> void:
 	print("Initializing game") # TODO: RM
 	current_world = world_object
 	current_player_ruleset = ruleset
@@ -63,7 +63,15 @@ func save_game(save_location: DirAccess) -> Error:
 		return status
 		
 	var game_data_path := _game_file_path(save_location)
-	# TODO: save game data
+	var game_data_file := FileAccess.open(game_data_path, FileAccess.WRITE)
+	if game_data_file == null:
+		push_error("Can't open file %s for writing" % [game_data_path])
+		return FileAccess.get_open_error()
+	
+	
+	var serialize_data = _current_player_civ.serialize_to_variant()
+	game_data_file.store_string(JSON.stringify(serialize_data, "\t"))
+
 	return OK
 	
 func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
@@ -78,7 +86,27 @@ func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
 		push_error("Can't load world from %s" % [_world_file_path(save_location)])
 		return status
 		
-	init_game(world, ruleset)
+	var game_data_path := _game_file_path(save_location)
+	var game_data_file := FileAccess.open(game_data_path, FileAccess.READ)
+	if game_data_file == null:
+		push_error("Can't open file %s for reading" % [game_data_path])
+		return FileAccess.get_open_error()
+	
+	var json := JSON.new()
+	if json.parse(game_data_file.get_as_text()) != OK:
+		push_error("Can't parse file %s as json" % [game_data_file] )
+		return ERR_FILE_CORRUPT
+		
+	var civ := Civilisation.new()
+	civ.parse_from_variant(json.data)
+	
+	# TODO: WE have to actually verify that data between binary file and json
+	# file match each other. Otherwise, one could add new city into json file
+	# without it being marked in world files
+		
+	current_world = world
+	current_player_ruleset = ruleset
+	_current_player_civ = civ
 	
 	return OK
 	

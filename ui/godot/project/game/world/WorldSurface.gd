@@ -67,5 +67,5 @@ func load_world(world_object : WorldObject) -> void:
 				#	terrain_mapping[terrain])
 				set_cell(0, xy_coords, terrain_mapping[terrain].source_id, terrain_mapping[terrain].atlas_coords,0)
 			else:
-				push_error("unknown terrain", terrain)
+				push_error("unknown terrain \"%s\"" % [terrain])
 				set_cell(0, xy_coords, 0, Vector2i(0,0), 0)
