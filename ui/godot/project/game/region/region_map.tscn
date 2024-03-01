@@ -16,6 +16,8 @@ layer_0/name = "terrain"
 layer_0/tile_data = PackedInt32Array(0, 0, 0)
 layer_1/name = "highlight"
 layer_1/tile_data = PackedInt32Array()
+layer_2/name = "improvements"
+layer_2/tile_data = PackedInt32Array()
 script = ExtResource("2_paq3v")
 surface_type = 2
 

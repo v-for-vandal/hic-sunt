@@ -1,0 +1,42 @@
+[gd_scene load_steps=3 format=3 uid="uid://ctl00b2mx67o4"]
+
+[ext_resource type="Script" path="res://ui/system/load_dialog.gd" id="1_2qs4f"]
+[ext_resource type="PackedScene" uid="uid://dko1560jvly1k" path="res://ui/system/save_games_list.tscn" id="1_dyr4m"]
+
+[node name="LoadDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2qs4f")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.272
+anchor_bottom = 0.763
+offset_right = -0.120026
+offset_bottom = -0.0200195
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="SaveGames" parent="PanelContainer/VBoxContainer" instance=ExtResource("1_dyr4m")]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="LoadButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Load"
+
+[node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Cancel"
+
+[connection signal="savegame_activated" from="PanelContainer/VBoxContainer/SaveGames" to="." method="_on_save_games_savegame_activated"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/LoadButton" to="." method="_on_load_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/CancelButton" to="." method="_on_cancel_button_pressed"]

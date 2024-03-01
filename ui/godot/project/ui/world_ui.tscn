@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://xbdd74ccg32f"]
+[gd_scene load_steps=6 format=3 uid="uid://xbdd74ccg32f"]
 
-[ext_resource type="PackedScene" uid="uid://ccnpnxy6gvlwm" path="res://ui/options_dialog.tscn" id="1_8kfrc"]
+[ext_resource type="PackedScene" uid="uid://ccnpnxy6gvlwm" path="res://ui/system/options_dialog.tscn" id="1_8kfrc"]
 [ext_resource type="Script" path="res://ui/world_ui.gd" id="1_xc8cv"]
 [ext_resource type="Script" path="res://ui/InfoTabContainer.gd" id="3_fovtq"]
 [ext_resource type="Script" path="res://ui/CellInfo.gd" id="4_ye4d0"]
+[ext_resource type="PackedScene" uid="uid://bxc5r6hxq4tjo" path="res://ui/system/save_dialog.tscn" id="5_c3bvn"]
 
 [node name="WorldUI" type="Control"]
 layout_mode = 3
@@ -13,6 +14,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_xc8cv")
+save_dialog_scene = ExtResource("5_c3bvn")
 
 [node name="TopPanel" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -67,3 +69,4 @@ script = ExtResource("4_ye4d0")
 [connection signal="toggled" from="TopPanel/OptionsButton" to="." method="_on_options_button_toggled"]
 [connection signal="toggled" from="TopPanel/InfoButton" to="." method="_on_info_button_toggled"]
 [connection signal="pressed" from="TopPanel/NextTurnButton" to="." method="_on_next_turn_button_pressed"]
+[connection signal="save_requested" from="OptionsDialog" to="." method="_on_save_requested"]

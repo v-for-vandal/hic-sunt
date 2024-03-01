@@ -39,7 +39,7 @@ Dictionary RulesetObject::get_atlas_render() const {
 Dictionary RulesetObject::convert_render(const hs::proto::render::AtlasRender& render) {
   Dictionary result;
   result["resource"] = render.resource().c_str();
-  //render["source_id"] = terrain_type.render().resource();
+  result["source_id"] = render.source_id();
   {
     int x = 0;
     int y = 0;

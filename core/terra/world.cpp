@@ -2,6 +2,8 @@
 
 #include <core/utils/serialize.hpp>
 
+#include <iostream> // TODO: RM
+
 namespace hs::terra {
 
 World::World(
@@ -14,7 +16,7 @@ World::World(
   ):
   surface_(q_start, q_end, r_start, r_end, s_start, s_end)
   {
-    InitRegionIndex();
+    InitNonpersistent();
   }
 
 /*
@@ -25,7 +27,46 @@ World::World(QRSSize size):
   }
   */
 
-void World::InitRegionIndex() {
+bool World::operator==(const World& other) const {
+  if(this == &other) {
+    return true;
+  }
+
+  if(surface_ != other.surface_) {
+    SPDLOG_TRACE("surface not equal");
+    return false;
+  }
+
+  if(off_surface_ != other.off_surface_) {
+    SPDLOG_TRACE("off-surface not equal");
+    return false;
+  }
+
+  if(region_index_.size() != other.region_index_.size()) {
+    SPDLOG_TRACE("region index not equal (by size)");
+    return false;
+  }
+
+  for(auto& [k,v] : region_index_) {
+    auto other_fit = other.region_index_.find(k);
+    if(other_fit == other.region_index_.end()) {
+      SPDLOG_TRACE("region index not equal, no key {} in other", k);
+      return false;
+    }
+
+    if(*v != *(other_fit->second)) {
+      SPDLOG_TRACE("region index not equal, values differ, key \"{}\"", k);
+      return false;
+    }
+  }
+
+  return true;
+
+}
+
+void World::InitNonpersistent() {
+  region_index_.clear();
+
   for(auto q = surface_.q_start(); q != surface_.q_end(); q++) {
     for(auto r = surface_.r_start(); r != surface_.r_end(); r++) {
       if(surface_.Contains(q,r)) {
@@ -85,6 +126,7 @@ World ParseFrom(const proto::terra::World& source, serialize::To<World>)
   if(source.has_surface()) {
     result.surface_ = ParseFrom(source.surface(), serialize::To<World::Surface>{});
   }
+  result.InitNonpersistent();
   return result;
 }
 

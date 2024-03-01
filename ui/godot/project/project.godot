@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Hic Sunt"
-run/main_scene="res://ui/MainScreen.tscn"
+run/main_scene="res://ui/system/MainScreen.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -21,6 +21,7 @@ GameUiEventBus="*res://game/ui_event_bus.gd"
 CentralSystem="*res://central/central_system.gd"
 LoadManager="*res://central/load_manager.gd"
 CurrentGame="*res://game/current_game.gd"
+GlobalSignalsBus="*res://game/global_signals_bus.gd"
 
 [debug]
 
@@ -37,6 +38,12 @@ enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 [input]
 
+ui_accept={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":4194309,"physical_keycode":0,"key_label":0,"unicode":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":4194310,"physical_keycode":0,"key_label":0,"unicode":0,"echo":false,"script":null)
+]
+}
 ui_zoom_in={
 "deadzone": 0.5,
 "events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":4,"canceled":false,"pressed":false,"double_click":false,"script":null)

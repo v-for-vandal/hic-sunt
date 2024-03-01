@@ -44,17 +44,24 @@ public:
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
 
+  const Surface& GetSurfaceObject() const { return surface_; }
+
   region::RegionPtr GetRegionById(const std::string& region_id) const;
   bool HasRegion(const std::string& region_id) const {
     return region_index_.contains(region_id);
   }
   void SetRegion(QRSCoords coords, region::Region region);
 
+  bool operator==(const World& other) const;
+  bool operator!=(const World& other) const {
+    return !(*this == other);
+  }
+
 private:
   friend void SerializeTo(const World& source, proto::terra::World& target);
   friend World ParseFrom(const proto::terra::World& world, serialize::To<World>);
 
-  void InitRegionIndex();
+  void InitNonpersistent();
 
 private:
   Surface surface_;

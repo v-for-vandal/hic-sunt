@@ -6,15 +6,15 @@ var zoom_speed := 0.3
 @onready var zoom_max := Vector2(3.6, 3.6) * zoom
 var cell_size := 100
 
-var _zoom_tween
+var _zoom_tween : Tween
 
 # Called when the node enters the scene tree for the first time.
-func _ready():
+func _ready() -> void:
 	pass # Replace with function body.
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(delta: float) -> void:
 	var displacement: Vector2 = Vector2.ZERO
 	if Input.is_action_pressed("ui_up"):
 		displacement += Vector2.UP
@@ -27,9 +27,9 @@ func _process(delta):
 		
 	position += displacement * cell_size * delta / zoom
 	
-func _unhandled_input(event):
+func _unhandled_input(event : InputEvent) -> void:
 	
-	var change_zoom = false
+	var change_zoom := false
 	var new_zoom: Vector2
 	if event.is_action_pressed("ui_zoom_in"):
 		change_zoom = true

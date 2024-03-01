@@ -69,7 +69,7 @@ class CancellationEvent:
 
 func _process_event( event )-> void:
 	#print("Processing event: ", event)
-	for consumer in [_main_interaction, _region_interaction, _world_inetraction]:
+	for consumer : Object in [_main_interaction, _region_interaction, _world_inetraction]:
 		if consumer != null:
 			#print('Consumer: ', consumer)
 			if consumer is Node and consumer.get_parent() == null:

@@ -23,8 +23,8 @@ TEST(World, Serialize) {
 
   auto parse_world = ParseFrom(proto_read_world, serialize::To<World>{});
 
-  // TODO: Compare ref and parse
-
+  EXPECT_EQ(ref_world, parse_world);
+  EXPECT_EQ(ref_world.GetSurfaceObject().data_size(), parse_world.GetSurfaceObject().data_size());
 }
 
 

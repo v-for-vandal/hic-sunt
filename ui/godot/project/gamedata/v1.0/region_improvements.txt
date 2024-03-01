@@ -1,6 +1,6 @@
 improvements : [
 	{ 
-		id: "core.bld.logging_1",
+		id: "core.improv.logging_1",
 		maintainence : {},
 		income: {
 			amounts : [
@@ -9,10 +9,18 @@ improvements : [
 		}
 	},
 	{
-		id: "core.bld.quarry_1",
+		id: "core.improv.quarry_1",
 		income: {
 			amounts: [
 				{ key : "core.res.stone", value: 1 }
+			]
+		}
+	},
+		{
+		id: "core.improv.mine_1",
+		income: {
+			amounts: [
+				{ key : "core.res.iron", value: 1 }
 			]
 		}
 	},

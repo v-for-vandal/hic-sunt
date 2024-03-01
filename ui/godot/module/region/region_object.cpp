@@ -9,6 +9,7 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
   ClassDB::bind_method(D_METHOD("set_terrain", "coords", "terrain"), &RegionObject::set_terrain);
   ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"), &RegionObject::set_feature);
+  ClassDB::bind_method(D_METHOD("set_improvement", "coords", "improvement"), &RegionObject::set_improvement);
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
 }
 

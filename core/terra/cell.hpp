@@ -32,6 +32,7 @@ namespace hs::terra {
       other.region_ = std::make_shared<region::Region>();
     }
     Cell& operator=(Cell&& other) {
+      if(this == &other) return *this;
       region_ = other.region_;
       other.region_ = std::make_shared<region::Region>();
       return *this;
@@ -43,6 +44,13 @@ namespace hs::terra {
     auto& GetRegionPtr() const { return region_; }
     const auto& GetRegionPtr() { return region_; }
 
+  bool operator==(const Cell& other) const {
+    return *region_ == *(other.region_);
+  }
+
+  bool operator!=(const Cell& other) const {
+    return !(*this == other);
+  }
 
   private:
     friend void SerializeTo(const Cell& source, proto::terra::Cell& proto_destination);

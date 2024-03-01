@@ -75,6 +75,11 @@ public:
     return Contains(ViewCoords{q,r});
   }
 
+  bool operator==(const SurfaceView& other) const;
+  bool operator!=(const SurfaceView& other) const {
+    return !(*this == other);
+  }
+
   /*
   auto begin() { return target_.begin(); }
   auto end() { return target_.end(); }
@@ -179,6 +184,13 @@ public:
 
 #undef WRLD_REDIRECT_VIEW_FUNCTION
 #undef WRLD_REDIRECT_VIEW_CONST_FUNCTION
+
+  bool operator==(const Surface& other) const {
+    return view() == other.view();
+  }
+  bool operator!=(const Surface& other) const {
+    return !(*this == other);
+  }
 
 private:
     /*

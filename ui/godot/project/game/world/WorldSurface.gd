@@ -5,8 +5,7 @@ extends GameTileSurface
 
 var _world_object : WorldObject
 
-var terrain_mapping : Dictionary = {
-}
+var terrain_mapping : Dictionary = {}
 
 func _ready() -> void:
 	# add highlight layer
@@ -66,7 +65,7 @@ func load_world(world_object : WorldObject) -> void:
 			if terrain_mapping.has(terrain):
 				#print("setting terrail of tile map xy=", xy_coords, " qr=", qr_coords, " to ",
 				#	terrain_mapping[terrain])
-				set_cell(0, xy_coords, 0, terrain_mapping[terrain].atlas_coords,0)
+				set_cell(0, xy_coords, terrain_mapping[terrain].source_id, terrain_mapping[terrain].atlas_coords,0)
 			else:
-				push_error("unknown terrain", terrain)
+				push_error("unknown terrain \"%s\"" % [terrain])
 				set_cell(0, xy_coords, 0, Vector2i(0,0), 0)

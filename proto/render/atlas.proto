@@ -5,7 +5,7 @@ package hs.proto.render;
 message AtlasRender {
   string id = 4;
   string resource = 1;
-  string source_id = 2;
+  int32 source_id = 2;
   repeated int32 atlas_coords = 3;
 
 }

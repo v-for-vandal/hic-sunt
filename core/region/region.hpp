@@ -36,6 +36,7 @@ public:
 
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
+  const auto& GetSurfaceObject() const { return surface_; }
 
 
 
@@ -55,6 +56,9 @@ public:
   bool IsCity() const { return !city_id_.empty(); }
   std::string_view GetCityId() const { return city_id_; }
 
+  bool operator==(const Region& other) const;
+  bool operator!=(const Region& other) const = default;
+
 private:
   std::string id_;
   Surface surface_;
@@ -63,6 +67,8 @@ private:
   std::string city_id_;
 
   static inline int next_id_{0};
+
+  void InitNonpersistent();
 
 
 private:

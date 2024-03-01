@@ -3,12 +3,11 @@ extends RefCounted
 class_name  SelectAndBuildInteraction
 
 var improvement_id: String
-var city
 
 var _last_highlight_surface : GameTileSurface
-var _last_highlight_qr : Vector2i
-	
-func on_ui_event(event: GameUiEventBus.UIEvent):
+
+
+func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 	if event is GameUiEventBus.RegionUIActionEvent:
 		if event.action_type == GameUiEventBus.ActionType.PRIMARY:
 			# TODO: Check that we can build here
@@ -20,7 +19,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent):
 			# TODO: Region may not have world_qr
 			#city.add_to_build(improvement_id, region, event.qr_coords)
 			print("Building ", improvement_id, " at ", region.get_region_id())
-			build_and_finish()
+			build_and_finish(region, event.qr_coords)
 			event.accept()
 			return
 			
@@ -45,9 +44,25 @@ func cancel() -> void:
 	# cleanup
 	cleanup()
 	
-func build_and_finish() -> void:
+func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
+	# TODO: Perhaps we should not store this logic in interaction and instead
+	# should move this code to civilization.gd
+	
 	# stop receiving other events
 	GameUiEventBus.remove_main_interaction(self)
+	# send city command to build improvement
+	var city_id : String = region.get_city_id()
+	if city_id.is_empty():
+		# TODO: Actually, we should be able to build improvement in region
+		# without city
+		push_error("Incorrect attempt to build improvement without any city")
+	else:
+		var city : City = CurrentGame.get_current_player_civ().find_city_by_id(city_id)
+		if city == null:
+			push_error("Can't find specified city: ", city_id)
+		else:
+			city.add_to_build(improvement_id, region, qr_coords)
+		
 	# cleanup
 	cleanup()
 	
