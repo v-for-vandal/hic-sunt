@@ -14,11 +14,13 @@ add_project_arguments([
 
 fmt_dep = dependency('fmt', version: '>=9.1')
 
-entt_dep = dependency('entt')
+#entt_dep = dependency('entt')
 
 spdlog_dep = dependency('spdlog')
 
 flatbuffer_dep = dependency('flatbuffers', static: true)
+
+abseil = dependency('absl', modules:['absl::flat_hash_set'])
 
 
 gtest_dep = dependency('gtest')
@@ -34,7 +36,7 @@ gtest_dep = dependency('gtest')
 subdir('fbs')
 subdir('proto')
 
-common_deps = [fmt_dep, entt_dep, spdlog_dep, flatbuffer_dep, protobuf_dep]
+common_deps = [fmt_dep, spdlog_dep, flatbuffer_dep, protobuf_dep, abseil]
 
 root_include = include_directories([
     '.',

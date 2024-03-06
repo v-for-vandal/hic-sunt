@@ -19,4 +19,8 @@ message Region {
   Surface surface = 2;
 
   string city_id = 3; // optional, empty string if no city
+
+  // When we need to generate some unique id for something in region,
+  // we use this counter
+  int32 unique_id_counter = 4;
 }

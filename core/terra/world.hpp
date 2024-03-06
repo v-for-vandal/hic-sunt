@@ -1,6 +1,8 @@
 #pragma once
 
 #include <core/geometry/surface.hpp>
+#include <core/region/region.hpp>
+#include <core/region/types.hpp>
 #include <core/terra/cell.hpp>
 #include <core/ruleset/ruleset.hpp>
 #include <core/utils/serialize.hpp>

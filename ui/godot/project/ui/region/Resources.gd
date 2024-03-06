@@ -10,9 +10,9 @@ func _clear() -> void:
 		remove_child(ch)
 		ch.queue_free()
 		
-func _create_resource_name_node(res:Dictionary) -> Label:
+func _create_resource_name_node(res_id:String) -> Label:
 	var result := Label.new()
-	result.text = res.id
+	result.text = res_id
 	return result
 	
 func _create_resource_count_node(count: int) -> Label:
@@ -20,12 +20,12 @@ func _create_resource_count_node(count: int) -> Label:
 	result.text = str(count)
 	return result
 		
-func load_region(_region: RegionObject) -> void:
+func load_region(region: RegionObject) -> void:
 	_clear()
 	# TODO: Replace with resources of this region
-	var resources : Array = CurrentGame.get_current_player_ruleset().get_all_resources()
+	var resources : Dictionary = region.get_pnl_statement(CurrentGame.get_current_player_ruleset()).get_total()
 	
-	for res : Variant in resources:
-		add_child(_create_resource_name_node(res))
-		add_child(_create_resource_count_node(42))
+	for res_id : String in resources:
+		add_child(_create_resource_name_node(res_id))
+		add_child(_create_resource_count_node(resources[res_id]))
 		pass

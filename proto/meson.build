@@ -16,6 +16,7 @@ proto_gen_hh = generator(protoc_prg,
 
 hs_proto_schemas = [
   'region/cell.proto',
+  'region/improvement.proto',
   'region/region.proto',
   'l10n/localized_name.proto',
   'terra/cell.proto',

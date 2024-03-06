@@ -47,7 +47,7 @@ func can_create_city(region_id: String) -> bool:
 	
 	return true
 	
-func next_turn():
+func next_turn() -> void:
 	for city_id : String in _cities_by_id:
 		_cities_by_id[city_id].next_turn()
 	
@@ -86,7 +86,7 @@ func parse_from_variant(data : Dictionary) -> void:
 	var cities_data: Dictionary = data["cities"]
 	# restor cities map map
 	print("restoring cities ", cities_data)
-	for city_id in cities_data:
+	for city_id: String in cities_data:
 		var city :=  City.new()
 		city.parse_from_variant(cities_data[city_id])
 		_cities_by_id[city_id] = city;

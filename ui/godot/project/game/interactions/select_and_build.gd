@@ -18,7 +18,6 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 			# add to build queue
 			# TODO: Region may not have world_qr
 			#city.add_to_build(improvement_id, region, event.qr_coords)
-			print("Building ", improvement_id, " at ", region.get_region_id())
 			build_and_finish(region, event.qr_coords)
 			event.accept()
 			return
@@ -47,6 +46,7 @@ func cancel() -> void:
 func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 	# TODO: Perhaps we should not store this logic in interaction and instead
 	# should move this code to civilization.gd
+	print("Building ", improvement_id, " at ", region.get_region_id())
 	
 	# stop receiving other events
 	GameUiEventBus.remove_main_interaction(self)

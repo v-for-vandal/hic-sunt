@@ -110,6 +110,11 @@ public:
 
   bool operator==(const Coords&) const noexcept = default;
 
+  template <typename H>
+  friend H AbslHashValue(H h, const Coords& c) {
+    return H::combine(std::move(h), c.data_.q(), c.data_.r());
+  }
+
 #define COORDS_CMP(op)                                   \
   bool operator op(const Coords& other) const noexcept { \
     return q() op other.q() && r() op other.r() && s() op other.s(); \

@@ -3,6 +3,9 @@
 #include <string_view>
 #include <filesystem>
 
+#include <absl/container/flat_hash_map.h>
+
+#include <core/utils/string_token.hpp>
 #include <core/utils/error_message.hpp>
 
 #include <ruleset/region_improvements.pb.h>
@@ -28,12 +31,17 @@ public:
 
   auto& GetRendering() const { return rendering_; }
 
+  const proto::ruleset::RegionImprovement* FindRegionImprovementByType(
+    utils::StringTokenCRef improvement_type_id) const;
+
 
 private:
   proto::ruleset::RegionImprovements improvements_;
   proto::ruleset::Terrain terrain_;
   proto::ruleset::Resources resources_;
   proto::render::Rendering rendering_;
+
+  absl::flat_hash_map<utils::StringToken, size_t> improvements_by_type_;
 
   static inline std::filesystem::path improvements_file{"region_improvements.txt"};
   static inline std::filesystem::path terrain_file{"terrain.txt"};

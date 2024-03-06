@@ -9,13 +9,17 @@ message ResourceBill {
   map<string, int32> amounts = 1;
 }
 
+// This is improvement type(class, whatever). Like 'palace', or 'lumber mill'
+// Specific instance of improvement (this palace, or that lumber mill) has
+// it's own proto scheme
 message RegionImprovement {
   string id = 1;
   l10n.LocalizedName name = 2;
 
   repeated placement_rules.PlacementRule placement_rules = 3;
 
-  ResourceBill maintainence = 4;
+  // TODO: Perhaps it is better to move them to instance ?
+  ResourceBill maintenance = 4;
   ResourceBill income = 5;
 }
 

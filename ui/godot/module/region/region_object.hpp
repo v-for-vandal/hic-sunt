@@ -3,6 +3,8 @@
 #include <memory>
 
 #include <core/terra/world.hpp>
+#include <ui/godot/module/game/pnl_object.hpp>
+#include <ui/godot/module/game/ruleset_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 
@@ -43,6 +45,8 @@ public:
   bool set_city_id(String city_id) const;
   Array get_available_improvements() const;
   String get_region_id() const;
+  Dictionary convert_to_dictionary(const hs::proto::region::Improvement& improvement) const;
+  Ref<PnlObject> get_pnl_statement(Ref<RulesetObject> ruleset) const;
 
   //Array get_region_improvements() const;
 
