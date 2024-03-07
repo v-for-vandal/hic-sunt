@@ -19,8 +19,10 @@ message RegionImprovement {
   repeated placement_rules.PlacementRule placement_rules = 3;
 
   // TODO: Perhaps it is better to move them to instance ?
-  ResourceBill maintenance = 4;
-  ResourceBill income = 5;
+  ResourceBill input = 4;
+  ResourceBill production = 5;
+  // How much it costs to build entity
+  ResourceBill cost = 6;
 }
 
 message RegionImprovements {

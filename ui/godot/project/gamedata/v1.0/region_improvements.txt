@@ -1,8 +1,8 @@
 improvements : [
 	{ 
 		id: "core.improv.logging_1",
-		maintenance : {},
-		income: {
+		input : {},
+		production: {
 			amounts : [
 				{ key : "core.res.logs", value: 1 }
 			]
@@ -10,12 +10,12 @@ improvements : [
 	},
 	{
 		id: "core.improv.quarry_1",
-		income: {
+		production: {
 			amounts: [
 				{ key : "core.res.stone", value: 2 }
 			]
 		},
-		maintenance: {
+		input: {
 			amounts : [
 				{ key : "core.res.logs", value: 1 }
 			]
@@ -23,12 +23,12 @@ improvements : [
 	},
 		{
 		id: "core.improv.mine_1",
-		income: {
+		production: {
 			amounts: [
 				{ key : "core.res.iron", value: 1 }
 			]
 		},
-		maintenance: {
+		input: {
 			amounts : [
 				{ key : "core.res.logs", value: 1 },
 				{ key : "core.res.stone", value: 2 }

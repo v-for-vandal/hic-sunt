@@ -168,13 +168,13 @@ PnlStatement Region::BuildPnlStatement(const ruleset::RuleSet& ruleset) const
     }
 
     // Get improvement pnl
-    const auto& maintenance = improvement_ruleset->maintenance();
-    const auto& income = improvement_ruleset->income();
+    const auto& input = improvement_ruleset->input();
+    const auto& production = improvement_ruleset->production();
 
-    for(const auto& [resource_id, amount] : maintenance.amounts()) {
+    for(const auto& [resource_id, amount] : input.amounts()) {
       result.GetLosses()[resource_id] -= amount;
     }
-    for(const auto& [resource_id, amount] : income.amounts()) {
+    for(const auto& [resource_id, amount] : production.amounts()) {
       result.GetProfit()[resource_id] += amount;
     }
   }
