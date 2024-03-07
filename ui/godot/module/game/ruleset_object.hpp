@@ -3,7 +3,6 @@
 #include <memory>
 
 #include <core/terra/world.hpp>
-#include <ui/godot/module/region/region_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 

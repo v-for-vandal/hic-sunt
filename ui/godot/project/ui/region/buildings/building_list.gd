@@ -9,11 +9,11 @@ func add_building(building_id: String) -> void:
 	var idx := add_item(building_id)
 	set_item_metadata(idx, building_id)
 
-func load_region(region: RegionObject) -> void:
+func load_region(_region: RegionObject) -> void:
 	var ruleset : RulesetObject = CurrentGame.get_current_player_ruleset()
-	var available_buildings = ruleset.get_all_region_improvements()
+	var available_buildings : Array = ruleset.get_all_region_improvements()
 	clear()
-	for bld in available_buildings:
+	for bld : Variant in available_buildings:
 		add_building(bld.id)
 
 

@@ -18,24 +18,8 @@ Region::Region(int radius):
     QRSCoordinateSystem::SAxis(radius)
     )
   {
-    InitNonpersistent();
+    BuildEphemeral();
   }
-
-void Region::InitNonpersistent() {
-  terrain_count_.clear();
-  feature_count_.clear();
-  auto surface = surface_.view();
-  for(auto q = surface.q_start(); q != surface.q_end(); ++q) {
-    for(auto r = surface.r_start(); r != surface.r_end(); ++r) {
-      if(surface.Contains(q, r)) {
-        auto& cell = surface.GetCell(q,r);
-        terrain_count_.Add(std::string{cell.GetTerrain()});
-        feature_count_[std::string{cell.GetFeature()}]++;
-      }
-    }
-  }
-
-}
 
 bool Region::operator==(const Region& other) const {
   if(this == &other) {
@@ -102,14 +86,26 @@ bool Region::SetFeature(QRSCoords coords, std::string_view feature)
 }
 
 
-bool Region::SetImprovement(QRSCoords coords, std::string_view improvement)
+bool Region::SetImprovement(QRSCoords coords, std::string_view improvement_type)
 {
   if(!surface_.Contains(coords)) {
     return false;
   }
 
+  if(improvement_type.empty()){
+    spdlog::error("can't use empty improvement type, use RemoveImprovement instead");
+    return false;
+  }
+
   auto& cell = surface_.GetCell(coords);
-  cell.SetImprovement(improvement);
+
+  proto::region::Improvement new_improvement;
+  new_improvement.set_id(next_unique_id_++);
+  new_improvement.set_type(improvement_type);
+  cell.SetImprovement(new_improvement);
+
+  cells_with_improvements_.insert(coords);
+
   return true;
 }
 
@@ -124,12 +120,75 @@ bool Region::SetCityId(std::string_view city_id) {
   return true;
 }
 
+void Region::BuildEphemeral() {
+  terrain_count_.clear();
+  feature_count_.clear();
+  cells_with_improvements_.clear();
+  auto surface = surface_.view();
+  for(auto q = surface.q_start(); q != surface.q_end(); ++q) {
+    for(auto r = surface.r_start(); r != surface.r_end(); ++r) {
+      QRSCoords coords(q,r);
+      if(surface.Contains(coords)) {
+        auto& cell = surface.GetCell(coords);
+        terrain_count_.Add(std::string{cell.GetTerrain()});
+        feature_count_[std::string{cell.GetFeature()}]++;
+        if(cell.HasImprovement()) {
+          cells_with_improvements_.insert(coords);
+        }
+      }
+    }
+  }
+
+  ephemeral_ready_.set();
+}
+
+PnlStatement Region::BuildPnlStatement(const ruleset::RuleSet& ruleset) const
+{
+  PnlStatement result;
+
+  // Go through every improvement
+  for(auto qr_coords : cells_with_improvements_) {
+    DEBUG_VERIFY(surface_.Contains(qr_coords));
+    auto& cell = surface_.GetCell(qr_coords);
+
+    if(!cell.HasImprovement()) {
+      spdlog::error("Incorrect cells_with_improvements_, missing improvement");
+      continue;
+    }
+
+    auto& improvement = cell.GetImprovement();
+
+    // Get its type
+    const proto::ruleset::RegionImprovement* improvement_ruleset =
+      ruleset.FindRegionImprovementByType(improvement.type());
+
+    if(improvement_ruleset == nullptr) {
+      spdlog::error("Can\'t get ruleset info for improvement {}", improvement.type());
+      continue;
+    }
+
+    // Get improvement pnl
+    const auto& input = improvement_ruleset->input();
+    const auto& production = improvement_ruleset->production();
+
+    for(const auto& [resource_id, amount] : input.amounts()) {
+      result.GetLosses()[resource_id] -= amount;
+    }
+    for(const auto& [resource_id, amount] : production.amounts()) {
+      result.GetProfit()[resource_id] += amount;
+    }
+  }
+
+  return result;
+}
+
 void SerializeTo(const Region& source, proto::region::Region& target)
 {
   target.Clear();
   SerializeTo(source.surface_, *target.mutable_surface());
   target.set_id(source.id_);
   target.set_city_id(source.city_id_);
+  target.set_unique_id_counter(source.next_unique_id_);
 }
 
 Region ParseFrom(const proto::region::Region& region, serialize::To<Region>)
@@ -140,9 +199,10 @@ Region ParseFrom(const proto::region::Region& region, serialize::To<Region>)
   }
   result.id_ = region.id();
   result.city_id_ = region.city_id();
+  result.next_unique_id_ = region.unique_id_counter();
 
   // Restore non-persistent data
-  result.InitNonpersistent();
+  result.BuildEphemeral();
 
   return result;
 }

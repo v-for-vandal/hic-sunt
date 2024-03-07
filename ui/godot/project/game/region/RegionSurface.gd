@@ -56,13 +56,14 @@ func update_cell(qr_coords: Vector2i) -> void:
 		
 	var improvement = region_info.improvement
 	if !improvement.is_empty():
-		if improvement in visualization_data:
+		var improvement_type = improvement.type
+		if improvement_type in visualization_data:
 			# put it into layer above
-			set_cell(_improvements_layer_id, xy_coords, visualization_data[improvement].source_id,
-				visualization_data[improvement].atlas_coords,0)
+			set_cell(_improvements_layer_id, xy_coords, visualization_data[improvement_type].source_id,
+				visualization_data[improvement_type].atlas_coords,0)
 		else:
 			# place pink object to indicate an error
-			push_error("Undefined visualization data for %s" % [improvement])
+			push_error("Undefined visualization data for %s" % [improvement_type])
 			set_cell(_improvements_layer_id, xy_coords, 0, Vector2i.ZERO, 0)
 		
 func get_region_object() -> RegionObject:

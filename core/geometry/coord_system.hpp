@@ -87,6 +87,11 @@ class IntAxis {
 
   int ToUnderlying() const noexcept { return val_; }
 
+  template <typename H>
+  friend H AbslHashValue(H h, const IntAxis& a) {
+    return H::combine(std::move(h), a.val_);
+  }
+
  private:
   int val_;
 };

@@ -32,3 +32,4 @@ func _on_region_changed(region_id: String, area: Rect2i) -> void:
 		
 	$RegionSurface.on_region_changed(area)
 	$CanvasLayer/RegionUI.on_region_changed(area)
+	# RegionUI is connected to GlobalSignalBus itself

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://xbdd74ccg32f"]
+[gd_scene load_steps=7 format=3 uid="uid://xbdd74ccg32f"]
 
 [ext_resource type="PackedScene" uid="uid://ccnpnxy6gvlwm" path="res://ui/system/options_dialog.tscn" id="1_8kfrc"]
 [ext_resource type="Script" path="res://ui/world_ui.gd" id="1_xc8cv"]
 [ext_resource type="Script" path="res://ui/InfoTabContainer.gd" id="3_fovtq"]
 [ext_resource type="Script" path="res://ui/CellInfo.gd" id="4_ye4d0"]
 [ext_resource type="PackedScene" uid="uid://bxc5r6hxq4tjo" path="res://ui/system/save_dialog.tscn" id="5_c3bvn"]
+[ext_resource type="Script" path="res://addons/godot-console/scripts/console_container.gd" id="6_gv2vh"]
 
 [node name="WorldUI" type="Control"]
 layout_mode = 3
@@ -64,6 +65,13 @@ script = ExtResource("3_fovtq")
 layout_mode = 2
 columns = 2
 script = ExtResource("4_ye4d0")
+
+[node name="DevConsole" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 559.0
+offset_bottom = 379.0
+script = ExtResource("6_gv2vh")
 
 [connection signal="world_cell_selected" from="." to="InfoTabContainer/CellInfo" method="_on_world_cell_selected"]
 [connection signal="toggled" from="TopPanel/OptionsButton" to="." method="_on_options_button_toggled"]

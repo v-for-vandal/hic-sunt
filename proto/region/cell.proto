@@ -2,11 +2,16 @@ syntax = "proto3";
 
 package hs.proto.region;
 
+import "region/improvement.proto";
+
+
 message Cell {
+  reserved 2;
+
   string terrain = 1;
 
   // list of improvements present on this cell
-  repeated string improvements = 2;
+  repeated Improvement improvements = 4;
 
   // list of features present on this cell
   repeated string features = 3;

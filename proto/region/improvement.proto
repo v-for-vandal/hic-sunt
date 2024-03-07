@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hs.proto.region;
+
+message Improvement {
+  // globally unique improvement id
+  // TODO: globally ? or per-region ?
+  int64 id = 1;
+
+  // type of improvement, one of ruleset::RegionImprovement ids
+  string type = 2;
+
+  // modules, modifications etc
+}
+

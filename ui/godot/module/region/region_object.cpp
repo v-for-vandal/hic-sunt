@@ -11,6 +11,7 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"), &RegionObject::set_feature);
   ClassDB::bind_method(D_METHOD("set_improvement", "coords", "improvement"), &RegionObject::set_improvement);
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
+  ClassDB::bind_method(D_METHOD("get_pnl_statement", "ruleset"), &RegionObject::get_pnl_statement);
 }
 
 Rect2i RegionObject::get_dimensions() const {
@@ -49,7 +50,19 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
   Dictionary result;
   result["terrain"] = cell.GetTerrain().data();
   result["feature"] = cell.GetFeature().data();
-  result["improvement"] = cell.GetImprovement().data();
+  result["improvement"] = convert_to_dictionary(
+    cell.GetImprovement());
+
+  return result;
+}
+
+Dictionary RegionObject::convert_to_dictionary(const hs::proto::region::Improvement& improvement) const {
+  Dictionary result;
+  if(improvement.type().empty()) {
+    return result;
+  }
+  result["id"] = improvement.id();
+  result["type"] = improvement.type().data();
 
   return result;
 }
@@ -146,5 +159,16 @@ bool RegionObject::set_city_id(String city_id) const {
   ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
 
   return region_->SetCityId(city_id.utf8().get_data());
+}
+
+Ref<PnlObject> RegionObject::get_pnl_statement(Ref<RulesetObject> ruleset) const {
+  ERR_FAIL_NULL_V_MSG(region_, Ref<RegionObject>{}, "null-containing region object");
+  ERR_FAIL_NULL_V_MSG(ruleset, Ref<RegionObject>{}, "null-containing ruleset object");
+
+  Ref<PnlObject> result(memnew(PnlObject(
+        region_->BuildPnlStatement(ruleset->GetRuleSet())
+        )));
+
+  return result;
 }
 

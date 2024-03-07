@@ -59,12 +59,36 @@ bool RuleSet::Load(const std::filesystem::path& path,
     return false;
   }
 
+  // Building hashes
+  for(int idx = 0; idx < improvements_.improvements_size(); ++idx) {
+    const auto& improvement = improvements_.improvements(idx);
+    improvements_by_type_.try_emplace(improvement.id(), idx);
+  }
+
+
+
   return true;
 
 }
 
 void RuleSet::Clear() {
+  terrain_.Clear();
   improvements_.Clear();
+  resources_.Clear();
+  rendering_.Clear();
+  improvements_by_type_.clear();
+}
+
+const proto::ruleset::RegionImprovement* RuleSet::FindRegionImprovementByType(
+    utils::StringTokenCRef improvement_type_id) const
+{
+  auto fit = improvements_by_type_.find(improvement_type_id);
+  if( fit != improvements_by_type_.end()) {
+    const auto result_idx = fit->second;
+    return &improvements_.improvements(result_idx);
+  }
+
+  return nullptr;
 }
 
 }

@@ -3,6 +3,7 @@ godot_module_sources = [
     'system/system.cpp',
     'system/surface_event.cpp',
     'game/ruleset_object.cpp',
+    'game/pnl_object.cpp',
     'terra/world_object.cpp',
     'region/region_object.cpp',
 ]
