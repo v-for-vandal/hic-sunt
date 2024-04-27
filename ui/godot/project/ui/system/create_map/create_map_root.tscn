@@ -14,30 +14,30 @@ script = ExtResource("1_pk3cd")
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+[node name="Controls" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
 
-[node name="GenerateButton" type="Button" parent="HBoxContainer/VBoxContainer"]
+[node name="GenerateButton" type="Button" parent="HBoxContainer/Controls"]
 layout_mode = 2
 text = "Generate"
 
-[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/Controls"]
 layout_mode = 2
 text = "Options"
 horizontal_alignment = 1
 
-[node name="WorldOptionsContainer" type="PanelContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="WorldOptionsContainer" type="PanelContainer" parent="HBoxContainer/Controls"]
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/Controls/WorldOptionsContainer"]
 layout_mode = 2
 columns = 2
 
-[node name="WorldSizeLabel" type="Label" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+[node name="WorldSizeLabel" type="Label" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
 layout_mode = 2
 text = "World size"
 
-[node name="WorldSizeSelector" type="OptionButton" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+[node name="WorldSizeSelector" type="OptionButton" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 item_count = 3
@@ -49,34 +49,34 @@ popup/item_1/id = 1
 popup/item_2/text = "Large"
 popup/item_2/id = 2
 
-[node name="WorldSizeLabel2" type="Label" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+[node name="WorldSizeLabel2" type="Label" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
 layout_mode = 2
 text = "Region size"
 
-[node name="RegionSizeSelector" type="SpinBox" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+[node name="RegionSizeSelector" type="SpinBox" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 10.0
 value = 10.0
 
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer"]
+[node name="Label2" type="Label" parent="HBoxContainer/Controls"]
 layout_mode = 2
 text = "Debug
 "
 horizontal_alignment = 1
 
-[node name="DebugContainer" type="PanelContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="DebugContainer" type="PanelContainer" parent="HBoxContainer/Controls"]
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/VBoxContainer/DebugContainer"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/Controls/DebugContainer"]
 layout_mode = 2
 columns = 2
 
-[node name="BackgroundLabel" type="Label" parent="HBoxContainer/VBoxContainer/DebugContainer/GridContainer"]
+[node name="BackgroundLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 layout_mode = 2
 text = "Background"
 
-[node name="BackgroundSelect" type="OptionButton" parent="HBoxContainer/VBoxContainer/DebugContainer/GridContainer"]
+[node name="BackgroundSelect" type="OptionButton" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 item_count = 1
@@ -84,11 +84,11 @@ selected = 0
 popup/item_0/text = "None"
 popup/item_0/id = 0
 
-[node name="ForegroundLabel" type="Label" parent="HBoxContainer/VBoxContainer/DebugContainer/GridContainer"]
+[node name="ForegroundLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 layout_mode = 2
 text = "Foreground"
 
-[node name="ForegroundSelect" type="OptionButton" parent="HBoxContainer/VBoxContainer/DebugContainer/GridContainer"]
+[node name="ForegroundSelect" type="OptionButton" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 item_count = 1
@@ -96,30 +96,43 @@ selected = 0
 popup/item_0/text = "None"
 popup/item_0/id = 0
 
-[node name="BackButton" type="Button" parent="HBoxContainer/VBoxContainer"]
+[node name="BackButton" type="Button" parent="HBoxContainer/Controls"]
 layout_mode = 2
 text = "Back"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/ScrollContainer"]
-layout_mode = 2
-
-[node name="DebugBackgroundView" type="TextureRect" parent="HBoxContainer/ScrollContainer/PanelContainer"]
+[node name="GenerationProgressBar" type="ProgressBar" parent="HBoxContainer/Controls"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="DebugForegroundView" type="TextureRect" parent="HBoxContainer/ScrollContainer/PanelContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/Controls/GenerationProgressBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DebugView" type="ScrollContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/DebugView"]
+layout_mode = 2
+
+[node name="DebugBackgroundView" type="TextureRect" parent="HBoxContainer/DebugView/PanelContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DebugForegroundView" type="TextureRect" parent="HBoxContainer/DebugView/PanelContainer"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.498039)
 layout_mode = 2
 
 [node name="WorldBuilder" parent="." instance=ExtResource("2_open1")]
 
-[connection signal="pressed" from="HBoxContainer/VBoxContainer/GenerateButton" to="." method="_on_generate_button_pressed"]
-[connection signal="item_selected" from="HBoxContainer/VBoxContainer/DebugContainer/GridContainer/BackgroundSelect" to="." method="_on_background_select_item_selected"]
-[connection signal="item_selected" from="HBoxContainer/VBoxContainer/DebugContainer/GridContainer/ForegroundSelect" to="." method="_on_foreground_select_item_selected"]
-[connection signal="pressed" from="HBoxContainer/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]
-[connection signal="emit_debug_map" from="WorldBuilder" to="." method="_add_debug_map"]
+[connection signal="pressed" from="HBoxContainer/Controls/GenerateButton" to="." method="_on_generate_button_pressed"]
+[connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/BackgroundSelect" to="." method="_on_background_select_item_selected"]
+[connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/ForegroundSelect" to="." method="_on_foreground_select_item_selected"]
+[connection signal="pressed" from="HBoxContainer/Controls/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="emit_debug_map" from="WorldBuilder" to="." method="_add_debug_map" flags=3]
+[connection signal="report_progress" from="WorldBuilder" to="." method="_on_world_builder_report_progress" flags=3]

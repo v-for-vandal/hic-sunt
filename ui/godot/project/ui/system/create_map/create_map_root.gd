@@ -34,7 +34,9 @@ func _on_generate_button_pressed() -> void:
 		
 	var selected_region_size := int($%RegionSizeSelector.value)
 	
+	# get_tree().paused = true doesn't work the way we want it to work
 	$WorldBuilder.generate(world_cells_size, selected_region_size )
+
 
 
 func _on_map_selected(name: String, widget: TextureRect) -> void:
@@ -65,3 +67,8 @@ func _on_foreground_select_item_selected(index: int) -> void:
 
 func _on_back_button_pressed() -> void:
 	transition_back.emit()
+
+
+func _on_world_builder_report_progress(message: String, progress: int) -> void:
+	print("Received pogress signal ", progress)
+	$%GenerationProgressBar.value = progress

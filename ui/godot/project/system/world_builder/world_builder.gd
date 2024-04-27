@@ -9,6 +9,7 @@ extends Node
 
 # public signals
 signal emit_debug_map(name: String, map: Image, legend: Dictionary)
+signal report_progress(message: String, progress: int)
 
 
 # private constants
@@ -18,6 +19,8 @@ const _TEMPERATURE_FLUCTUATION = 5
 
 const _HEIGHT_RANGE = Vector2i(-8000, 8000) # meters
 const _MOUNTAIN_EXTRA_HEIGHT_RANGE = Vector2i(3000, 6000) # meters
+
+const _PRECIPATION_RANGE = Vector2i(0, 500)
 
 const MIN_REGION_SIZE = 10
 const INTER_REGION_MARGIN = 10
@@ -30,6 +33,24 @@ var _DEBUG_HEIGHT_GRADIENT : Gradient = ResourceLoader.load("res://system/world_
 var _generation_map_size := Rect2i( Vector2i(0,0), Vector2i(100, 100))
 
 var _heightmap : Image
+
+var _gen_thread: Thread
+
+
+func _do_notify_progress(message: String, progress: int) -> void:
+	report_progress.emit(message, progress)
+	
+func _notify_progress(message: String, progress: int) -> void:
+	# deferred signal connection doesn't work, we must defer invocation
+	# itself
+	_do_notify_progress.call_deferred(message, progress)
+
+func _do_emit_debug_map(name: String, map: Image, legend: Dictionary) -> void:
+	emit_debug_map.emit(name, map, legend)
+	
+func _emit_debug_map(name: String, map: Image, legend: Dictionary) -> void:
+	_do_emit_debug_map.call_deferred(name, map, legend)
+	
 
 
 
@@ -54,7 +75,9 @@ var terrain_colors = {
 	"core.terrain.temperate_grassland" : Color.DARK_OLIVE_GREEN,
 	"core.terrain.taiga" : Color.BEIGE,
 	"core.terrain.desert" : Color.GOLDENROD,
-	"core.terrain.temperate_forest" : Color.DARK_GREEN
+	"core.terrain.temperate_forest" : Color.DARK_GREEN,
+	"core.terrain.ocean" : Color.DARK_BLUE,
+	"core.terrain.unknown" : Color.DEEP_PINK
 }
 
 # assumes that value is between -1 and 1.
@@ -64,15 +87,6 @@ func _sample_simple_range(value: float, range : Vector2i) -> int:
 func _displacement_at_range(value: float, range: Vector2i) -> float:
 	return (value - range.x) / (range.y - range.x)
 
-func _get_biome(temperature: int, precipation: int) -> String:
-	var point := Vector2i(temperature, precipation)
-	
-	for biome_map : Dictionary in biome_maps:
-		for rect : Rect2i in biome_map:
-			if rect.has_point(point):
-				return biome_map[rect]
-	return "core.terrain.unknown"
-	
 func _get_height_at_point(i: int, j : int) -> int:
 	# Get base height. It will be in range (-1, 1)
 	var height_float = terrain_noise_generator.get_noise_2d(i, j)
@@ -104,7 +118,7 @@ func _create_debug_height_map() -> void:
 				_displacement_at_range(height, _HEIGHT_RANGE)
 			)
 			height_image.set_pixel(i, j, color)
-	emit_debug_map.emit("heightmap", height_image, {})
+	_emit_debug_map("heightmap", height_image, {})
 
 # Terrain map is like height map, but with less colors for clarity.
 # Good for backgrounds
@@ -123,16 +137,16 @@ func _create_debug_terrain_map() -> void:
 			else:
 				terrain_image.set_pixel(i, j, Color.LIGHT_GRAY)
 
-		emit_debug_map.emit("terrain", terrain_image, {})
+		_emit_debug_map("terrain", terrain_image, {})
 
-func _get_temperature_at_point(i, j) -> int:
+func _get_temperature_at_point(i : int, j : int) -> int:
 	# base temperature = how close is point to the borders
 	var j_percent : float  = float(j - _generation_map_size.position.y) /  _generation_map_size.size.y
 	var point_on_curve : float = temperature_curve.sample(j_percent)
 	var temperature : int = _sample_simple_range(point_on_curve, _TEMPERATURE_RANGE)
 	
-	if i % 10 == 0 and j % 10 == 0:
-		print("Temperature at ", i, ",", j, ": ", j_percent, ", ", point_on_curve, ", ", temperature)
+	#if i % 10 == 0 and j % 10 == 0:
+	#	print("Temperature at ", i, ",", j, ": ", j_percent, ", ", point_on_curve, ", ", temperature)
 
 	# add fluctuation from the map
 	var temp_fluctuation : int = int(terrain_noise_generator.get_noise_2d(i,j) * _TEMPERATURE_FLUCTUATION)
@@ -142,7 +156,7 @@ func _get_temperature_at_point(i, j) -> int:
 	return temperature
 
 # Create temperature map and emits it for debugging
-func _create_debug_temperature_map():
+func _create_debug_temperature_map() -> void:
 	var size = _generation_map_size.size
 	var temperature_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 	for i in range(0, size.x):
@@ -153,17 +167,85 @@ func _create_debug_temperature_map():
 			)
 			temperature_image.set_pixel(i, j, color)
 			
-	emit_debug_map.emit("temperature", temperature_image, {})
+	_emit_debug_map("temperature", temperature_image, {})
+	
+func _get_precipation_at_point(i : int, j : int) -> int:
+	# Get base height. It will be in range (-1, 1)
+	var precipation_float = terrain_noise_generator.get_noise_2d(i, j)
+	
+	var precipation_cm = _sample_simple_range(precipation_float, _PRECIPATION_RANGE)
+	return precipation_cm
+	
+func _create_debug_precipation_map() -> void:
+	var size = _generation_map_size.size
+	var precipation_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+	for i in range(0, size.x):
+		for j in range(0, size.y):
+			var precip := _get_precipation_at_point(i,j)
+			var color = _DEBUG_GENERAL_GRADIENT.sample(
+				_displacement_at_range(precip, _PRECIPATION_RANGE)
+			)
+			precipation_image.set_pixel(i, j, color)
+			
+	_emit_debug_map("precipation", precipation_image, {})
+	
+func _get_biome(temperature: int, precipation: int) -> String:
+	var point := Vector2i(temperature, precipation)
+	
+	for biome_map : Dictionary in biome_maps:
+		for rect : Rect2i in biome_map:
+			if rect.has_point(point):
+				return biome_map[rect]
+				
+	print("Can't find biome for (temp, prcp): ", point)
+	return "core.terrain.unknown"
 	
 func _get_biome_at_point(i: int, j:int) -> String:
-	return ""
+	var temp = _get_temperature_at_point(i, j)
+	var height = _get_height_at_point(i, j)
+	var precipation = _get_precipation_at_point(i, j)
+	
+	if height < 0:
+		return "core.terrain.ocean"
+		
+	return _get_biome(temp, precipation)
+	
+func _create_debug_biome_map() -> void:
+	var size = _generation_map_size.size
+	var biome_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+	for i in range(0, size.x):
+		for j in range(0, size.y):
+			var biome := _get_biome_at_point(i,j)
+			var color = Color.DEEP_PINK
+			if terrain_colors.has(biome):
+				color = terrain_colors[biome]
+				
+			biome_image.set_pixel(i, j, color)
+			
+	_emit_debug_map("biome", biome_image, {})
+
 	
 
 
 func _generate_biome_map() -> void:
+	_notify_progress("Generating heightmap", 0)
 	_create_debug_height_map()
+	_notify_progress("Generating temperature", 30)
 	_create_debug_temperature_map()
+	_notify_progress("Generating terrain", 60)
 	_create_debug_terrain_map()
+	_notify_progress("Generating precipation", 80)
+	_create_debug_precipation_map()
+	_notify_progress("Generating biome", 90)
+	_create_debug_biome_map()
+	_notify_progress("Done", 100)
+	
+	
+func _generate() -> void:
+	# Now that we have map size, lets generate biome map
+	_generate_biome_map()
+	
+	# Now, lets build hexagon map via this generated map
 		
 func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	if region_size < MIN_REGION_SIZE:
@@ -180,17 +262,10 @@ func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	#)
 	
 	_generation_map_size = Rect2i(Vector2i.ZERO, Vector2i(800, 800))
-
-	
-	# Now that we have map size, lets generate biome map
-	_generate_biome_map()
-	
-	# Now, lets build hexagon map via this generated map
 	
 
-func _on_world_builder_generate_requested(world_size: WBConstants.WorldSize, region_size: int) -> void:
-	var world_cells_size = Vector2i(20, 20)
-	if(world_size == WBConstants.WorldSize.Normal):
-		world_cells_size = Vector2i(40, 40)
-		
-	generate(world_cells_size, region_size)
+	_gen_thread = Thread.new()
+	print("Starting generation in new thread")
+	_gen_thread.start(_generate)
+	print("Waiting for generation to finish")
+	#_gen_thread.wait_to_finish()
