@@ -16,11 +16,14 @@ signal emit_debug_map(name: String, map: Image, legend: Dictionary)
 const _TEMPERATURE_RANGE = Vector2i(-20, 20)
 const _TEMPERATURE_FLUCTUATION = 5
 
+const _HEIGHT_RANGE = Vector2i(-8000, 8000) # meters
+const _MOUNTAIN_EXTRA_HEIGHT_RANGE = Vector2i(3000, 6000) # meters
+
 const MIN_REGION_SIZE = 10
 const INTER_REGION_MARGIN = 10
 
 var _DEBUG_GENERAL_GRADIENT : Gradient = ResourceLoader.load("res://system/world_builder/debug_genral_gradientt.tres")
-
+var _DEBUG_HEIGHT_GRADIENT : Gradient = ResourceLoader.load("res://system/world_builder/debug_height_gradient.tres")
 # private variables
 
 # Size of the map (image, texutere) that we should generate
@@ -54,6 +57,13 @@ var terrain_colors = {
 	"core.terrain.temperate_forest" : Color.DARK_GREEN
 }
 
+# assumes that value is between -1 and 1.
+func _sample_simple_range(value: float, range : Vector2i) -> int:
+	return range.x + (range.y - range.x) * (value - (-1.0)) / 2
+	
+func _displacement_at_range(value: float, range: Vector2i) -> float:
+	return (value - range.x) / (range.y - range.x)
+
 func _get_biome(temperature: int, precipation: int) -> String:
 	var point := Vector2i(temperature, precipation)
 	
@@ -63,38 +73,67 @@ func _get_biome(temperature: int, precipation: int) -> String:
 				return biome_map[rect]
 	return "core.terrain.unknown"
 	
-func _generate_terrain_map() -> void:
+func _get_height_at_point(i: int, j : int) -> int:
+	# Get base height. It will be in range (-1, 1)
+	var height_float = terrain_noise_generator.get_noise_2d(i, j)
+	
+	var height_meters = _sample_simple_range(height_float, _HEIGHT_RANGE)
+	
+	# add mountains
+	var mountain_extra_float = mountain_noise_generator.get_noise_2d(i,j)
+	var mountain_extra_meters = 0 # by default, don't add anything
+	if mountain_extra_float > 0.75:
+		# renormalize to range (-1,1) because that is what _sample_simple_range
+		# expects
+		mountain_extra_float =  -1 + ( mountain_extra_float - 0.75) / (1 - 0.75) * 2
+		mountain_extra_meters = _sample_simple_range(mountain_extra_float, _MOUNTAIN_EXTRA_HEIGHT_RANGE)
+		
+	var result := int(clamp(height_meters + mountain_extra_meters, _HEIGHT_RANGE.x, _HEIGHT_RANGE.y))
+	
+	return result
+	
+	
+	
+func _create_debug_height_map() -> void:
 	var size = _generation_map_size.size
-	#var heightmap := Image.create(size.x, size.y, false, Image.FORMAT_R8)
-	
-	#for i in range(0, size.x):
-	#	for j in range(0, size.y):
-	
-	var heightmap := terrain_noise_generator.get_image(size.x, size.y)
-	var terrain_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
-	
-	
-	
+	var height_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 	for i in range(0, size.x):
 		for j in range(0, size.y):
-			var value := terrain_noise_generator.get_noise_2d(i,j)
+			var height := _get_height_at_point(i,j)
+			var color := _DEBUG_HEIGHT_GRADIENT.sample(
+				_displacement_at_range(height, _HEIGHT_RANGE)
+			)
+			height_image.set_pixel(i, j, color)
+	emit_debug_map.emit("heightmap", height_image, {})
+
+# Terrain map is like height map, but with less colors for clarity.
+# Good for backgrounds
+func _create_debug_terrain_map() -> void:
+	var size = _generation_map_size.size
+	var terrain_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+
+	for i in range(0, size.x):
+		for j in range(0, size.y):
+			var value := _get_height_at_point(i,j)
 			if value < 0:
 				terrain_image.set_pixel(i, j, Color.DARK_BLUE)
+			elif value < 4000:
+				# normal(ish) land
+				terrain_image.set_pixel(i,j, Color.CORAL)
 			else:
-				if mountain_noise_generator.get_noise_2d(i,j) > 0.7:
-					terrain_image.set_pixel(i, j, Color.LIGHT_GRAY)
-				else:
-					terrain_image.set_pixel(i,j, Color.CORAL)
-	if debug_mode:
+				terrain_image.set_pixel(i, j, Color.LIGHT_GRAY)
+
 		emit_debug_map.emit("terrain", terrain_image, {})
 
 func _get_temperature_at_point(i, j) -> int:
 	# base temperature = how close is point to the borders
-	var j_percent : float  = j /  _generation_map_size.size.y
+	var j_percent : float  = float(j - _generation_map_size.position.y) /  _generation_map_size.size.y
 	var point_on_curve : float = temperature_curve.sample(j_percent)
-	var temperature : int = _TEMPERATURE_RANGE.x + int(
-		(_TEMPERATURE_RANGE.y - _TEMPERATURE_RANGE.x) * point_on_curve)
-		
+	var temperature : int = _sample_simple_range(point_on_curve, _TEMPERATURE_RANGE)
+	
+	if i % 10 == 0 and j % 10 == 0:
+		print("Temperature at ", i, ",", j, ": ", j_percent, ", ", point_on_curve, ", ", temperature)
+
 	# add fluctuation from the map
 	var temp_fluctuation : int = int(terrain_noise_generator.get_noise_2d(i,j) * _TEMPERATURE_FLUCTUATION)
 	temperature += temp_fluctuation
@@ -110,7 +149,7 @@ func _create_debug_temperature_map():
 		for j in range(0, size.y):
 			var temp := _get_temperature_at_point(i,j)
 			var color = _DEBUG_GENERAL_GRADIENT.sample(
-				(temp - _TEMPERATURE_RANGE.x) / (_TEMPERATURE_RANGE.y - _TEMPERATURE_RANGE.x)
+				_displacement_at_range(temp, _TEMPERATURE_RANGE)
 			)
 			temperature_image.set_pixel(i, j, color)
 			
@@ -122,7 +161,9 @@ func _get_biome_at_point(i: int, j:int) -> String:
 
 
 func _generate_biome_map() -> void:
-	_generate_terrain_map()
+	_create_debug_height_map()
+	_create_debug_temperature_map()
+	_create_debug_terrain_map()
 		
 func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	if region_size < MIN_REGION_SIZE:
@@ -138,7 +179,7 @@ func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	#	(world_cells_size.y / 2 + (world_cells_size.y & 1)) * (2 * 1.75 * region_size + margin)
 	#)
 	
-	_generation_map_size = Rect2i(Vector2i.ZERO, Vector2i(1000, 1000))
+	_generation_map_size = Rect2i(Vector2i.ZERO, Vector2i(800, 800))
 
 	
 	# Now that we have map size, lets generate biome map

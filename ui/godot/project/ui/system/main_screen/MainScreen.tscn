@@ -45,3 +45,4 @@ layout_mode = 1
 
 [connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/NewGameButton" to="." method="_on_new_game_button_pressed"]
 [connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/LoadGameButton" to="." method="_on_load_game_button_pressed"]
+[connection signal="transition_back" from="CreateMapRoot" to="." method="_on_transition_back"]

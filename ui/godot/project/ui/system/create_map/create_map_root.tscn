@@ -1,4 +1,7 @@
-[gd_scene format=3 uid="uid://bxo1rll4achyc"]
+[gd_scene load_steps=3 format=3 uid="uid://bxo1rll4achyc"]
+
+[ext_resource type="Script" path="res://ui/system/create_map/create_map_root.gd" id="1_pk3cd"]
+[ext_resource type="PackedScene" uid="uid://b0iqgdkdgf6j2" path="res://system/world_builder/world_builder.tscn" id="2_open1"]
 
 [node name="CreateMapRoot" type="PanelContainer"]
 anchors_preset = 15
@@ -6,6 +9,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_pk3cd")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -33,7 +37,8 @@ columns = 2
 layout_mode = 2
 text = "World size"
 
-[node name="OptionButton" type="OptionButton" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+[node name="WorldSizeSelector" type="OptionButton" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 item_count = 3
 selected = 0
@@ -48,7 +53,8 @@ popup/item_2/id = 2
 layout_mode = 2
 text = "Region size"
 
-[node name="SpinBox" type="SpinBox" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+[node name="RegionSizeSelector" type="SpinBox" parent="HBoxContainer/VBoxContainer/WorldOptionsContainer/GridContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 min_value = 10.0
 value = 10.0
@@ -71,6 +77,7 @@ layout_mode = 2
 text = "Background"
 
 [node name="BackgroundSelect" type="OptionButton" parent="HBoxContainer/VBoxContainer/DebugContainer/GridContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 item_count = 1
 selected = 0
@@ -82,17 +89,37 @@ layout_mode = 2
 text = "Foreground"
 
 [node name="ForegroundSelect" type="OptionButton" parent="HBoxContainer/VBoxContainer/DebugContainer/GridContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 item_count = 1
 selected = 0
 popup/item_0/text = "None"
 popup/item_0/id = 0
 
-[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer"]
+[node name="BackButton" type="Button" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "Back"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/ScrollContainer"]
 layout_mode = 2
 
-[node name="BackgroundView" type="TextureRect" parent="HBoxContainer/PanelContainer"]
+[node name="DebugBackgroundView" type="TextureRect" parent="HBoxContainer/ScrollContainer/PanelContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ForegroundView" type="TextureRect" parent="HBoxContainer/PanelContainer"]
+[node name="DebugForegroundView" type="TextureRect" parent="HBoxContainer/ScrollContainer/PanelContainer"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.498039)
 layout_mode = 2
+
+[node name="WorldBuilder" parent="." instance=ExtResource("2_open1")]
+
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/GenerateButton" to="." method="_on_generate_button_pressed"]
+[connection signal="item_selected" from="HBoxContainer/VBoxContainer/DebugContainer/GridContainer/BackgroundSelect" to="." method="_on_background_select_item_selected"]
+[connection signal="item_selected" from="HBoxContainer/VBoxContainer/DebugContainer/GridContainer/ForegroundSelect" to="." method="_on_foreground_select_item_selected"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="emit_debug_map" from="WorldBuilder" to="." method="_add_debug_map"]
