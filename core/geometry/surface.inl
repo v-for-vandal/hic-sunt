@@ -49,7 +49,7 @@ bool SurfaceView<Cell, CoordinateSystem>::operator==(const SurfaceView& other) c
   // compare cells
   for(auto q = q_start(); q != q_end(); q++) {
     for(auto r = r_start(); r != r_end(); r++) {
-      ViewCoords coords{q,r};
+      Coords coords{q,r};
       if(Contains(coords) != other.Contains(coords)) {
         SPDLOG_TRACE("Different contains outcome for coords {}", coords);
         return false;

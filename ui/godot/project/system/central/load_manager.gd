@@ -3,7 +3,7 @@ extends Node
 signal progress_changed(progress, message: String)
 signal load_done()
 
-var _load_screen_path : String = "res://central/load_screen.tscn"
+var _load_screen_path : String = "res://system/central/load_screen.tscn"
 var _load_screen = load(_load_screen_path)
 
 var _world_scene_resource : PackedScene = ResourceLoader.load("res://root_map.tscn")

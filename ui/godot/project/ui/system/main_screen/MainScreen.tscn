@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3 uid="uid://bup1yx750kq0"]
+
+[ext_resource type="Script" path="res://ui/system/main_screen/MainScreen.gd" id="1_mdqee"]
+[ext_resource type="PackedScene" uid="uid://bxo1rll4achyc" path="res://ui/system/create_map/create_map_root.tscn" id="2_5d5gq"]
+
+[node name="MainScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_mdqee")
+
+[node name="MainMenuRoot" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="MainMenuRoot"]
+layout_mode = 2
+
+[node name="MainMenu" type="VBoxContainer" parent="MainMenuRoot/CenterContainer"]
+layout_mode = 2
+
+[node name="ContinueButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu"]
+layout_mode = 2
+text = "Continue"
+
+[node name="NewGameButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu"]
+layout_mode = 2
+text = "New Game"
+
+[node name="LoadGameButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="CreateMapRoot" parent="." instance=ExtResource("2_5d5gq")]
+visible = false
+layout_mode = 1
+
+[connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/NewGameButton" to="." method="_on_new_game_button_pressed"]
+[connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/LoadGameButton" to="." method="_on_load_game_button_pressed"]
