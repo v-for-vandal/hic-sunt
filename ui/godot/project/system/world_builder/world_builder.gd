@@ -6,6 +6,7 @@ extends Node
 @export var percipation_noise_generator: FastNoiseLite
 @export var temperature_curve : Curve
 @export var debug_mode := false
+@export var biome_map : BiomeMap
 
 # public signals
 signal emit_debug_map(name: String, map: Image, legend: Dictionary)
@@ -14,13 +15,13 @@ signal report_progress(message: String, progress: int)
 
 # private constants
 
-const _TEMPERATURE_RANGE = Vector2i(-20, 20)
+const _TEMPERATURE_RANGE = Vector2i(-20, 40) # celsius
 const _TEMPERATURE_FLUCTUATION = 5
 
 const _HEIGHT_RANGE = Vector2i(-8000, 8000) # meters
 const _MOUNTAIN_EXTRA_HEIGHT_RANGE = Vector2i(3000, 6000) # meters
 
-const _PRECIPATION_RANGE = Vector2i(0, 500)
+const _PRECIPATION_RANGE = Vector2i(0, 400)
 
 const MIN_REGION_SIZE = 10
 const INTER_REGION_MARGIN = 10
@@ -60,24 +61,37 @@ func make_biome_rect(temp_start:int, temp_end:int, percipation_start:int, percip
 # TODO: Move to proto
 var biome_maps = [
 	{
-		make_biome_rect(-10, 0, 0, 400) : "core.terrain.tundra",
-		make_biome_rect(0, 5, 0, 20) : "core.terrain.temperate_grassland",
-		make_biome_rect(5, 20, 0, 40) : "core.terrain.temperate_grassland",
-		make_biome_rect(0, 5, 20, 400 ) : "core.terrain.taiga",
-		make_biome_rect(20, 30, 0, 100 ) : "core.terrain.desert",
-		make_biome_rect(5, 15, 40, 200) : "core.terrain.temperate_forest",
-		make_biome_rect(15, 20, 120, 230) : "core.terrain.temperate_forest",
+		make_biome_rect(_TEMPERATURE_RANGE.x, -10, 0, _PRECIPATION_RANGE.y+1) : "core.biome.snow",
+		make_biome_rect(-10, 0, 0,  _PRECIPATION_RANGE.y+1) : "core.biome.tundra",
+		make_biome_rect(0, 5, 0, 20) : "core.biome.temperate_grassland",
+		make_biome_rect(0, 5, 20, _PRECIPATION_RANGE.y + 1) : "core.biome.taiga", # boreal forest
+		make_biome_rect(5, 20, 0, 40) : "core.biome.temperate_grassland", #	
+		make_biome_rect(5, 15, 40, 200) : "core.biome.temperate_forest",
+		make_biome_rect(5, 15, 200, _PRECIPATION_RANGE.y + 1) : "core.biome.rainforest",
+		make_biome_rect(15, 20, 40, 120) : "core.biome.shrubland",
+		make_biome_rect(15, 20, 120, 230) : "core.biome.temperate_forest",
+		make_biome_rect(15, 20, 230, _PRECIPATION_RANGE.y + 1) : "core.biome.rainforest",
+		make_biome_rect(20, 30, 0, 100 ) : "core.biome.desert", # subtropical_desert
+		make_biome_rect(20, 30, 100, 230 ) : "core.biome.savanna", # subtropical_desert
+		make_biome_rect(20, 30, 230, _PRECIPATION_RANGE.y + 1 ) : "core.biome.tropical_rainforest", # subtropical_desert
+		make_biome_rect(30, _TEMPERATURE_RANGE.y+1, 0, _PRECIPATION_RANGE.y+1 ) : "core.biome.desert", # subtropical_desert
+
 	}
 ]
 
 var terrain_colors = {
-	"core.terrain.tundra" : Color.FLORAL_WHITE,
-	"core.terrain.temperate_grassland" : Color.DARK_OLIVE_GREEN,
-	"core.terrain.taiga" : Color.BEIGE,
-	"core.terrain.desert" : Color.GOLDENROD,
-	"core.terrain.temperate_forest" : Color.DARK_GREEN,
-	"core.terrain.ocean" : Color.DARK_BLUE,
-	"core.terrain.unknown" : Color.DEEP_PINK
+	"core.biome.tundra" : Color.FLORAL_WHITE,
+	"core.biome.temperate_grassland" : Color.DARK_OLIVE_GREEN,
+	"core.biome.taiga" : Color.BEIGE,
+	"core.biome.desert" : Color.GOLDENROD,
+	"core.biome.temperate_forest" : Color.DARK_GREEN,
+	"core.biome.rainforest" : Color.CHARTREUSE,
+	"core.biome.tropical_rainforest" : Color.GREEN_YELLOW,
+	"core.biome.savanna" : Color.KHAKI,
+	"core.biome.shrubland" : Color.BURLYWOOD,
+	"core.biome.ocean" : Color.DARK_BLUE,
+	"core.biome.unknown" : Color.DEEP_PINK,
+	"core.biome.snow" : Color.ALICE_BLUE
 }
 
 # assumes that value is between -1 and 1.
@@ -198,7 +212,7 @@ func _get_biome(temperature: int, precipation: int) -> String:
 				return biome_map[rect]
 				
 	print("Can't find biome for (temp, prcp): ", point)
-	return "core.terrain.unknown"
+	return "core.biome.unknown"
 	
 func _get_biome_at_point(i: int, j:int) -> String:
 	var temp = _get_temperature_at_point(i, j)
@@ -206,7 +220,7 @@ func _get_biome_at_point(i: int, j:int) -> String:
 	var precipation = _get_precipation_at_point(i, j)
 	
 	if height < 0:
-		return "core.terrain.ocean"
+		return "core.biome.ocean"
 		
 	return _get_biome(temp, precipation)
 	
@@ -219,6 +233,8 @@ func _create_debug_biome_map() -> void:
 			var color = Color.DEEP_PINK
 			if terrain_colors.has(biome):
 				color = terrain_colors[biome]
+			else:
+				push_error("Biome ", biome, " has no color")
 				
 			biome_image.set_pixel(i, j, color)
 			
