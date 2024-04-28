@@ -42,12 +42,19 @@ public:
   static Dictionary create_error(const char* error);
   static Dictionary create_success();
   //String get_cell_terrain(Vector2i coords) const;
+  static Ref<WorldObject> create_world(Vector2i world_size, int region_radius);
 
   static QRSCoords cast_qrs(Vector2i coords) {
     return QRSCoords{
       QRSCoordinateSystem::QAxis{coords.x},
       QRSCoordinateSystem::RAxis{coords.y}
     };
+  }
+  static auto cast_qrs_size(Vector2i size) {
+    auto q_size = typename hs::terra::World::QRSCoordinateSystem::QDelta{size.x};
+    auto r_size = typename hs::terra::World::QRSCoordinateSystem::RDelta{size.y};
+
+    return typename hs::terra::World::QRSSize{q_size, r_size};
   }
 
 };

@@ -32,6 +32,8 @@ var _DEBUG_HEIGHT_GRADIENT : Gradient = ResourceLoader.load("res://system/world_
 
 # Size of the map (image, texutere) that we should generate
 var _generation_map_size := Rect2i( Vector2i(0,0), Vector2i(100, 100))
+var _generation_region_size := 10
+var _generation_cells_size := Vector2i(20, 20)
 
 var _heightmap : Image
 
@@ -256,6 +258,10 @@ func _generate_biome_map() -> void:
 	_create_debug_biome_map()
 	_notify_progress("Done", 100)
 	
+func _generate_hexagons_map():
+	var world = WorldObject.create_world(_generation_cells_size, _generation_region_size)
+	
+	# Now, set biome of every cell in every region
 	
 func _generate() -> void:
 	# Now that we have map size, lets generate biome map
@@ -277,6 +283,8 @@ func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	#	(world_cells_size.y / 2 + (world_cells_size.y & 1)) * (2 * 1.75 * region_size + margin)
 	#)
 	
+	_generation_region_size = region_size
+	_generation_cells_size = world_cells_size
 	_generation_map_size = Rect2i(Vector2i.ZERO, Vector2i(800, 800))
 	
 

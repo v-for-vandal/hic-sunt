@@ -24,6 +24,8 @@ terra::World System::LoadWorld(std::string_view filename) {
 }
 
 
+// TODO: World generation is moved to Godot code, this method is no longer
+// required
 terra::World System::NewWorld(NewWorldParameters params, const ruleset::RuleSet& active_rule_set) {
   std::vector<std::string> terrain_types;
   for(const auto& terrain_type: active_rule_set.GetTerrain().terrain_types()) {
