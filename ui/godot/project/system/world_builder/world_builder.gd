@@ -55,7 +55,19 @@ func _emit_debug_map(name: String, map: Image, legend: Dictionary) -> void:
 	_do_emit_debug_map.call_deferred(name, map, legend)
 	
 
-
+func _wrap_x(i: float) -> float:
+	while i > _generation_map_size.end.x:
+		i -= _generation_map_size.size.x
+	while i < _generation_map_size.position.x:
+		i+= _generation_map_size.size.x
+	return i
+	
+func _wrap_y(j: float) -> float:
+	while j > _generation_map_size.end.y:
+		j -= _generation_map_size.size.y
+	while j < _generation_map_size.position.y:
+		j += _generation_map_size.size.y
+	return j
 
 func make_biome_rect(temp_start:int, temp_end:int, percipation_start:int, percipation_end:int) -> Rect2i:
 	return Rect2i( temp_start, percipation_start, (temp_end-temp_start), (percipation_end - percipation_start))
@@ -103,7 +115,9 @@ func _sample_simple_range(value: float, range : Vector2i) -> int:
 func _displacement_at_range(value: float, range: Vector2i) -> float:
 	return (value - range.x) / (range.y - range.x)
 
-func _get_height_at_point(i: int, j : int) -> int:
+func _get_height_at_point(i: float, j : float) -> int:
+	i = _wrap_x(i)
+	j = _wrap_y(i)
 	# Get base height. It will be in range (-1, 1)
 	var height_float = terrain_noise_generator.get_noise_2d(i, j)
 	
@@ -155,7 +169,9 @@ func _create_debug_terrain_map() -> void:
 
 		_emit_debug_map("terrain", terrain_image, {})
 
-func _get_temperature_at_point(i : int, j : int) -> int:
+func _get_temperature_at_point(i : float, j : float) -> int:
+	i = _wrap_x(i)
+	j = _wrap_y(i)
 	# base temperature = how close is point to the borders
 	var j_percent : float  = float(j - _generation_map_size.position.y) /  _generation_map_size.size.y
 	var point_on_curve : float = temperature_curve.sample(j_percent)
@@ -185,7 +201,9 @@ func _create_debug_temperature_map() -> void:
 			
 	_emit_debug_map("temperature", temperature_image, {})
 	
-func _get_precipation_at_point(i : int, j : int) -> int:
+func _get_precipation_at_point(i : float, j : float) -> int:
+	i = _wrap_x(i)
+	j = _wrap_y(i)
 	# Get base height. It will be in range (-1, 1)
 	var precipation_float = terrain_noise_generator.get_noise_2d(i, j)
 	
@@ -216,7 +234,9 @@ func _get_biome(temperature: int, precipation: int) -> String:
 	print("Can't find biome for (temp, prcp): ", point)
 	return "core.biome.unknown"
 	
-func _get_biome_at_point(i: int, j:int) -> String:
+func _get_biome_at_point(i: float, j:float) -> String:
+	i = _wrap_x(i)
+	j = _wrap_y(i)
 	var temp = _get_temperature_at_point(i, j)
 	var height = _get_height_at_point(i, j)
 	var precipation = _get_precipation_at_point(i, j)
@@ -258,16 +278,47 @@ func _generate_biome_map() -> void:
 	_create_debug_biome_map()
 	_notify_progress("Done", 100)
 	
+func _generate_hexagon_region(world: WorldObject, world_qr_coords: Vector2i) -> void:
+	var region_object =  world.get_region(world_qr_coords)
+	
+	var region_center_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(world_qr_coords) * (_generation_region_size + INTER_REGION_MARGIN)
+	
+	
+	# dimensions are in (q,r,s) system with s omited
+	# tilemap is in (x,y) system
+	var qr_dimensions : Rect2i = region_object.get_dimensions()
+
+	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
+		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
+			var qr_coords := Vector2i(q,r)
+			if region_object.contains(qr_coords):
+				# set up biome
+				var cell_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(qr_coords)
+				var total_pixel = region_center_pixel + cell_pixel
+				var biome = _get_biome_at_point(total_pixel.x, total_pixel.y)
+	
 func _generate_hexagons_map():
-	var world = WorldObject.create_world(_generation_cells_size, _generation_region_size)
+	var world_object = WorldObject.create_world(_generation_cells_size, _generation_region_size)
 	
 	# Now, set biome of every cell in every region
+	var qr_dimensions : Rect2i = world_object.get_dimensions()
+	print("world dimensions: ", qr_dimensions)
+
+	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
+		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
+
+			var qr_coords := Vector2i(q,r)
+			if not world_object.contains(qr_coords):
+				print("skipping non-existing world cell ", qr_coords)
+				continue
+			_generate_hexagon_region(world_object, qr_coords)
 	
 func _generate() -> void:
 	# Now that we have map size, lets generate biome map
 	_generate_biome_map()
 	
 	# Now, lets build hexagon map via this generated map
+	_generate_hexagons_map()
 		
 func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	if region_size < MIN_REGION_SIZE:

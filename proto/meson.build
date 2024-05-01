@@ -23,7 +23,7 @@ hs_proto_schemas = [
   'terra/world.proto',
   'ruleset/region_improvements.proto',
   'ruleset/placement_rules.proto',
-  'ruleset/terrain.proto',
+  'ruleset/biome.proto',
   'ruleset/resources.proto',
   'render/atlas.proto',
   'render/render.proto',

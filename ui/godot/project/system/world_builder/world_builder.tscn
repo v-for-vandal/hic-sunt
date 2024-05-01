@@ -40,5 +40,4 @@ mountain_noise_generator = SubResource("FastNoiseLite_wk7nx")
 temperature_noise_generator = SubResource("FastNoiseLite_5541a")
 percipation_noise_generator = SubResource("FastNoiseLite_qfstu")
 temperature_curve = SubResource("Curve_f3jal")
-debug_mode = null
 biome_map = ExtResource("2_8vw7o")

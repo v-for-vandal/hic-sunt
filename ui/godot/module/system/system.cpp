@@ -42,9 +42,11 @@ Dictionary HicSuntSystem::save_world(Ref<WorldObject> world, String filename) {
 }
 */
 
+// TODO: Get rid of this method
 Ref<WorldObject> HicSuntSystem::create_world(Vector2i world_size, int region_radius,
   RulesetObject* ruleset) {
 
+#if 0
   ERR_FAIL_NULL_V_MSG(ruleset, Ref<WorldObject>{}, "Nullptr as ruleset when creating world");
 
   hs::system::NewWorldParameters params;
@@ -55,6 +57,8 @@ Ref<WorldObject> HicSuntSystem::create_world(Vector2i world_size, int region_rad
   //result.reference_ptr());
   ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new world");
   return result;
+#endif
+  return {};
 
 }
 
@@ -84,6 +88,6 @@ Dictionary HicSuntSystem::load_ruleset(String folder_path) {
 
 void HicSuntSystem::_bind_methods() {
   ClassDB::bind_method(D_METHOD("load_world", "filename"), &HicSuntSystem::load_world);
-  ClassDB::bind_method(D_METHOD("create_world", "world_size", "region_size", "ruleset"), &HicSuntSystem::create_world);
+  //ClassDB::bind_method(D_METHOD("create_world", "world_size", "region_size", "ruleset"), &HicSuntSystem::create_world);
   ClassDB::bind_method(D_METHOD("load_ruleset", "folder_path"), &HicSuntSystem::load_ruleset);
 }

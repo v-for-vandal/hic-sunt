@@ -47,12 +47,12 @@ public:
   RegionIdCRef GetId() const { return id_; }
   void SetId(RegionIdCRef id) { id_ = id; }
 
-  bool SetTerrain(QRSCoords coords, std::string_view terrain);
-  std::vector<std::pair<std::string, int>> GetTopKTerrain(int k) const {
-    return terrain_count_.TopK(k);
+  bool SetBiome(QRSCoords coords, std::string_view biome);
+  std::vector<std::pair<std::string, int>> GetTopKBiomes(int k) const {
+    return biome_count_.TopK(k);
   }
 
-  bool SetFeature(QRSCoords coords, std::string_view terrain);
+  bool SetFeature(QRSCoords coords, std::string_view biome);
 
   bool SetImprovement(QRSCoords coords, std::string_view improvement_type);
 
@@ -75,7 +75,7 @@ private:
 
   enum class EphemeralData {
     kFeatureCount,
-    kTerrainComb,
+    kBiomeComb,
     kImprovements,
 
     kSize
@@ -87,7 +87,7 @@ private:
 
   // can be updated if region was changed
   mutable PnlStatement current_pnl_;
-  utils::Comb terrain_count_;
+  utils::Comb biome_count_;
   std::unordered_map<std::string, size_t> feature_count_;
   absl::flat_hash_set<QRSCoords> cells_with_improvements_;
 

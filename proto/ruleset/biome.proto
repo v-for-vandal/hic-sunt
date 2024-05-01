@@ -16,19 +16,20 @@ message WhittakerRegion {
 }
 
 
-message TerrainType {
+message Biome {
   string id = 1;
   l10n.LocalizedName name = 2;
 }
 
 
-message TerrainFeature {
+message BiomeFeature {
   string id = 1;
   l10n.LocalizedName name = 2;
 }
 
 // Root message
-message Terrain {
-  repeated TerrainType terrain_types = 1;
-  repeated TerrainFeature terrain_features = 2;
+message Biomes {
+  repeated Biome biomes = 1;
+  repeated BiomeFeature biome_features = 2;
 }
+
