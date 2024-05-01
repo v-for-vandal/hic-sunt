@@ -56,7 +56,7 @@ func load_world(world_object : WorldObject) -> void:
 			if region_info.is_empty():
 				push_error("Can't get region at: ", qr_coords)
 				continue
-			var top_terrain: Array = region_info.top_terrain
+			var top_terrain: Array = region_info.top_biome
 			var terrain : String = top_terrain[1]
 			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 			# convert to xy dimensions

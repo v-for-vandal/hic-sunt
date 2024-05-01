@@ -11,6 +11,7 @@ extends Node
 # public signals
 signal emit_debug_map(name: String, map: Image, legend: Dictionary)
 signal report_progress(message: String, progress: int)
+signal finished(world: WorldObject)
 
 
 # private constants
@@ -35,10 +36,14 @@ var _generation_map_size := Rect2i( Vector2i(0,0), Vector2i(100, 100))
 var _generation_region_size := 10
 var _generation_cells_size := Vector2i(20, 20)
 
-var _heightmap : Image
-
 var _gen_thread: Thread
+var _world_object : WorldObject
 
+func _do_finish(world: WorldObject) -> void:
+	finished.emit(world)
+	
+func _finish(world: WorldObject) -> void:
+	_do_finish.call_deferred(world)
 
 func _do_notify_progress(message: String, progress: int) -> void:
 	report_progress.emit(message, progress)
@@ -60,6 +65,7 @@ func _wrap_x(i: float) -> float:
 		i -= _generation_map_size.size.x
 	while i < _generation_map_size.position.x:
 		i+= _generation_map_size.size.x
+	
 	return i
 	
 func _wrap_y(j: float) -> float:
@@ -67,6 +73,7 @@ func _wrap_y(j: float) -> float:
 		j -= _generation_map_size.size.y
 	while j < _generation_map_size.position.y:
 		j += _generation_map_size.size.y
+	
 	return j
 
 func make_biome_rect(temp_start:int, temp_end:int, percipation_start:int, percipation_end:int) -> Rect2i:
@@ -117,7 +124,7 @@ func _displacement_at_range(value: float, range: Vector2i) -> float:
 
 func _get_height_at_point(i: float, j : float) -> int:
 	i = _wrap_x(i)
-	j = _wrap_y(i)
+	j = _wrap_y(j)
 	# Get base height. It will be in range (-1, 1)
 	var height_float = terrain_noise_generator.get_noise_2d(i, j)
 	
@@ -139,6 +146,8 @@ func _get_height_at_point(i: float, j : float) -> int:
 	
 	
 func _create_debug_height_map() -> void:
+	if not debug_mode:
+		return
 	var size = _generation_map_size.size
 	var height_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 	for i in range(0, size.x):
@@ -153,6 +162,8 @@ func _create_debug_height_map() -> void:
 # Terrain map is like height map, but with less colors for clarity.
 # Good for backgrounds
 func _create_debug_terrain_map() -> void:
+	if not debug_mode:
+		return
 	var size = _generation_map_size.size
 	var terrain_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 
@@ -171,7 +182,7 @@ func _create_debug_terrain_map() -> void:
 
 func _get_temperature_at_point(i : float, j : float) -> int:
 	i = _wrap_x(i)
-	j = _wrap_y(i)
+	j = _wrap_y(j)
 	# base temperature = how close is point to the borders
 	var j_percent : float  = float(j - _generation_map_size.position.y) /  _generation_map_size.size.y
 	var point_on_curve : float = temperature_curve.sample(j_percent)
@@ -189,6 +200,8 @@ func _get_temperature_at_point(i : float, j : float) -> int:
 
 # Create temperature map and emits it for debugging
 func _create_debug_temperature_map() -> void:
+	if not debug_mode:
+		return
 	var size = _generation_map_size.size
 	var temperature_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 	for i in range(0, size.x):
@@ -203,7 +216,7 @@ func _create_debug_temperature_map() -> void:
 	
 func _get_precipation_at_point(i : float, j : float) -> int:
 	i = _wrap_x(i)
-	j = _wrap_y(i)
+	j = _wrap_y(j)
 	# Get base height. It will be in range (-1, 1)
 	var precipation_float = terrain_noise_generator.get_noise_2d(i, j)
 	
@@ -211,6 +224,8 @@ func _get_precipation_at_point(i : float, j : float) -> int:
 	return precipation_cm
 	
 func _create_debug_precipation_map() -> void:
+	if not debug_mode:
+		return
 	var size = _generation_map_size.size
 	var precipation_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 	for i in range(0, size.x):
@@ -236,7 +251,7 @@ func _get_biome(temperature: int, precipation: int) -> String:
 	
 func _get_biome_at_point(i: float, j:float) -> String:
 	i = _wrap_x(i)
-	j = _wrap_y(i)
+	j = _wrap_y(j)
 	var temp = _get_temperature_at_point(i, j)
 	var height = _get_height_at_point(i, j)
 	var precipation = _get_precipation_at_point(i, j)
@@ -247,6 +262,8 @@ func _get_biome_at_point(i: float, j:float) -> String:
 	return _get_biome(temp, precipation)
 	
 func _create_debug_biome_map() -> void:
+	if not debug_mode:
+		return
 	var size = _generation_map_size.size
 	var biome_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 	for i in range(0, size.x):
@@ -278,11 +295,10 @@ func _generate_biome_map() -> void:
 	_create_debug_biome_map()
 	_notify_progress("Done", 100)
 	
-func _generate_hexagon_region(world: WorldObject, world_qr_coords: Vector2i) -> void:
-	var region_object =  world.get_region(world_qr_coords)
+func _generate_hexagon_region(world_qr_coords: Vector2i) -> void:
+	var region_object =  _world_object.get_region(world_qr_coords)
 	
 	var region_center_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(world_qr_coords) * (_generation_region_size + INTER_REGION_MARGIN)
-	
 	
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system
@@ -296,22 +312,25 @@ func _generate_hexagon_region(world: WorldObject, world_qr_coords: Vector2i) -> 
 				var cell_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(qr_coords)
 				var total_pixel = region_center_pixel + cell_pixel
 				var biome = _get_biome_at_point(total_pixel.x, total_pixel.y)
+				region_object.set_biome(qr_coords, biome)
 	
 func _generate_hexagons_map():
-	var world_object = WorldObject.create_world(_generation_cells_size, _generation_region_size)
+	_world_object = WorldObject.create_world(_generation_cells_size, _generation_region_size)
 	
 	# Now, set biome of every cell in every region
-	var qr_dimensions : Rect2i = world_object.get_dimensions()
+	var qr_dimensions : Rect2i = _world_object.get_dimensions()
 	print("world dimensions: ", qr_dimensions)
 
 	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
 		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
 
 			var qr_coords := Vector2i(q,r)
-			if not world_object.contains(qr_coords):
+			if not _world_object.contains(qr_coords):
 				print("skipping non-existing world cell ", qr_coords)
 				continue
-			_generate_hexagon_region(world_object, qr_coords)
+			_generate_hexagon_region(qr_coords)
+			
+
 	
 func _generate() -> void:
 	# Now that we have map size, lets generate biome map
@@ -319,6 +338,8 @@ func _generate() -> void:
 	
 	# Now, lets build hexagon map via this generated map
 	_generate_hexagons_map()
+	
+	_finish(_world_object)
 		
 func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	if region_size < MIN_REGION_SIZE:

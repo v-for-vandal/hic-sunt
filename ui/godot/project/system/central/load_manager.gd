@@ -64,15 +64,15 @@ func _return_to_main_screen() -> void:
 		_loading_screen_instance.queue_free()
 	
 	
-func new_game() -> void:
+func new_game(world_object: WorldObject) -> void:
 	
 	_prepare_loading()
 	
 	var ruleset_object := _load_ruleset()
 	
-	var world_object : WorldObject = CentralSystem.create_world(Vector2i(10, 5), 7, ruleset_object)
+	#var world_object : WorldObject = CentralSystem.create_world(Vector2i(10, 5), 7, ruleset_object)
 	
-	assert(world_object != null, "Failed to create world")
+	#assert(world_object != null, "Failed to create world")
 
 	CurrentGame.init_game(world_object, ruleset_object)
 	

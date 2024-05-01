@@ -134,11 +134,11 @@ modulate = Color(1, 1, 1, 0.498039)
 layout_mode = 2
 
 [node name="WorldBuilder" parent="." instance=ExtResource("2_open1")]
-debug_mode = false
 
 [connection signal="pressed" from="HBoxContainer/Controls/GenerateButton" to="." method="_on_generate_button_pressed"]
 [connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/BackgroundSelect" to="." method="_on_background_select_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/ForegroundSelect" to="." method="_on_foreground_select_item_selected"]
 [connection signal="pressed" from="HBoxContainer/Controls/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/Controls/StartGameButton" to="." method="_on_start_game_button_pressed"]
 [connection signal="emit_debug_map" from="WorldBuilder" to="." method="_add_debug_map" flags=3]
 [connection signal="report_progress" from="WorldBuilder" to="." method="_on_world_builder_report_progress" flags=3]

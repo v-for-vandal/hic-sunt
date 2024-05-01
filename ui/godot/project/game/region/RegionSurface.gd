@@ -41,15 +41,15 @@ func load_region(region_object : RegionObject) -> void:
 				
 func update_cell(qr_coords: Vector2i) -> void:
 	var region_info : Dictionary = _region_object.get_cell_info(qr_coords)
-	var terrain : String = region_info.terrain
+	var biome : String = region_info.biome
 	#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 	# convert to xy dimensions
 	var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
 	# fill cell
-	if visualization_data.has(terrain):
+	if visualization_data.has(biome):
 		#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
-		set_cell(0, xy_coords, visualization_data[terrain].source_id,
-			visualization_data[terrain].atlas_coords,0)
+		set_cell(0, xy_coords, visualization_data[biome].source_id,
+			visualization_data[biome].atlas_coords,0)
 	else:
 		# set cell to absent pink
 		set_cell(0, xy_coords, 0, Vector2i(0,0), 0)
