@@ -6,6 +6,7 @@
 #include <ui/godot/module/region/region_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/image.hpp>
 
 using namespace godot;
 
