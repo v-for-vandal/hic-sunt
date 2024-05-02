@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://brhsewnl00nkp"]
 
 [ext_resource type="Script" path="res://ui/region/region_ui.gd" id="1_j578s"]
-[ext_resource type="Script" path="res://ui/InfoTabContainer.gd" id="2_b3ivv"]
-[ext_resource type="Script" path="res://ui/CellInfo.gd" id="3_6gntf"]
+[ext_resource type="Script" path="res://ui/world/InfoTabContainer.gd" id="2_itlrf"]
+[ext_resource type="Script" path="res://ui/world/CellInfo.gd" id="3_swddy"]
 [ext_resource type="PackedScene" uid="uid://dcacdldp7pmxy" path="res://ui/region/buildings/building_list.tscn" id="4_0x70n"]
 [ext_resource type="Script" path="res://ui/region/Resources.gd" id="5_wjejd"]
 
@@ -52,12 +52,12 @@ anchor_bottom = 1.0
 offset_top = -2.48
 offset_right = -0.160004
 grow_vertical = 2
-script = ExtResource("2_b3ivv")
+script = ExtResource("2_itlrf")
 
 [node name="CellInfo" type="GridContainer" parent="InfoTabContainer"]
 layout_mode = 2
 columns = 2
-script = ExtResource("3_6gntf")
+script = ExtResource("3_swddy")
 
 [node name="Buildings" parent="InfoTabContainer" instance=ExtResource("4_0x70n")]
 visible = false

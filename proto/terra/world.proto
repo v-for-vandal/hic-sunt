@@ -17,6 +17,10 @@ message Surface {
 message World {
   string id = 1;
   Surface surface = 2;
+  // Things like caves, other dimensions and so on
   repeated Cell off_surface = 3;
+
+  // world map image. png.
+  //bytes world_map_image = 4;
 }
 

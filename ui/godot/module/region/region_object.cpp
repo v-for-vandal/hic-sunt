@@ -7,7 +7,7 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
-  ClassDB::bind_method(D_METHOD("set_terrain", "coords", "terrain"), &RegionObject::set_terrain);
+  ClassDB::bind_method(D_METHOD("set_biome", "coords", "biome"), &RegionObject::set_biome);
   ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"), &RegionObject::set_feature);
   ClassDB::bind_method(D_METHOD("set_improvement", "coords", "improvement"), &RegionObject::set_improvement);
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
@@ -48,7 +48,7 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
 
   // Fill result
   Dictionary result;
-  result["terrain"] = cell.GetTerrain().data();
+  result["biome"] = cell.GetBiome().data();
   result["feature"] = cell.GetFeature().data();
   result["improvement"] = convert_to_dictionary(
     cell.GetImprovement());
@@ -67,7 +67,7 @@ Dictionary RegionObject::convert_to_dictionary(const hs::proto::region::Improvem
   return result;
 }
 
-bool RegionObject::set_terrain(Vector2i coords, String terrain) const
+bool RegionObject::set_biome(Vector2i coords, String biome) const
 {
   if(!region_) {
     return false;
@@ -78,7 +78,7 @@ bool RegionObject::set_terrain(Vector2i coords, String terrain) const
     return false;
   }
 
-  return region_->SetTerrain(qrs_coords, terrain.utf8().get_data());
+  return region_->SetBiome(qrs_coords, biome.utf8().get_data());
 }
 
 bool RegionObject::set_feature(Vector2i coords, String feature) const
@@ -111,15 +111,15 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const
 
 Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
   Dictionary result;
-  // Build top terrain
+  // Build top biome
   {
-    Array top_terrain_result;
-    auto top_terrain = region.GetTopKTerrain(3);
-    for(auto& [terrain, count] : top_terrain) {
-      top_terrain_result.append(count);
-      top_terrain_result.append(String(terrain.c_str()));
+    Array top_biome_result;
+    auto top_biome = region.GetTopKBiomes(3);
+    for(auto& [biome, count] : top_biome) {
+      top_biome_result.append(count);
+      top_biome_result.append(String(biome.c_str()));
     }
-    result["top_terrain"] = std::move(top_terrain_result);
+    result["top_biome"] = std::move(top_biome_result);
   }
   //result["size"] = region.GetSurface().size();
 

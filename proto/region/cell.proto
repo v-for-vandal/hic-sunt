@@ -8,7 +8,7 @@ import "region/improvement.proto";
 message Cell {
   reserved 2;
 
-  string terrain = 1;
+  string biome = 1;
 
   // list of improvements present on this cell
   repeated Improvement improvements = 4;

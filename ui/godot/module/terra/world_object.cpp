@@ -12,6 +12,8 @@ void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_region_info", "coords"), &WorldObject::get_region_info);
   ClassDB::bind_method(D_METHOD("save", "filename"), &WorldObject::save);
   ClassDB::bind_method(D_METHOD("load", "filename"), &WorldObject::load);
+
+  ClassDB::bind_static_method("WorldObject", D_METHOD("create_world", "size", "region_size"), &WorldObject::create_world);
 }
 
 Rect2i WorldObject::get_dimensions() const {
@@ -128,6 +130,43 @@ Dictionary WorldObject::create_success() {
     Dictionary result;
     result["success"] = true;
     return result;
+}
+
+Ref<WorldObject> WorldObject::create_world(Vector2i world_size, int region_radius) {
+
+  if(region_radius <= 10) {
+    region_radius = 10;
+  }
+
+  auto qrs_world_size = cast_qrs_size(world_size);
+
+  auto world = hs::terra::World{
+      hs::terra::World::QRSCoordinateSystem::QAxis{0},
+      hs::terra::World::QRSCoordinateSystem::QAxis{0} + qrs_world_size.q(),
+      hs::terra::World::QRSCoordinateSystem::RAxis{0},
+      hs::terra::World::QRSCoordinateSystem::RAxis{0} + qrs_world_size.r(),
+      hs::terra::World::QRSCoordinateSystem::SAxis{0},
+      hs::terra::World::QRSCoordinateSystem::SAxis{0} + qrs_world_size.s()};
+
+  auto surface = world.GetSurface();
+  /* randomize terrain for now */
+  for(auto q_pos = surface.q_start(); q_pos < surface.q_end(); q_pos++) {
+    for( auto r_pos = surface.r_start(); r_pos < surface.r_end(); r_pos++) {
+      auto coords = hs::terra::World::QRSCoords{q_pos, r_pos};
+      if(surface.Contains(coords)) {
+        // initialize region
+        hs::region::Region region{region_radius};
+        world.SetRegion(coords, std::move(region));
+      }
+    }
+  }
+
+  Ref<WorldObject> result(memnew(WorldObject(
+        std::move(world))));
+
+  ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new world");
+  return result;
+
 }
 
 #if 0

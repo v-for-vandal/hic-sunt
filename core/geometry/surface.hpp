@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/geometry/coords.hpp>
+#include <core/geometry/surface_raw_view.hpp>
 #include <core/utils/serialize.hpp>
 
 #include <mdspan>
@@ -17,10 +18,10 @@ using CellsArrayView =
 template<typename Cell, typename CoordinateSystem>
 class SurfaceView {
 public:
-  using ViewCoords = geometry::Coords<CoordinateSystem>;
+  using Coords = geometry::Coords<CoordinateSystem>;
 
   SurfaceView() = default;
-  SurfaceView(CellsArrayView<Cell> target, typename ViewCoords::QAxis q_start, typename ViewCoords::RAxis r_start, typename ViewCoords::SAxis s_start, typename ViewCoords::SAxis s_end):
+  SurfaceView(CellsArrayView<Cell> target, typename Coords::QAxis q_start, typename Coords::RAxis r_start, typename Coords::SAxis s_start, typename Coords::SAxis s_end):
     target_(std::move(target)),
     q_start_(q_start),
     r_start_(r_start),
@@ -33,20 +34,20 @@ public:
   SurfaceView& operator=(SurfaceView&&) = default;
 
 
-  Cell& GetCell(ViewCoords coords) {
+  Cell& GetCell(Coords coords) {
     return const_cast<Cell&>(const_cast<const SurfaceView&>(*this).GetCell(coords));
   }
-  Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) {
-    return GetCell(ViewCoords{q,r});
+  Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
+    return GetCell(Coords{q,r});
   }
 
-  const Cell& GetCell(ViewCoords coords) const {
+  const Cell& GetCell(Coords coords) const {
     return target_(
       (coords.q()-q_start()).ToUnderlying(),
       (coords.r() - r_start()).ToUnderlying());
   }
-  const Cell& GetCell(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
-    return GetCell(ViewCoords{q,r});
+  const Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
+    return GetCell(Coords{q,r});
   }
 
   auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
@@ -60,7 +61,7 @@ public:
   auto r_start() const { return r_start_; }
   auto s_start() const { return s_start_; }
 
-  bool Contains(ViewCoords coords) const {
+  bool Contains(Coords coords) const {
     /*spdlog::info("Checking {} vs {}-{},{}-{}, {}-{}",
       coords,
       q_start(), q_end(), r_start(), r_end(), s_start(), s_end()
@@ -71,8 +72,8 @@ public:
       CheckInRange(coords.s(), s_start(), s_end())
       ;
   }
-  bool Contains(typename ViewCoords::QAxis q, typename ViewCoords::RAxis r) const {
-    return Contains(ViewCoords{q,r});
+  bool Contains(typename Coords::QAxis q, typename Coords::RAxis r) const {
+    return Contains(Coords{q,r});
   }
 
   bool operator==(const SurfaceView& other) const;
@@ -96,10 +97,10 @@ private:
   CellsArrayView<Cell> target_;
   // we store s_start and s_end explicitly because it is virtual. It limits what cells
   // are in surface, but it doesn't affect the storage itself.
-  typename ViewCoords::QAxis q_start_{0};
-  typename ViewCoords::RAxis r_start_{0};
-  typename ViewCoords::SAxis s_start_{0};
-  typename ViewCoords::SAxis s_end_{1}; // not inclusive
+  typename Coords::QAxis q_start_{0};
+  typename Coords::RAxis r_start_{0};
+  typename Coords::SAxis s_start_{0};
+  typename Coords::SAxis s_end_{1}; // not inclusive
 
 };
 
@@ -119,7 +120,7 @@ class Surface {
 public:
 
   using View = SurfaceView<Cell, CoordinateSystem>;
-  using ViewCoords = geometry::Coords<CoordinateSystem>;
+  using Coords = geometry::Coords<CoordinateSystem>;
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
   using SCSize = DeltaCoords<CoordinateSystem>;
@@ -150,7 +151,7 @@ public:
   size_t data_size() const { return data_size_; }
   const Cell& GetCell(size_t idx) const { return data_storage_[idx]; }
   Cell& GetCell(size_t idx) { return data_storage_[idx]; }
-  //bool Contains(ViewCoords coords) const { return cells_.Contains(coords); }
+  //bool Contains(Coords coords) const { return cells_.Contains(coords); }
 
   auto q_size() const { return cells_.q_size(); }
   auto r_size() const { return cells_.r_size(); }

@@ -41,8 +41,8 @@ bool Region::operator==(const Region& other) const {
     return false;
   }
 
-  if(terrain_count_ != other.terrain_count_) {
-    SPDLOG_TRACE("terrain_count_ comb not equal");
+  if(biome_count_ != other.biome_count_) {
+    SPDLOG_TRACE("biome_count_ comb not equal");
     return false;
   }
 
@@ -55,20 +55,20 @@ bool Region::operator==(const Region& other) const {
 }
 
 
-bool Region::SetTerrain(QRSCoords coords, std::string_view terrain)
+bool Region::SetBiome(QRSCoords coords, std::string_view biome)
 {
   if(!surface_.Contains(coords)) {
     return false;
   }
 
-  std::string terrain_str{terrain};
+  std::string biome_str{biome};
 
   auto& cell = surface_.GetCell(coords);
-  if(!cell.GetTerrain().empty()) {
-    terrain_count_.Remove(std::string{cell.GetTerrain()});
+  if(!cell.GetBiome().empty()) {
+    biome_count_.Remove(std::string{cell.GetBiome()});
   }
-  cell.SetTerrain(terrain);
-  terrain_count_.Add(terrain_str);
+  cell.SetBiome(biome);
+  biome_count_.Add(biome_str);
 
   return true;
 }
@@ -121,7 +121,7 @@ bool Region::SetCityId(std::string_view city_id) {
 }
 
 void Region::BuildEphemeral() {
-  terrain_count_.clear();
+  biome_count_.clear();
   feature_count_.clear();
   cells_with_improvements_.clear();
   auto surface = surface_.view();
@@ -130,7 +130,7 @@ void Region::BuildEphemeral() {
       QRSCoords coords(q,r);
       if(surface.Contains(coords)) {
         auto& cell = surface.GetCell(coords);
-        terrain_count_.Add(std::string{cell.GetTerrain()});
+        biome_count_.Add(std::string{cell.GetBiome()});
         feature_count_[std::string{cell.GetFeature()}]++;
         if(cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);

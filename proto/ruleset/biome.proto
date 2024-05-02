@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package hs.proto.ruleset;
+
+import "l10n/localized_name.proto";
+import "render/atlas.proto";
+
+message WhittakerRegion {
+  // max two elements. temperature range
+  repeated int32 temperature = 1;
+  // max two elements. percipation range
+  repeated int32 percipation = 2;
+  // add-hoc overlay implementation
+  // regions in higher z-order take precendence
+  // over lower z-order
+}
+
+
+message Biome {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+}
+
+
+message BiomeFeature {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+}
+
+// Root message
+message Biomes {
+  repeated Biome biomes = 1;
+  repeated BiomeFeature biome_features = 2;
+}
+

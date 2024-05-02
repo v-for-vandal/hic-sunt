@@ -5,7 +5,7 @@
 namespace hs::region {
 
 bool Cell::operator==(const Cell& other) const {
-  if(terrain_type_ != other.terrain_type_) {
+  if(biome_!= other.biome_) {
     return false;
   }
 
@@ -23,7 +23,7 @@ bool Cell::operator==(const Cell& other) const {
 
 void SerializeTo(const Cell& source, proto::region::Cell& to) {
   to.Clear();
-  to.set_terrain(source.GetTerrain());
+  to.set_biome(source.GetBiome());
   to.add_features(source.GetFeature());
   auto improvement_ptr = to.mutable_improvements()->Add();
   *improvement_ptr = source.GetImprovement();
@@ -31,7 +31,7 @@ void SerializeTo(const Cell& source, proto::region::Cell& to) {
 
 Cell ParseFrom( const proto::region::Cell& from, serialize::To<Cell>) {
   Cell result;
-  result.SetTerrain(from.terrain());
+  result.SetBiome(from.biome());
   if(from.features_size() > 0) {
     result.SetFeature(from.features(0));
   }

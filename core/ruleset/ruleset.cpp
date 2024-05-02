@@ -41,8 +41,8 @@ bool RuleSet::Load(const std::filesystem::path& path,
     return false;
   }
 
-  SPDLOG_INFO("Parsing terrain file");
-  success = ReadFromFile( path / terrain_file, terrain_, errors);
+  SPDLOG_INFO("Parsing biomes file");
+  success = ReadFromFile( path / biomes_file, biomes_, errors);
   if(!success) {
     return false;
   }
@@ -72,7 +72,7 @@ bool RuleSet::Load(const std::filesystem::path& path,
 }
 
 void RuleSet::Clear() {
-  terrain_.Clear();
+  biomes_.Clear();
   improvements_.Clear();
   resources_.Clear();
   rendering_.Clear();

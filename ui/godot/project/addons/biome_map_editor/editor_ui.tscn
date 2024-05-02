@@ -1,0 +1,96 @@
+[gd_scene load_steps=2 format=3 uid="uid://bagt5t3uh58eg"]
+
+[ext_resource type="Script" path="res://addons/biome_map_editor/editor_ui.gd" id="1_ya6t3"]
+
+[node name="EditorUi" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ya6t3")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ControlContainer" type="PanelContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/ControlContainer"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/ControlContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "t0"
+
+[node name="T0Control" type="SpinBox" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+value = -20.0
+suffix = "C"
+
+[node name="Label2" type="Label" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "t1"
+
+[node name="T1Control" type="SpinBox" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+value = 20.0
+suffix = "C"
+
+[node name="Label3" type="Label" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "p0"
+
+[node name="P0Control" type="SpinBox" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+value = -20.0
+suffix = "C"
+
+[node name="Label4" type="Label" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+tooltip_text = "Precipation end"
+mouse_filter = 1
+text = "p1"
+
+[node name="P1Control" type="SpinBox" parent="HBoxContainer/ControlContainer/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -1000.0
+max_value = 1000.0
+value = 20.0
+suffix = "C"
+
+[node name="AddBiomeButton" type="Button" parent="HBoxContainer/ControlContainer/VBoxContainer"]
+layout_mode = 2
+text = "AddBiome"
+
+[node name="ViewContainer" type="ScrollContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BiomeLayout" type="Panel" parent="HBoxContainer/ViewContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[connection signal="pressed" from="HBoxContainer/ControlContainer/VBoxContainer/AddBiomeButton" to="." method="_on_add_biome_button_pressed"]

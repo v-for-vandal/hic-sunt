@@ -2,26 +2,26 @@
 
 void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_all_region_improvements"), &RulesetObject::get_all_region_improvements);
-  ClassDB::bind_method(D_METHOD("get_terrain_types"), &RulesetObject::get_terrain_types);
+  ClassDB::bind_method(D_METHOD("get_biomes"), &RulesetObject::get_biomes);
   ClassDB::bind_method(D_METHOD("get_all_resources"), &RulesetObject::get_all_resources);
   ClassDB::bind_method(D_METHOD("get_atlas_render"), &RulesetObject::get_atlas_render);
 }
 
-Array RulesetObject::get_terrain_types() const {
+Array RulesetObject::get_biomes() const {
   Array result;
 
-  const auto& terrain = ruleset_.GetTerrain();
+  const auto& biome = ruleset_.GetBiomes();
 
-  for(const auto& terrain_type : terrain.terrain_types()) {
-    result.append(convert_terrain_type(terrain_type));
+  for(const auto& biome_type : biome.biomes()) {
+    result.append(convert_biome_type(biome_type));
   }
 
   return result;
 }
 
-Dictionary RulesetObject::convert_terrain_type(const hs::proto::ruleset::TerrainType& terrain_type) {
+Dictionary RulesetObject::convert_biome_type(const hs::proto::ruleset::Biome& biome_type) {
   Dictionary result;
-  result["id"] = terrain_type.id().c_str();
+  result["id"] = biome_type.id().c_str();
 
   return result;
 }

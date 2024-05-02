@@ -37,7 +37,7 @@ private:
 public:
   Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
-  bool set_terrain(Vector2i coords, String terrain) const;
+  bool set_biome(Vector2i coords, String biome) const;
   bool set_feature(Vector2i coords, String feature) const;
   bool set_improvement(Vector2i coords, String improvement) const;
   bool contains(Vector2i coords) const;
