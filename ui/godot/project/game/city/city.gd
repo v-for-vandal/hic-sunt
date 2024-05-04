@@ -23,6 +23,7 @@ func get_city_id() -> String:
 	
 func get_region_id() -> String:
 	return _region_id
+
 # This constructor is used by civilization.gd. It is not supposed to be used
 # directly
 static func create_new_city(city_id: String, region_id: String) -> City:

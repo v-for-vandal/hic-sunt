@@ -1,5 +1,7 @@
 extends RefCounted
 
+# Deprecated in favour of ConstructionProject
+
 class_name BuildSite
 
 var _id: int
