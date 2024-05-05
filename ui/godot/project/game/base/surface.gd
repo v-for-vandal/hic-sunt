@@ -22,7 +22,7 @@ func _contains(tile_qr: Vector2i) -> bool:
 	printerr("Function must be overriden in child class")
 	return false
 	
-func _unhandled_input(event) -> void:
+func _unhandled_input(event : InputEvent) -> void:
 	if event is InputEventMouse:
 		event = make_input_local(event)
 		var tile_xy := local_to_map(to_local(event.position))
@@ -35,8 +35,8 @@ func _unhandled_input(event) -> void:
 				ui_event.surface = self
 				GameUiEventBus.emit_event(ui_event)
 			if event is InputEventMouseButton:
-				if not event.pressed and not event.canceled:
-					print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
+				if event.pressed and not event.is_canceled():
+					#print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
 					var ui_event = _create_action_event()
 					ui_event.qr_coords = tile_qr
 					ui_event.surface = self
@@ -51,7 +51,7 @@ func _create_movement_event():
 			ui_event = GameUiEventBus.WorldUIMovementEvent.new()
 		SurfaceType.REGION_SURFACE:
 			ui_event = GameUiEventBus.RegionUIMovementEvent.new()
-		_:
+		_: # default
 			push_error("surface_type is unset")
 			assert(false)
 	return ui_event

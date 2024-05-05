@@ -4,6 +4,9 @@ signal building_selected(building_id: String);
 
 func _init() -> void:
 	clear()
+	
+func _ready() -> void:
+	print("Buildings is ready")
 
 func add_building(building_id: String) -> void:
 	var idx := add_item(building_id)

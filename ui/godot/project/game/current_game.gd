@@ -77,7 +77,7 @@ func save_game(save_location: DirAccess) -> Error:
 func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
 	# Create empty world
 	# TODO: Have some method to create empty world
-	var world : WorldObject = CentralSystem.create_world(Vector2i(1, 1), 1, ruleset)
+	var world : WorldObject = WorldObject.create_world(Vector2i(1, 1), 1)
 	assert(world != null)
 	var world_file_path := _world_file_path(save_location)
 	var status : Error = world.load(ProjectSettings.globalize_path(world_file_path))

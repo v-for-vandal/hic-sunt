@@ -5,6 +5,7 @@ extends Control
 @onready var _current_scene = $MainMenuRoot
 
 var _history = []
+var _load_dialog_scene := preload("res://ui/system/load_game/load_dialog.tscn")
 
 func _ready() -> void:
 	# hide everything
@@ -33,6 +34,6 @@ func _on_new_game_button_pressed() -> void:
 
 
 func _on_load_game_button_pressed() -> void:
-	#var dialog = load_dialog_scene.instantiate()
-	#add_child(dialog)
+	var dialog = _load_dialog_scene.instantiate()
+	add_child(dialog)
 	pass
