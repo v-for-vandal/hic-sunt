@@ -39,6 +39,7 @@ func update_region() -> void:
 		
 	$InfoTabContainer/Buildings.load_region(_region)
 	$InfoTabContainer/Resources.load_region(_region)
+	$InfoTabContainer/Projects.load_region(_region)
 	$ScrollContainer/VBoxContainer/BuildingList.load_region(_region)
 	
 func _on_close_button_pressed() -> void:

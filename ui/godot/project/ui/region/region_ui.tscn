@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://brhsewnl00nkp"]
+[gd_scene load_steps=7 format=3 uid="uid://brhsewnl00nkp"]
 
 [ext_resource type="Script" path="res://ui/region/region_ui.gd" id="1_j578s"]
 [ext_resource type="Script" path="res://ui/world/InfoTabContainer.gd" id="2_itlrf"]
 [ext_resource type="Script" path="res://ui/world/CellInfo.gd" id="3_swddy"]
 [ext_resource type="PackedScene" uid="uid://dcacdldp7pmxy" path="res://ui/region/buildings/building_list.tscn" id="4_0x70n"]
 [ext_resource type="Script" path="res://ui/region/Resources.gd" id="5_wjejd"]
+[ext_resource type="PackedScene" uid="uid://cls0hdxhdqsxu" path="res://ui/city/city_projects_queue.tscn" id="6_uhseh"]
 
 [node name="RegionUI" type="Control"]
 layout_mode = 3
@@ -43,7 +44,6 @@ layout_mode = 2
 text = "City"
 
 [node name="InfoTabContainer" type="TabContainer" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.062
@@ -84,6 +84,10 @@ text = "long resource name"
 [node name="Number2" type="Label" parent="InfoTabContainer/Resources"]
 layout_mode = 2
 text = "100983"
+
+[node name="Projects" parent="InfoTabContainer" instance=ExtResource("6_uhseh")]
+visible = false
+layout_mode = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 visible = false

@@ -1,6 +1,10 @@
 extends Control
 
+# TODO: REname , get rid of 'Dialog'
+# LoadGameScreen ?
+
 @onready var _save_games_list := $PanelContainer/VBoxContainer/SaveGames
+ 
 
 func _load(savegame: String) -> void:
 	LoadManager.load_game(savegame)
@@ -8,6 +12,9 @@ func _load(savegame: String) -> void:
 	
 func _cancel() -> void:
 	self.queue_free()
+	# TODO: Must send singnal instead, because behaviour is different
+	# when cancelling in-game or in-main-menu
+	#pass
 
 func _on_load_button_pressed() -> void:
 	# See if anything is selected

@@ -2,6 +2,8 @@ extends Control
 
 #@export var load_dialog_scene : PackedScene
 
+var load_dialog_scene := preload("res://ui/system/load_game/load_dialog.tscn")
+
 @onready var _current_scene = $MainMenuRoot
 
 var _history = []

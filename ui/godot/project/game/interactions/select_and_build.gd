@@ -61,7 +61,12 @@ func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 		if city == null:
 			push_error("Can't find specified city: ", city_id)
 		else:
-			city.add_to_build(improvement_id, region, qr_coords)
+			var construction_project = ConstructionProject.create_construction_project(
+				improvement_id, region, qr_coords)
+			if construction_project == null:
+				push_error("Failed to create construction project")
+			else:
+				city.add_project(construction_project)
 		
 	# cleanup
 	cleanup()

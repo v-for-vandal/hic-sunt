@@ -15,11 +15,23 @@ func take_resources(resources: Dictionary) -> void:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
 	
+## Return true if project is finished. City will remove your project from queue
+## and call appropriate callback.
 func is_finished() -> bool:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
 	return false
-	
+
+## Invalid project, in in-game terms. For example, land where construction
+## was done is now occupied by enemy, or is flooded. Impossible projects
+## will not be given any resources and will be generally skipped in
+## processing
+func is_possible() -> bool:
+	assert(false, "Please implement this method")
+	push_error("Please implement this method")
+	return false
+
+
 func turns_without_progress() -> int:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
