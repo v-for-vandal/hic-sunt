@@ -1,27 +1,21 @@
 extends Node2D
 
-var _loaded := false
-var _region_map_scene : PackedScene = load("res://game/region/region_map.tscn") 
-var _world_map_scene : PackedScene = load("res://game/world/world_map.tscn") 
-var _world_map: Node
-var _region_map: Node
+#var _loaded := false
 
 
-# Should be called manually to propertly initialize object
-func root_load() -> void:
-	_world_map = _world_map_scene.instantiate()
-	_region_map = _region_map_scene.instantiate()
-	_world_map.show_region_request.connect(_on_world_map_show_region_request)
-	_region_map.exit_reqion_request.connect(_on_region_map_exit_reqion_request)
-	
+@onready var _world_map: Node = $WorldMap
+@onready var _region_map: Node = $RegionMap
+
+
+func _ready() -> void:
+	assert(_world_map != null, "Child failed to initialize")
+	assert(_region_map != null, "Child failed to initialize")
 	GameUiEventBus.set_world_interaction(_world_map)
 	GameUiEventBus.set_region_interaction(_region_map)
+	# world is empty at the moment, but lets set up everything properly
 	_switch_to_world()
-	_loaded = true
 	
-func _build_tileset(sources: Array) -> void:
-	pass
-	
+
 #func _build_tiles_mapping(world_object: WorldObject):
 	#assert(world_object != null)
 	#var terrain_types:Array = CurrentGame.current_player_ruleset.get_terrain_types()
@@ -36,7 +30,7 @@ func _build_tileset(sources: Array) -> void:
 
 
 func load_world(world_object : WorldObject) -> void:
-	assert(_loaded, "You can't call methods on root-map before it is fully loaded")
+	#assert(_loaded, "You can't call methods on root-map before it is fully loaded")
 	assert(world_object != null)
 	# TODO: Don't set up terrain mapping, instead use it as global class
 	var terrain_mapping : Dictionary = CurrentGame.get_atlas_visualization()
@@ -47,7 +41,7 @@ func load_world(world_object : WorldObject) -> void:
 
 
 func _on_world_map_show_region_request(world_object:  WorldObject, qr_position: Vector2i) -> void:
-	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
+	#assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	assert(_region_map != null, "_region_map is somehow null")
 	var region_obj = world_object.get_region(qr_position);
 	# TODO: Check for fog
@@ -75,7 +69,7 @@ func _switch_to_world() -> void:
 
 
 func _on_region_map_exit_reqion_request() -> void:
-	assert(_loaded, "THis instance can't react to signals before it is fully loaded")
+	#assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	_switch_to_world()
 
 	

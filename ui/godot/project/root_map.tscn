@@ -1,6 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://7ikhs8bt68gy"]
+[gd_scene load_steps=4 format=3 uid="uid://7ikhs8bt68gy"]
 
 [ext_resource type="Script" path="res://root_map.gd" id="1_yul2b"]
+[ext_resource type="PackedScene" uid="uid://dyp7yp0fqe876" path="res://game/region/region_map.tscn" id="2_cosq6"]
+[ext_resource type="PackedScene" uid="uid://dxuoujwpadbf1" path="res://game/world/world_map.tscn" id="3_0mdmy"]
 
 [node name="RootMap" type="Node2D"]
 script = ExtResource("1_yul2b")
+
+[node name="RegionMap" parent="." instance=ExtResource("2_cosq6")]
+
+[node name="WorldMap" parent="." instance=ExtResource("3_0mdmy")]
+
+[connection signal="exit_reqion_request" from="RegionMap" to="." method="_on_region_map_exit_reqion_request"]
+[connection signal="show_region_request" from="WorldMap" to="." method="_on_world_map_show_region_request"]

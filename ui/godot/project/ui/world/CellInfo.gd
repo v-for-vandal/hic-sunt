@@ -1,5 +1,8 @@
 extends GridContainer
 
+func _ready() -> void:
+	pass
+	
 func _create_label(text: String) -> Label:
 	var result := Label.new()
 	result.text = text

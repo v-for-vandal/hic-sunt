@@ -7,11 +7,13 @@ var _load_screen_path : String = "res://system/central/load_screen.tscn"
 var _load_screen = load(_load_screen_path)
 
 var _world_scene_resource : PackedScene = ResourceLoader.load("res://root_map.tscn")
+var _main_screen_scene_resource : PackedScene = ResourceLoader.load("res://ui/system/main_screen/MainScreen.tscn")
 var _loaded_resource: PackedScene
 var _progress: Array = []
 var use_subthreads := true
 var _loading_screen_instance : Node
-var _new_scene : Node
+#@onready var _world_scene := _world_scene_resource.instantiate()
+#var _new_scene : Node
 
 var _debug_timer: float = 0
 
@@ -20,16 +22,17 @@ func _ready() -> void:
 	
 func _prepare_loading()-> void:
 	# switch to loading screen
-	_loading_screen_instance = _load_screen.instantiate()
-	get_tree().root.add_child(_loading_screen_instance)
-	get_tree().current_scene = _loading_screen_instance
-	
-	# hide main screen
-	get_tree().root.get_node('/root/MainScreen').visible = false
-	_debug_timer = 0.0
-	
-	self.progress_changed.connect(_loading_screen_instance._update_progress_bar)
-	self.load_done.connect(_loading_screen_instance._start_outro_animation)
+	#_loading_screen_instance = _load_screen.instantiate()
+	#get_tree().root.add_child(_loading_screen_instance)
+	#get_tree().current_scene = _loading_screen_instance
+	#
+	## hide main screen
+	#get_tree().root.get_node('/root/MainScreen').visible = false
+	#_debug_timer = 0.0
+	#
+	#self.progress_changed.connect(_loading_screen_instance._update_progress_bar)
+	#self.load_done.connect(_loading_screen_instance._start_outro_animation)
+	pass
 
 # TODO: Move this function to CentralSystem
 func _load_ruleset() -> RulesetObject:
@@ -46,27 +49,47 @@ func _load_ruleset() -> RulesetObject:
 	
 	return _ruleset_object
 	
-func _init_world_scene() -> void:
-	_new_scene = _world_scene_resource.instantiate()
-	_new_scene.root_load()
-	_new_scene.load_world(CurrentGame.current_world)
+func _clear_scene_if_present(node_name : String) -> void:
+	var scene = get_tree().root.get_node(node_name);
+	if  scene != null:
+		get_tree().root.remove_child(scene)
+		scene.queue_free
 	
-	set_process(true)
+func _init_world_scene() -> void:
+	_clear_scene_if_present('/root/MainScreen')
+	_clear_scene_if_present('/root/RootMap')
+		
+	var world_scene = _world_scene_resource.instantiate()
+
+	# We can call methods of this node only AFTER we have added it to the
+	# tree. Because it finishes its initialization in _ready callback
+	get_tree().root.add_child(world_scene)
+	world_scene.load_world(CurrentGame.current_world)
+	
+	get_tree().current_scene = world_scene
+	
+	#_new_scene.load_world(CurrentGame.current_world)
+	
+	#set_process(true)
+	#get_tree().change_scene_to_packed(_world_scene_resource)
+	
+	pass
 	
 func _return_to_main_screen() -> void:
-	if _new_scene != null:
-		_new_scene.queue_free()
-	var main_screen : Node = get_tree().root.get_node('/root/MainScreen')
-	main_screen.visible = true
-	get_tree().current_scene = main_screen
+	#if _new_scene != null:
+		#_new_scene.queue_free()
+	#var main_screen : Node = get_tree().root.get_node('/root/MainScreen')
+	#main_screen.visible = true
+	#get_tree().current_scene = main_screen
+	get_tree().change_scene_to_packed(_main_screen_scene_resource)
 	
-	if _loading_screen_instance != null:
-		_loading_screen_instance.queue_free()
+	#if _loading_screen_instance != null:
+	#	_loading_screen_instance.queue_free()
 	
 	
 func new_game(world_object: WorldObject) -> void:
 	
-	_prepare_loading()
+	#_prepare_loading()
 	
 	var ruleset_object := _load_ruleset()
 	
@@ -79,7 +102,7 @@ func new_game(world_object: WorldObject) -> void:
 	_init_world_scene()
 
 func load_game(savegame: String) -> void:
-
+	print("Loading game: ", savegame)
 	_prepare_loading()
 	
 	var ruleset_object := _load_ruleset()
@@ -110,34 +133,34 @@ func load_game(savegame: String) -> void:
 
 	
 	
-func _process(_delta : float) -> void:
-	if _loading_screen_instance == null:
-		set_process(false)
-		return
-	
-	_debug_timer += _delta;
-		
-	if _debug_timer > 1.0:
-	#if _world_object != null:
-		set_process(false)
-		emit_signal("progress_changed", 1.0)
-		emit_signal("load_done") 
-		# delete current world scene
-		call_deferred("_defered_goto_scene")
+#func _process(_delta : float) -> void:
+	#if _loading_screen_instance == null:
+		#set_process(false)
+		#return
+	#
+	#_debug_timer += _delta;
+		#
+	#if _debug_timer > 1.0:
+	##if _world_object != null:
+		#set_process(false)
+		#emit_signal("progress_changed", 1.0)
+		#emit_signal("load_done") 
+		## delete current world scene
+		#call_deferred("_defered_goto_scene")
 
 		
-func _defered_goto_scene() -> void:
-		print("going to world scene")
-		if has_node("/root/World"):
-			var current_world_scene := get_node("/root/World")
-			current_world_scene.queue_free()
-
-		assert(_new_scene != null)
-		get_tree().root.add_child(_new_scene)
-		get_tree().current_scene = _new_scene
-
-		if _loading_screen_instance != null:
-			_loading_screen_instance.queue_free()
+#func _defered_goto_scene() -> void:
+		#print("going to world scene")
+		#if has_node("/root/World"):
+			#var current_world_scene := get_node("/root/World")
+			#current_world_scene.queue_free()
+#
+		#assert(_new_scene != null)
+		#get_tree().root.add_child(_new_scene)
+		#get_tree().current_scene = _new_scene
+#
+		#if _loading_screen_instance != null:
+			#_loading_screen_instance.queue_free()
 	
 	
 #func start_load() -> void:
