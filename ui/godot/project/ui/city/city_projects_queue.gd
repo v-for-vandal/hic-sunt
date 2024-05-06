@@ -7,6 +7,7 @@ var _queue : CityProjectsQueue
 func _ready() -> void:
 	var children = get_children(true)
 	var root_container = $%RootContainer
+	print("Self: ", self)
 	print("Children: ", children)
 	print("Root container: ", $%RootContainer)
 	print("get_node Root container", self.get_node("RootContainer"))
@@ -14,14 +15,23 @@ func _ready() -> void:
 	assert($%RootContainer != null, "Something wrong, child is missing")
 	
 func _init() -> void:
-	print("Initializing CityProjectsQueue")
+	print("Initializing CityProjectsQueue ", self)
 	
 	
 func _enter_tree() -> void:
-	print("CityProjectsQueue is entering tree")
+	print("CityProjectsQueue ", self, " is entering tree")
 
+func _unset_queue() -> void:
+	if _queue == null:
+		return
+		
+	_queue.removed.disconnect(_on_removed)
+	_queue.swapped.disconnect(_on_swapped)
+	_queue.inserted.disconnect(_add_project_widget)
+	_queue = null
 
-func setup(queue: CityProjectsQueue) -> void:
+func _set_queue(queue: CityProjectsQueue) -> void:
+	_unset_queue()
 	_queue = queue
 	for idx : int in range(0, queue.size()):
 		_add_project_widget(idx)
@@ -32,11 +42,16 @@ func setup(queue: CityProjectsQueue) -> void:
 	queue.inserted.connect(_add_project_widget)
 	
 func _add_project_widget(idx: int) -> void:
+	print("Adding project, self: ", self)
 	var project := _queue.get_project_at(idx)
 	var project_holder = _project_holder_scene.instantiate()
 	project_holder.setup(project)
 	$%RootContainer.add_child(project_holder)
 	$%RootContainer.move_child(project_holder, idx)
+	
+	# connect signals
+	project_holder.move_up.connect(_on_move_up_requested)
+	project_holder.move_down.connect(_on_move_down_requested)
 	
 func _on_removed(idx: int) -> void:
 	var to_rm := $%RootContainer.get_child(idx)
@@ -64,13 +79,29 @@ func _on_swapped(idx1: int, idx2: int) -> void:
 	#
 	# 0 1 2 3 4 5
 	# a e c d b f
-	$%RootContainer.move_child(get_child(min_idx), max_idx)
-	$%RootContainer.move_child(get_child(max_idx-1), min_idx)
+	$%RootContainer.move_child($%RootContainer.get_child(min_idx), max_idx)
+	$%RootContainer.move_child($%RootContainer.get_child(max_idx-1), min_idx)
+	
+func _on_move_up_requested(index: int) -> void:
+	if index == 0:
+		# do nothing
+		return
+	# queue will notify UI about change, there is no need to do anything
+	# more
+	_queue.swap(index-1, index)
+	
+func _on_move_down_requested(index: int) -> void:
+	if index >= $%RootContainer.get_child_count() - 1:
+		# do nothing
+		return
+	# queue will notify UI about change, there is no need to do anything
+	# more
+	_queue.swap(index, index+1)
 	
 func _clear() -> void:
-	var children = get_children()
+	var children = $%RootContainer.get_children()
 	for child in children:
-		remove_child(child)
+		$%RootContainer.remove_child(child)
 		child.queue_free()
 		
 func load_region(region: RegionObject) -> void:
@@ -86,4 +117,4 @@ func load_region(region: RegionObject) -> void:
 		push_error("Can't fetch city with id: ", city_id_opt)
 		return
 		
-	setup(city.get_projects_queue())
+	_set_queue(city.get_projects_queue())
