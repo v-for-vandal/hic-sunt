@@ -7,7 +7,7 @@ var _city_id : String
 var _player : int = 0
 var _city_finance : Dictionary = {}
 var _territory: Dictionary = {} # dict [region_id -> whatever]
-var _build_queue : Array
+var _projects_queue := CityProjectsQueue.new()
 
 var _serializable_properties: Array[StringName] = [
 	"_region_id",
@@ -15,7 +15,7 @@ var _serializable_properties: Array[StringName] = [
 	"_player",
 	"_city_finance",
 	"_territory",
-	"_build_queue"
+	#"_projects_queue" TODO: Support serialization
 	]
 
 func get_city_id() -> String:
@@ -23,6 +23,7 @@ func get_city_id() -> String:
 	
 func get_region_id() -> String:
 	return _region_id
+
 # This constructor is used by civilization.gd. It is not supposed to be used
 # directly
 static func create_new_city(city_id: String, region_id: String) -> City:
@@ -35,13 +36,19 @@ static func create_new_city(city_id: String, region_id: String) -> City:
 	# TODO: Update region object itself
 	return result
 
-func add_to_build(improvement_id: String, region: RegionObject, region_qr: Vector2i) -> void:
-	# TODO: Restore. for now, just set improvement on tile
-	#_build_queue.append(BuildSite.CreateBuildSite(improvement_id, region, region_qr))
-	region.set_improvement(region_qr, improvement_id)
-	# notify about updates
-	GlobalSignalsBus.emit_region_cell_changed(region.get_region_id(), region_qr)
+#func add_to_build(improvement_id: String, region: RegionObject, region_qr: Vector2i) -> void:
+	## TODO: Restore. for now, just set improvement on tile
+	##_build_queue.append(BuildSite.CreateBuildSite(improvement_id, region, region_qr))
+	#region.set_improvement(region_qr, improvement_id)
+	## notify about updates
+	#GlobalSignalsBus.emit_region_cell_changed(region.get_region_id(), region_qr)
+	
+func add_project(project: CityProject) -> void:
+	assert(project != null, "project must not be null")
+	_projects_queue.add_project(project, _projects_queue.size())
 
+func get_projects_queue() -> CityProjectsQueue:
+	return _projects_queue
 
 	
 func next_turn() -> void:
@@ -55,15 +62,8 @@ func next_turn() -> void:
 	# aggregate them
 	var total : Dictionary = ResourceEconomyLibrary.combine(profit_and_loss.profit, profit_and_loss.loss)
 	
-	# Finance build queue
-	if not _build_queue.is_empty():
-		var current_buildsite = _build_queue[0].add_resources(total)
-		if current_buildsite.is_ready():
-			# TODO: Support building in other regions
-			#CurrentGame.current_world.get_region_by_id(_region_id).set_improvement(
-			#		current_buildsite.improvement_id(),
-			#		)
-			_build_queue.pop_front()
+	# Finance projects queue
+	_projects_queue.process(total)
 		
 	# Add to the city finance
 	var new_finance := ResourceEconomyLibrary.combine(_city_finance, total)

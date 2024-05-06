@@ -1,0 +1,37 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6a3dba8v4rs6"]
+
+[ext_resource type="Script" path="res://ui/city/city_project_holder.gd" id="1_4efxu"]
+
+[node name="CityProjectHolder" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1609.0
+offset_bottom = -950.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4efxu")
+
+[node name="PlaceholderContainer" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Controls" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="UpButton" type="Button" parent="Controls"]
+layout_mode = 2
+text = "UP"
+
+[node name="CancelButton" type="Button" parent="Controls"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="DownButton" type="Button" parent="Controls"]
+layout_mode = 2
+text = "DN"
+
+[connection signal="pressed" from="Controls/UpButton" to="." method="_on_up_button_pressed"]
+[connection signal="pressed" from="Controls/DownButton" to="." method="_on_down_button_pressed"]

@@ -5,6 +5,7 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_biomes"), &RulesetObject::get_biomes);
   ClassDB::bind_method(D_METHOD("get_all_resources"), &RulesetObject::get_all_resources);
   ClassDB::bind_method(D_METHOD("get_atlas_render"), &RulesetObject::get_atlas_render);
+  ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"), &RulesetObject::get_improvement_info);
 }
 
 Array RulesetObject::get_biomes() const {
@@ -36,6 +37,22 @@ Dictionary RulesetObject::get_atlas_render() const {
   return result;
 }
 
+Dictionary RulesetObject::convert_improvement(const hs::proto::ruleset::RegionImprovement& improvement_type)
+{
+  Dictionary result;
+  result["id"] = improvement_type.id().c_str();
+
+  {
+    Dictionary cost;
+    for(const auto& [k,v] : improvement_type.cost().amounts()) {
+      cost[k.c_str()] = v;
+    }
+    result["cost"] = std::move(cost);
+  }
+
+  return result;
+}
+
 Dictionary RulesetObject::convert_render(const hs::proto::render::AtlasRender& render) {
   Dictionary result;
   result["resource"] = render.resource().c_str();
@@ -62,13 +79,23 @@ Array RulesetObject::get_all_region_improvements() const {
   Array result;
 
   for(auto& improvement: improvements.improvements()) {
-    Dictionary godot_improvement_info;
-    godot_improvement_info["id"] = improvement.id().c_str();
-
-    result.append(std::move(godot_improvement_info));
+    result.append(convert_improvement(improvement));
   }
 
   return result;
+}
+
+Dictionary RulesetObject::get_improvement_info(String id) const {
+  auto ascii_id = id.ascii();
+  const auto& improvements = ruleset_.GetRegionImprovements();
+  // TODO: Optimize this
+  for(auto& improvement: improvements.improvements()) {
+    if(improvement.id() == std::string_view{ascii_id.get_data()}) {
+      return convert_improvement(improvement);
+    }
+  }
+  spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
+  return {};
 }
 
 Array RulesetObject::get_all_resources() const {
