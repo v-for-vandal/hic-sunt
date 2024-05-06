@@ -3,11 +3,11 @@ extends HBoxContainer
 signal move_up(idx: int)
 signal move_down(idx: int)
 
-var _construction_project_scene = preload("res://ui/city/construction_project.tscn")
+var _construction_project_scene := preload("res://ui/city/construction_project.tscn")
 
 func setup(project: CityProject)-> void:
 	if project is ConstructionProject:
-		var construction_project_widget = _construction_project_scene.instantiate()
+		var construction_project_widget := _construction_project_scene.instantiate()
 		construction_project_widget.setup(project)
 		$%PlaceholderContainer.add_child(construction_project_widget)
 	else:

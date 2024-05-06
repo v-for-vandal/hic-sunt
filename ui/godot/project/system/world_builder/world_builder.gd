@@ -264,12 +264,12 @@ func _get_biome_at_point(i: float, j:float) -> String:
 func _create_debug_biome_map() -> void:
 	if not debug_mode:
 		return
-	var size = _generation_map_size.size
-	var biome_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+	var size := _generation_map_size.size
+	var biome_image := Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
 	for i in range(0, size.x):
 		for j in range(0, size.y):
 			var biome := _get_biome_at_point(i,j)
-			var color = Color.DEEP_PINK
+			var color := Color.DEEP_PINK
 			if terrain_colors.has(biome):
 				color = terrain_colors[biome]
 			else:

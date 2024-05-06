@@ -25,6 +25,7 @@ hs_proto_schemas = [
   'ruleset/placement_rules.proto',
   'ruleset/biome.proto',
   'ruleset/resources.proto',
+  'ruleset/jobs.proto',
   'render/atlas.proto',
   'render/render.proto',
   ]

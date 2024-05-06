@@ -47,6 +47,7 @@ public:
   String get_region_id() const;
   Dictionary convert_to_dictionary(const hs::proto::region::Improvement& improvement) const;
   Ref<PnlObject> get_pnl_statement(Ref<RulesetObject> ruleset) const;
+  Dictionary get_jobs(Ref<RulesetObject> ruleset_object) const;
 
   //Array get_region_improvements() const;
 

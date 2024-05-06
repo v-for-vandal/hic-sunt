@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://5ak57s6uysir"]
+
+[node name="CityJobWidget" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1226.0
+offset_bottom = -923.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="HBoxContainer"]
+layout_mode = 2
+bbcode_enabled = true
+text = "job id"
+fit_content = true
+autowrap_mode = 0

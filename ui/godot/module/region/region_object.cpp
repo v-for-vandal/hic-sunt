@@ -12,6 +12,7 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_improvement", "coords", "improvement"), &RegionObject::set_improvement);
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
   ClassDB::bind_method(D_METHOD("get_pnl_statement", "ruleset"), &RegionObject::get_pnl_statement);
+  ClassDB::bind_method(D_METHOD("get_jobs", "ruleset"), &RegionObject::get_jobs);
 }
 
 Rect2i RegionObject::get_dimensions() const {
@@ -171,4 +172,47 @@ Ref<PnlObject> RegionObject::get_pnl_statement(Ref<RulesetObject> ruleset) const
 
   return result;
 }
+
+// TODO: We can move this object to godot...
+Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
+  Dictionary result;
+  auto surface = region_->GetSurface();
+  const auto& ruleset = ruleset_object->GetRuleSet();
+
+  absl::flat_hash_map<std::string, size_t> data;
+
+  for(auto qr_coords : region_->GetImprovedCells()) {
+    DEBUG_VERIFY(surface.Contains(qr_coords));
+    auto& cell = surface.GetCell(qr_coords);
+
+    if(!cell.HasImprovement()) {
+      spdlog::error("Incorrect cells_with_improvements_, missing improvement");
+      continue;
+    }
+
+    auto& improvement = cell.GetImprovement();
+
+    // Get its type
+    const hs::proto::ruleset::RegionImprovement* improvement_ruleset =
+      ruleset.FindRegionImprovementByType(improvement.type());
+
+    if(improvement_ruleset == nullptr) {
+      spdlog::error("Can\'t get ruleset info for improvement {}", improvement.type());
+      continue;
+    }
+
+    // Get all jobs
+    for(auto& [k,v] : improvement_ruleset->jobs()) {
+      data[k] += v;
+    }
+  }
+
+  // Convert to Godot
+  for(auto& [k,v] : data) {
+    result[String{k.c_str()}] = v;
+  }
+
+  return result;
+}
+
 

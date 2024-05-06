@@ -142,11 +142,14 @@ void Region::BuildEphemeral() {
   ephemeral_ready_.set();
 }
 
-PnlStatement Region::BuildPnlStatement(const ruleset::RuleSet& ruleset) const
+PnlStatement Region::BuildPnlStatement([[maybe_unused]] const ruleset::RuleSet& ruleset) const
 {
   PnlStatement result;
 
   // Go through every improvement
+#if 0
+  TODO: do something with this code, input/production system was replaced with
+          jobs system
   for(auto qr_coords : cells_with_improvements_) {
     DEBUG_VERIFY(surface_.Contains(qr_coords));
     auto& cell = surface_.GetCell(qr_coords);
@@ -178,6 +181,7 @@ PnlStatement Region::BuildPnlStatement(const ruleset::RuleSet& ruleset) const
       result.GetProfit()[resource_id] += amount;
     }
   }
+#endif
 
   return result;
 }

@@ -1,12 +1,12 @@
 extends Control
 
 # private members
-var _project_holder_scene = preload("res://ui/city/city_project_holder.tscn")
+var _project_holder_scene := preload("res://ui/city/city_project_holder.tscn")
 var _queue : CityProjectsQueue
 
 func _ready() -> void:
-	var children = get_children(true)
-	var root_container = $%RootContainer
+	var children := get_children(true)
+	var root_container := $%RootContainer
 	print("Self: ", self)
 	print("Children: ", children)
 	print("Root container: ", $%RootContainer)

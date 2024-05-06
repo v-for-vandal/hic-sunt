@@ -3,11 +3,8 @@ syntax = "proto3";
 package hs.proto.ruleset;
 
 import "ruleset/placement_rules.proto";
+import "ruleset/jobs.proto";
 import "l10n/localized_name.proto";
-
-message ResourceBill {
-  map<string, int32> amounts = 1;
-}
 
 // This is improvement type(class, whatever). Like 'palace', or 'lumber mill'
 // Specific instance of improvement (this palace, or that lumber mill) has
@@ -18,11 +15,10 @@ message RegionImprovement {
 
   repeated placement_rules.PlacementRule placement_rules = 3;
 
-  // TODO: Perhaps it is better to move them to instance ?
-  ResourceBill input = 4; // Replace with 'jobs'
-  ResourceBill production = 5; // Replace with 'jobs' as well
   // How much it costs to build entity
   ResourceBill cost = 6;
+
+  map<string, int32> jobs = 7;
 }
 
 message RegionImprovements {

@@ -1,40 +1,22 @@
 improvements : [
 	{ 
 		id: "core.improv.logging_1",
-		input : {},
-		production: {
-			amounts : [
-				{ key : "core.res.logs", value: 1 }
-			]
-		}
+		jobs: [
+			{ key: "core.job.woodcutter", value: 1}
+		]
 	},
 	{
 		id: "core.improv.quarry_1",
-		production: {
-			amounts: [
-				{ key : "core.res.stone", value: 2 }
-			]
-		},
-		input: {
-			amounts : [
-				{ key : "core.res.logs", value: 1 }
-			]
-		}
+		jobs: [
+			{ key: "core.job.stone_miner", value: 1}
+		],
 	},
-		{
+	{
 		id: "core.improv.mine_1",
-		production: {
-			amounts: [
-				{ key : "core.res.iron", value: 1 }
-			]
-		},
-		input: {
-			amounts : [
-				{ key : "core.res.logs", value: 1 },
-				{ key : "core.res.stone", value: 2 }
-			]
-		}
+		jobs: [
+			{ key: "core.job.miner", value: 1}
+		]
 	},
-	{ id: "core.bld.palace "}
+	{ id: "core.bld.palace" 	}
 	
 ]

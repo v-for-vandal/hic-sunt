@@ -14,6 +14,7 @@ func _ready() -> void:
 	GameUiEventBus.set_region_interaction(_region_map)
 	# world is empty at the moment, but lets set up everything properly
 	_switch_to_world()
+
 	
 
 #func _build_tiles_mapping(world_object: WorldObject):

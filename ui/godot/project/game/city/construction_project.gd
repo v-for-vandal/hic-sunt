@@ -37,7 +37,8 @@ var _resources_cost : Dictionary
 var _accumulated_resources: Dictionary
 
 
-static func create_construction_project(improvement_id: String, region: RegionObject, region_coords: Vector2i):
+static func create_construction_project(improvement_id: String, region: RegionObject,
+	region_coords: Vector2i) ->ConstructionProject:
 	var result := ConstructionProject.new()
 	result._improvement_id = improvement_id
 	var improvement_info : Dictionary = CurrentGame.get_ruleset().get_improvement_info(improvement_id)
