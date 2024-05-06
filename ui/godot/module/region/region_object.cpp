@@ -173,7 +173,7 @@ Ref<PnlObject> RegionObject::get_pnl_statement(Ref<RulesetObject> ruleset) const
   return result;
 }
 
-// TODO: We can move this object to godot...
+// TODO: We can move this method to godot...
 Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
   Dictionary result;
   auto surface = region_->GetSurface();

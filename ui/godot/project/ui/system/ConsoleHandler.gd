@@ -1,5 +1,7 @@
 extends Node
 
+var DevSelectAndBuildInteraction = preload("res://game/interactions/dev/dev_select_and_build.gd")
+
 func _ready() -> void:
 	_register_dev_console_commands()
 
@@ -8,6 +10,7 @@ func _register_dev_console_commands()-> void:
 	pass
 	
 func _dev_build(improvement_id = null, a = 1, b = "s", f = {}):
+	var resolved_improvent_id : String
 	if improvement_id == null:
 		# create a popup
 		var popup_menu := PopupMenu.new()
@@ -25,8 +28,12 @@ func _dev_build(improvement_id = null, a = 1, b = "s", f = {}):
 		$CanvasLayer.remove_child(popup_menu)
 		popup_menu.queue_free()
 		
-		improvement_id = available_buildings[idx]
-	print("Building an improvement: ", improvement_id)
+		resolved_improvent_id = available_buildings[idx].id as String
+	else:
+		resolved_improvent_id = improvement_id as String
+		
+	var new_build_interaction = DevSelectAndBuildInteraction.new(resolved_improvent_id)
+	GameUiEventBus.set_main_interaction(new_build_interaction)
 	
 	
 func _input(event: InputEvent) -> void:
