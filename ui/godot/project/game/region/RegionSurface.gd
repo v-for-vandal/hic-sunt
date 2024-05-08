@@ -3,7 +3,10 @@ extends GameTileSurface
 signal cell_clicked(region_object: RegionObject, qr_position: Vector2i)
 
 var _region_object : RegionObject
-var _improvements_layer_id : int = 0
+
+# Those constants are set up in _ready()
+var _BIOME_LAYER_ID : int = -1
+var _IMPROVEMENT_LAYER_ID : int  = -1
 
 var visualization_data : Dictionary = {}
 
@@ -13,8 +16,12 @@ func _ready() -> void:
 	super()
 	for i in range(get_layers_count()):
 		if get_layer_name(i) == "improvements":
-			_improvements_layer_id = i
-			break
+			_IMPROVEMENT_LAYER_ID = i
+		if get_layer_name(i) == "biomes":
+			_BIOME_LAYER_ID = i
+			
+	assert(_BIOME_LAYER_ID != -1, "Faild to find TileMap layer for biomes")
+	assert(_IMPROVEMENT_LAYER_ID != -1, "Faild to find TileMap layer for improvements")
 
 
 func _contains(tile_qr: Vector2i) -> bool:
@@ -23,9 +30,10 @@ func _contains(tile_qr: Vector2i) -> bool:
 
 func load_region(region_object : RegionObject) -> void:
 	assert(region_object != null, "Can't load nullptr as region")
-	clear()
 	
+	_connect_region_object(region_object)
 	_region_object = region_object
+
 	
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system
@@ -36,9 +44,17 @@ func load_region(region_object : RegionObject) -> void:
 			var qr_coords := Vector2i(q,r)
 			if _contains(qr_coords):
 				update_cell(qr_coords)
-	# TODO: Connect to 'cell_updated' signal
-			
-				
+
+func _clear_old_region()->void:
+	super.clear()
+	
+	if _region_object == null:
+		# no old region, exit
+		return
+		
+	# break connections
+	_disconnect_region_object(_region_object)
+	
 func update_cell(qr_coords: Vector2i) -> void:
 	var region_info : Dictionary = _region_object.get_cell_info(qr_coords)
 	var biome : String = region_info.biome
@@ -48,33 +64,41 @@ func update_cell(qr_coords: Vector2i) -> void:
 	# fill cell
 	if visualization_data.has(biome):
 		#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
-		set_cell(0, xy_coords, visualization_data[biome].source_id,
+		set_cell(_BIOME_LAYER_ID, xy_coords, visualization_data[biome].source_id,
 			visualization_data[biome].atlas_coords,0)
 	else:
 		# set cell to absent pink
-		set_cell(0, xy_coords, 0, Vector2i(0,0), 0)
+		set_cell(_BIOME_LAYER_ID, xy_coords, 0, Vector2i(0,0), 0)
 		
 	var improvement = region_info.improvement
 	if !improvement.is_empty():
 		var improvement_type = improvement.type
 		if improvement_type in visualization_data:
 			# put it into layer above
-			set_cell(_improvements_layer_id, xy_coords, visualization_data[improvement_type].source_id,
+			set_cell(_IMPROVEMENT_LAYER_ID, xy_coords, visualization_data[improvement_type].source_id,
 				visualization_data[improvement_type].atlas_coords,0)
 		else:
 			# place pink object to indicate an error
 			push_error("Undefined visualization data for %s" % [improvement_type])
-			set_cell(_improvements_layer_id, xy_coords, 0, Vector2i.ZERO, 0)
+			set_cell(_IMPROVEMENT_LAYER_ID, xy_coords, 0, Vector2i.ZERO, 0)
+	else:
+		# no improvement
+		erase_cell(_IMPROVEMENT_LAYER_ID, xy_coords)
 		
 func get_region_object() -> RegionObject:
 	return _region_object
 	
-func on_region_changed(area: Rect2i) -> void:
+func _on_region_changed(area: Rect2i, flags: int) -> void:
 	for q in range(area.position.x, area.end.x):
 		for r in range(area.position.y, area.end.y):
 			var qr_coords := Vector2i(q,r)
 			if _contains(qr_coords):
 				update_cell(qr_coords)
 	
+func _connect_region_object(region_object: RegionObject) -> void:
+	region_object.region_changed.connect(_on_region_changed)
+	
+func _disconnect_region_object(region_object: RegionObject) -> void:
+	region_object.region_changed.disconnect(_on_region_changed)
 	
 

@@ -45,12 +45,15 @@ func _on_world_map_show_region_request(world_object:  WorldObject, qr_position: 
 	#assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	assert(_region_map != null, "_region_map is somehow null")
 	var region_obj = world_object.get_region(qr_position);
-	# TODO: Check for fog
-	if region_obj != null:
-		_region_map.load_region(region_obj)
-	else:
+	
+	if region_obj == null:
 		print("region is absent")
+		return
+		
+	# We need to add scene to the tree before we can call load_region
 	_switch_to_region()
+	_region_map.load_region(region_obj)
+	
 	
 func _switch(from: Node, to: Node) -> void:
 	if from.get_parent() != null:

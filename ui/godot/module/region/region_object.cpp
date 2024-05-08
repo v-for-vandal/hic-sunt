@@ -1,5 +1,7 @@
 #include "region_object.hpp"
 
+#include <godot_cpp/core/object.hpp>
+
 void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id);
@@ -13,6 +15,12 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
   ClassDB::bind_method(D_METHOD("get_pnl_statement", "ruleset"), &RegionObject::get_pnl_statement);
   ClassDB::bind_method(D_METHOD("get_jobs", "ruleset"), &RegionObject::get_jobs);
+
+  // signals
+  ADD_SIGNAL(MethodInfo("region_changed",
+    PropertyInfo(Variant::RECT2I, "area"),
+    PropertyInfo(Variant::INT, "flags"))
+    );
 }
 
 Rect2i RegionObject::get_dimensions() const {
@@ -79,7 +87,12 @@ bool RegionObject::set_biome(Vector2i coords, String biome) const
     return false;
   }
 
-  return region_->SetBiome(qrs_coords, biome.utf8().get_data());
+  auto success = region_->SetBiome(qrs_coords, biome.utf8().get_data());
+  if( success) {
+    emit_signals_for_cell(coords, 0);
+  }
+
+  return success;
 }
 
 bool RegionObject::set_feature(Vector2i coords, String feature) const
@@ -93,7 +106,13 @@ bool RegionObject::set_feature(Vector2i coords, String feature) const
     return false;
   }
 
-  return region_->SetFeature(qrs_coords, feature.utf8().get_data());
+  auto success = region_->SetFeature(qrs_coords, feature.utf8().get_data());
+
+  if( success) {
+    emit_signals_for_cell(coords, 0);
+  }
+
+  return success;
 }
 
 bool RegionObject::set_improvement(Vector2i coords, String improvement) const
@@ -107,7 +126,13 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const
   // on.
   // However, it will not perform checks that this improvement follows
   // the ruleset
-  return region_->SetImprovement(qrs_coords, improvement.utf8().get_data());
+  auto success = region_->SetImprovement(qrs_coords, improvement.utf8().get_data());
+
+  if( success) {
+    emit_signals_for_cell(coords, 0);
+  }
+
+  return success;
 }
 
 Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
@@ -213,6 +238,12 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
   }
 
   return result;
+}
+
+void RegionObject::emit_signals_for_cell(Vector2i coords, int flags) const
+{
+  Rect2i area{coords, Vector2i{1,1}};
+  const_cast<RegionObject*>(this)->emit_signal("region_changed", area, flags);
 }
 
 

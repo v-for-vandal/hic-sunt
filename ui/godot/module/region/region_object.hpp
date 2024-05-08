@@ -49,6 +49,8 @@ public:
   Ref<PnlObject> get_pnl_statement(Ref<RulesetObject> ruleset) const;
   Dictionary get_jobs(Ref<RulesetObject> ruleset_object) const;
 
+  void emit_signals_for_cell(Vector2i coords, int falgs) const;
+
   //Array get_region_improvements() const;
 
   static QRSCoords cast_qrs(Vector2i coords) {

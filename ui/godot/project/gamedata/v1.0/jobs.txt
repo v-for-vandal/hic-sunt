@@ -19,6 +19,6 @@ jobs : [
   output: [
 	  { key : "core.res.iron", value: 1 }
 	]
-},
+}
 
 ]

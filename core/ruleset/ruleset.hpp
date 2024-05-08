@@ -31,22 +31,30 @@ public:
 
   auto& GetRendering() const { return rendering_; }
 
+  auto& GetJobs() const { return jobs_; }
+
   const proto::ruleset::RegionImprovement* FindRegionImprovementByType(
     utils::StringTokenCRef improvement_type_id) const;
+
+  const proto::ruleset::Job* FindJobByType(
+    utils::StringTokenCRef job_type_id) const;
 
 
 private:
   proto::ruleset::RegionImprovements improvements_;
   proto::ruleset::Biomes biomes_;
   proto::ruleset::Resources resources_;
+  proto::ruleset::Jobs jobs_;
   proto::render::Rendering rendering_;
 
   absl::flat_hash_map<utils::StringToken, size_t> improvements_by_type_;
+  absl::flat_hash_map<utils::StringToken, size_t> jobs_by_type_;
 
   static inline std::filesystem::path improvements_file{"region_improvements.txt"};
   static inline std::filesystem::path biomes_file{"biomes.txt"};
   static inline std::filesystem::path resources_file{"resources.txt"};
   static inline std::filesystem::path rendering_file{"rendering.txt"};
+  static inline std::filesystem::path jobs_file{"jobs.txt"};
 };
 
 }

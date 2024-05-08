@@ -2,6 +2,10 @@ extends RefCounted
 
 class_name City
 
+# signals
+
+
+# private variables
 var _region_id : String
 var _city_id : String
 var _player : int = 0
@@ -23,6 +27,9 @@ func get_city_id() -> String:
 	
 func get_region_id() -> String:
 	return _region_id
+	
+func get_region_object() -> RegionObject:
+	return CurrentGame.get_current_world().get_region_by_id(_region_id)
 
 # This constructor is used by civilization.gd. It is not supposed to be used
 # directly
@@ -50,11 +57,46 @@ func add_project(project: CityProject) -> void:
 func get_projects_queue() -> CityProjectsQueue:
 	return _projects_queue
 
+func build_pnl() -> Dictionary:
+	# TODO: This function must use cache, because it is computationally
+	# expensive
+	var profit: Dictionary = {}
+	var losses: Dictionary = {}
+	
+
+	var ruleset := CurrentGame.get_current_player_ruleset()
+	# this is list of jobs 
+	var region_jobs : Dictionary = get_region_object().get_jobs(ruleset)
+	print("region jobs: ", region_jobs)
+	for job_id : String in region_jobs:
+		var job_count = region_jobs[job_id] # for now, assume that every job is occupied
+		var job_info = ruleset.get_job_info(job_id)
+		var job_profit : Dictionary = job_info.output
+		var job_losses : Dictionary = job_info.input
+		print("Job id: ", job_id)
+		print("Job profit: ", job_profit)
+		print("Job losses: ", job_losses)
+		print("Job count: ", job_count)
+		ResourceEconomyLibrary.multiply(job_profit, job_count)
+		ResourceEconomyLibrary.multiply(job_losses, job_count)
+		# multiply everything by count
+		
+		ResourceEconomyLibrary.update(profit, job_profit)
+		ResourceEconomyLibrary.update(losses, job_losses)
+		
+	var result := {
+		"profit" : profit,
+		"losses" : losses,
+		"total" : ResourceEconomyLibrary.combine(profit, losses)
+		}
+	
+	return result
+		
 	
 func next_turn() -> void:
 	# Collect profit and loss from region
 	var profit_and_loss := {}
-	for world_qr in _territory:
+	for world_qr : Vector2i in _territory:
 		ResourceEconomyLibrary.update(profit_and_loss,
 			CurrentGame.current_world.get_region(world_qr).collect_profit_and_loss(
 				CurrentGame.get_ruleset()))

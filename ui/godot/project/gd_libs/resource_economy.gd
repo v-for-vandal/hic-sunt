@@ -10,10 +10,10 @@ static func combine(profit: Dictionary, loss: Dictionary) -> Dictionary:
 	
 static func update(target: Dictionary, input: Dictionary) -> void:
 	for res_id : String in input:
-		target[res_id] = target[res_id] + input.get(res_id, 0)
-	
-	for res_id : String in input:
-		if not res_id in target:
-			target[res_id] = target[res_id]
+		target[res_id] = target.get(res_id, 0) + input.get(res_id, 0)
+		
+static func multiply(target: Dictionary, multiplier: int) -> void:
+	for res_id : String in target:
+		target[res_id] = target[res_id] * multiplier
 			
 	

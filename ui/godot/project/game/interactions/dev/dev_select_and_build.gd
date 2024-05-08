@@ -1,11 +1,11 @@
 extends RefCounted
 
-var improvement_id: String
+var _improvement_id: String
 
 var _last_highlight_surface : GameTileSurface
 
-func _init(_improvement_id : String) -> void:
-	self.improvement_id = improvement_id
+func _init(improvement_id : String) -> void:
+	self._improvement_id = improvement_id
 
 func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 	if event is GameUiEventBus.RegionUIActionEvent:
@@ -43,7 +43,7 @@ func cancel() -> void:
 func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 	# TODO: Perhaps we should not store this logic in interaction and instead
 	# should move this code to civilization.gd
-	print("Building ", improvement_id, " at ", region.get_region_id())
+	print("Building ", _improvement_id, " at ", region.get_region_id())
 	
 	# stop receiving other events
 	GameUiEventBus.remove_main_interaction(self)
@@ -54,7 +54,7 @@ func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 		# without city
 		push_error("Dev mode: warning: building improvement without any city")
 
-	region.set_improvement(qr_coords, improvement_id)
+	region.set_improvement(qr_coords, _improvement_id)
 		
 	# cleanup
 	cleanup()

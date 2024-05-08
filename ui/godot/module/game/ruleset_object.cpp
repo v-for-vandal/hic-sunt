@@ -6,6 +6,7 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_all_resources"), &RulesetObject::get_all_resources);
   ClassDB::bind_method(D_METHOD("get_atlas_render"), &RulesetObject::get_atlas_render);
   ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"), &RulesetObject::get_improvement_info);
+  ClassDB::bind_method(D_METHOD("get_job_info", "job_id"), &RulesetObject::get_job_info);
 }
 
 Array RulesetObject::get_biomes() const {
@@ -72,6 +73,25 @@ Dictionary RulesetObject::convert_render(const hs::proto::render::AtlasRender& r
   return result;
 }
 
+Dictionary RulesetObject::convert_job(const hs::proto::ruleset::Job& job) {
+  Dictionary result;
+  result["id"] = job.id().c_str();
+
+  Dictionary input;
+  for(const auto& [k,v] : job.input()) {
+    input[k.c_str()] = v;
+  }
+
+  Dictionary output;
+  for(const auto& [k,v] : job.output()) {
+    output[k.c_str()] = v;
+  }
+
+  result["input"] = std::move(input);
+  result["output"] = std::move(output);
+
+  return result;
+}
 
 Array RulesetObject::get_all_region_improvements() const {
   const auto& improvements = ruleset_.GetRegionImprovements();
@@ -87,15 +107,25 @@ Array RulesetObject::get_all_region_improvements() const {
 
 Dictionary RulesetObject::get_improvement_info(String id) const {
   auto ascii_id = id.ascii();
-  const auto& improvements = ruleset_.GetRegionImprovements();
-  // TODO: Optimize this
-  for(auto& improvement: improvements.improvements()) {
-    if(improvement.id() == std::string_view{ascii_id.get_data()}) {
-      return convert_improvement(improvement);
-    }
+  const auto* improvement = ruleset_.FindRegionImprovementByType(ascii_id.get_data());
+
+  if(improvement == nullptr) {
+    spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
+    return {};
   }
-  spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
-  return {};
+
+  return convert_improvement(*improvement);
+}
+
+Dictionary RulesetObject::get_job_info(String id) const {
+  auto ascii_id = id.ascii();
+  const auto* job = ruleset_.FindJobByType(ascii_id.get_data());
+  if(job == nullptr) {
+    spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
+    return {};
+  }
+
+  return convert_job(*job);
 }
 
 Array RulesetObject::get_all_resources() const {
