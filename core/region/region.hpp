@@ -60,6 +60,9 @@ public:
   bool IsCity() const { return !city_id_.empty(); }
   std::string_view GetCityId() const { return city_id_; }
 
+  // Returns container with coordinates of all improved cells
+  const auto& GetImprovedCells() const { return cells_with_improvements_; }
+
   // TODO: Perhaphs this method should not be inside region?
   PnlStatement BuildPnlStatement(const ruleset::RuleSet& ruleset) const;
 

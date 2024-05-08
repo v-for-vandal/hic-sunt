@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2g36s2i8bc5p"]
+
+[ext_resource type="Script" path="res://ui/city/city_jobs.gd" id="1_pka0q"]
+
+[node name="CityJobs" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pka0q")
+
+[node name="JobsView" type="GridContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+columns = 2
+
+[node name="ExampleName" type="RichTextLabel" parent="JobsView"]
+layout_mode = 2
+bbcode_enabled = true
+text = "example.job.id"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="ExampleValue" type="Label" parent="JobsView"]
+layout_mode = 2
+text = "42"

@@ -13,6 +13,10 @@ func _ready() -> void:
 	_highlight_layer_id = get_layers_count() - 1
 	
 func _contains(tile_qr: Vector2i) -> bool:
+	if _world_object == null:
+		push_error("WorldSurface is running in uninitialized mode")
+		return false
+
 	assert(_world_object != null)
 	return _world_object.contains(tile_qr)
 	

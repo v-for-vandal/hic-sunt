@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://brhsewnl00nkp"]
+[gd_scene load_steps=8 format=3 uid="uid://brhsewnl00nkp"]
 
 [ext_resource type="Script" path="res://ui/region/region_ui.gd" id="1_j578s"]
 [ext_resource type="Script" path="res://ui/world/InfoTabContainer.gd" id="2_itlrf"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dcacdldp7pmxy" path="res://ui/region/buildings/building_list.tscn" id="4_0x70n"]
 [ext_resource type="Script" path="res://ui/region/Resources.gd" id="5_wjejd"]
 [ext_resource type="PackedScene" uid="uid://cls0hdxhdqsxu" path="res://ui/city/city_projects_queue.tscn" id="6_uhseh"]
+[ext_resource type="PackedScene" uid="uid://d2g36s2i8bc5p" path="res://ui/city/city_jobs.tscn" id="7_udedg"]
 
 [node name="RegionUI" type="Control"]
 layout_mode = 3
@@ -59,11 +60,11 @@ layout_mode = 2
 columns = 2
 script = ExtResource("3_swddy")
 
-[node name="Buildings" parent="InfoTabContainer" instance=ExtResource("4_0x70n")]
+[node name="Buildings" parent="InfoTabContainer" groups=["ui:region"] instance=ExtResource("4_0x70n")]
 visible = false
 layout_mode = 2
 
-[node name="Resources" type="GridContainer" parent="InfoTabContainer"]
+[node name="Resources" type="GridContainer" parent="InfoTabContainer" groups=["ui:region"]]
 visible = false
 layout_mode = 2
 columns = 2
@@ -85,7 +86,11 @@ text = "long resource name"
 layout_mode = 2
 text = "100983"
 
-[node name="Projects" parent="InfoTabContainer" instance=ExtResource("6_uhseh")]
+[node name="Projects" parent="InfoTabContainer" groups=["ui:region"] instance=ExtResource("6_uhseh")]
+visible = false
+layout_mode = 2
+
+[node name="Jobs" parent="InfoTabContainer" groups=["ui:region"] instance=ExtResource("7_udedg")]
 visible = false
 layout_mode = 2
 
@@ -105,7 +110,7 @@ horizontal_scroll_mode = 0
 [node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
 layout_mode = 2
 
-[node name="BuildingList" parent="ScrollContainer/VBoxContainer" instance=ExtResource("4_0x70n")]
+[node name="BuildingList" parent="ScrollContainer/VBoxContainer" groups=["ui:region"] instance=ExtResource("4_0x70n")]
 custom_minimum_size = Vector2(200, 200)
 layout_mode = 2
 

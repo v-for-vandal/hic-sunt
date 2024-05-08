@@ -19,14 +19,6 @@ func _gui_input(event : InputEvent) -> void:
 			_current_select_callback = null
 			_is_in_select_mode = false
 			accept_event()
-
-		
-func _input(event: InputEvent) -> void:
-	# We have to catch this key before _gui_input, otherwise
-	# console itself will catch it and simply print as a character
-	if event.is_action_pressed("ui_dev_console"):
-		$DevConsole.visible = !$DevConsole.visible
-		get_viewport().set_input_as_handled()
 	
 		
 func _on_options_button_toggled(toggled_on: bool) -> void:

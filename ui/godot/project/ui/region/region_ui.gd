@@ -18,9 +18,9 @@ func on_region_cell_clicked_forward(region_object: RegionObject, qr: Vector2i) -
 func load_region(region_object: RegionObject) -> void:
 	assert(region_object != null)
 	_region = region_object
-	update_region()
+	_update_region()
 	
-func update_region() -> void:
+func _update_region() -> void:
 	if _region == null:
 		return
 	# get list of buildings
@@ -37,10 +37,13 @@ func update_region() -> void:
 		$CityNameLabel.visible = true
 		$CityNameLabel.text = city_id_opt
 		
-	$InfoTabContainer/Buildings.load_region(_region)
-	$InfoTabContainer/Resources.load_region(_region)
-	$InfoTabContainer/Projects.load_region(_region)
-	$ScrollContainer/VBoxContainer/BuildingList.load_region(_region)
+	# The call load_region is performed via call_group. All nodes
+	# that require such call will receive them.
+	#$InfoTabContainer/Buildings.load_region(_region)
+	#$InfoTabContainer/Resources.load_region(_region)
+	#$InfoTabContainer/Projects.load_region(_region)
+	#$InfoTabContainer/Jobs.load_region(_region)
+	#$ScrollContainer/VBoxContainer/BuildingList.load_region(_region)
 	
 func _on_close_button_pressed() -> void:
 	print("Close region UI requested") # TODO: RM
@@ -74,8 +77,8 @@ func _on_build_improvement(improvement_id: String) -> void:
 	GameUiEventBus.set_main_interaction(new_build_interaction)
 	
 # This function is called by parent class when something inside region has changed
-func on_region_changed(_area: Rect2i) -> void:
+func _on_region_changed(_area: Rect2i, flags: int) -> void:
 	if _region == null:
 		return
 		
-	update_region()
+	_update_region()

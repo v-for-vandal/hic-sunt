@@ -19,6 +19,9 @@ func get_ruleset() -> RulesetObject:
 func get_current_player_civ() -> Civilisation:
 	return _current_player_civ
 	
+func get_current_world() -> WorldObject:
+	return current_world
+	
 func get_atlas_visualization() -> Dictionary:
 	# TODO:
 	# 1. cache data

@@ -1,0 +1,26 @@
+syntax = "proto3";
+import "l10n/localized_name.proto";
+
+package hs.proto.ruleset;
+
+message ResourceBill {
+  map<string, int32> amounts = 1;
+}
+
+message Job {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+
+  // stratum of society - worker, specialist, etc
+  string  strata = 5;
+
+  // what resources does job consume
+  map<string, int32> input = 3;
+
+  // what is the output of this job
+  map<string, int32> output = 4;
+};
+
+message Jobs {
+  repeated Job jobs = 1;
+}

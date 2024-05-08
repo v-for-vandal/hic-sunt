@@ -9,10 +9,10 @@
 [node name="RegionMap" type="Node2D"]
 script = ExtResource("1_5bqhm")
 
-[node name="RegionSurface" type="TileMap" parent="."]
+[node name="RegionSurface" type="TileMap" parent="." groups=["ui:region"]]
 tile_set = ExtResource("2_ihpnb")
 format = 2
-layer_0/name = "terrain"
+layer_0/name = "biomes"
 layer_0/tile_data = PackedInt32Array(0, 0, 0)
 layer_1/name = "highlight"
 layer_1/tile_data = PackedInt32Array()
@@ -27,7 +27,7 @@ zoom = Vector2(0.4, 0.4)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="RegionUI" parent="CanvasLayer" instance=ExtResource("3_ltroy")]
+[node name="RegionUI" parent="CanvasLayer" groups=["ui:region"] instance=ExtResource("3_ltroy")]
 mouse_filter = 1
 
 [connection signal="cell_clicked" from="RegionSurface" to="CanvasLayer/RegionUI" method="on_region_cell_clicked_forward"]

@@ -1,11 +1,11 @@
 extends RefCounted
 
-class_name  SelectAndBuildInteraction
-
-var improvement_id: String
+var _improvement_id: String
 
 var _last_highlight_surface : GameTileSurface
 
+func _init(improvement_id : String) -> void:
+	self._improvement_id = improvement_id
 
 func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 	if event is GameUiEventBus.RegionUIActionEvent:
@@ -15,9 +15,6 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 			
 			# get current region
 			var region : RegionObject = event.surface.get_region_object()
-			# add to build queue
-			# TODO: Region may not have world_qr
-			#city.add_to_build(improvement_id, region, event.qr_coords)
 			build_and_finish(region, event.qr_coords)
 			event.accept()
 			return
@@ -46,7 +43,7 @@ func cancel() -> void:
 func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 	# TODO: Perhaps we should not store this logic in interaction and instead
 	# should move this code to civilization.gd
-	print("Building ", improvement_id, " at ", region.get_region_id())
+	print("Building ", _improvement_id, " at ", region.get_region_id())
 	
 	# stop receiving other events
 	GameUiEventBus.remove_main_interaction(self)
@@ -55,18 +52,9 @@ func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 	if city_id.is_empty():
 		# TODO: Actually, we should be able to build improvement in region
 		# without city
-		push_error("Incorrect attempt to build improvement without any city")
-	else:
-		var city : City = CurrentGame.get_current_player_civ().find_city_by_id(city_id)
-		if city == null:
-			push_error("Can't find specified city: ", city_id)
-		else:
-			var construction_project := ConstructionProject.create_construction_project(
-				improvement_id, region, qr_coords)
-			if construction_project == null:
-				push_error("Failed to create construction project")
-			else:
-				city.add_project(construction_project)
+		push_error("Dev mode: warning: building improvement without any city")
+
+	region.set_improvement(qr_coords, _improvement_id)
 		
 	# cleanup
 	cleanup()
