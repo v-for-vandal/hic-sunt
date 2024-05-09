@@ -19,6 +19,13 @@ jobs : [
   output: [
 	  { key : "core.res.iron", value: 1 }
 	]
+},
+{
+  id: "core.job.worker",
+  input: []
+  output: [
+	  { key : "core.res.workforce", value: 1 }
+	]
 }
 
 ]

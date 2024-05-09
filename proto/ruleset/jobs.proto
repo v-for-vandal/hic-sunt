@@ -3,10 +3,6 @@ import "l10n/localized_name.proto";
 
 package hs.proto.ruleset;
 
-message ResourceBill {
-  map<string, int32> amounts = 1;
-}
-
 message Job {
   string id = 1;
   l10n.LocalizedName name = 2;

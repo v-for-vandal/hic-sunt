@@ -31,4 +31,5 @@ layout_mode = 2
 text = "Improvement name"
 
 [node name="ProgressBar" type="ProgressBar" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2

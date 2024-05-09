@@ -95,14 +95,7 @@ func build_pnl() -> Dictionary:
 	
 func next_turn() -> void:
 	# Collect profit and loss from region
-	var profit_and_loss := {}
-	for world_qr : Vector2i in _territory:
-		ResourceEconomyLibrary.update(profit_and_loss,
-			CurrentGame.current_world.get_region(world_qr).collect_profit_and_loss(
-				CurrentGame.get_ruleset()))
-	
-	# aggregate them
-	var total : Dictionary = ResourceEconomyLibrary.combine(profit_and_loss.profit, profit_and_loss.loss)
+	var total : Dictionary = build_pnl().total
 	
 	# Finance projects queue
 	_projects_queue.process(total)

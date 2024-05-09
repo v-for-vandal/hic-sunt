@@ -46,7 +46,6 @@ func _update_region() -> void:
 	#$ScrollContainer/VBoxContainer/BuildingList.load_region(_region)
 	
 func _on_close_button_pressed() -> void:
-	print("Close region UI requested") # TODO: RM
 	close_requested.emit()
 
 
@@ -56,8 +55,6 @@ func _on_info_button_toggled(toggled_on : bool) -> void:
 
 func _on_build_button_toggled(toggled_on : bool) -> void:
 	$ScrollContainer.visible = toggled_on
-
-		
 
 
 func _on_city_button_pressed() -> void:

@@ -54,7 +54,10 @@ func process(available_resources: Dictionary) -> void:
 		if not project.is_possible():
 			project.execute_skipped()
 			
-		project.take_resources(available_resources)
+		var was_changed := project.take_resources(available_resources)
+		if was_changed:
+			project.changed.emit()
+		
 		if project.is_finished():
 			project.execute_finisher()
 			
@@ -65,4 +68,5 @@ func process(available_resources: Dictionary) -> void:
 		if _queue[idx].is_finished():
 			removed.emit(idx)
 			_queue.remove_at(idx)
+		idx -= 1
 
