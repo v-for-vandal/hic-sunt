@@ -19,7 +19,7 @@ var _serializable_properties: Array[StringName] = [
 	"_player",
 	"_city_finance",
 	"_territory",
-	#"_projects_queue" TODO: Support serialization
+	"_projects_queue"
 	]
 
 func get_city_id() -> String:
@@ -73,10 +73,10 @@ func build_pnl() -> Dictionary:
 		var job_info = ruleset.get_job_info(job_id)
 		var job_profit : Dictionary = job_info.output
 		var job_losses : Dictionary = job_info.input
-		print("Job id: ", job_id)
-		print("Job profit: ", job_profit)
-		print("Job losses: ", job_losses)
-		print("Job count: ", job_count)
+		#print("Job id: ", job_id)
+		#print("Job profit: ", job_profit)
+		#print("Job losses: ", job_losses)
+		#print("Job count: ", job_count)
 		ResourceEconomyLibrary.multiply(job_profit, job_count)
 		ResourceEconomyLibrary.multiply(job_losses, job_count)
 		# multiply everything by count
@@ -104,6 +104,16 @@ func next_turn() -> void:
 	var new_finance := ResourceEconomyLibrary.combine(_city_finance, total)
 	_city_finance = new_finance
 	
+# This is internal method, we use it to clear object before parsing
+func _clear() -> void:
+	_region_id = ""
+	_city_id = ""
+	_player = 0
+	_city_finance  = {}
+	_territory = {} # dict [region_id -> whatever]
+	_projects_queue = CityProjectsQueue.new()
+	
+	
 func get_serializable_properties() -> Array[StringName]:
 	return _serializable_properties
 
@@ -111,4 +121,5 @@ func serialize_to_variant() -> Dictionary:
 	return SerializeLibrary.serialize_to_variant(self)
 	
 func parse_from_variant(data : Dictionary) -> void:
+	_clear()
 	SerializeLibrary.parse_from_variant(self, data)

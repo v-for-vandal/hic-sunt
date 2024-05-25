@@ -6,7 +6,6 @@ extends Node2D
 @onready var _world_map: Node = $WorldMap
 @onready var _region_map: Node = $RegionMap
 
-
 func _ready() -> void:
 	assert(_world_map != null, "Child failed to initialize")
 	assert(_region_map != null, "Child failed to initialize")
@@ -14,6 +13,14 @@ func _ready() -> void:
 	GameUiEventBus.set_region_interaction(_region_map)
 	# world is empty at the moment, but lets set up everything properly
 	_switch_to_world()
+	
+	# TODO: RM - was checking how get_script works
+	#print("Check get_script.get_resource_path")
+	#print(_region_map.get_script().resource_path)
+	#print(_world_map.get_script().resource_path)
+	#var test_script = ResourceLoader.load(_region_map.get_script().resource_path)
+	#var test_object = test_script.new()
+	#print(test_object)
 
 	
 

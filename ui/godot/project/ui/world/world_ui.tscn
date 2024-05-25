@@ -36,6 +36,11 @@ text = "Info"
 layout_mode = 2
 text = "Next turn"
 
+[node name="TurnNumber" type="Label" parent="TopPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Turn: 0"
+
 [node name="OptionsDialog" parent="." instance=ExtResource("1_8kfrc")]
 visible = false
 layout_mode = 1

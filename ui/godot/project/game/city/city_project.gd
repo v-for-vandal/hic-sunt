@@ -15,6 +15,14 @@ class_name CityProject
 ## by the system, there is no need to call it manually
 signal changed()
 
+## Reimplement this static (preferably) method so that you can
+## specify your project type.
+## project types must be present in ruleset object
+static func get_project_type() -> StringName:
+	assert(false, "Please implement this method")
+	push_error("Please implement this method")
+	return &"error.uninitialized"
+
 ## Take resources that the project need. Modify the 'resources' accordingly
 ## Return true if the was any change, false otherwrise. Doesn't matter what
 ## kind of chnage - return value is used to notify UI so that it can update
@@ -23,6 +31,27 @@ func take_resources(resources: Dictionary) -> bool:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
 	return false
+	
+## This method will be called when project reportes that it is is_finished()
+## It will be called only once.
+## You can return false if you have failed, but that usually means  a bug in
+## code. Nothing will be done from game perspective, other then writing about
+## it in logs
+func execute_finisher() -> bool:
+	assert(false, "Please implement this method")
+	push_error("Please implement this method")
+	return false
+
+## This method is called when for some reason this turn system can't even call
+## take_resources. For example, if project reports that it is no longer
+## 'is_possible()', then system will not call 'take_resources' and will instead
+## call 'execute_skipped'. Or, for example, game scenario - riots in the city
+## and nothing is being done.
+func execute_skipped() -> bool:
+	assert(false, "Please implement this method")
+	push_error("Please implement this method")
+	return false
+
 	
 ## Return true if project is finished. City will remove your project from queue
 ## and call appropriate callback.
@@ -55,4 +84,14 @@ func turns_without_progress() -> int:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
 	return 0
+	
+func serialize_to_variant() -> Dictionary:
+	assert(false, "Please implement this method")
+	push_error("Please implement this method")
+	return {}
+	
+func parse_from_variant(data : Dictionary) -> void:
+	assert(false, "Please implement this method")
+	push_error("Please implement this method")
+	pass
 

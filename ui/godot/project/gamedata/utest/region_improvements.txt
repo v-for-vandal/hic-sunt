@@ -1,0 +1,47 @@
+improvements : [
+	{ 
+		id: "test.improv.construction_1",
+		cost : {
+			amounts: [
+				{ key: "core.res.stone", value: 10},
+				{ key: "core.res.wood", value: 10},
+				{ key: "core.res.workforce", value: 2}
+			]
+		}
+	},
+	{ 
+		id: "core.improv.logging_1",
+		jobs: [
+			{ key: "core.job.woodcutter", value: 1}
+		]
+	},
+	{
+		id: "core.improv.quarry_1",
+		jobs: [
+			{ key: "core.job.stone_miner", value: 1}
+		],
+	},
+	{
+		id: "core.improv.mine_1",
+		jobs: [
+			{ key: "core.job.miner", value: 1}
+		]
+	},
+		{
+		id: "core.improv.construction_office_1",
+		jobs: [
+			{ key: "core.job.worker", value: 2}
+		]
+	},
+	{
+		id: "core.bld.palace" ,
+		cost : {
+			amounts: [
+				{ key: "core.res.stone", value: 10},
+				{ key: "core.res.wood", value: 10},
+				{ key: "core.res.workforce", value: 2}
+			]
+		}
+	}
+	
+]

@@ -7,6 +7,7 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_atlas_render"), &RulesetObject::get_atlas_render);
   ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"), &RulesetObject::get_improvement_info);
   ClassDB::bind_method(D_METHOD("get_job_info", "job_id"), &RulesetObject::get_job_info);
+  ClassDB::bind_method(D_METHOD("get_project_info", "project_id"), &RulesetObject::get_project_info);
 }
 
 Array RulesetObject::get_biomes() const {
@@ -93,6 +94,25 @@ Dictionary RulesetObject::convert_job(const hs::proto::ruleset::Job& job) {
   return result;
 }
 
+Dictionary RulesetObject::convert_project(const hs::proto::ruleset::Project& project) {
+  Dictionary result;
+  result["id"] = project.id().c_str();
+  result["script"] = project.script().c_str();
+
+  return result;
+}
+
+Array RulesetObject::get_projects() const {
+  const auto& projects = ruleset_.GetProjects();
+
+  Array result;
+  for(auto& project: projects.projects()) {
+    result.append(convert_project(project));
+  }
+
+  return result;
+}
+
 Array RulesetObject::get_all_region_improvements() const {
   const auto& improvements = ruleset_.GetRegionImprovements();
 
@@ -121,12 +141,24 @@ Dictionary RulesetObject::get_job_info(String id) const {
   auto ascii_id = id.ascii();
   const auto* job = ruleset_.FindJobByType(ascii_id.get_data());
   if(job == nullptr) {
-    spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
+    spdlog::error("Can't find job with id {}", ascii_id.get_data());
     return {};
   }
 
   return convert_job(*job);
 }
+
+Dictionary RulesetObject::get_project_info(String id) const {
+  auto ascii_id = id.ascii();
+  const auto* project = ruleset_.FindProjectByType(ascii_id.get_data());
+  if(project == nullptr) {
+    spdlog::error("Can't find project with id {}", ascii_id.get_data());
+    return {};
+  }
+
+  return convert_project(*project);
+}
+
 
 Array RulesetObject::get_all_resources() const {
 

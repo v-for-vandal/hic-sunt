@@ -1,0 +1,8 @@
+projects : [
+{
+	id : "core.prj.construction",
+	script : "res://game/city/construction_project.gd",
+	ui_scene : "res://ui/city/construction_project.tscn"
+}
+	
+]

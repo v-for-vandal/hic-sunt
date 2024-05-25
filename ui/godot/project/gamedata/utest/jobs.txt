@@ -1,0 +1,31 @@
+jobs : [
+{
+  id: "core.job.stone_miner",
+  input: []
+  output: [
+	  { key : "core.res.stone", value: 1 }
+	]
+},
+{
+  id: "core.job.woodcutter",
+  input: []
+  output: [
+	  { key : "core.res.wood", value: 1 }
+	]
+},
+{
+  id: "core.job.miner",
+  input: []
+  output: [
+	  { key : "core.res.iron", value: 1 }
+	]
+},
+{
+  id: "core.job.worker",
+  input: []
+  output: [
+	  { key : "core.res.workforce", value: 1 }
+	]
+}
+
+]

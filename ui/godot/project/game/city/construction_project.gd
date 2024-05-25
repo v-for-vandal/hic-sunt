@@ -16,6 +16,8 @@ extends CityProject
 
 class_name ConstructionProject
 
+
+
 # private variables
 var _id: int
 var _improvement_id: String
@@ -27,6 +29,20 @@ var _region_coords: Vector2i
 var _progress := 0
 var _turns_left := -1
 
+var _serializable_properties: Array[StringName] = [
+	"_id",
+	"_improvement_id",
+	"_turns_without_progress",
+	"_is_ready",
+	"_region",
+	"_region_coords",
+	"_progress",
+	"_turns_left"
+	]
+
+# TODO: Rename get_type_id
+static func get_project_type() -> StringName:
+	return &"core.prj.construction"
 
 # We have two maps - one with resources cost, one with accumulated resources
 # instead of one map like 'remaining_required_resources_to_finish' because
@@ -41,12 +57,21 @@ var _accumulated_resources: Dictionary
 var _total_accumulated_resources := 0 # sum of all elements in _accumulated_resources
 var _total_required_resources := 0 # sum of all resources required for completition
 
-static func create_construction_project(improvement_id: String, region: RegionObject,
+static func create_construction_project(improvement_id: StringName, region: RegionObject,
 	region_coords: Vector2i) ->ConstructionProject:
+	assert(region != null, "Null region object")
+	
+	if not region.contains(region_coords):
+		push_error("Region with id ", region.get_region_id() , " doesn't contains coords ", region_coords)
+		return null
+	
 	var result := ConstructionProject.new()
 	result._improvement_id = improvement_id
 	var improvement_info : Dictionary = CurrentGame.get_ruleset().get_improvement_info(improvement_id)
-	assert(improvement_info.size() > 0, "No information for improvement")
+	if improvement_info.is_empty():
+		push_error("No information for improvement: ", improvement_id)
+		return null
+
 	result._resources_cost = improvement_info.cost
 	result._id = CurrentGame.get_new_id()
 	result._region = region
@@ -144,13 +169,11 @@ func _take_assembly_cost(available_resources: Dictionary) -> bool:
 	
 # return true if the was any change in status
 func _take_resources(available_resources: Dictionary) -> bool:
-	print("Taking resources") # TODO: RM
 	# maximum number of resources taken is 'workforce'
 	var max_workforce : int = available_resources.get(CityConstants.WORKFORCE_RESOURCE, 0)
 	
 	if max_workforce <= 0:
 		# There is no workforce left
-		print("no workforce left") # TODO: RM
 		return false
 	# iterate over _cost
 
@@ -187,15 +210,15 @@ func _take_resources(available_resources: Dictionary) -> bool:
 	return (prev_total_accumulated_resources != _total_accumulated_resources)
 	
 
-# City project api
-func turns_without_progress() -> int:
-	return _turns_without_progress
-	
 func is_finished() -> bool:
 	return _is_ready
 	
 func take_resources(resources: Dictionary) -> bool:
-	return _take_resources(resources)
+	var status := _take_resources(resources)
+	if not status:
+		_turns_without_progress += 1
+		
+	return status
 	
 func progress_estimate() -> Dictionary:
 	return {
@@ -208,10 +231,34 @@ func is_possible() -> bool:
 	# At the moment we make no checks
 	return true
 	
-func execute_finisher() -> void:
+func execute_finisher() -> bool:
 	if not _region.set_improvement(_region_coords, _improvement_id):
 		push_error("Failed to set improvement at region ", _region.get_region_id())
+		return false
+	return true
 	
-func execute_skipped() -> void:
+func execute_skipped() -> bool:
 	_turns_without_progress += 1
+	return true
+	
+func _clear():
+	_id = 0
+	_improvement_id = ""
+
+	_turns_without_progress = 0
+	_is_ready = false
+	_region = null
+	_region_coords = Vector2i(0,0)
+	_progress = 0
+	_turns_left = 0
+	
+func get_serializable_properties() -> Array[StringName]:
+	return _serializable_properties
+
+func serialize_to_variant() -> Dictionary:
+	return SerializeLibrary.serialize_to_variant(self)
+	
+func parse_from_variant(data : Dictionary) -> void:
+	_clear()
+	SerializeLibrary.parse_from_variant(self, data)
 	
