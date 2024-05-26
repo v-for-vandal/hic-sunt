@@ -15,5 +15,10 @@ static func update(target: Dictionary, input: Dictionary) -> void:
 static func multiply(target: Dictionary, multiplier: int) -> void:
 	for res_id : String in target:
 		target[res_id] = target[res_id] * multiplier
-			
+		
+static func total_amount(target: Dictionary) -> int:
+	var result := 0
+	for res_id : String in target:
+		result += target[res_id]
+	return result
 	

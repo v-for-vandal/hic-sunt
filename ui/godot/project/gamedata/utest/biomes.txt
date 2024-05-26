@@ -1,0 +1,42 @@
+biomes : [
+	{ id : "core.biome.tundra",
+	  name : { key : "core.biome.tundra", fallback_name: "tundra" }  
+	},
+	{ id : "core.biome.taiga",
+	  name : { key : "core.biome.temperate_grassland", fallback_name: "taiga" }  
+	},
+	{ id : "core.biome.temperate_grassland",
+	  name : { key : "core.biome.temperate_grassland", fallback_name: "temperate grassland" }  
+	},
+	{ id : "core.biome.desert",
+	  name : { key : "core.biome.desert", fallback_name: "desert" }  
+	},
+	{ id : "core.biome.temperate_forest",
+	  name : { key : "core.biome.temperate_forest", fallback_name: "temperate forest" }  
+	},
+	{ id : "core.biome.rainforest",
+	  name : { key : "core.biome.rainforest", fallback_name: "rainforest" }  
+	},
+	{ id : "core.biome.tropical_rainforest",
+	  name : { key : "core.biome.tropical_rainforest", fallback_name: "tropical rainforest" }  
+	},
+	{ id : "core.biome.savanna",
+	  name : { key : "core.biome.savanna", fallback_name: "savanna" }  
+	},
+	{ id : "core.biome.shrubland",
+	  name : { key : "core.biome.shrubland", fallback_name: "shrubland" }  
+	},
+	{ id : "core.biome.ocean",
+	  name : { key : "core.biome.ocean", fallback_name: "ocean" },
+	},
+	{ id : "core.biome.coastal_water",
+	  name : { key : "core.biome.coastal_water", fallback_name: "coast" },
+	},
+	{ id : "core.biome.snow",
+	  name : { key : "core.biome.snow", fallback_name: "snow" },
+	}
+],
+
+biome_features : [
+	{ id : "core.forest", name: { key: "core.terrain.forest", fallback_name: "forest"}}
+]

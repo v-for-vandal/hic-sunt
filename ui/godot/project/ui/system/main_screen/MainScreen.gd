@@ -9,6 +9,15 @@ var load_dialog_scene := preload("res://ui/system/load_game/load_dialog.tscn")
 var _history = []
 var _load_dialog_scene := preload("res://ui/system/load_game/load_dialog.tscn")
 
+# TODO: RM method
+func _init() -> void:
+	# test a few things
+	# TODO: RM
+	print("Test instantiating")
+	print( ClassDB.instantiate("String"))
+	print( ClassDB.instantiate("Object"))
+	print( ClassDB.instantiate("CityProject"))
+	
 func _ready() -> void:
 	# hide everything
 	for child in get_children():

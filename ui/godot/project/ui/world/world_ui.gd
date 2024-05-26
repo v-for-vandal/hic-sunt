@@ -10,6 +10,8 @@ var _current_select_callback: Variant
 var _is_in_select_mode := false
 
 func _ready() -> void:
+	CurrentGame.new_turn_started.connect(_on_new_turn_started)
+	_on_new_turn_started(CurrentGame.get_current_turn())
 	pass
 
 func _gui_input(event : InputEvent) -> void:
@@ -43,7 +45,10 @@ func on_world_cell_clicked_forward(world_object: WorldObject, qr: Vector2i) -> v
 func _on_next_turn_button_pressed() -> void:
 	next_turn_requested.emit()
 
-
+func _on_new_turn_started(turn: int) -> void:
+	$%TurnNumber.text = "Turn: " + str(turn)
+	
+	
 
 func _on_save_requested() -> void:
 	var dialog : Node = save_dialog_scene.instantiate()

@@ -65,6 +65,13 @@ bool RuleSet::Load(const std::filesystem::path& path,
     return false;
   }
 
+  SPDLOG_INFO("Parsing projects file");
+  success = ReadFromFile( path / projects_file, projects_, errors);
+  if(!success) {
+    return false;
+  }
+
+
   // Building hashes
   for(int idx = 0; idx < improvements_.improvements_size(); ++idx) {
     const auto& improvement = improvements_.improvements(idx);
@@ -74,6 +81,11 @@ bool RuleSet::Load(const std::filesystem::path& path,
   for(int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto& job = jobs_.jobs(idx);
     jobs_by_type_.try_emplace(job.id(), idx);
+  }
+
+  for(int idx = 0; idx < projects_.projects_size(); ++idx) {
+    const auto& project = projects_.projects(idx);
+    projects_by_type_.try_emplace(project.id(), idx);
   }
 
 
@@ -88,8 +100,10 @@ void RuleSet::Clear() {
   resources_.Clear();
   rendering_.Clear();
   jobs_.Clear();
+  projects_.Clear();
   improvements_by_type_.clear();
   jobs_by_type_.clear();
+  projects_by_type_.clear();
 }
 
 const proto::ruleset::RegionImprovement* RuleSet::FindRegionImprovementByType(
@@ -111,6 +125,18 @@ const proto::ruleset::Job* RuleSet::FindJobByType(
   if( fit != jobs_by_type_.end()) {
     const auto result_idx = fit->second;
     return &jobs_.jobs(result_idx);
+  }
+
+  return nullptr;
+}
+
+const proto::ruleset::Project* RuleSet::FindProjectByType(
+    utils::StringTokenCRef project_type_id) const
+{
+  auto fit = projects_by_type_.find(project_type_id);
+  if( fit != projects_by_type_.end()) {
+    const auto result_idx = fit->second;
+    return &projects_.projects(result_idx);
   }
 
   return nullptr;

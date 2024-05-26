@@ -6,6 +6,10 @@ import "ruleset/placement_rules.proto";
 import "ruleset/jobs.proto";
 import "l10n/localized_name.proto";
 
+message ResourceBill {
+  map<string, int32> amounts = 1;
+}
+
 // This is improvement type(class, whatever). Like 'palace', or 'lumber mill'
 // Specific instance of improvement (this palace, or that lumber mill) has
 // it's own proto scheme

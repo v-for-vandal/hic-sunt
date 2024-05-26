@@ -2,10 +2,13 @@
 
 extends Node
 
+signal new_turn_started(turn_number: int)
+
 var current_world : WorldObject
 # TODO: Make ruleset one for all players
 var current_player_ruleset: RulesetObject
 var _current_player_civ: Civilisation
+var _current_turn := 1
 
 var _next_id := 0
 
@@ -22,6 +25,9 @@ func get_current_player_civ() -> Civilisation:
 func get_current_world() -> WorldObject:
 	return current_world
 	
+func get_current_turn() -> int:
+	return _current_turn
+	
 func get_atlas_visualization() -> Dictionary:
 	# TODO:
 	# 1. cache data
@@ -33,9 +39,14 @@ func init_game(world_object: WorldObject, ruleset: RulesetObject) -> void:
 	current_world = world_object
 	current_player_ruleset = ruleset
 	_current_player_civ = Civilisation.create_civilisation()
+	# TODO: we must do something with current_turn and next_id
 	
+# TODO: REname it as end_turn
 func next_turn() -> void:
 	_current_player_civ.next_turn()
+	_current_turn += 1
+	new_turn_started.emit(_current_turn)
+	
 	
 # TODO: move to ruleset?
 func can_build(improvement_id: String) -> bool:
@@ -78,12 +89,15 @@ func save_game(save_location: DirAccess) -> Error:
 	return OK
 	
 func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
+	current_player_ruleset = ruleset
 	# Create empty world
 	# TODO: Have some method to create empty world
 	var world : WorldObject = WorldObject.create_world(Vector2i(1, 1), 1)
 	assert(world != null)
 	var world_file_path := _world_file_path(save_location)
 	var status : Error = world.load(ProjectSettings.globalize_path(world_file_path))
+	current_world = world
+	
 	#var status := OK
 	if status != OK:
 		push_error("Can't load world from %s" % [_world_file_path(save_location)])
@@ -107,10 +121,12 @@ func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
 	# file match each other. Otherwise, one could add new city into json file
 	# without it being marked in world files
 		
-	current_world = world
-	current_player_ruleset = ruleset
+
 	_current_player_civ = civ
 	
 	return OK
 	
+	# TODO: This should be in ruleset object, but for that we should
+	# create a gdscript wrapper around gdextension/c++ class
+	#func get
 	

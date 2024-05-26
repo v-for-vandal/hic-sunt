@@ -147,6 +147,8 @@ Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
     }
     result["top_biome"] = std::move(top_biome_result);
   }
+  result["city_id"] = region.GetCityId().data();
+  result["region_id"] = region.GetId().data();
   //result["size"] = region.GetSurface().size();
 
   return result;

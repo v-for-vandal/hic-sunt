@@ -26,6 +26,7 @@ hs_proto_schemas = [
   'ruleset/biome.proto',
   'ruleset/resources.proto',
   'ruleset/jobs.proto',
+  'ruleset/projects.proto',
   'render/atlas.proto',
   'render/render.proto',
   ]

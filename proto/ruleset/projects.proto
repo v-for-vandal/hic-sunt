@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package hs.proto.ruleset;
+
+import "l10n/localized_name.proto";
+
+// Projects are implemented entirely in GDScript. However, description must
+// be provided, for the purposes of:
+// 1. serialization.
+// 2. limiting projects by tech/traits/etc
+message Project {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+
+  // Path to gdscript. Path must follow godot notation, e.g.
+  // 'res://path/to/script.gd
+  string script = 3;
+
+  // Path to tscn file for project ui. Optional.
+  string ui_scene = 4;
+}
+
+message Projects {
+  repeated Project projects = 1;
+}
+
+
+
+

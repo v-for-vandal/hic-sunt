@@ -1,5 +1,15 @@
 improvements : [
 	{ 
+		id: "test.improv.construction_1",
+		cost : {
+			amounts: [
+				{ key: "core.res.stone", value: 10},
+				{ key: "core.res.wood", value: 10},
+				{ key: "core.res.workforce", value: 2}
+			]
+		}
+	},
+	{ 
 		id: "core.improv.logging_1",
 		jobs: [
 			{ key: "core.job.woodcutter", value: 1}

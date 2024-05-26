@@ -7,7 +7,7 @@ func _ready() -> void:
 
 func _register_dev_console_commands()-> void:
 	Console.create_command("build", self._dev_build , "Immediatelly build specified improvement")
-	pass
+	Console.create_command("next_turn", CurrentGame.next_turn, "Start next turn")
 	
 func _dev_build(improvement_id = null, a = 1, b = "s", f = {}):
 	var resolved_improvent_id : String
