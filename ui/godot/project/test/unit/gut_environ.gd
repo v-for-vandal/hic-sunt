@@ -42,4 +42,21 @@ func before_each() -> void:
 	zero_region = world.get_region(Vector2i(0,0))
 	assert_not_null(zero_region, "Failed to get (0,0) region")
 	CurrentGame.init_game(world, ruleset)
+	
+# == helper methods for descendants
+
+func do_test_equal_by_serialization(target) -> void:
+	assert_true(target is Object, "Can only be used with objects")
+	# serialize target
+	var serialized = target.serialize_to_variant()
+	
+	# now, load new object from variant
+	var new_object = (target as Object).get_script().new()
+	new_object.parse_from_variant(serialized)
+	
+	# save it again
+	var reserialized = new_object.serialize_to_variant()
+	
+	# compare
+	assert_eq(serialized, reserialized, "Expected that two consequent serialization will provide same result")
 

@@ -60,13 +60,17 @@ func load_world(world_object : WorldObject) -> void:
 			if region_info.is_empty():
 				push_error("Can't get region at: ", qr_coords)
 				continue
+				
 			var top_terrain: Array = region_info.top_biome
 			var terrain : String = top_terrain[1]
+			var has_city : bool = not region_info.city_id.is_empty()
 			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 			# convert to xy dimensions
 			var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
 			# fill cell
-			if terrain_mapping.has(terrain):
+			if has_city:
+				set_cell(0, xy_coords, 0, Vector2i(0,2), 0)
+			elif terrain_mapping.has(terrain):
 				#print("setting terrail of tile map xy=", xy_coords, " qr=", qr_coords, " to ",
 				#	terrain_mapping[terrain])
 				set_cell(0, xy_coords, terrain_mapping[terrain].source_id, terrain_mapping[terrain].atlas_coords,0)

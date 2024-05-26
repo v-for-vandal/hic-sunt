@@ -13,6 +13,15 @@ func test_creation() -> void:
 	assert_false(result.is_finished())
 	assert_eq(result._region_coords, coords )
 	
+func test_serialization() -> void:
+	var coords := Vector2i(1,2)
+	assert_true(zero_region.contains(coords))
+	var target = ConstructionProject.create_construction_project(
+		&"test.improv.construction_1",
+		zero_region, coords)
+	assert_not_null(target, "Failed to create construction project")
+	do_test_equal_by_serialization(target)
+	
 func test_creation_failure_out_of_bounds() -> void:
 	var coords := Vector2i(1000, 1000)
 	assert_false(zero_region.contains(coords))
@@ -37,6 +46,9 @@ func test_progress() -> void:
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_not_null(project, "Failed to create construction project")
+	assert_eq(project.progress_estimate().progress, 0, "Progress should be 0%")
+	assert_true(project.is_possible())
+	assert_false(project.is_finished())
 	
 	# total required - 10 wood, 10 stone, 2 workforce for assembly
 	
