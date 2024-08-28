@@ -20,7 +20,8 @@ spdlog_dep = dependency('spdlog')
 
 flatbuffer_dep = dependency('flatbuffers', static: true)
 
-abseil = dependency('absl', modules:['absl::flat_hash_set'])
+#abseil = dependency('abseil-cpp', modules:['absl_flat_hash_set'])
+abseil = dependency('absl_flat_hash_set')
 
 
 gtest_dep = dependency('gtest')
@@ -42,7 +43,7 @@ root_include = include_directories([
     '.',
     'fbs',
     'submodules/mdspan/include/experimental',
-    'submodules/godot-4.2',
+    #'submodules/godot-4.2',
     ])
 
 test_resources_dir = meson.source_root() / 'test-resources'
