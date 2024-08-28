@@ -18,11 +18,29 @@
 
 2. Build it with following options:
   scons platform=linuxbsd use_llvm=yes arch=x86_64 linker=lld cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++"
+
+3. Install ninja
+   ```
+   aptitude install ninja-build
+   ```
    
 ### Building project
 
 Make build dir
 ```
-meson setup --native-file clang.native.ini --prefix ABSOLUTE/PATH
+meson setup --native-file clang.native.ini --prefix ABSOLUTE/PATH build
 ```
 where ABSOLUTE/PATH is absolute path to the following subfolder:
+  ui/godot/module
+
+Then build as usual
+```
+cd build
+ninja .
+```
+
+Then install compiled library
+```
+cd build
+meson install
+```
