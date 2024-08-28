@@ -43,7 +43,6 @@ root_include = include_directories([
     '.',
     'fbs',
     'submodules/mdspan/include/experimental',
-    #'submodules/godot-4.2',
     ])
 
 test_resources_dir = meson.source_root() / 'test-resources'
@@ -56,7 +55,5 @@ subdir('utils')
 subdir('core')
 
 godot_dep = dependency('godot-cpp')
-#godot_subproj=cmake.subproject('godot-cpp')
-#godot_dep = godot_subproj.dependency('godot-cpp')
 
 subdir('ui/godot/')
