@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://7ikhs8bt68gy"]
+[gd_scene load_steps=7 format=3 uid="uid://7ikhs8bt68gy"]
 
 [ext_resource type="Script" path="res://root_map.gd" id="1_yul2b"]
 [ext_resource type="PackedScene" uid="uid://dyp7yp0fqe876" path="res://game/region/region_map.tscn" id="2_cosq6"]
 [ext_resource type="PackedScene" uid="uid://dxuoujwpadbf1" path="res://game/world/world_map.tscn" id="3_0mdmy"]
 [ext_resource type="Script" path="res://addons/godot-console/scripts/console_container.gd" id="4_tawhk"]
 [ext_resource type="Script" path="res://ui/system/ConsoleHandler.gd" id="4_urerv"]
+[ext_resource type="TileSet" uid="uid://pcraxaogcyn7" path="res://resources/world/v4_terrain.tres" id="6_f563n"]
 
 [node name="RootMap" type="Node2D"]
 script = ExtResource("1_yul2b")
@@ -25,6 +26,12 @@ offset_top = 35.0
 offset_right = 871.0
 offset_bottom = 588.0
 script = ExtResource("4_tawhk")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+tile_set = ExtResource("6_f563n")
+
+[node name="TileMapLayer2" type="TileMapLayer" parent="."]
+tile_set = ExtResource("6_f563n")
 
 [connection signal="exit_reqion_request" from="RegionMap" to="." method="_on_region_map_exit_reqion_request"]
 [connection signal="show_region_request" from="WorldMap" to="." method="_on_world_map_show_region_request"]
