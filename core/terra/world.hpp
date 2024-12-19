@@ -3,6 +3,7 @@
 #include <core/geometry/surface.hpp>
 #include <core/region/region.hpp>
 #include <core/region/types.hpp>
+#include <core/terra/types.hpp>
 #include <core/terra/cell.hpp>
 #include <core/ruleset/ruleset.hpp>
 #include <core/utils/serialize.hpp>
@@ -19,13 +20,13 @@ class World;
 void SerializeTo(const World& source, proto::terra::World& target);
 World ParseFrom(const proto::terra::World& world, serialize::To<World>);
 
+// World is a collection of planes
 class World {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
-  using Surface = geometry::Surface<Cell, QRSCoordinateSystem>;
-  using SurfaceView = geometry::SurfaceView<Cell, QRSCoordinateSystem>;
+  using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
 
   World() = default;
   World(const World&) = delete;
@@ -33,26 +34,8 @@ public:
   World& operator=(const World&) = delete;
   World& operator=(World&&) = default;
 
-  World(
-    QRSCoordinateSystem::QAxis q_start,
-    QRSCoordinateSystem::QAxis q_end,
-    QRSCoordinateSystem::RAxis r_start,
-    QRSCoordinateSystem::RAxis r_end,
-    QRSCoordinateSystem::SAxis s_start,
-    QRSCoordinateSystem::SAxis s_end
-    );
-  //explicit World(QRSSize size);
-
-  SurfaceView GetSurface() const { return surface_.view(); }
-  SurfaceView GetSurface() { return surface_.view(); }
-
-  const Surface& GetSurfaceObject() const { return surface_; }
-
-  region::RegionPtr GetRegionById(const std::string& region_id) const;
-  bool HasRegion(const std::string& region_id) const {
-    return region_index_.contains(region_id);
-  }
-  void SetRegion(QRSCoords coords, region::Region region);
+  PlanePtr GetPlane(PlaneIdCRef id) const;
+  PlanePtr AddPlane(QRSBox box);
 
   bool operator==(const World& other) const;
   bool operator!=(const World& other) const {
@@ -62,16 +45,10 @@ public:
 private:
   friend void SerializeTo(const World& source, proto::terra::World& target);
   friend World ParseFrom(const proto::terra::World& world, serialize::To<World>);
-
   void InitNonpersistent();
 
 private:
-  Surface surface_;
-  // some regions are not really part of the surface. Like caves.
-  // Or some magical land
-  std::vector<Cell> off_surface_;
-  //ruleset::RuleSet ruleset_;
-  std::unordered_map<std::string, region::RegionPtr> region_index_;
+  std::unordered_map<std::string, PlanePtr> planes_;
 };
 
 

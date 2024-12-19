@@ -182,4 +182,3 @@ func load_game(savegame: String) -> void:
 			#emit_signal("load_done")
 			#get_tree().change_scene_to_packed(_loaded_resource)
 	#
-

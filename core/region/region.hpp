@@ -5,6 +5,7 @@
 #include <absl/container/flat_hash_set.h>
 
 #include <core/geometry/surface.hpp>
+#include <core/geometry/box.hpp>
 #include <core/region/cell.hpp>
 #include <core/region/types.hpp>
 #include <core/region/pnl_statement.hpp>
@@ -24,6 +25,7 @@ class Region {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
+  using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
   using QRSSize = typename geometry::Coords<geometry::QRSCoordinateSystem>::DeltaCoords;
   using Surface = geometry::Surface<Cell, QRSCoordinateSystem>;
   using SurfaceView = geometry::SurfaceView<Cell, QRSCoordinateSystem>;

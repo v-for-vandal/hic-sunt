@@ -21,7 +21,7 @@ static func xy_to_qrs(xy: Vector2i)->Vector2i:
 	
 
 static func flat_top_qrs_to_pixel(qr: Vector2i) -> Vector2 :
-	var x = 1.5 * qr.x
-	var y = 0.866 * qr.x + 1.732 * qr.y
+	var x : float = 1.5 * qr.x
+	var y : float = 0.866 * qr.x + 1.732 * qr.y
 	
 	return Vector2(x, y)

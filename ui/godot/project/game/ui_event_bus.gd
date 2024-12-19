@@ -129,4 +129,3 @@ func mouse_button_to_action_type(mouse_button: MouseButton) -> ActionType:
 		return ActionType.PRIMARY
 	else:
 		return ActionType.SECONDARY
-

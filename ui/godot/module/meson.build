@@ -5,6 +5,7 @@ godot_module_sources = [
     'game/ruleset_object.cpp',
     'game/pnl_object.cpp',
     'terra/world_object.cpp',
+    'terra/plane_object.cpp',
     'region/region_object.cpp',
 ]
 
@@ -23,6 +24,6 @@ hic_sunt_godot = shared_library('hic_sunt_godot',
      ],
   include_directories: root_include,
   install: true,
-  install_dir: meson.source_root() + '/ui/godot/project/module')
+  install_dir: 'module')
 
 

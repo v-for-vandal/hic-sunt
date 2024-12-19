@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "terra/cell.proto";
+
+package hs.proto.terra;
+
+message Surface {
+  repeated Cell cells = 1;
+  int32 q_start = 2;
+  int32 q_end = 3;
+  int32 r_start = 4;
+  int32 r_end = 5;
+  int32 s_start = 6;
+  int32 s_end = 7;
+}
+
+message Plane {
+  string id = 1;
+  Surface surface = 2;
+  // Things like caves, other dimensions and so on
+  repeated Cell off_surface = 3;
+
+  // world map image. png.
+  //bytes world_map_image = 4;
+}
+
+

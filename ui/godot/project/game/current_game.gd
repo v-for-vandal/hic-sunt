@@ -49,7 +49,7 @@ func next_turn() -> void:
 	
 	
 # TODO: move to ruleset?
-func can_build(improvement_id: String) -> bool:
+func can_build(_improvement_id: String) -> bool:
 	return true
 
 
@@ -83,7 +83,7 @@ func save_game(save_location: DirAccess) -> Error:
 		return FileAccess.get_open_error()
 	
 	
-	var serialize_data = _current_player_civ.serialize_to_variant()
+	var serialize_data := _current_player_civ.serialize_to_variant()
 	game_data_file.store_string(JSON.stringify(serialize_data, "\t"))
 
 	return OK

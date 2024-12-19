@@ -35,5 +35,4 @@ zoom = Vector2(0.4, 0.4)
 [node name="RegionUI" parent="CanvasLayer" groups=["ui:region"] instance=ExtResource("3_ltroy")]
 mouse_filter = 1
 
-[connection signal="cell_clicked" from="RegionSurface" to="CanvasLayer/RegionUI" method="on_region_cell_clicked_forward"]
 [connection signal="close_requested" from="CanvasLayer/RegionUI" to="." method="_on_region_ui_close_requested"]

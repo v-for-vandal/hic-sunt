@@ -105,8 +105,10 @@ public:
   RAxis r() const noexcept { return data_.r(); }
   SAxis s() const noexcept { return data_.s(); }
 
+  /* TODO: RM
   bool IsUndefined() const noexcept;
   void SetUndefined() noexcept;
+  */
 
   bool operator==(const Coords&) const noexcept = default;
 

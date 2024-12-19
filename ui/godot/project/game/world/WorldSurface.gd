@@ -8,9 +8,7 @@ var _world_object : WorldObject
 var terrain_mapping : Dictionary = {}
 
 func _ready() -> void:
-	# add highlight layer
-	add_layer(-1)
-	_highlight_layer_id = get_layers_count() - 1
+	pass
 	
 func _contains(tile_qr: Vector2i) -> bool:
 	if _world_object == null:
@@ -69,11 +67,11 @@ func load_world(world_object : WorldObject) -> void:
 			var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
 			# fill cell
 			if has_city:
-				set_cell(0, xy_coords, 0, Vector2i(0,2), 0)
+				$terrain.set_cell(xy_coords, 0, Vector2i(0,2), 0)
 			elif terrain_mapping.has(terrain):
 				#print("setting terrail of tile map xy=", xy_coords, " qr=", qr_coords, " to ",
 				#	terrain_mapping[terrain])
-				set_cell(0, xy_coords, terrain_mapping[terrain].source_id, terrain_mapping[terrain].atlas_coords,0)
+				$terrain.set_cell( xy_coords, terrain_mapping[terrain].source_id, terrain_mapping[terrain].atlas_coords,0)
 			else:
 				push_error("unknown terrain \"%s\"" % [terrain])
-				set_cell(0, xy_coords, 0, Vector2i(0,0), 0)
+				$terrain.set_cell(xy_coords, 0, Vector2i(0,0), 0)

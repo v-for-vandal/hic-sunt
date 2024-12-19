@@ -11,12 +11,7 @@ var _load_dialog_scene := preload("res://ui/system/load_game/load_dialog.tscn")
 
 # TODO: RM method
 func _init() -> void:
-	# test a few things
-	# TODO: RM
-	print("Test instantiating")
-	print( ClassDB.instantiate("String"))
-	print( ClassDB.instantiate("Object"))
-	print( ClassDB.instantiate("CityProject"))
+	pass
 	
 func _ready() -> void:
 	# hide everything

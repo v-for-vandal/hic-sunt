@@ -5,8 +5,8 @@ signal cell_clicked(region_object: RegionObject, qr_position: Vector2i)
 var _region_object : RegionObject
 
 # Those constants are set up in _ready()
-var _BIOME_LAYER_ID : int = -1
-var _IMPROVEMENT_LAYER_ID : int  = -1
+var _BIOME_LAYER : TileMapLayer = null
+var _IMPROVEMENT_LAYER : TileMapLayer  = null
 
 var visualization_data : Dictionary = {}
 
@@ -14,14 +14,16 @@ var visualization_data : Dictionary = {}
 
 func _ready() -> void:
 	super()
-	for i in range(get_layers_count()):
-		if get_layer_name(i) == "improvements":
-			_IMPROVEMENT_LAYER_ID = i
-		if get_layer_name(i) == "biomes":
-			_BIOME_LAYER_ID = i
+	for child in get_children():
+		if child is not TileMapLayer:
+			continue
+		if child.name == "improvements":
+			_IMPROVEMENT_LAYER = child
+		if child.name == "biomes":
+			_BIOME_LAYER = child
 			
-	assert(_BIOME_LAYER_ID != -1, "Faild to find TileMap layer for biomes")
-	assert(_IMPROVEMENT_LAYER_ID != -1, "Faild to find TileMap layer for improvements")
+	assert(_BIOME_LAYER != null, "Faild to find TileMap layer for biomes")
+	assert(_IMPROVEMENT_LAYER != null, "Faild to find TileMap layer for improvements")
 
 
 func _contains(tile_qr: Vector2i) -> bool:
@@ -64,26 +66,26 @@ func update_cell(qr_coords: Vector2i) -> void:
 	# fill cell
 	if visualization_data.has(biome):
 		#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])
-		set_cell(_BIOME_LAYER_ID, xy_coords, visualization_data[biome].source_id,
+		_BIOME_LAYER.set_cell(xy_coords, visualization_data[biome].source_id,
 			visualization_data[biome].atlas_coords,0)
 	else:
 		# set cell to absent pink
-		set_cell(_BIOME_LAYER_ID, xy_coords, 0, Vector2i(0,0), 0)
+		_BIOME_LAYER.set_cell(xy_coords, 0, Vector2i(0,0), 0)
 		
 	var improvement = region_info.improvement
 	if !improvement.is_empty():
 		var improvement_type = improvement.type
 		if improvement_type in visualization_data:
 			# put it into layer above
-			set_cell(_IMPROVEMENT_LAYER_ID, xy_coords, visualization_data[improvement_type].source_id,
+			_IMPROVEMENT_LAYER.set_cell(xy_coords, visualization_data[improvement_type].source_id,
 				visualization_data[improvement_type].atlas_coords,0)
 		else:
 			# place pink object to indicate an error
 			push_error("Undefined visualization data for %s" % [improvement_type])
-			set_cell(_IMPROVEMENT_LAYER_ID, xy_coords, 0, Vector2i.ZERO, 0)
+			_IMPROVEMENT_LAYER.set_cell(xy_coords, 0, Vector2i.ZERO, 0)
 	else:
 		# no improvement
-		erase_cell(_IMPROVEMENT_LAYER_ID, xy_coords)
+		_IMPROVEMENT_LAYER.erase_cell(xy_coords)
 		
 func get_region_object() -> RegionObject:
 	return _region_object
@@ -101,4 +103,3 @@ func _connect_region_object(region_object: RegionObject) -> void:
 func _disconnect_region_object(region_object: RegionObject) -> void:
 	region_object.region_changed.disconnect(_on_region_changed)
 	
-

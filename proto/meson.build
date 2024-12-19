@@ -21,6 +21,7 @@ hs_proto_schemas = [
   'l10n/localized_name.proto',
   'terra/cell.proto',
   'terra/world.proto',
+  'terra/plane.proto',
   'ruleset/region_improvements.proto',
   'ruleset/placement_rules.proto',
   'ruleset/biome.proto',

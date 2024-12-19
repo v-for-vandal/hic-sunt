@@ -12,7 +12,7 @@
 
 namespace hs::terra {
 
-  class World;
+  class Plane;
   class Cell;
 
   void SerializeTo(const Cell& source, proto::terra::Cell& proto_destination);
@@ -55,7 +55,7 @@ namespace hs::terra {
   private:
     friend void SerializeTo(const Cell& source, proto::terra::Cell& proto_destination);
     friend Cell ParseFrom( const proto::terra::Cell& source,  serialize::To<Cell>);
-    friend World;
+    friend Plane;
 
     // Call this method via World object, not directly
     auto SetRegion(region::Region region) {
