@@ -69,8 +69,8 @@ func build_pnl() -> Dictionary:
 	var region_jobs : Dictionary = get_region_object().get_jobs(ruleset)
 	print("region jobs: ", region_jobs)
 	for job_id : String in region_jobs:
-		var job_count = region_jobs[job_id] # for now, assume that every job is occupied
-		var job_info = ruleset.get_job_info(job_id)
+		var job_count : int = region_jobs[job_id] # for now, assume that every job is occupied
+		var job_info := ruleset.get_job_info(job_id)
 		var job_profit : Dictionary = job_info.output
 		var job_losses : Dictionary = job_info.input
 		#print("Job id: ", job_id)

@@ -7,6 +7,7 @@
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("save", "filename"), &WorldObject::save);
   ClassDB::bind_method(D_METHOD("load", "filename"), &WorldObject::load);
+  ClassDB::bind_static_method("create_world", D_METHOD("create_world"), &WorldObject::create_world);
 }
 
 
@@ -61,6 +62,15 @@ Dictionary WorldObject::create_success() {
     Dictionary result;
     result["success"] = true;
     return result;
+}
+
+Ref<WorldObject> WorldObject::create_world() {
+
+  Ref<WorldObject> result(memnew(WorldObject()));
+
+  ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new world");
+  return result;
+
 }
 
 

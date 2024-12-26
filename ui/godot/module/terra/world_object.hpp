@@ -35,6 +35,7 @@ public:
   Error load(String filename);
   static Dictionary create_error(const char* error);
   static Dictionary create_success();
+  static Ref<WorldObject> create_world();
 
   static QRSCoords cast_qrs(Vector2i coords) {
     return QRSCoords{

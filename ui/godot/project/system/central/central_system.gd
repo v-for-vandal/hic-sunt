@@ -1,7 +1,7 @@
 extends HicSuntSystem
 
 
-var CentralSystemImpl := preload("res://system/central/central_system_impl.gd")
+var CentralSystemImpl := preload("res://system/central/impl/central_system_impl.gd")
 var _pimpl := CentralSystemImpl.new()
 
 

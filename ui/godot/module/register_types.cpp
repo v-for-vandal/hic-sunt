@@ -7,6 +7,7 @@
 #include <godot_cpp/godot.hpp>
 
 #include <ui/godot/module/terra/world_object.hpp>
+#include <ui/godot/module/terra/plane_object.hpp>
 #include <ui/godot/module/region/region_object.hpp>
 #include <ui/godot/module/system/system.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
@@ -28,6 +29,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<HicSuntSystem>();
     ClassDB::register_class<RegionObject>();
     ClassDB::register_class<PnlObject>();
+    ClassDB::register_class<PlaneObject>();
     ClassDB::register_class<WorldObject>();
     ClassDB::register_class<RulesetObject>();
   }

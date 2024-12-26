@@ -92,7 +92,7 @@ func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
 	current_player_ruleset = ruleset
 	# Create empty world
 	# TODO: Have some method to create empty world
-	var world : WorldObject = WorldObject.create_world(Vector2i(1, 1), 1)
+	var world : WorldObject = WorldObject.new()
 	assert(world != null)
 	var world_file_path := _world_file_path(save_location)
 	var status : Error = world.load(ProjectSettings.globalize_path(world_file_path))

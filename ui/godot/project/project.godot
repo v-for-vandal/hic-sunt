@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Console="*res://addons/godot-console/scripts/console.gd"
 GameUiEventBus="*res://game/ui_event_bus.gd"
+WorldBuilderRegistry="*res://system/world_builder/registry.gd"
 CentralSystem="*res://system/central/central_system.gd"
 LoadManager="*res://system/central/load_manager.gd"
 CurrentGame="*res://game/current_game.gd"

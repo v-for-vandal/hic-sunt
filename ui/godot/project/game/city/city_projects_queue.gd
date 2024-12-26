@@ -149,4 +149,3 @@ func parse_from_variant(data : Dictionary) -> void:
 		# add to queue
 		_queue.append(project_object)
 		
-

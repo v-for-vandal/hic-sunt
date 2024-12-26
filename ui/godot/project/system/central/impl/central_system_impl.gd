@@ -1,5 +1,6 @@
 extends RefCounted
 
+var load_mod_impl_ := preload("res://system/central/impl/load_mod_impl.gd").new()
 
 var _savegames_dir := "user://savegames"
 
@@ -107,29 +108,13 @@ func ask_confirm(message: String, current_scene : Node) -> bool:
 	var result : bool = await _confirm_result
 	return result
 	
-func load_mods_from_folder(folder: String) -> Array:
-	var dir := DirAccess.open(folder)
-	var result := []
-	 
-	if dir:
-		dir.list_dir_begin()
-		var filename := dir.get_next()
-		while filename != "":
-			if filename.get_extension() == "pck":
-				
-				if ProjectSettings.load_resource_pack(filename):
-					result.append(filename)
-				else:
-					push_error('Failed to load module %s' % filename )
-			filename = dir.get_next()
-					
-	return result
+
 	
 func load_mods() -> Array:
 	var result := []
 	# load everything from our content folder
-	result.append_array(load_mods_from_folder('res://content'))
+	result.append_array(load_mod_impl_.load_mods_from_folder('res://content'))
 	# load everything from user mods folder
-	result.append_array(load_mods_from_folder('user://mods'))
+	result.append_array(load_mod_impl_.load_mods_from_folder('user://mods'))
 
 	return result

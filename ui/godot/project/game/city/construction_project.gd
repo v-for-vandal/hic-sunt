@@ -97,7 +97,7 @@ func get_improvement_id() -> String:
 	
 static func _calc_total_required(resources_cost : Dictionary) -> int:
 	var result := 0
-	for resource_id in resources_cost:
+	for resource_id: String in resources_cost:
 		if resource_id == CityConstants.WORKFORCE_RESOURCE:
 			result += resources_cost[resource_id]
 		else:

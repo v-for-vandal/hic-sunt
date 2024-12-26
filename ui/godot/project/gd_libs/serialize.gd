@@ -89,7 +89,7 @@ static func parse_from_variant(object: Object, data : Dictionary) -> void:
 				# Check for special types first
 				if property_value is Dictionary:
 					if property_value.has("$type"):
-						var type = property_value.get("$type", "")
+						var type : String = property_value.get("$type", "")
 						if type == &"core.type.region":
 							# this is region object
 							object.set(property, _parse_region_object(property_value))
@@ -110,7 +110,7 @@ static func parse_from_variant(object: Object, data : Dictionary) -> void:
 				object.set(property, property_value)
 			_:
 				assert(property_value is String, "Unsupported deserialization from non-string type")
-				var converted = str_to_var(property_value)
+				var converted : Variant = str_to_var(property_value)
 				object.set(property, converted)
 							
 				
@@ -119,7 +119,6 @@ static func parse_from_variant(object: Object, data : Dictionary) -> void:
 # method returns class name that can be later used to make '.new()'
 static func _get_class_name(object: Object) -> String:
 	return ""
-	pass
 	
 # This helper function is required with you have an array of pointers to base
 # classes. E.g. 
