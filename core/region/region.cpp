@@ -82,7 +82,6 @@ bool Region::SetFeature(QRSCoords coords, std::string_view feature)
   auto& cell = surface_.GetCell(coords);
   cell.SetFeature(feature);
   return true;
-  //cell.
 }
 
 
@@ -118,6 +117,64 @@ bool Region::SetCityId(std::string_view city_id) {
 
   city_id_ = city_id;
   return true;
+}
+
+double Region::GetDataNumeric(QRSCoords coords, StringTokenCRef key) const noexcept
+{
+  if(!surface_.Contains(coords)) {
+    return 0.0;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  return cell.GetDataNumeric(key);
+}
+
+double Region::SetDataNumeric(QRSCoords coords, StringTokenCRef key, double value) {
+  if(!surface_.Contains(coords)) {
+    return 0.0;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  return cell.SetDataNumeric(key, value);
+
+}
+
+bool Region::HasDataNumeric(QRSCoords coords, StringTokenCRef key) const noexcept {
+  if(!surface_.Contains(coords)) {
+    return false;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  return cell.HasDataNumeric(key);
+}
+
+std::string_view Region::GetDataString(QRSCoords coords, StringTokenCRef key) const noexcept
+{
+  if(!surface_.Contains(coords)) {
+    return {};
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  return cell.GetDataString(key);
+}
+
+std::string Region::SetDataString(QRSCoords coords, StringTokenCRef key, std::string_view value) {
+  if(!surface_.Contains(coords)) {
+    return {};
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  return cell.SetDataString(key, value);
+
+}
+
+bool Region::HasDataString(QRSCoords coords, StringTokenCRef key) const noexcept {
+  if(!surface_.Contains(coords)) {
+    return false;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  return cell.HasDataString(key);
 }
 
 void Region::BuildEphemeral() {

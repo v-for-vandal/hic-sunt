@@ -2,6 +2,8 @@
 
 #include <string>
 
+/* TODO: Use boost flyweight library to do string interning */
+
 namespace hs::utils {
 
 using StringToken = std::string;

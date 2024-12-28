@@ -26,4 +26,18 @@ namespace hs {
     }
   }
 
+  template<typename M, typename ProtoM>
+  void SerializeMapTo(const M& source, ProtoM* target) {
+      target->clear();
+      target->insert(source.begin(),
+          source.end());
+  }
+
+  template<typename M, typename ProtoM>
+  void ParseMapFrom(const ProtoM& source, M& target) {
+      target.clear();
+      target.insert(source.begin(),
+          source.end());
+  }
+
 }

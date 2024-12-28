@@ -49,7 +49,16 @@ public:
   Ref<PnlObject> get_pnl_statement(Ref<RulesetObject> ruleset) const;
   Dictionary get_jobs(Ref<RulesetObject> ruleset_object) const;
 
-  void emit_signals_for_cell(Vector2i coords, int falgs) const;
+  // user data wrappers
+  double get_data_numeric(Vector2i coords,String key) const noexcept;
+  double set_data_numeric(Vector2i coords,String key, double value);
+  bool has_data_numeric(Vector2i coords,String key) const noexcept;
+  String get_data_string(Vector2i coords,const String& key) const noexcept;
+  String set_data_string(Vector2i coords,String key, String value);
+  bool has_data_string(Vector2i coords,const String& key) const noexcept;
+
+  // signals
+  void emit_signals_for_cell(Vector2i coords, int flags) const;
 
   //Array get_region_improvements() const;
 

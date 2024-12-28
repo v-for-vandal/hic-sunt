@@ -242,6 +242,39 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
   return result;
 }
 
+double RegionObject::get_data_numeric(Vector2i coords,String key) const noexcept {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->GetDataNumeric(qrs_coords, key.utf8().get_data());
+}
+
+double RegionObject::set_data_numeric(Vector2i coords,String key, double value) {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->SetDataNumeric(qrs_coords, key.utf8().get_data(), value);
+}
+
+bool RegionObject::has_data_numeric(Vector2i coords,String key) const noexcept {
+  ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
+  auto qrs_coords = cast_qrs(coords);
+    return region_->HasDataNumeric(qrs_coords, key.utf8().get_data());
+}
+
+String RegionObject::get_data_string(Vector2i coords,const String& key) const noexcept {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->GetDataString(qrs_coords,key.utf8().get_data()).data();
+}
+
+String RegionObject::set_data_string(Vector2i coords,String key, String value) {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->SetDataString(qrs_coords,key.utf8().get_data(),
+        value.utf8().get_data()).data();
+}
+
+bool RegionObject::has_data_string(Vector2i coords,const String& key) const noexcept {
+  ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
+  auto qrs_coords = cast_qrs(coords);
+    return region_->HasDataString(qrs_coords,key.utf8().get_data());
+}
+
 void RegionObject::emit_signals_for_cell(Vector2i coords, int flags) const
 {
   Rect2i area{coords, Vector2i{1,1}};

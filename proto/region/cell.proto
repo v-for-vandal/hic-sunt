@@ -15,5 +15,11 @@ message Cell {
 
   // list of features present on this cell
   repeated string features = 3;
+
+  // height
+  //double height_meters = 5;
+
+  map<string, string> user_data_string = 6;
+  map<string, double> user_data_numeric = 7;
 }
 

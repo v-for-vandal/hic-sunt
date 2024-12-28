@@ -68,6 +68,16 @@ public:
   // TODO: Perhaphs this method should not be inside region?
   PnlStatement BuildPnlStatement(const ruleset::RuleSet& ruleset) const;
 
+  // This is abstract storage for data. It never throws. If key is absent,
+  // default value is returned.
+  double GetDataNumeric(QRSCoords coords, StringTokenCRef key) const noexcept;
+  double SetDataNumeric(QRSCoords coords, StringTokenCRef key, double value);
+  bool HasDataNumeric(QRSCoords coords, StringTokenCRef key) const noexcept;
+  // Same, but for string. Strings are owned (and copied) internally
+  std::string_view GetDataString(QRSCoords coords, StringTokenCRef key) const noexcept;
+  std::string SetDataString(QRSCoords coords, StringTokenCRef key, std::string_view value);
+  bool HasDataString(QRSCoords coords, StringTokenCRef key) const noexcept;
+
   bool operator==(const Region& other) const;
   bool operator!=(const Region& other) const = default;
 
