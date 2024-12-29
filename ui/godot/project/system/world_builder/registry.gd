@@ -3,6 +3,14 @@ extends Node
 
 var _world_generators : Dictionary = {}
 
+enum CATEGORY {
+	Heightmap,
+	Climate,
+}
+
+## Return list of all enabled modules for selected category
+func get_all_modules()
+
 ## Register a module for use in world builder subsystem
 func register_module(mod_info: ModInfo, module: Script) -> bool:
 	# modconfig is config for whole mod. One mod may have a lot of 
