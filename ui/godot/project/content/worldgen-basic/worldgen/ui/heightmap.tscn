@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://dwt63rcf0y7lj"]
+
+[ext_resource type="Script" path="res://content/worldgen-basic/worldgen/ui/heightmap.gd" id="1_fknsk"]
+
+[node name="Heightmap" type="GridContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+columns = 2
+script = ExtResource("1_fknsk")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Max height"
+
+[node name="MaxHeightSlider" type="HSlider" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+max_value = 10.0
+value = 5.0
+tick_count = 10
+ticks_on_borders = true
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 2
+text = "Min height"
+
+[node name="MinHeightSlider" type="HSlider" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+min_value = -10.0
+max_value = 0.0
+value = -5.0
+tick_count = 10
+ticks_on_borders = true

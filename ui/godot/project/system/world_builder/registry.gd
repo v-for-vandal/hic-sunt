@@ -1,15 +1,24 @@
 # we must extend Node, otherwise Autoload wont work
 extends Node
 
-var _world_generators : Dictionary = {}
+var _world_generators_by_name : Dictionary = {}
+var _worldgen_modules_by_category: Dictionary = {}
 
 enum CATEGORY {
 	Heightmap,
 	Climate,
 }
 
+class ModuleInfo:
+	var name: String
+	var module_script: Script
+	
+	func create_instance() -> RefCounted:
+		return module_script.new()
+
 ## Return list of all enabled modules for selected category
-func get_all_modules()
+func get_modules_for_category(category: CATEGORY) -> Array[ModuleInfo]:
+	return _worldgen_modules_by_category.get(category, [])
 
 ## Register a module for use in world builder subsystem
 func register_module(mod_info: ModInfo, module: Script) -> bool:
@@ -33,7 +42,10 @@ func register_module(mod_info: ModInfo, module: Script) -> bool:
 		
 	if instance.has_method('create_world'):
 		# Ok, this is world generator module
-		_world_generators[mod_info.name] = module
+		_world_generators_by_name[mod_info.name] = module
+		
+	if instance.has_method('create_heightmap'):
+		_worldgen_modules_by_category[CATEGORY.Heightmap] = module
 
 	
 	return true

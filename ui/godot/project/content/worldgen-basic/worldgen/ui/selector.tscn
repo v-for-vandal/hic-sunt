@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://61kx4vhql3m8"]
+
+[ext_resource type="Script" path="res://content/worldgen-basic/worldgen/ui/selector.gd" id="1_e4wvg"]
+
+[node name="Root" type="VBoxContainer"]
+offset_right = 122.0
+offset_bottom = 23.0
+script = ExtResource("1_e4wvg")
+
+[node name="Selector" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Selector"]
+layout_mode = 2
+text = "Heightmap"
+
+[node name="SelectButton" type="OptionButton" parent="Selector"]
+layout_mode = 2
+
+[connection signal="item_selected" from="Selector/SelectButton" to="." method="_on_select_button_item_selected"]

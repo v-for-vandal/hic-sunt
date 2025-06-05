@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://m8fqciwcc6hq"]
+
+[ext_resource type="PackedScene" uid="uid://61kx4vhql3m8" path="res://content/worldgen-basic/worldgen/ui/selector.tscn" id="1_qdhwu"]
+
+[node name="Main" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -763.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer2" parent="." instance=ExtResource("1_qdhwu")]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Climate"
+
+[node name="ClimateButton" type="OptionButton" parent="HBoxContainer"]
+layout_mode = 2
