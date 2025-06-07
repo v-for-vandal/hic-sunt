@@ -10,15 +10,11 @@ offset_right = -763.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HBoxContainer2" parent="." instance=ExtResource("1_qdhwu")]
+[node name="HeighmapSelector" parent="." instance=ExtResource("1_qdhwu")]
 layout_mode = 2
+text = "Heightmap"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="ClimateSelector" parent="." instance=ExtResource("1_qdhwu")]
 layout_mode = 2
-
-[node name="Label" type="Label" parent="HBoxContainer"]
-layout_mode = 2
+category = 1
 text = "Climate"
-
-[node name="ClimateButton" type="OptionButton" parent="HBoxContainer"]
-layout_mode = 2

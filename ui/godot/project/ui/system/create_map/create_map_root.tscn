@@ -17,48 +17,25 @@ layout_mode = 2
 [node name="Controls" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
 
-[node name="GenerateButton" type="Button" parent="HBoxContainer/Controls"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/Controls"]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer/Controls/HBoxContainer"]
+layout_mode = 2
+
+[node name="GenerateButton" type="Button" parent="HBoxContainer/Controls/HBoxContainer"]
 layout_mode = 2
 text = "Generate"
 
-[node name="Label" type="Label" parent="HBoxContainer/Controls"]
+[node name="OptionsLabel" type="Label" parent="HBoxContainer/Controls"]
 layout_mode = 2
 text = "Options"
 horizontal_alignment = 1
 
-[node name="WorldOptionsContainer" type="PanelContainer" parent="HBoxContainer/Controls"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/Controls"]
 layout_mode = 2
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/Controls/WorldOptionsContainer"]
-layout_mode = 2
-columns = 2
-
-[node name="WorldSizeLabel" type="Label" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
-layout_mode = 2
-text = "World size"
-
-[node name="WorldSizeSelector" type="OptionButton" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-selected = 0
-item_count = 3
-popup/item_0/text = "Small"
-popup/item_1/text = "Normal"
-popup/item_1/id = 1
-popup/item_2/text = "Large"
-popup/item_2/id = 2
-
-[node name="WorldSizeLabel2" type="Label" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
-layout_mode = 2
-text = "Region size"
-
-[node name="RegionSizeSelector" type="SpinBox" parent="HBoxContainer/Controls/WorldOptionsContainer/GridContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-min_value = 10.0
-value = 10.0
-
-[node name="Label2" type="Label" parent="HBoxContainer/Controls"]
+[node name="DebugLabel" type="Label" parent="HBoxContainer/Controls"]
 layout_mode = 2
 text = "Debug
 "
@@ -132,7 +109,7 @@ layout_mode = 2
 
 [node name="WorldBuilder" parent="." instance=ExtResource("2_open1")]
 
-[connection signal="pressed" from="HBoxContainer/Controls/GenerateButton" to="." method="_on_generate_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/Controls/HBoxContainer/GenerateButton" to="." method="_on_generate_button_pressed"]
 [connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/BackgroundSelect" to="." method="_on_background_select_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/ForegroundSelect" to="." method="_on_foreground_select_item_selected"]
 [connection signal="pressed" from="HBoxContainer/Controls/BackButton" to="." method="_on_back_button_pressed"]

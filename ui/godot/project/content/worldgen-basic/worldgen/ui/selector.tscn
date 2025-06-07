@@ -12,7 +12,7 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="Selector"]
 layout_mode = 2
-text = "Heightmap"
+text = "Placeholder"
 
 [node name="SelectButton" type="OptionButton" parent="Selector"]
 layout_mode = 2

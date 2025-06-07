@@ -1,5 +1,13 @@
 extends HBoxContainer
 
+@export var category : WorldBuilderRegistry.CATEGORY = WorldBuilderRegistry.CATEGORY.Heightmap
+@export var text: String:
+	set(value):
+		text = value
+		if !is_inside_tree:
+			return
+		$Selector/Label.text = value
+
 var _ui_elements : Dictionary = {}
 var _modules : Dictionary = {}
 var _current_selected := -1
@@ -14,15 +22,20 @@ func get_selected_module_config() -> Dictionary:
 	else:
 		return {}
 
+func _init() -> void:
+	pass
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	# get all possible heightmaps
-	var available_generators := WorldBuilderRegistry.get_modules_for_category(WorldBuilderRegistry.CATEGORY.Heightmap)
+	# Init bound child properties
+	$Selector/Label.text = text
+	
+	# get all possible values for selected category
+	var available_generators := WorldBuilderRegistry.get_modules_for_category(category)
 	
 	for generator_info : WorldBuilderRegistry.ModuleInfo in available_generators:
 		var name := generator_info.name
-		var generator : RefCounted = generator_info.create_instalce()
+		var generator : RefCounted = generator_info.create_instance()
 		
 		var this_index : int = $Root/Selector/SelectButton.items_count
 		$Root/Selector/SelectButton.add_item(name)
