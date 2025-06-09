@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c6a3dba8v4rs6"]
 
-[ext_resource type="Script" path="res://ui/city/city_project_holder.gd" id="1_4efxu"]
+[ext_resource type="Script" uid="uid://bp8r26cx7qiah" path="res://ui/city/city_project_holder.gd" id="1_4efxu"]
 
 [node name="CityProjectHolder" type="HBoxContainer"]
 anchors_preset = 15

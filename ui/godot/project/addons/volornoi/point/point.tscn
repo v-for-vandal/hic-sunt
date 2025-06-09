@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://by8bhlkniekdb"]
 
-[ext_resource type="Script" path="res://addons/volornoi/point/point.gd" id="1_cetb4"]
+[ext_resource type="Script" uid="uid://db28ofbyi6y5l" path="res://addons/volornoi/point/point.gd" id="1_cetb4"]
 [ext_resource type="Texture2D" uid="uid://dky5dc66ro8st" path="res://addons/volornoi/point/point.png" id="2_f3xnu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_anwhw"]

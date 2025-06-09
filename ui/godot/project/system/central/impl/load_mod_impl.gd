@@ -4,6 +4,7 @@ func is_mod_folder(folder: String) -> bool:
 	return FileAccess.file_exists(folder.path_join('module.cfg'))
 	
 	
+## Load module from given folder, returns its ConfigFile
 func load_mod(folder: String) -> ConfigFile:
 	var moddir := DirAccess.open(folder)
 	if not moddir:
@@ -42,6 +43,7 @@ func load_mod(folder: String) -> ConfigFile:
 			
 	return modconfig
 	
+## Returns all .gd scripts in target location
 func load_mod_content_files(target_dir: String) -> Array[Resource]:
 	var result: Array[Resource] = []
 	var target_files := DirAccess.get_files_at(target_dir)
@@ -60,10 +62,14 @@ func load_mod_content_files(target_dir: String) -> Array[Resource]:
 	return result
 			
 	
+## Load content of the module. Looks for appropriate files in appropriate
+## locations and registers them.
 func load_mod_content(modconfig: ConfigFile) -> bool:
 	var mod_name : String = modconfig.get_value("main", "module_name")
 	var mod_info := ModInfo.new()
 	mod_info.name = mod_name
+	mod_info.config = modconfig
+	
 	var loaded_mod_path := "res://content".path_join(mod_name)
 	
 	# Check world gen folder

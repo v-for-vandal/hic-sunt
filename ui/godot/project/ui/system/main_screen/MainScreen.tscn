@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bup1yx750kq0"]
 
-[ext_resource type="Script" path="res://ui/system/main_screen/MainScreen.gd" id="1_mdqee"]
+[ext_resource type="Script" uid="uid://brn6sri8iccam" path="res://ui/system/main_screen/MainScreen.gd" id="1_mdqee"]
 [ext_resource type="PackedScene" uid="uid://bxo1rll4achyc" path="res://ui/system/create_map/create_map_root.tscn" id="2_5d5gq"]
 
 [node name="MainScreen" type="Control"]

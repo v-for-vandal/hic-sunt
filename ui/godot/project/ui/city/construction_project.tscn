@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://byvpjfsvggp5m"]
 
-[ext_resource type="Script" path="res://ui/city/construction_project.gd" id="1_07vf1"]
+[ext_resource type="Script" uid="uid://b8kt6qk2lcvuf" path="res://ui/city/construction_project.gd" id="1_07vf1"]
 [ext_resource type="Texture2D" uid="uid://di0208nhsy8bv" path="res://resources/city/general building.jpg" id="1_38yil"]
 
 [node name="ConstructionProject" type="HBoxContainer"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bxo1rll4achyc"]
 
-[ext_resource type="Script" path="res://ui/system/create_map/create_map_root.gd" id="1_pk3cd"]
+[ext_resource type="Script" uid="uid://cm5v1rniietax" path="res://ui/system/create_map/create_map_root.gd" id="1_pk3cd"]
 [ext_resource type="PackedScene" uid="uid://b0iqgdkdgf6j2" path="res://system/world_builder/world_builder.tscn" id="2_open1"]
 
 [node name="CreateMapRoot" type="PanelContainer"]
@@ -58,6 +58,7 @@ layout_mode = 2
 selected = 0
 item_count = 1
 popup/item_0/text = "None"
+popup/item_0/id = 0
 
 [node name="ForegroundLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 layout_mode = 2
@@ -69,6 +70,7 @@ layout_mode = 2
 selected = 0
 item_count = 1
 popup/item_0/text = "None"
+popup/item_0/id = 0
 
 [node name="BackButton" type="Button" parent="HBoxContainer/Controls"]
 layout_mode = 2

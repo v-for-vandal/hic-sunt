@@ -5,7 +5,6 @@ func get_module_info() -> Dictionary:
 
 func create_world() -> WorldObject:
 	return WorldObject.new()
-	
-	
+
 
 	

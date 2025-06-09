@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://baty2spf2o6n0"]
 
-[ext_resource type="Shader" path="res://addons/volornoi/voronoi_node/simple_outliner.gdshader" id="1_3rwv6"]
-[ext_resource type="Script" path="res://addons/volornoi/voronoi_node/voronoi_map.gd" id="2_458ri"]
+[ext_resource type="Shader" uid="uid://bqv2fhb1lthpx" path="res://addons/volornoi/voronoi_node/simple_outliner.gdshader" id="1_3rwv6"]
+[ext_resource type="Script" uid="uid://7tm1ubevxwgt" path="res://addons/volornoi/voronoi_node/voronoi_map.gd" id="2_458ri"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dgtw8"]
 shader = ExtResource("1_3rwv6")

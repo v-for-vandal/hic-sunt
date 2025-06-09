@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bxc5r6hxq4tjo"]
 
-[ext_resource type="Script" path="res://ui/system/save_dialog.gd" id="1_u2bjh"]
+[ext_resource type="Script" uid="uid://c8g8svq5xm51h" path="res://ui/system/save_dialog.gd" id="1_u2bjh"]
 [ext_resource type="PackedScene" uid="uid://dko1560jvly1k" path="res://ui/system/save_games_list.tscn" id="2_prgj7"]
 
 [node name="SaveDialog" type="Control"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://ctl00b2mx67o4"]
 
-[ext_resource type="Script" path="res://ui/system/load_game/load_dialog.gd" id="1_2qs4f"]
+[ext_resource type="Script" uid="uid://bq4yc4c8fr7ql" path="res://ui/system/load_game/load_dialog.gd" id="1_2qs4f"]
 [ext_resource type="PackedScene" uid="uid://dko1560jvly1k" path="res://ui/system/save_games_list.tscn" id="1_dyr4m"]
 
 [node name="LoadDialog" type="Control"]

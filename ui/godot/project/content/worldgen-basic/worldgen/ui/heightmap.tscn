@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dwt63rcf0y7lj"]
 
-[ext_resource type="Script" path="res://content/worldgen-basic/worldgen/ui/heightmap.gd" id="1_fknsk"]
+[ext_resource type="Script" uid="uid://dlwfkp3ov1rl" path="res://content/worldgen-basic/worldgen/ui/heightmap.gd" id="1_fknsk"]
 
 [node name="Heightmap" type="GridContainer"]
 anchors_preset = 15

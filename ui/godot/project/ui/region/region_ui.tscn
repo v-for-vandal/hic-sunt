@@ -1,10 +1,10 @@
 [gd_scene load_steps=8 format=3 uid="uid://brhsewnl00nkp"]
 
-[ext_resource type="Script" path="res://ui/region/region_ui.gd" id="1_j578s"]
-[ext_resource type="Script" path="res://ui/world/InfoTabContainer.gd" id="2_itlrf"]
-[ext_resource type="Script" path="res://ui/world/CellInfo.gd" id="3_swddy"]
+[ext_resource type="Script" uid="uid://cuo0kal3fuvwd" path="res://ui/region/region_ui.gd" id="1_j578s"]
+[ext_resource type="Script" uid="uid://bps81is67jlqo" path="res://ui/world/InfoTabContainer.gd" id="2_itlrf"]
+[ext_resource type="Script" uid="uid://cupjn1uapiruw" path="res://ui/world/CellInfo.gd" id="3_swddy"]
 [ext_resource type="PackedScene" uid="uid://dcacdldp7pmxy" path="res://ui/region/buildings/building_list.tscn" id="4_0x70n"]
-[ext_resource type="Script" path="res://ui/region/Resources.gd" id="5_wjejd"]
+[ext_resource type="Script" uid="uid://b2fcva54o43ye" path="res://ui/region/Resources.gd" id="5_wjejd"]
 [ext_resource type="PackedScene" uid="uid://cls0hdxhdqsxu" path="res://ui/city/city_projects_queue.tscn" id="6_uhseh"]
 [ext_resource type="PackedScene" uid="uid://d2g36s2i8bc5p" path="res://ui/city/city_jobs.tscn" id="7_udedg"]
 

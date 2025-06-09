@@ -14,4 +14,3 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		print("SubNode1: Received input: ", event)
 	
-

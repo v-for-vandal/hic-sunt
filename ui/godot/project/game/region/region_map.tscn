@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://dyp7yp0fqe876"]
 
-[ext_resource type="Script" path="res://game/region/region_map.gd" id="1_5bqhm"]
+[ext_resource type="Script" uid="uid://cnxbiq5omyuqk" path="res://game/region/region_map.gd" id="1_5bqhm"]
 [ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="2_ihpnb"]
-[ext_resource type="Script" path="res://game/region/RegionSurface.gd" id="2_paq3v"]
+[ext_resource type="Script" uid="uid://dasud4j0s1l5u" path="res://game/region/RegionSurface.gd" id="2_paq3v"]
 [ext_resource type="PackedScene" uid="uid://brhsewnl00nkp" path="res://ui/region/region_ui.tscn" id="3_ltroy"]
 [ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="4_tsfj2"]
 

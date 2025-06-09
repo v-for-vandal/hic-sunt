@@ -1,18 +1,21 @@
-[gd_scene load_steps=6 format=3 uid="uid://cmguowjwau2bf"]
+[gd_scene load_steps=7 format=4 uid="uid://cmguowjwau2bf"]
 
 [ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="1_3p2pg"]
-[ext_resource type="Script" path="res://resources/world/test_tile_map.gd" id="2_vwonc"]
-[ext_resource type="Script" path="res://test/playground_1/sub_node_1.gd" id="3_jfpfx"]
-[ext_resource type="Script" path="res://test/playground_1/test_node_1.gd" id="4_cxoia"]
-[ext_resource type="Script" path="res://test/playground_1/sub_node_2.gd" id="5_upke4"]
+[ext_resource type="Script" uid="uid://xnchamhioqk8" path="res://resources/world/test_tile_map.gd" id="2_vwonc"]
+[ext_resource type="Script" uid="uid://mjsxty0njujm" path="res://test/playground_1/sub_node_1.gd" id="3_jfpfx"]
+[ext_resource type="Script" uid="uid://bwod3l67rwhj4" path="res://test/playground_1/test_node_1.gd" id="4_cxoia"]
+[ext_resource type="Script" uid="uid://dujfxcatkm7vu" path="res://test/playground_1/sub_node_2.gd" id="5_upke4"]
+[ext_resource type="TileSet" uid="uid://pcraxaogcyn7" path="res://resources/world/v4_terrain.tres" id="6_cdcu2"]
 
 [node name="Node2D" type="Node2D"]
 
 [node name="TileMap" type="TileMap" parent="."]
+visible = false
 position = Vector2(-1, 0)
 tile_set = ExtResource("1_3p2pg")
 format = 2
 layer_0/tile_data = PackedInt32Array(65536, 131072, 0, 1, 131072, 0, 0, 131072, 0, 65535, 131072, 0, 131071, 65536, 0, 131072, 65536, 0, 65537, 65536, 0, 65538, 65536, 0, 196607, 65536, 1, 131073, 65536, 1, 131074, 65536, 0, 196608, 1, 0)
+layer_1/name = "Layer1"
 layer_1/z_index = 1
 layer_1/tile_data = PackedInt32Array(131073, 1, 0)
 script = ExtResource("2_vwonc")
@@ -25,3 +28,12 @@ script = ExtResource("4_cxoia")
 
 [node name="SubNode2" type="Node2D" parent="TestNode1"]
 script = ExtResource("5_upke4")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+visible = false
+tile_map_data = PackedByteArray("AAD/////AgABAAMAAAAAAP7/AgAEAAQAAAAAAP//AgAFAAUAAAAAAAAAAgAEAAcAAAD//wAAAgABAAgAAAD+////AgAFAAYAAAD///7/AgABAAkAAAABAP//AgAFAAYAAAAAAP3/AgAEAAcAAAD///3/AgABAAgAAAD+//7/AgADAAIAAAD+/wAAAgAAAAEAAAD+//3/AgAAAAEAAAABAP7/AgADAAIAAAABAAAAAgAAAAEAAAABAP3/AgAAAAEAAAD//wEAAgAEAAQAAAD+/wEAAgABAAkAAAAAAPz/AgABAAMAAAAAAAEAAgADAAIAAAD9////AgAFAAUAAAD8////AgABAAMAAAA=")
+tile_set = ExtResource("6_cdcu2")
+
+[node name="TileMapLayer2" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAD+/wAAAgACAAoAAAD/////AgABAAMAAAD///7/AgABAAMAAAAAAP7/AgABAAMAAAAAAP//AgABAAMAAAAAAAAAAgABAAMAAAD//wAAAgABAAMAAAD+////AgABAAMAAAABAP7/AgAFAAEAAAABAP//AgAEAAMAAAABAAAAAgAEAAQAAAD+//7/AgADAAEAAAD9////AgADAAMAAAD+//3/AgABAAYAAAD///3/AgABAAcAAAAAAP3/AgABAAUAAAD+/wEAAgABAAkAAAD//wEAAgABAAsAAAAAAAEAAgACAAEAAAACAP//AgADAAMAAAD9//3/AgACAAIAAAD9/wEAAgACAAYAAAD8//3/AgACAAQAAAD8/wEAAgACAAcAAAD9/wAAAgADAAwAAAD9//7/AgADAAsAAAACAP7/AgADAAsAAAACAAAAAgADAAwAAAABAP3/AgACAAQAAAA=")
+tile_set = ExtResource("6_cdcu2")
