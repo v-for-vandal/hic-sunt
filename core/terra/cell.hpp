@@ -12,16 +12,22 @@
 
 namespace hs::terra {
 
+    template<typename BaseTypes>
   class Plane;
+    template<typename BaseTypes>
   class Cell;
 
-  void SerializeTo(const Cell& source, proto::terra::Cell& proto_destination);
-  Cell ParseFrom( const proto::terra::Cell& source,  serialize::To<Cell>);
+    template<typename BaseTypes>
+  void SerializeTo(const Cell<BaseTypes>& source, proto::terra::Cell& proto_destination);
+    template<typename BaseTypes>
+  Cell<BaseTypes> ParseFrom( const proto::terra::Cell& source,  serialize::To<Cell<BaseTypes>>);
 
+    template<typename BaseTypes>
   class Cell {
   public:
+      using Region = region::Region<BaseTypes>;
     Cell():
-      region_(std::make_shared<region::Region>()) {}
+      region_(std::make_shared<Region>()) {}
 
     Cell(const Cell&) = delete;
     Cell& operator=(const Cell&) = delete;
@@ -29,12 +35,12 @@ namespace hs::terra {
       region_(std::move(other.region_))
     {
       // don't leave other in invalid form
-      other.region_ = std::make_shared<region::Region>();
+      other.region_ = std::make_shared<Region>();
     }
     Cell& operator=(Cell&& other) {
       if(this == &other) return *this;
       region_ = other.region_;
-      other.region_ = std::make_shared<region::Region>();
+      other.region_ = std::make_shared<Region>();
       return *this;
     }
 
@@ -53,20 +59,22 @@ namespace hs::terra {
   }
 
   private:
-    friend void SerializeTo(const Cell& source, proto::terra::Cell& proto_destination);
-    friend Cell ParseFrom( const proto::terra::Cell& source,  serialize::To<Cell>);
-    friend Plane;
+    friend void SerializeTo(const Cell<BaseTypes>& source, proto::terra::Cell& proto_destination);
+    friend Cell<BaseTypes> ParseFrom( const proto::terra::Cell& source,  serialize::To<Cell<BaseTypes>>);
+    friend Plane<BaseTypes>;
 
     // Call this method via World object, not directly
-    auto SetRegion(region::Region region) {
+    auto SetRegion(Region region) {
       *region_ = std::move(region);
     }
 
 
   private:
-    std::shared_ptr<region::Region> region_;
+    std::shared_ptr<Region> region_;
 
   };
 
 
 }
+
+#include "cell.inl"

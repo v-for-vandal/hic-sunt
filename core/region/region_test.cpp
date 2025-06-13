@@ -9,7 +9,7 @@ namespace hs::region {
 
 using namespace ::hs::geometry::literals;
 
-using StdRegion = Region<StdBaseTypes>
+using StdRegion = Region<StdBaseTypes>;
 
 TEST(StdRegion, Serialize) {
   StdRegion ref_region(15);

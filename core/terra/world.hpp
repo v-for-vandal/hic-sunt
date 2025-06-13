@@ -7,6 +7,7 @@
 #include <core/terra/cell.hpp>
 #include <core/ruleset/ruleset.hpp>
 #include <core/utils/serialize.hpp>
+#include <core/types/std_base_types.hpp>
 
 #include <flatbuffers/flatbuffers.h>
 #include <fbs/world_generated.h>
@@ -15,18 +16,26 @@
 
 namespace hs::terra {
 
+template<typename BaseTypes>
 class World;
 
-void SerializeTo(const World& source, proto::terra::World& target);
-World ParseFrom(const proto::terra::World& world, serialize::To<World>);
+template<typename BaseTypes>
+void SerializeTo(const World<BaseTypes>& source, proto::terra::World& target);
+template<typename BaseTypes>
+World<BaseTypes> ParseFrom(const proto::terra::World& world, serialize::To<World<BaseTypes>>);
 
 // World is a collection of planes
+template<typename BaseTypes = StdBaseTypes>
 class World {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
   using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
+  using Plane = Plane<BaseTypes>;
+  using PlanePtr = PlanePtr<BaseTypes>;
+  using StringId = BaseTypes::StringId;
+  using String = BaseTypes::String;
 
   World() = default;
   World(const World&) = delete;
@@ -34,8 +43,8 @@ public:
   World& operator=(const World&) = delete;
   World& operator=(World&&) = default;
 
-  PlanePtr GetPlane(PlaneIdCRef id) const;
-  PlanePtr AddPlane(PlaneIdCRef id, QRSBox box);
+  PlanePtr GetPlane(const StringId& id) const;
+  PlanePtr AddPlane(const StringId& id, QRSBox box);
 
   bool operator==(const World& other) const;
   bool operator!=(const World& other) const {
@@ -53,3 +62,5 @@ private:
 
 
 }
+
+#include "world.inl"

@@ -10,7 +10,11 @@ namespace hs {
         using StringId = std::string;
         using StringIdRef = const std::string&;
 
-        using Strigng = std::string;
+        using String = std::string;
         using StringRef = const std::string&;
+
+        bool IsNullToken(const auto& string) {
+            return string.size() == 0;
+        }
     };
 }

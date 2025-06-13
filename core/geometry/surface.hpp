@@ -225,7 +225,7 @@ public:
   }
 
 private:
-    /*
+    /* TODO: RM
   friend Surface<Cell,CoordinateSystem> ParseFrom(const auto& fbs_class,
     serialize::To<Surface<Cell, CoordinateSystem>>);
   friend auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::FlatBufferBuilder& fbb, auto to);

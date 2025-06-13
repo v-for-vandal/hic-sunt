@@ -20,7 +20,7 @@ public:
   Comb() = default;
 
   void Add(const StringId& elem) {
-    if(IsNullToken(elem) ) { return; }
+    if(BaseTypes::IsNullToken(elem) ) { return; }
     auto prev_count = count_[elem]++;
     auto curr_count = prev_count+1;
     comb_[prev_count].erase(elem);
@@ -28,7 +28,7 @@ public:
   }
 
   void Remove(const StringId& elem) {
-    if(IsNullToken(elem) ) { return; }
+    if(BaseTypes::IsNullToken(elem) ) { return; }
     auto prev_count = count_[elem]--;
     auto curr_count = prev_count-1;
     comb_[prev_count].erase(elem);
@@ -80,8 +80,8 @@ public:
   }
 
 
-  bool operator==(const Comb& other) const;
-  bool operator!=(const Comb& other) const {
+  bool operator==(const Comb& other) const noexcept;
+  bool operator!=(const Comb& other) const noexcept {
     return !(*this == other);
   }
 
@@ -93,3 +93,5 @@ private:
 };
 
 }
+
+#include "comb.inl"

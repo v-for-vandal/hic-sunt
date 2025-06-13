@@ -8,13 +8,15 @@ namespace hs::terra {
 
 using namespace ::hs::geometry::literals;
 
-TEST(Plane, Serialize) {
-  Plane ref_plane(Plane::QRSBox(
-      Plane::QRSCoords(
+using StdPlane = Plane<>;
+
+TEST(StdPlane, Serialize) {
+  StdPlane ref_plane(StdPlane::QRSBox(
+      StdPlane::QRSCoords(
         -1_q,
         -2_r
         ),
-      Plane::QRSCoords(
+      StdPlane::QRSCoords(
         4_q,
         6_r
         )
@@ -31,7 +33,7 @@ TEST(Plane, Serialize) {
   proto::terra::Plane proto_read_plane;
   ASSERT_TRUE(proto_read_plane.ParseFromString(storage));
 
-  auto parse_plane = ParseFrom(proto_read_plane, serialize::To<Plane>{});
+  auto parse_plane = ParseFrom(proto_read_plane, serialize::To<StdPlane>{});
 
   EXPECT_EQ(ref_plane, parse_plane);
   EXPECT_EQ(ref_plane.GetSurfaceObject().data_size(), parse_plane.GetSurfaceObject().data_size());

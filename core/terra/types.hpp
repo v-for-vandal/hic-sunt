@@ -5,12 +5,11 @@
 
 namespace hs::terra {
 
+template<typename BaseTypes>
 class Plane;
 
-using PlanePtr = utils::SharedPtr<Plane>;
-
-using PlaneId = utils::StringToken;
-using PlaneIdCRef = utils::StringTokenCRef;
+template<typename BaseTypes>
+using PlanePtr = utils::SharedPtr<Plane<BaseTypes>>;
 
 }
 
