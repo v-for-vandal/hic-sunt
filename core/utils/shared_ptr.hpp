@@ -4,6 +4,8 @@
 
 namespace hs::utils {
 
+// The sole purpose is to provide operator== that compares items
+// by value, not by address
 template<typename T>
 class SharedPtr {
 public:

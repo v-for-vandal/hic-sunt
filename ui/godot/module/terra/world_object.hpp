@@ -33,6 +33,8 @@ private:
 public:
   Error save(String filename);
   Error load(String filename);
+  Ref<PlaneObject> create_plane(StringName plane_id, Rect2i box);
+  Ref<PlaneObject> get_plane(StringName plane_id);
   static Dictionary create_error(const char* error);
   static Dictionary create_success();
   static Ref<WorldObject> create_world();

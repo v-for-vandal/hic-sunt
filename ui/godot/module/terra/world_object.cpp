@@ -7,6 +7,8 @@
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("save", "filename"), &WorldObject::save);
   ClassDB::bind_method(D_METHOD("load", "filename"), &WorldObject::load);
+  ClassDB::bind_method(D_METHOD("create_plane", "plane_id", "box"), &WorldObject::create_plane);
+  ClassDB::bind_method(D_METHOD("get_plane", "plane_id"), &WorldObject::get_plane);
   ClassDB::bind_static_method("create_world", D_METHOD("create_world"), &WorldObject::create_world);
 }
 
@@ -72,5 +74,8 @@ Ref<WorldObject> WorldObject::create_world() {
   return result;
 
 }
+
+Ref<PlaneObject> WorldObject::get_plane(StringName name) {
+  Ref<PlaneObject> result(memnew(PlaneObject(
 
 

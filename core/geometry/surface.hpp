@@ -13,7 +13,7 @@ using CellsArrayView =
     std::mdspan<Cell,
                   std::extents<int, std::dynamic_extent,
                                  std::dynamic_extent>,
-                  std::layout_left>;
+                  std::layout_right>;
 
 template<typename Cell, typename CoordinateSystem>
 class SurfaceView {
@@ -50,6 +50,7 @@ public:
     return GetCell(Coords{q,r});
   }
 
+
   auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
   auto r_size() const { return typename CoordinateSystem::RDelta{target_.extent(1)}; }
 
@@ -81,6 +82,14 @@ public:
     return !(*this == other);
   }
 
+  template<typename Callback>
+  void foreach(Callback& calback) {
+      for(size_t idx = 0; idx < target_.size(); ++idx) {
+          const auto coords = FromRawIndex(idx);
+          callback(coords, Cell);
+      }
+  }
+
   /*
   auto begin() { return target_.begin(); }
   auto end() { return target_.end(); }
@@ -89,9 +98,23 @@ public:
   */
 
   private:
-  static bool CheckInRange(auto x, auto start, auto end) {
+  static bool CheckInRange(auto x, auto start, auto end) noexcept {
     return (x.ToUnderlying() - start.ToUnderlying()) * (end.ToUnderlying() - 1 - x.ToUnderlying()) >= 0;
   }
+  Coords FromRawIndex(const size_t index) {
+    // index is displacement in raw underlying array.
+    // This code relies on mdspan having layout_right.
+    const size_t x = index / q_size().value;
+    const size_t y = index % q_size().value;
+
+
+    return Coords{q_start_ + CoordinateSystem::QDelta{x},
+        r_start_ + CoordinateSystem::RDelta{y}};
+  }
+  // idx is index in underlying array.
+  const Cell& GetCell(size_t idx) const { return target_.data_handle[idx]; }
+  Cell& GetCell(size_t idx) { return target_.data_handle[idx]; }
+
 
 private:
   CellsArrayView<Cell> target_;

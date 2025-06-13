@@ -24,9 +24,21 @@ PlanePtr World::GetPlane(PlaneIdCRef plane_id) const {
     return fit->second;
   }
 
-  spdlog::info("Can't find region {}", plane_id);
+  spdlog::info("Can't find Plane with id {}", plane_id);
 
   return {};
+}
+
+PlanePtr World::AddPlane(PlaneIdCRef id, QRSBox box) {
+  if(auto fit = planes_.find(plane_id); fit != planes_.end()) {
+      spdlog::error("Plane with id {} already exists", plane_id);
+      return fit->second;
+  }
+
+  auto plane_ptr = std::make_shared<Plane>(box);
+  planes_[plane_id] = plane_ptr;
+
+  return plane_ptr;
 }
 
 void SerializeTo(const World& source, proto::terra::World& target)

@@ -61,6 +61,13 @@ Ref<RegionObject> PlaneObject::get_region_by_id(String region_id) const {
   return result;
 }
 
+void PlaneObject::foreach(const Callable& callback) {
+  data_.GetSurface().view().foreach(
+    [&callback](QRSCoords coords, hs::terra::Cell& cell) {
+      callback.call(coords.q.value, coords.r.value);
+    }
+}
+
 bool PlaneObject::contains(Vector2i coords) const {
   auto qrs_coords = cast_qrs(coords);
 

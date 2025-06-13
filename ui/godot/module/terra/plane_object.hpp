@@ -7,6 +7,7 @@
 
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/variant/callable.hpp>
 
 using namespace godot;
 
@@ -37,6 +38,7 @@ public:
   Ref<RegionObject> get_region(Vector2i coords) const;
   Ref<RegionObject> get_region_by_id(String region_id) const;
   Dictionary get_region_info(Vector2i coords) const;
+  void foreach(const Callable& callback);
   bool contains(Vector2i coords) const;
   Error save(String filename);
   Error load(String filename);
