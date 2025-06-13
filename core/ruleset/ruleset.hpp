@@ -5,66 +5,39 @@
 
 #include <absl/container/flat_hash_map.h>
 
-#include <core/utils/string_token.hpp>
-#include <core/utils/error_message.hpp>
+#include <core/ruleset/ruleset_base.hpp>
 
-#include <ruleset/region_improvements.pb.h>
-#include <ruleset/biome.pb.h>
-#include <ruleset/jobs.pb.h>
-#include <ruleset/projects.pb.h>
-#include <ruleset/resources.pb.h>
-#include <render/render.pb.h>
-#include <render/atlas.pb.h>
+#include <core/utils/error_message.hpp>
+#include <core/types/std_base_types.hpp>
 
 namespace hs::ruleset {
 
-class RuleSet {
+template<typename BaseTypes = StdBaseTypes>
+class RuleSet :  RuleSetBase {
 public:
   using ErrorsCollection = utils::ErrorsCollection;
+  using StringId = StdBaseTypes::StringId;
   void Clear();
   // Adds data to ruleset
   bool Load(const std::filesystem::path& path, ErrorsCollection& errors);
 
-  auto& GetRegionImprovements() const { return improvements_; }
-
-  auto& GetBiomes() const { return biomes_; }
-
-  auto& GetResources() const { return resources_; }
-
-  auto& GetRendering() const { return rendering_; }
-
-  auto& GetJobs() const { return jobs_; }
-
-  auto& GetProjects() const { return projects_; }
-
   const proto::ruleset::RegionImprovement* FindRegionImprovementByType(
-    utils::StringTokenCRef improvement_type_id) const;
+    const StringId& improvement_type_id) const;
 
   const proto::ruleset::Job* FindJobByType(
-    utils::StringTokenCRef job_type_id) const;
+    const StringId& job_type_id) const;
 
   const proto::ruleset::Project* FindProjectByType(
-    utils::StringTokenCRef project_type_id) const;
+    const StringId& project_type_id) const;
 
 
 private:
-  proto::ruleset::RegionImprovements improvements_;
-  proto::ruleset::Biomes biomes_;
-  proto::ruleset::Resources resources_;
-  proto::ruleset::Jobs jobs_;
-  proto::ruleset::Projects projects_;
-  proto::render::Rendering rendering_;
 
-  absl::flat_hash_map<utils::StringToken, size_t> improvements_by_type_;
-  absl::flat_hash_map<utils::StringToken, size_t> jobs_by_type_;
-  absl::flat_hash_map<utils::StringToken, size_t> projects_by_type_;
-
-  static inline std::filesystem::path improvements_file{"region_improvements.txt"};
-  static inline std::filesystem::path biomes_file{"biomes.txt"};
-  static inline std::filesystem::path resources_file{"resources.txt"};
-  static inline std::filesystem::path rendering_file{"rendering.txt"};
-  static inline std::filesystem::path jobs_file{"jobs.txt"};
-  static inline std::filesystem::path projects_file{"projects.txt"};
+  absl::flat_hash_map<StringId, size_t> improvements_by_type_;
+  absl::flat_hash_map<StringId, size_t> jobs_by_type_;
+  absl::flat_hash_map<StringId, size_t> projects_by_type_;
 };
 
 }
+
+#include "ruleset.inl"

@@ -3,19 +3,20 @@
 #include <absl/container/flat_hash_map.h>
 
 #include <core/utils/string_token.hpp>
+#include <core/types/std_base_types.hpp>
 
 namespace hs::region {
 
-using ResourceId = utils::StringToken;
-using ResourceIdCRef = utils::StringTokenCRef;
-
-// List of resources and their per-turn values. Positive means income,
-// negative means losses
-using ResourceFlow = absl::flat_hash_map<ResourceId, int>;
-
 // Profit and losses
+template<typename BaseTypes = StdBaseTypes>
 class PnlStatement {
 public:
+  using ResourceId = typename BaseTypes::StringId;
+
+  // List of resources and their per-turn values. Positive means income,
+  // negative means losses
+  using ResourceFlow = absl::flat_hash_map<ResourceId, int>;
+
   const auto& GetProfit() const { return profit_; }
   const auto& GetLosses() const { return losses_; }
 
@@ -32,3 +33,5 @@ private:
 };
 
 }
+
+#include "pnl_statement.inl"

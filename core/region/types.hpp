@@ -6,11 +6,10 @@
 
 namespace hs::region {
 
+template<typename BaseTypes>
 class Region;
 
-using RegionPtr = std::shared_ptr<Region>;
-
-using RegionId = utils::StringToken;
-using RegionIdCRef = utils::StringTokenCRef;
+template<typename BaseTypes>
+using RegionPtr = std::shared_ptr<Region<BaseTypes>>;
 
 }

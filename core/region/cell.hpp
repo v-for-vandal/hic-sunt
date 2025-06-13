@@ -6,35 +6,43 @@
 #include <absl/container/flat_hash_map.h>
 
 #include <core/utils/serialize.hpp>
-#include <core/utils/string_token.hpp>
+#include <core/types/std_base_types.hpp>
 
 #include <fbs/world_generated.h>
 #include <region/cell.pb.h>
 #include <region/improvement.pb.h>
 
 namespace hs::region {
+  template<typename BaseTypes>
   class Region;
+  template<typename BaseTypes>
   class Cell;
 
-  void SerializeTo(const Cell& source, proto::region::Cell& to);
-  Cell ParseFrom( const proto::region::Cell& from, serialize::To<Cell>);
+  template<typename BaseTypes>
+  void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to);
+  template<typename BaseTypes>
+  Cell<BaseTypes> ParseFrom( const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
 
   /// One cell in region map
+  template<typename BaseTypes = StdBaseTypes>
   class Cell {
 
   public:
-    std::string_view GetBiome() const { return biome_; }
-    std::string_view GetFeature() const { return feature_; }
+    using StringId = typename BaseTypes::StringId;
+    using String = typename BaseTypes::String;
+
+    StringId GetBiome() const { return biome_; }
+    StringId GetFeature() const { return feature_; }
 
     // This is abstract storage for data. It never throws. If key is absent,
     // default value is returned.
-    double GetDataNumeric(std::string_view key) const noexcept;
-    double SetDataNumeric(std::string_view key, double value);
-    bool HasDataNumeric(std::string_view key) const noexcept;
+    double GetDataNumeric(StringId key) const noexcept;
+    double SetDataNumeric(StringId key, double value);
+    bool HasDataNumeric(StringId key) const noexcept;
     // Same, but for string. Strings are owned (and copied) internally
-    std::string_view GetDataString(std::string_view key) const noexcept;
-    std::string SetDataString(std::string_view key, std::string_view value);
-    bool HasDataString(std::string_view key) const noexcept;
+    const String& GetDataString(StringId key) const noexcept;
+    std::string SetDataString(StringId key, String value);
+    bool HasDataString(StringId key) const noexcept;
 
     bool HasImprovement() const { return !improvement_.type().empty(); }
     const proto::region::Improvement& GetImprovement() const { return improvement_; }
@@ -42,20 +50,18 @@ namespace hs::region {
     bool operator==(const Cell&) const;
 
   private:
-    friend Region;
-    friend void SerializeTo(const Cell& source, proto::region::Cell& to);
-    friend Cell ParseFrom( const proto::region::Cell& from, serialize::To<Cell>);
+    friend Region<BaseTypes>;
+    friend void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to);
+    friend Cell ParseFrom( const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
     // Using this method is not recommended - instead use Region::SetBiome
     // because region tracks some aggregated information about cells
-    void SetBiome(std::string_view biome) { biome_ = biome; }
-    void SetFeature(std::string_view feature) { feature_ = feature; }
+    void SetBiome(StringId biome) { biome_ = biome; }
+    void SetFeature(StringId feature) { feature_ = feature; }
     void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
 
   private:
-    // TODO: optimize by sharing strings
-    // or by replacing it with token
-    hs::utils::StringToken biome_;
-    hs::utils::StringToken feature_;
+    StringId biome_;
+    StringId feature_;
 
     // height, in meters, above/under sea level (whatever sea this may be)
     // double height_meters_{0};
@@ -64,10 +70,11 @@ namespace hs::region {
 
     proto::region::Improvement improvement_;
 
-    absl::flat_hash_map<utils::StringToken, size_t> user_data_numeric_;
-    absl::flat_hash_map<utils::StringToken, std::string> user_data_string_;
+    absl::flat_hash_map<StringId, double> user_data_numeric_;
+    absl::flat_hash_map<StringId, String> user_data_string_;
   };
 
 
 }
 
+#include "cell.inl"
