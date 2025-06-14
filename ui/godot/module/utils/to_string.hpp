@@ -9,6 +9,10 @@ namespace utils {
     ::godot::String result{str.c_str()};
     return result;
   }
+    inline ::godot::StringName to_string_name(const std::string& str) {
+    ::godot::StringName result{str.c_str()};
+    return result;
+  }
     inline std::string from_string(const ::godot::String& input) {
         auto utf8str = input.utf8();
         return std::string{utf8str.ptr(), static_cast<size_t>(utf8str.size())};

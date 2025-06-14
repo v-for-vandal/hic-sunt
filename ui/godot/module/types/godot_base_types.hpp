@@ -4,6 +4,7 @@
 #include <godot_cpp/variant/string.hpp>
 
 #include <ui/godot/module/utils/fmt.hpp>
+#include <ui/godot/module/types/godot_serialize.hpp>
 
 namespace hs::godot {
 
@@ -17,19 +18,48 @@ namespace hs::godot {
             return string.length() == 0;
         }
 
+        static StringId StringIdFromStdString(const std::string& data) noexcept {
+            return utils::to_string_name(data);
+        }
+
         // This method should only be used to serialize godod Strings
         // into protobuf. For general conversion to std::string see
         // ui/godot/module/utils/to_string.hpp
         static auto ToProtoString(const ::godot::StringName& input) noexcept {
-            return ToProtoString(::godot::String(input));
+            std::string result;
+            SerializeTo(input, result);
+            return result;
         }
         // This method should only be used to serialize godod Strings
         // into protobuf. For general conversion to std::string see
         // ui/godot/module/utils/to_string.hpp
         static std::string ToProtoString(const ::godot::String& input) noexcept {
-            auto utf8str = input.utf8();
-            return std::string{utf8str.ptr(), static_cast<size_t>(utf8str.size())};
+            std::string result;
+            SerializeTo(input, result);
+            return result;
         }
+
+        /*
+        static StringId StringIdFromProtoString(const std::string& data) noexcept {
+            return utils::to_string_name(data);
+        }
+        static String StringFromProtoString(const std::string& data) noexcept {
+            return utils::to_string(data);
+        }
+        */
     };
 
+}
+
+namespace godot {
+
+    template<typename H>
+    H AbslHashValue(H h, const ::godot::StringName& target) {
+        return H::combine(std::move(h), target.hash());
+    }
+
+    template<typename H>
+    H AbslHashValue(H h, const ::godot::String& target) {
+        return H::combine(std::move(h), target.hash());
+    }
 }

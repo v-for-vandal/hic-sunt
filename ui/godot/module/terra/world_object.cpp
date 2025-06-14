@@ -80,6 +80,18 @@ Ref<WorldObject> WorldObject::create_world() {
 
 Ref<PlaneObject> WorldObject::get_plane(StringName name) {
   auto plane_ptr = data_.GetPlane(name);
+  if (!plane_ptr) {
+    return Ref<PlaneObject>();
+  }
+
+  Ref<PlaneObject> result(memnew(PlaneObject(
+        plane_ptr)));
+  ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to get plane");
+  return result;
+}
+
+Ref<PlaneObject> WorldObject::create_plane(StringName name, Rect2i box) {
+  auto plane_ptr = data_.AddPlane(name, cast_qrs_box(box));
   Ref<PlaneObject> result(memnew(PlaneObject(
         plane_ptr)));
   ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new plane");

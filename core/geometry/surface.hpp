@@ -85,7 +85,7 @@ public:
   }
 
   template<typename Callback>
-  void foreach(Callback& callback) {
+  void foreach(Callback&& callback) {
       for(size_t idx = 0; idx < target_.size(); ++idx) {
           const auto coords = FromRawIndex(idx);
           if (Contains(coords)) [[likely]] {
@@ -109,8 +109,8 @@ public:
   Coords FromRawIndex(const size_t index) {
     // index is displacement in raw underlying array.
     // This code relies on mdspan having layout_right.
-    const size_t x = index / q_size().value;
-    const size_t y = index % q_size().value;
+    const int x = index / q_size().ToUnderlying();
+    const int y = index % q_size().ToUnderlying();
 
     const auto q_pos = q_start() + QDelta{x};
     const auto r_pos = r_start() + RDelta{y};

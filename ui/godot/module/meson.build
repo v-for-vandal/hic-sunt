@@ -7,11 +7,12 @@ godot_module_sources = [
     'terra/world_object.cpp',
     'terra/plane_object.cpp',
     'region/region_object.cpp',
+    hs_proto_generated_headers,
 ]
 
 
 hic_sunt_godot = shared_library('hic_sunt_godot',
-  sources: godot_module_sources + hs_proto_generated_headers,
+  sources: godot_module_sources,
   link_args: ['-static-libstdc++'],
   dependencies : [common_deps, godot_dep],
   link_whole: [core_lib],
@@ -27,3 +28,14 @@ hic_sunt_godot = shared_library('hic_sunt_godot',
   install_dir: 'module')
 
 
+godot_module_tests = executable('unit_tests',
+  sources: [
+    'region/region_test.cpp',
+    hs_proto_generated_headers,
+    ],
+  dependencies : [common_deps, gtest_dep, godot_dep],
+  link_with: [hic_sunt_godot],
+  include_directories: root_include,
+  )
+
+test('godot.module', godot_module_tests, env: environment(test_env))

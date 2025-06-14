@@ -8,7 +8,7 @@ template<typename BaseTypes>
 Plane<BaseTypes>::Plane(
     QRSBox box
   ):
-  plane_id_(fmt::format("plane_{}", next_id_++)),
+  plane_id_(BaseTypes::StringIdFromStdString(fmt::format("plane_{}", next_id_++))),
   surface_(box.start().q(), box.end().q(), box.start().r(), box.end().r(),
     box.start().s(), box.end().s())
   {
@@ -63,7 +63,7 @@ void Plane<BaseTypes>::InitNonpersistent() {
       if(surface_.Contains(q,r)) {
         auto region_ptr = surface_.GetCell(q,r).GetRegionPtr();
         auto region_id = region_ptr->GetId();
-        region_index_[std::string{region_id}] = region_ptr;
+        region_index_[region_id] = region_ptr;
       }
     }
   }
@@ -71,7 +71,7 @@ void Plane<BaseTypes>::InitNonpersistent() {
   for(const auto& cell : off_surface_) {
       auto region_ptr = cell.GetRegionPtr();
       auto region_id = region_ptr->GetId();
-      region_index_[std::string{region_id}] = region_ptr;
+      region_index_[region_id] = region_ptr;
   }
 
 }

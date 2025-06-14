@@ -1,6 +1,7 @@
 #include <google/protobuf/util/message_differencer.h>
 
 #include <core/utils/serialize.hpp>
+#include <core/utils/serialize_containers.hpp>
 
 namespace hs::region {
 
@@ -76,28 +77,31 @@ bool Cell<BaseTypes>::HasDataString(StringId key) const noexcept {
 template<typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to) {
   to.Clear();
-  to.set_biome(source.GetBiome());
-  to.add_features(source.GetFeature());
+  to.set_biome(BaseTypes::ToProtoString(source.GetBiome()));
+  to.add_features(BaseTypes::ToProtoString(source.GetFeature()));
   auto improvement_ptr = to.mutable_improvements()->Add();
   *improvement_ptr = source.GetImprovement();
 
-  SerializeMapTo(source.user_data_string_, to.mutable_user_data_string());
-  SerializeMapTo(source.user_data_numeric_, to.mutable_user_data_numeric());
+  // convert dictionary to serializable type
+
+  SerializeStringIdMapTo(BaseTypes{}, source.user_data_string_, to.mutable_user_data_string());
+  SerializeStringIdMapTo(BaseTypes{}, source.user_data_numeric_, to.mutable_user_data_numeric());
 }
 
 template<typename BaseTypes>
 Cell<BaseTypes> ParseFrom( const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>) {
+  using StringId = typename BaseTypes::StringId;
   Cell<BaseTypes> result;
-  result.SetBiome(from.biome());
+  result.SetBiome(ParseFrom(from.biome(), serialize::To<StringId>{}));
   if(from.features_size() > 0) {
-    result.SetFeature(from.features(0));
+    result.SetFeature(ParseFrom(from.features(0), serialize::To<StringId>{}));
   }
   if(from.improvements_size() > 0) {
     result.SetImprovement(from.improvements(0));
   }
 
-  ParseMapFrom(from.user_data_string(), result.user_data_string_);
-  ParseMapFrom(from.user_data_numeric(), result.user_data_numeric_);
+  ParseStringIdMapFrom(BaseTypes{}, from.user_data_string(), result.user_data_string_);
+  ParseStringIdMapFrom(BaseTypes{}, from.user_data_numeric(), result.user_data_numeric_);
 
   return result;
 }

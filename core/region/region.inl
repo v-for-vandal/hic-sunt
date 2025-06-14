@@ -1,4 +1,3 @@
-
 namespace hs::region {
 
 template<typename BaseTypes>
@@ -9,7 +8,7 @@ Region<BaseTypes>::Region():
 
 template<typename BaseTypes>
 Region<BaseTypes>::Region(int radius):
-  id_(fmt::format("region_{}", next_id_++)),
+  id_(BaseTypes::StringIdFromStdString(fmt::format("region_{}", next_id_++))),
   surface_(
     QRSCoordinateSystem::QAxis(-radius),
     QRSCoordinateSystem::QAxis(radius),
@@ -267,20 +266,21 @@ void SerializeTo(const Region<BaseTypes>& source, proto::region::Region& target)
 {
   target.Clear();
   SerializeTo(source.surface_, *target.mutable_surface());
-  target.set_id(source.id_);
-  target.set_city_id(source.city_id_);
+  target.set_id(BaseTypes::ToProtoString(source.id_));
+  target.set_city_id(BaseTypes::ToProtoString(source.city_id_));
   target.set_unique_id_counter(source.next_unique_id_);
 }
 
 template<typename BaseTypes>
 Region<BaseTypes> ParseFrom(const proto::region::Region& region, serialize::To<Region<BaseTypes>>)
 {
+    using StringId = typename BaseTypes::StringId;
   Region<BaseTypes> result;
   if(region.has_surface()) {
     result.surface_ = ParseFrom(region.surface(), serialize::To<typename Region<BaseTypes>::Surface>{});
   }
-  result.id_ = region.id();
-  result.city_id_ = region.city_id();
+  result.id_ = ParseFrom(region.id(), serialize::To<StringId>{});
+  result.city_id_ = ParseFrom(region.city_id(), serialize::To<StringId>{});
   result.next_unique_id_ = region.unique_id_counter();
 
   // Restore non-persistent data

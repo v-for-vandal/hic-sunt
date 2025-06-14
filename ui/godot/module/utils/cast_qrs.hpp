@@ -8,18 +8,26 @@ namespace hs::godot {
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
   using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
 
-  auto cast_qrs_size(Vector2i size) noexcept {
+  inline auto cast_qrs_size(Vector2i size) noexcept {
     auto q_size = typename QRSCoordinateSystem::QDelta{size.x};
     auto r_size = typename QRSCoordinateSystem::RDelta{size.y};
 
     return QRSSize{q_size, r_size};
   }
 
-  QRSCoords cast_qrs(Vector2i coords) noexcept {
+  inline QRSCoords cast_qrs(Vector2i coords) noexcept {
     return QRSCoords{
       QRSCoordinateSystem::QAxis{coords.x},
       QRSCoordinateSystem::RAxis{coords.y}
     };
   }
+
+  inline QRSBox cast_qrs_box(Rect2i coords) noexcept {
+      return QRSBox(
+          cast_qrs(coords.position),
+          cast_qrs(coords.get_end())
+          );
+  }
+
 
 }

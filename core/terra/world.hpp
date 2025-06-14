@@ -52,8 +52,8 @@ public:
   }
 
 private:
-  friend void SerializeTo(const World& source, proto::terra::World& target);
-  friend World ParseFrom(const proto::terra::World& world, serialize::To<World>);
+  friend void SerializeTo<BaseTypes>(const World& source, proto::terra::World& target);
+  friend World ParseFrom<BaseTypes>(const proto::terra::World& world, serialize::To<World>);
   void InitNonpersistent();
 
 private:

@@ -45,12 +45,9 @@ public:
   Dictionary get_region_info(Vector2i coords) const;
   void foreach(const Callable& callback);
   bool contains(Vector2i coords) const;
-  Error save(String filename);
-  Error load(String filename);
   static Dictionary create_error(const char* error);
   static Dictionary create_success();
   //String get_cell_terrain(Vector2i coords) const;
-  static Ref<PlaneObject> create_world(Vector2i world_size, int region_radius);
 
 };
 

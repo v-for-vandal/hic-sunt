@@ -29,6 +29,10 @@ public:
     return value;
   }
 
+  operator bool () const {
+      return bool(value);
+  }
+
   auto& operator*() { return *value; }
   const auto& operator*() const { return *value; }
   auto& operator->() { return value; }
