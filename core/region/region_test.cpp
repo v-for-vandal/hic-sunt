@@ -16,12 +16,12 @@ TEST(StdRegion, Serialize) {
 
   std::string storage;
 
-  proto::region::StdRegion proto_region;
+  proto::region::Region proto_region;
   SerializeTo(ref_region, proto_region);
   proto_region.SerializeToString(&storage);
 
 
-  proto::region::StdRegion proto_read_region;
+  proto::region::Region proto_read_region;
   ASSERT_TRUE(proto_read_region.ParseFromString(storage));
 
   auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{});
@@ -35,12 +35,12 @@ TEST(StdRegion, SerializeDefaultConstructed) {
 
   std::string storage;
 
-  proto::region::StdRegion proto_region;
+  proto::region::Region proto_region;
   SerializeTo(ref_region, proto_region);
   proto_region.SerializeToString(&storage);
 
 
-  proto::region::StdRegion proto_read_region;
+  proto::region::Region proto_read_region;
   ASSERT_TRUE(proto_read_region.ParseFromString(storage));
 
   auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{});

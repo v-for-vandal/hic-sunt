@@ -15,6 +15,8 @@
 #include <ui/godot/module/system/spdlog_sink.hpp>
 #include <ui/godot/module/system/surface_event.hpp>
 
+namespace hs::godot {
+
 using namespace godot;
 
 void initialize_example_module(ModuleInitializationLevel p_level) {
@@ -26,7 +28,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     auto logger = godot_logger_mt("godot_logger");
     logger->info("Initialized godot sink");
     spdlog::set_default_logger(logger);
-    ClassDB::register_class<HicSuntSystem>();
+    //ClassDB::register_class<HicSuntSystem>();
     ClassDB::register_class<RegionObject>();
     ClassDB::register_class<PnlObject>();
     ClassDB::register_class<PlaneObject>();
@@ -52,4 +54,6 @@ GDExtensionBool GDE_EXPORT sichunt_library_init(GDExtensionInterfaceGetProcAddre
 
   return init_obj.init();
 }
+}
+
 }

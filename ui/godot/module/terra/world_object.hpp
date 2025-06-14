@@ -2,11 +2,13 @@
 
 #include <memory>
 
-#include <core/terra/world.hpp>
-#include <ui/godot/module/region/region_object.hpp>
+#include <ui/godot/module/terra/plane_object.hpp>
+#include <ui/godot/module/terra/world.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/classes/image.hpp>
+
+namespace hs::godot {
 
 using namespace godot;
 
@@ -15,11 +17,11 @@ class WorldObject : public RefCounted {
 
 public:
   WorldObject() {}
-  WorldObject(hs::terra::World&& data):
+  WorldObject(hs::godot::World&& data):
     data_(std::move(data)) {}
 
-  using QRSCoordinateSystem = hs::terra::World::QRSCoordinateSystem;
-  using QRSCoords = hs::terra::World::QRSCoords;
+  using QRSCoordinateSystem = World::QRSCoordinateSystem;
+  using QRSCoords = World::QRSCoords;
 
   void _init() {
   }
@@ -28,7 +30,7 @@ public:
 
 
 private:
-  hs::terra::World data_;
+  World data_;
 
 public:
   Error save(String filename);
@@ -39,19 +41,6 @@ public:
   static Dictionary create_success();
   static Ref<WorldObject> create_world();
 
-  static QRSCoords cast_qrs(Vector2i coords) {
-    return QRSCoords{
-      QRSCoordinateSystem::QAxis{coords.x},
-      QRSCoordinateSystem::RAxis{coords.y}
-    };
-  }
-  static auto cast_qrs_size(Vector2i size) {
-    auto q_size = typename hs::terra::World::QRSCoordinateSystem::QDelta{size.x};
-    auto r_size = typename hs::terra::World::QRSCoordinateSystem::RDelta{size.y};
-
-    return typename hs::terra::World::QRSSize{q_size, r_size};
-  }
-
 };
 
-
+}

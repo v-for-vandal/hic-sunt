@@ -2,37 +2,40 @@
 
 #include <memory>
 
-#include <core/terra/world.hpp>
+#include <ui/godot/module/region/region.hpp>
+#include <ui/godot/module/terra/world.hpp>
 #include <ui/godot/module/game/pnl_object.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 
-using namespace godot;
+
+namespace hs::godot {
+
+using namespace ::godot;
+
 
 class RegionObject : public RefCounted {
   GDCLASS(RegionObject, RefCounted);
 
 public:
   RegionObject() {}
-  RegionObject(std::shared_ptr<hs::region::Region> region):
+  RegionObject(std::shared_ptr<Region> region):
     region_(std::move(region)) {}
 
-  using QRSCoordinateSystem = hs::terra::World::QRSCoordinateSystem;
-  using QRSCoords = hs::terra::World::QRSCoords;
+  using QRSCoordinateSystem = World::QRSCoordinateSystem;
+  using QRSCoords = World::QRSCoords;
 
   void _init() {
   }
 
-  //void set_world(std::shared_ptr<terra::World> world_ptr);
-
   static void _bind_methods();
 
-  static Dictionary make_region_info(const hs::region::Region& region);
+  static Dictionary make_region_info(const Region& region);
 
 
 private:
-  std::shared_ptr<hs::region::Region> region_; // never null
+  std::shared_ptr<Region> region_; // never null
 
 public:
   Rect2i get_dimensions() const;
@@ -70,3 +73,5 @@ public:
   }
 
 };
+
+}

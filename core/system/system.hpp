@@ -8,6 +8,8 @@
 
 namespace hs::system {
 
+#if 0
+
 struct NewWorldParameters {
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSSize = geometry::DeltaCoords<QRSCoordinateSystem>;
@@ -30,5 +32,7 @@ public:
   std::optional<ruleset::RuleSet> LoadRuleSet(const std::filesystem::path& path,
     ErrorsCollection& errors);
 };
+
+#endif
 
 }

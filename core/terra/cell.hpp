@@ -59,8 +59,8 @@ namespace hs::terra {
   }
 
   private:
-    friend void SerializeTo(const Cell<BaseTypes>& source, proto::terra::Cell& proto_destination);
-    friend Cell<BaseTypes> ParseFrom( const proto::terra::Cell& source,  serialize::To<Cell<BaseTypes>>);
+    friend void SerializeTo<BaseTypes>(const Cell<BaseTypes>& source, proto::terra::Cell& proto_destination);
+    friend Cell<BaseTypes> ParseFrom<BaseTypes>( const proto::terra::Cell& source,  serialize::To<Cell<BaseTypes>>);
     friend Plane<BaseTypes>;
 
     // Call this method via World object, not directly

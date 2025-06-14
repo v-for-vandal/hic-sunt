@@ -57,7 +57,7 @@ private:
   void InitNonpersistent();
 
 private:
-  std::unordered_map<std::string, PlanePtr> planes_;
+  std::unordered_map<StringId, PlanePtr> planes_;
 };
 
 

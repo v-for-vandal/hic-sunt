@@ -41,7 +41,7 @@ namespace hs::region {
     bool HasDataNumeric(StringId key) const noexcept;
     // Same, but for string. Strings are owned (and copied) internally
     const String& GetDataString(StringId key) const noexcept;
-    std::string SetDataString(StringId key, String value);
+    const String& SetDataString(StringId key, String value);
     bool HasDataString(StringId key) const noexcept;
 
     bool HasImprovement() const { return !improvement_.type().empty(); }
@@ -51,8 +51,8 @@ namespace hs::region {
 
   private:
     friend Region<BaseTypes>;
-    friend void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to);
-    friend Cell ParseFrom( const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
+    friend void SerializeTo<BaseTypes>(const Cell<BaseTypes>& source, proto::region::Cell& to);
+    friend Cell ParseFrom<BaseTypes>( const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
     // Using this method is not recommended - instead use Region::SetBiome
     // because region tracks some aggregated information about cells
     void SetBiome(StringId biome) { biome_ = biome; }

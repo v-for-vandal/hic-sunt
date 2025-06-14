@@ -2,6 +2,8 @@
 
 #include <godot_cpp/core/object.hpp>
 
+namespace hs::godot {
+
 void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id);
@@ -57,8 +59,8 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
 
   // Fill result
   Dictionary result;
-  result["biome"] = cell.GetBiome().data();
-  result["feature"] = cell.GetFeature().data();
+  result["biome"] = cell.GetBiome();
+  result["feature"] = cell.GetFeature();
   result["improvement"] = convert_to_dictionary(
     cell.GetImprovement());
 
@@ -71,7 +73,7 @@ Dictionary RegionObject::convert_to_dictionary(const hs::proto::region::Improvem
     return result;
   }
   result["id"] = improvement.id();
-  result["type"] = improvement.type().data();
+  result["type"] = StringName(improvement.type().c_str());
 
   return result;
 }
@@ -87,7 +89,7 @@ bool RegionObject::set_biome(Vector2i coords, String biome) const
     return false;
   }
 
-  auto success = region_->SetBiome(qrs_coords, biome.utf8().get_data());
+  auto success = region_->SetBiome(qrs_coords, biome);
   if( success) {
     emit_signals_for_cell(coords, 0);
   }
@@ -106,7 +108,7 @@ bool RegionObject::set_feature(Vector2i coords, String feature) const
     return false;
   }
 
-  auto success = region_->SetFeature(qrs_coords, feature.utf8().get_data());
+  auto success = region_->SetFeature(qrs_coords, feature);
 
   if( success) {
     emit_signals_for_cell(coords, 0);
@@ -126,7 +128,7 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const
   // on.
   // However, it will not perform checks that this improvement follows
   // the ruleset
-  auto success = region_->SetImprovement(qrs_coords, improvement.utf8().get_data());
+  auto success = region_->SetImprovement(qrs_coords, improvement);
 
   if( success) {
     emit_signals_for_cell(coords, 0);
@@ -135,7 +137,7 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const
   return success;
 }
 
-Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
+Dictionary RegionObject::make_region_info(const Region& region) {
   Dictionary result;
   // Build top biome
   {
@@ -143,12 +145,12 @@ Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
     auto top_biome = region.GetTopKBiomes(3);
     for(auto& [biome, count] : top_biome) {
       top_biome_result.append(count);
-      top_biome_result.append(String(biome.c_str()));
+      top_biome_result.append(String(biome));
     }
     result["top_biome"] = std::move(top_biome_result);
   }
-  result["city_id"] = region.GetCityId().data();
-  result["region_id"] = region.GetId().data();
+  result["city_id"] = region.GetCityId();
+  result["region_id"] = region.GetId();
   //result["size"] = region.GetSurface().size();
 
   return result;
@@ -173,20 +175,20 @@ String RegionObject::get_region_id() const {
     return {};
   }
 
-  return region_->GetId().data();
+  return region_->GetId();
 
 }
 
 String RegionObject::get_city_id() const {
   ERR_FAIL_NULL_V_MSG(region_, String{}, "null-containing region object");
 
-  return region_->GetCityId().data();
+  return region_->GetCityId();
 }
 
 bool RegionObject::set_city_id(String city_id) const {
   ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
 
-  return region_->SetCityId(city_id.utf8().get_data());
+  return region_->SetCityId(city_id);
 }
 
 Ref<PnlObject> RegionObject::get_pnl_statement(Ref<RulesetObject> ruleset) const {
@@ -244,35 +246,35 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
 
 double RegionObject::get_data_numeric(Vector2i coords,String key) const noexcept {
   auto qrs_coords = cast_qrs(coords);
-    return region_->GetDataNumeric(qrs_coords, key.utf8().get_data());
+    return region_->GetDataNumeric(qrs_coords, key);
 }
 
 double RegionObject::set_data_numeric(Vector2i coords,String key, double value) {
   auto qrs_coords = cast_qrs(coords);
-    return region_->SetDataNumeric(qrs_coords, key.utf8().get_data(), value);
+    return region_->SetDataNumeric(qrs_coords, key, value);
 }
 
 bool RegionObject::has_data_numeric(Vector2i coords,String key) const noexcept {
   ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
   auto qrs_coords = cast_qrs(coords);
-    return region_->HasDataNumeric(qrs_coords, key.utf8().get_data());
+    return region_->HasDataNumeric(qrs_coords, key);
 }
 
 String RegionObject::get_data_string(Vector2i coords,const String& key) const noexcept {
   auto qrs_coords = cast_qrs(coords);
-    return region_->GetDataString(qrs_coords,key.utf8().get_data()).data();
+    return region_->GetDataString(qrs_coords,key);
 }
 
 String RegionObject::set_data_string(Vector2i coords,String key, String value) {
   auto qrs_coords = cast_qrs(coords);
-    return region_->SetDataString(qrs_coords,key.utf8().get_data(),
-        value.utf8().get_data()).data();
+    return region_->SetDataString(qrs_coords,key,
+        value);
 }
 
 bool RegionObject::has_data_string(Vector2i coords,const String& key) const noexcept {
   ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
   auto qrs_coords = cast_qrs(coords);
-    return region_->HasDataString(qrs_coords,key.utf8().get_data());
+    return region_->HasDataString(qrs_coords,key);
 }
 
 void RegionObject::emit_signals_for_cell(Vector2i coords, int flags) const
@@ -281,4 +283,4 @@ void RegionObject::emit_signals_for_cell(Vector2i coords, int flags) const
   const_cast<RegionObject*>(this)->emit_signal("region_changed", area, flags);
 }
 
-
+}

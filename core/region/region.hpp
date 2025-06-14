@@ -21,6 +21,7 @@ namespace hs::region {
 
 template<typename BaseTypes>
 void SerializeTo(const Region<BaseTypes>& source, proto::region::Region& to);
+
 template<typename BaseTypes>
 Region<BaseTypes> ParseFrom( const proto::region::Region& from, serialize::To<Region<BaseTypes>>);
 
@@ -57,7 +58,7 @@ public:
   void SetId(const StringId& id) { id_ = id; }
 
   bool SetBiome(QRSCoords coords, const StringId& biome);
-  std::vector<std::pair<std::string, int>> GetTopKBiomes(int k) const {
+  std::vector<std::pair<StringId, int>> GetTopKBiomes(int k) const {
     return biome_count_.TopK(k);
   }
 
@@ -66,7 +67,7 @@ public:
   bool SetImprovement(QRSCoords coords, const StringId& improvement_type);
 
   bool SetCityId(const StringId& city_id);
-  bool IsCity() const { return !city_id_.empty(); }
+  bool IsCity() const { return !BaseTypes::IsNullToken(city_id_); }
   const StringId& GetCityId() const { return city_id_; }
 
   // Returns container with coordinates of all improved cells
@@ -92,7 +93,7 @@ private:
   // === persistent data
   StringId id_;
   Surface surface_;
-  std::string city_id_;
+  StringId city_id_;
   int next_unique_id_{0};
 
   enum class EphemeralData {
@@ -119,8 +120,9 @@ private:
 
 
 private:
-  friend void SerializeTo(const Region& source, proto::region::Region& to);
-  friend Region ParseFrom( const proto::region::Region& from, serialize::To<Region>);
+
+  friend void SerializeTo<BaseTypes>(const Region& source, proto::region::Region& to);
+  friend Region ParseFrom<BaseTypes>( const proto::region::Region& from, serialize::To<Region>);
 };
 
 

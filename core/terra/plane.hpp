@@ -67,8 +67,8 @@ public:
   }
 
 private:
-  friend void SerializeTo(const Plane& source, proto::terra::Plane& target);
-  friend Plane ParseFrom(const proto::terra::Plane& world, serialize::To<Plane>);
+  friend void SerializeTo<BaseTypes>(const Plane& source, proto::terra::Plane& target);
+  friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane& world, serialize::To<Plane>);
 
   void InitNonpersistent();
 

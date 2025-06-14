@@ -3,6 +3,9 @@
 #include <fstream>
 
 #include <ui/godot/module/utils/to_string.hpp>
+#include <ui/godot/module/utils/cast_qrs.hpp>
+
+namespace hs::godot {
 
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("save", "filename"), &WorldObject::save);
@@ -42,7 +45,7 @@ Error WorldObject::load(String filename) {
     return ERR_FILE_CANT_OPEN;
   }
   try {
-    data_ = ParseFrom(proto_world, ::hs::serialize::To<hs::terra::World>{});
+    data_ = ParseFrom(proto_world, ::hs::serialize::To<World>{});
   } catch (const std::exception&e) {
     return ERR_FILE_CORRUPT;
   }
@@ -76,6 +79,11 @@ Ref<WorldObject> WorldObject::create_world() {
 }
 
 Ref<PlaneObject> WorldObject::get_plane(StringName name) {
+  auto plane_ptr = data_.GetPlane(name);
   Ref<PlaneObject> result(memnew(PlaneObject(
+        plane_ptr)));
+  ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new plane");
+  return result;
+}
 
-
+}

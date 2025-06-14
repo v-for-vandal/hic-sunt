@@ -64,14 +64,17 @@ bool Region<BaseTypes>::SetBiome(QRSCoords coords, const StringId& biome)
     return false;
   }
 
-  std::string biome_str{biome};
+  if (BaseTypes::IsNullToken(biome)) {
+      return false;
+  }
+
 
   auto& cell = surface_.GetCell(coords);
-  if(!cell.GetBiome().empty()) {
-    biome_count_.Remove(std::string{cell.GetBiome()});
+  if(!BaseTypes::IsNullToken(cell.GetBiome())) {
+    biome_count_.Remove(cell.GetBiome());
   }
   cell.SetBiome(biome);
-  biome_count_.Add(biome_str);
+  biome_count_.Add(biome);
 
   return true;
 }
@@ -96,7 +99,7 @@ bool Region<BaseTypes>::SetImprovement(QRSCoords coords, const StringId& improve
     return false;
   }
 
-  if(improvement_type.empty()){
+  if(BaseTypes::IsNullToken(improvement_type)){
     spdlog::error("can't use empty improvement type, use RemoveImprovement instead");
     return false;
   }
@@ -105,7 +108,7 @@ bool Region<BaseTypes>::SetImprovement(QRSCoords coords, const StringId& improve
 
   proto::region::Improvement new_improvement;
   new_improvement.set_id(next_unique_id_++);
-  new_improvement.set_type(improvement_type);
+  new_improvement.set_type(BaseTypes::ToProtoString(improvement_type));
   cell.SetImprovement(new_improvement);
 
   cells_with_improvements_.insert(coords);
@@ -116,7 +119,7 @@ bool Region<BaseTypes>::SetImprovement(QRSCoords coords, const StringId& improve
 
 template<typename BaseTypes>
 bool Region<BaseTypes>::SetCityId(const StringId& city_id) {
-  if(IsCity() && !city_id.empty()) {
+  if(IsCity() && !BaseTypes::IsNullToken(city_id)) {
     spdlog::error("Can't set city_id in region where city is already present");
     return false;
   }
@@ -202,8 +205,8 @@ void Region<BaseTypes>::BuildEphemeral() {
       QRSCoords coords(q,r);
       if(surface.Contains(coords)) {
         auto& cell = surface.GetCell(coords);
-        biome_count_.Add(std::string{cell.GetBiome()});
-        feature_count_[std::string{cell.GetFeature()}]++;
+        biome_count_.Add(cell.GetBiome());
+        feature_count_[cell.GetFeature()]++;
         if(cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);
         }

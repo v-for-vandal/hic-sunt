@@ -3,35 +3,40 @@
 #include <memory>
 
 #include <core/terra/plane.hpp>
+#include <core/terra/world.hpp>
 #include <ui/godot/module/region/region_object.hpp>
+#include <ui/godot/module/terra/plane.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/variant/callable.hpp>
 
-using namespace godot;
+
+namespace hs::godot {
+
+using namespace ::godot;
 
 class PlaneObject : public RefCounted {
   GDCLASS(PlaneObject, RefCounted);
 
 public:
   PlaneObject() {}
-  PlaneObject(hs::terra::Plane&& data):
+  PlaneObject(::hs::godot::PlanePtr data):
     data_(std::move(data)) {}
 
-  using QRSCoordinateSystem = hs::terra::Plane::QRSCoordinateSystem;
-  using QRSCoords = hs::terra::Plane::QRSCoords;
+  using QRSCoordinateSystem = World::QRSCoordinateSystem;
+  using QRSCoords = World::QRSCoords;
+  using QRSSize = World::QRSSize;
+  using Cell = ::hs::godot::Plane::Cell;
 
   void _init() {
   }
-
-  //void set_world(std::shared_ptr<terra::Plane> world_ptr);
 
   static void _bind_methods();
 
 
 private:
-  hs::terra::Plane data_;
+  PlanePtr data_;
 
 public:
   Rect2i get_dimensions() const;
@@ -47,20 +52,7 @@ public:
   //String get_cell_terrain(Vector2i coords) const;
   static Ref<PlaneObject> create_world(Vector2i world_size, int region_radius);
 
-  static QRSCoords cast_qrs(Vector2i coords) {
-    return QRSCoords{
-      QRSCoordinateSystem::QAxis{coords.x},
-      QRSCoordinateSystem::RAxis{coords.y}
-    };
-  }
-  static auto cast_qrs_size(Vector2i size) {
-    auto q_size = typename hs::terra::Plane::QRSCoordinateSystem::QDelta{size.x};
-    auto r_size = typename hs::terra::Plane::QRSCoordinateSystem::RDelta{size.y};
-
-    return typename hs::terra::Plane::QRSSize{q_size, r_size};
-  }
-
 };
 
 
-
+}

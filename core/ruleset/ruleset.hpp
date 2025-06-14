@@ -13,7 +13,7 @@
 namespace hs::ruleset {
 
 template<typename BaseTypes = StdBaseTypes>
-class RuleSet :  RuleSetBase {
+class RuleSet :  public RuleSetBase {
 public:
   using ErrorsCollection = utils::ErrorsCollection;
   using StringId = StdBaseTypes::StringId;

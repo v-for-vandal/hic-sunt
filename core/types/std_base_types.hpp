@@ -8,13 +8,16 @@ namespace hs {
     public:
         // TODO: use boost flyweight ?
         using StringId = std::string;
-        using StringIdRef = const std::string&;
 
         using String = std::string;
-        using StringRef = const std::string&;
 
-        bool IsNullToken(const auto& string) {
+        static bool IsNullToken(const auto& string) noexcept {
             return string.size() == 0;
+        }
+
+        template<typename T>
+        static auto ToProtoString(T&& input) noexcept {
+            return std::forward<T>(input);
         }
     };
 }

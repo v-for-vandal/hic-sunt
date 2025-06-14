@@ -2,18 +2,21 @@
 
 #include <memory>
 
-#include <core/terra/world.hpp>
+
+#include <ui/godot/module/game/ruleset.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 
-using namespace godot;
+namespace hs::godot {
+
+using namespace ::godot;
 
 class RulesetObject : public RefCounted {
   GDCLASS(RulesetObject, RefCounted);
 
 public:
   RulesetObject() {}
-  RulesetObject(hs::ruleset::RuleSet&& data):
+  RulesetObject(RuleSet&& data):
     ruleset_(std::move(data)) {}
 
 
@@ -24,14 +27,14 @@ public:
 
   static void _bind_methods();
 
-  void SetRuleSet(hs::ruleset::RuleSet rules) {
+  void SetRuleSet(RuleSet rules) {
     ruleset_ = std::move(rules);
   }
 
   const auto& GetRuleSet() const { return ruleset_; }
 
 private:
-  hs::ruleset::RuleSet ruleset_;
+  RuleSet ruleset_;
   // TODO: add unordered_map<string, int> for quick access to improvement by
   // its id
 
@@ -52,3 +55,4 @@ public:
   static Dictionary convert_project(const hs::proto::ruleset::Project& project);
 };
 
+}

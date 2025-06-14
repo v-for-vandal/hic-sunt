@@ -60,12 +60,11 @@ auto Cell<BaseTypes>::GetDataString(StringId key) const noexcept -> const String
 }
 
 template<typename BaseTypes>
-std::string Cell<BaseTypes>::SetDataString(StringId key, String value) {
+auto Cell<BaseTypes>::SetDataString(StringId key, String value) -> const String& {
     auto& elem = user_data_string_[key];
-    std::string res = elem;
     elem = std::move(value);
 
-    return res;
+    return elem;
 }
 
 template<typename BaseTypes>

@@ -1,5 +1,9 @@
 #include "ruleset_object.hpp"
 
+#include <spdlog/spdlog.h>
+
+namespace hs::godot {
+
 void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_all_region_improvements"), &RulesetObject::get_all_region_improvements);
   ClassDB::bind_method(D_METHOD("get_biomes"), &RulesetObject::get_biomes);
@@ -175,4 +179,4 @@ Array RulesetObject::get_all_resources() const {
 
 }
 
-
+}

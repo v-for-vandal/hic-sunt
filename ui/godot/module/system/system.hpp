@@ -10,8 +10,11 @@
 
 #include <core/system/system.hpp>
 
+namespace hs::godot {
 
 using namespace godot;
+
+#if 0
 
 class HicSuntSystem : public Node {
   GDCLASS(HicSuntSystem, Node);
@@ -55,5 +58,7 @@ private:
 
 };
 
+#endif
 
 
+}

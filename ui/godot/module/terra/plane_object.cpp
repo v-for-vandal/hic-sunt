@@ -3,6 +3,9 @@
 #include <fstream>
 
 #include <ui/godot/module/utils/to_string.hpp>
+#include <ui/godot/module/utils/cast_qrs.hpp>
+
+namespace hs::godot {
 
 void PlaneObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &PlaneObject::get_dimensions);
@@ -63,8 +66,8 @@ Ref<RegionObject> PlaneObject::get_region_by_id(String region_id) const {
 
 void PlaneObject::foreach(const Callable& callback) {
   data_.GetSurface().view().foreach(
-    [&callback](QRSCoords coords, hs::terra::Cell& cell) {
-      callback.call(coords.q.value, coords.r.value);
+    [&callback](QRSCoords coords, Cell& cell) {
+      callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying());
     }
 }
 
@@ -213,4 +216,4 @@ Ref<CellObject> PlaneObject::GetCellObject(Vector3 godot_coords) const {
 #endif
 
 
-
+}
