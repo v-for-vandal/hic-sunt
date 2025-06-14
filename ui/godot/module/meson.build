@@ -30,6 +30,7 @@ hic_sunt_godot = shared_library('hic_sunt_godot',
 
 godot_module_tests = executable('unit_tests',
   sources: [
+    'test_main.cpp',
     'region/region_test.cpp',
     hs_proto_generated_headers,
     ],

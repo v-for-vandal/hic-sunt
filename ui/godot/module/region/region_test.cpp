@@ -11,6 +11,8 @@ namespace hs::godot {
 
 using namespace ::godot;
 
+// Alas, godot classes can not be created without godot runtime
+/*
 TEST(RegionObject, AbseilMap) {
     // This tests checks that abesil map works with godot string and string ids
     absl::flat_hash_map<StringName, String> user_data_string;
@@ -18,10 +20,11 @@ TEST(RegionObject, AbseilMap) {
     StringName key{"some_key"};
     String value{"some_value"};
 
-    //user_data_string[key] = value;
+    user_data_string[key] = value;
 
-    //ASSERT_EQ(value, user_data_string[key]);
+    ASSERT_EQ(value, user_data_string[key]);
 }
+*/
 
 
 }
