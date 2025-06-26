@@ -6,12 +6,20 @@ namespace hs::terra {
 
 template<typename BaseTypes>
 Plane<BaseTypes>::Plane(
-    QRSBox box
+    QRSBox box,
+    int region_radius
   ):
   plane_id_(BaseTypes::StringIdFromStdString(fmt::format("plane_{}", next_id_++))),
   surface_(box.start().q(), box.end().q(), box.start().r(), box.end().r(),
     box.start().s(), box.end().s())
   {
+      if (region_radius > 0) {
+          // Init regions
+          GetSurface().foreach([region_radius](QRSCoords, Cell& cell) {
+              cell.SetRegion(Region(region_radius));
+              });
+        }
+
     InitNonpersistent();
   }
 

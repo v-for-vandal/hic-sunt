@@ -21,7 +21,8 @@ func _load_ruleset() -> RulesetObject:
 	return _ruleset_object
 	
 func _create_world() -> WorldObject:
-	var world := WorldObject.create_world(Vector2i(1,1), 10)
+	var world := WorldObject.create_world()
+	assert_not_null(world.create_plane("test_plane", Rect2i(Vector2i(0,0), Vector2i(2,2)), 10))
 	assert_true(world.contains(Vector2i(0,0)))
 	# each test should set biomes the way it likes
 	return world
@@ -59,4 +60,3 @@ func do_test_equal_by_serialization(target) -> void:
 	
 	# compare
 	assert_eq(serialized, reserialized, "Expected that two consequent serialization will provide same result")
-

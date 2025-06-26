@@ -13,6 +13,7 @@ void PlaneObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_region_by_id", "region_id"), &PlaneObject::get_region_by_id);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &PlaneObject::contains);
   ClassDB::bind_method(D_METHOD("get_region_info", "coords"), &PlaneObject::get_region_info);
+  ClassDB::bind_method(D_METHOD("foreach_surface", "callback"), &PlaneObject::foreach_surface);
 }
 
 Rect2i PlaneObject::get_dimensions() const {
@@ -59,10 +60,13 @@ Ref<RegionObject> PlaneObject::get_region_by_id(String region_id) const {
   return result;
 }
 
-void PlaneObject::foreach(const Callable& callback) {
+void PlaneObject::foreach_surface(const Callable& callback) {
   data_->GetSurface().foreach(
-    [&callback](QRSCoords coords, Cell& cell) {
-      callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying());
+    [&callback, data(this->data_)](QRSCoords coords, Cell& cell) {
+      Ref<RegionObject> region(memnew(RegionObject(
+          data->GetSurface().GetCell(coords).GetRegionPtr()
+            )));
+      callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying(), region);
     });
 }
 

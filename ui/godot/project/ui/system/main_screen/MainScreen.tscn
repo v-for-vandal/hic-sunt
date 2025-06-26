@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bup1yx750kq0"]
+[gd_scene load_steps=2 format=3 uid="uid://bup1yx750kq0"]
 
 [ext_resource type="Script" uid="uid://brn6sri8iccam" path="res://ui/system/main_screen/MainScreen.gd" id="1_mdqee"]
-[ext_resource type="PackedScene" uid="uid://bxo1rll4achyc" path="res://ui/system/create_map/create_map_root.tscn" id="2_5d5gq"]
 
 [node name="MainScreen" type="Control"]
 layout_mode = 3
@@ -39,10 +38,5 @@ text = "New Game"
 layout_mode = 2
 text = "Load Game"
 
-[node name="CreateMapRoot" parent="." instance=ExtResource("2_5d5gq")]
-visible = false
-layout_mode = 1
-
 [connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/NewGameButton" to="." method="_on_new_game_button_pressed"]
 [connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/LoadGameButton" to="." method="_on_load_game_button_pressed"]
-[connection signal="transition_back" from="CreateMapRoot" to="." method="_on_transition_back"]

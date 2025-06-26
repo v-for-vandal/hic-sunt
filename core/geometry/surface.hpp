@@ -15,9 +15,10 @@ using CellsArrayView =
                                  std::dynamic_extent>,
                   std::layout_right>;
 
-template<typename Cell, typename CoordinateSystem>
+template<typename Cell_, typename CoordinateSystem>
 class SurfaceView {
 public:
+  using Cell = Cell_;
   using Coords = geometry::Coords<CoordinateSystem>;
   using QDelta = CoordinateSystem::QDelta;
   using RDelta = CoordinateSystem::RDelta;
@@ -146,10 +147,11 @@ template<typename Cell, typename CoordinateSystem>
 Surface<Cell, CoordinateSystem> ParseFrom(const auto& fbs_class, serialize::To<Surface<Cell, CoordinateSystem>>);
 */
 
-template<typename Cell, typename CoordinateSystem>
+template<typename Cell_, typename CoordinateSystem>
 class Surface {
 public:
 
+  using Cell = Cell_;
   using View = SurfaceView<Cell, CoordinateSystem>;
   using Coords = geometry::Coords<CoordinateSystem>;
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;

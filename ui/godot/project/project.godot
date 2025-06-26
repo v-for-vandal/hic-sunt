@@ -38,7 +38,7 @@ window/size/window_height_override=640
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/biome_map_editor/plugin.cfg", "res://addons/godot-console/plugin.cfg", "res://addons/gut/plugin.cfg")
+enabled=PackedStringArray("res://addons/biome_map_editor/plugin.cfg", "res://addons/dynamic_table/plugin.cfg", "res://addons/godot-console/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [input]
 

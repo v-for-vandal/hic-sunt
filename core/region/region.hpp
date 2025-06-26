@@ -62,6 +62,9 @@ public:
     return biome_count_.TopK(k);
   }
 
+  bool SetHeight(QRSCoords coords, double height);
+  std::pair<double,double> GetHeightRange() const noexcept { return std::make_pair(min_height_, max_height_); }
+
   bool SetFeature(QRSCoords coords, const StringId& biome);
 
   bool SetImprovement(QRSCoords coords, const StringId& improvement_type);
@@ -113,6 +116,8 @@ private:
   utils::Comb<BaseTypes> biome_count_;
   std::unordered_map<StringId, size_t> feature_count_;
   absl::flat_hash_set<QRSCoords> cells_with_improvements_;
+  double min_height_{std::numeric_limits<double>::max()};
+  double max_height_{std::numeric_limits<double>::min()};
 
   static inline int next_id_{0};
 

@@ -1,4 +1,4 @@
-extends RefCounted
+extends InteractionInterface
 
 class_name  SelectAndBuildInteraction
 
@@ -14,7 +14,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 			var can_build := true
 			
 			# get current region
-			var region : RegionObject = event.surface.get_region_object()
+			var region : RegionObject = event.surface.get_region()
 			# add to build queue
 			# TODO: Region may not have world_qr
 			#city.add_to_build(improvement_id, region, event.qr_coords)

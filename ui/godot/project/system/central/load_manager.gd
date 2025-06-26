@@ -1,21 +1,23 @@
 extends Node
 
-signal progress_changed(progress, message: String)
+@warning_ignore("unused_signal")
+signal progress_changed(progress: int, message: String)
+@warning_ignore("unused_signal")
 signal load_done()
 
-var _load_screen_path : String = "res://system/central/load_screen.tscn"
-var _load_screen = load(_load_screen_path)
+#var _load_screen_path : String = "res://system/central/load_screen.tscn"
+#var _load_screen := load(_load_screen_path)
 
 var _world_scene_resource : PackedScene = ResourceLoader.load("res://root_map.tscn")
 var _main_screen_scene_resource : PackedScene = ResourceLoader.load("res://ui/system/main_screen/MainScreen.tscn")
-var _loaded_resource: PackedScene
-var _progress: Array = []
+#var _loaded_resource: PackedScene
+#var _progress: Array = []
 var use_subthreads := true
-var _loading_screen_instance : Node
+#var _loading_screen_instance : Node
 #@onready var _world_scene := _world_scene_resource.instantiate()
 #var _new_scene : Node
 
-var _debug_timer: float = 0
+#var _debug_timer: float = 0
 
 func _ready() -> void:
 	set_process(false)
@@ -50,16 +52,16 @@ func _load_ruleset() -> RulesetObject:
 	return _ruleset_object
 	
 func _clear_scene_if_present(node_name : String) -> void:
-	var scene = get_tree().root.get_node(node_name);
+	var scene := get_tree().root.get_node(node_name);
 	if  scene != null:
 		get_tree().root.remove_child(scene)
-		scene.queue_free
+		scene.queue_free()
 	
 func _init_world_scene() -> void:
 	_clear_scene_if_present('/root/MainScreen')
 	_clear_scene_if_present('/root/RootMap')
 		
-	var world_scene = _world_scene_resource.instantiate()
+	var world_scene := _world_scene_resource.instantiate()
 
 	# We can call methods of this node only AFTER we have added it to the
 	# tree. Because it finishes its initialization in _ready callback

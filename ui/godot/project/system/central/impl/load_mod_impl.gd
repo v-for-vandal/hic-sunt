@@ -6,6 +6,7 @@ func is_mod_folder(folder: String) -> bool:
 	
 ## Load module from given folder, returns its ConfigFile
 func load_mod(folder: String) -> ConfigFile:
+	print('Loading mod %s' % folder)
 	var moddir := DirAccess.open(folder)
 	if not moddir:
 		push_error('Failed to open %s' % folder)
@@ -28,6 +29,7 @@ func load_mod(folder: String) -> ConfigFile:
 		push_error('Incorrect module.cfg, name can not be empty')
 		return null
 		
+	# TODO: Read from modconfig, raise error if file not preset
 	var data_path := folder.path_join('data.pck')
 	if FileAccess.file_exists(data_path):
 		if not ProjectSettings.load_resource_pack(data_path):
@@ -40,7 +42,7 @@ func load_mod(folder: String) -> ConfigFile:
 	if not load_mod_content(modconfig):
 		return null
 	
-			
+	print("success")
 	return modconfig
 	
 ## Returns all .gd scripts in target location
@@ -51,7 +53,7 @@ func load_mod_content_files(target_dir: String) -> Array[Resource]:
 		var full_file_path := target_dir.path_join(file)
 		if file.get_extension() == "gd" or file.get_extension() == "gdc":
 			var script : Resource = load(full_file_path)
-			var test_instance = script.new()
+			var test_instance : Object = script.new()
 			if test_instance is not RefCounted:
 				push_error('Failed to load %s as it does not inherit RefCounted' % [full_file_path])
 				test_instance.free()
@@ -72,15 +74,19 @@ func load_mod_content(modconfig: ConfigFile) -> bool:
 	
 	var loaded_mod_path := "res://content".path_join(mod_name)
 	
+	mod_info.path = loaded_mod_path
+	assert(mod_info.is_valid())
+	
 	# Check world gen folder
 	var world_gen_folder_path := loaded_mod_path.path_join("worldgen")
 
 	# DirAccess.dir_exists_absolute doesn't work here :(
-	var mod_dir = DirAccess.open(loaded_mod_path)
+	var mod_dir := DirAccess.open(loaded_mod_path)
 	if mod_dir == null:
 		return false
 	
 	if mod_dir.dir_exists("worldgen"):
+		print("Loading wordlgen modules")
 		# load every file in this folder
 		var target_scripts := load_mod_content_files(world_gen_folder_path)
 		for script: Script in target_scripts:

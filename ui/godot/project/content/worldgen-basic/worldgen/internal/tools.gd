@@ -106,29 +106,6 @@ func _wrap_y(j: float) -> float:
 	
 	return j
 
-func make_biome_rect(temp_start:int, temp_end:int, percipation_start:int, percipation_end:int) -> Rect2i:
-	return Rect2i( temp_start, percipation_start, (temp_end-temp_start), (percipation_end - percipation_start))
-	
-# TODO: Move to proto
-var biome_maps = [
-	{
-		make_biome_rect(_TEMPERATURE_RANGE.x, -10, 0, _PRECIPATION_RANGE.y+1) : "core.biome.snow",
-		make_biome_rect(-10, 0, 0,  _PRECIPATION_RANGE.y+1) : "core.biome.tundra",
-		make_biome_rect(0, 5, 0, 20) : "core.biome.temperate_grassland",
-		make_biome_rect(0, 5, 20, _PRECIPATION_RANGE.y + 1) : "core.biome.taiga", # boreal forest
-		make_biome_rect(5, 20, 0, 40) : "core.biome.temperate_grassland", #	
-		make_biome_rect(5, 15, 40, 200) : "core.biome.temperate_forest",
-		make_biome_rect(5, 15, 200, _PRECIPATION_RANGE.y + 1) : "core.biome.rainforest",
-		make_biome_rect(15, 20, 40, 120) : "core.biome.shrubland",
-		make_biome_rect(15, 20, 120, 230) : "core.biome.temperate_forest",
-		make_biome_rect(15, 20, 230, _PRECIPATION_RANGE.y + 1) : "core.biome.rainforest",
-		make_biome_rect(20, 30, 0, 100 ) : "core.biome.desert", # subtropical_desert
-		make_biome_rect(20, 30, 100, 230 ) : "core.biome.savanna", # subtropical_desert
-		make_biome_rect(20, 30, 230, _PRECIPATION_RANGE.y + 1 ) : "core.biome.tropical_rainforest", # subtropical_desert
-		make_biome_rect(30, _TEMPERATURE_RANGE.y+1, 0, _PRECIPATION_RANGE.y+1 ) : "core.biome.desert", # subtropical_desert
-
-	}
-]
 
 var terrain_colors = {
 	"core.biome.tundra" : Color.FLORAL_WHITE,
@@ -268,130 +245,111 @@ func _create_debug_precipation_map() -> void:
 			
 	_emit_debug_map("precipation", precipation_image, {})
 	
-func _get_biome(temperature: int, precipation: int) -> String:
-	var point := Vector2i(temperature, precipation)
+
 	
-	for biome_map : Dictionary in biome_maps:
-		for rect : Rect2i in biome_map:
-			if rect.has_point(point):
-				return biome_map[rect]
-				
-	print("Can't find biome for (temp, prcp): ", point)
-	return "core.biome.unknown"
+
 	
-func _get_biome_at_point(i: float, j:float) -> String:
-	i = _wrap_x(i)
-	j = _wrap_y(j)
-	var temp = _get_temperature_at_point(i, j)
-	var height = _get_height_at_point(i, j)
-	var precipation = _get_precipation_at_point(i, j)
-	
-	if height < 0:
-		return "core.biome.ocean"
-		
-	return _get_biome(temp, precipation)
-	
-func _create_debug_biome_map() -> void:
-	if not debug_mode:
-		return
-	var size := _generation_map_size.size
-	var biome_image := Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
-	for i in range(0, size.x):
-		for j in range(0, size.y):
-			var biome := _get_biome_at_point(i,j)
-			var color := Color.DEEP_PINK
-			if terrain_colors.has(biome):
-				color = terrain_colors[biome]
-			else:
-				push_error("Biome ", biome, " has no color")
-				
-			biome_image.set_pixel(i, j, color)
-			
-	_emit_debug_map("biome", biome_image, {})
+#func _create_debug_biome_map() -> void:
+	#if not debug_mode:
+		#return
+	#var size := _generation_map_size.size
+	#var biome_image := Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+	#for i in range(0, size.x):
+		#for j in range(0, size.y):
+			#var biome := _get_biome_at_point(i,j)
+			#var color := Color.DEEP_PINK
+			#if terrain_colors.has(biome):
+				#color = terrain_colors[biome]
+			#else:
+				#push_error("Biome ", biome, " has no color")
+				#
+			#biome_image.set_pixel(i, j, color)
+			#
+	#_emit_debug_map("biome", biome_image, {})
 
 	
 
 
-func _generate_biome_map() -> void:
-	_notify_progress("Generating heightmap", 0)
-	_create_debug_height_map()
-	_notify_progress("Generating temperature", 30)
-	_create_debug_temperature_map()
-	_notify_progress("Generating terrain", 60)
-	_create_debug_terrain_map()
-	_notify_progress("Generating precipation", 80)
-	_create_debug_precipation_map()
-	_notify_progress("Generating biome", 90)
-	_create_debug_biome_map()
-	_notify_progress("Done", 100)
-	
-func _generate_hexagon_region(world_qr_coords: Vector2i) -> void:
-	var region_object =  _world_object.get_region(world_qr_coords)
-	
-	var region_center_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(world_qr_coords) * (_generation_region_size + INTER_REGION_MARGIN)
-	
-	# dimensions are in (q,r,s) system with s omited
-	# tilemap is in (x,y) system
-	var qr_dimensions : Rect2i = region_object.get_dimensions()
-
-	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
-		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
-			var qr_coords := Vector2i(q,r)
-			if region_object.contains(qr_coords):
-				# set up biome
-				var cell_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(qr_coords)
-				var total_pixel = region_center_pixel + cell_pixel
-				var biome = _get_biome_at_point(total_pixel.x, total_pixel.y)
-				region_object.set_biome(qr_coords, biome)
-	
-func _generate_hexagons_map():
-	_world_object = WorldObject.create_world(_generation_cells_size, _generation_region_size)
-	
-	# Now, set biome of every cell in every region
-	var qr_dimensions : Rect2i = _world_object.get_dimensions()
-	print("world dimensions: ", qr_dimensions)
-
-	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
-		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
-
-			var qr_coords := Vector2i(q,r)
-			if not _world_object.contains(qr_coords):
-				print("skipping non-existing world cell ", qr_coords)
-				continue
-			_generate_hexagon_region(qr_coords)
-			
-
-	
-func _generate() -> void:
-	# Now that we have map size, lets generate biome map
-	_generate_biome_map()
-	
-	# Now, lets build hexagon map via this generated map
-	_generate_hexagons_map()
-	
-	_finish(_world_object)
-		
-func generate(world_cells_size: Vector2i, region_size: int) -> void:
-	if region_size < MIN_REGION_SIZE:
-		region_size = MIN_REGION_SIZE
-		
-	# first, we determine required size of generated image. It doesn't have to be
-	# precise, it just have to be enough
-	# generated image size is 
-	# x - number of cells on x axis * ( region_size (region_size is diameter) + margin)
-	# y - ( number of cells on y axis / 2  rounded up) * ( 2 * sqrt(3) * region_size + margin)
-	#var generated_map_size = Vector2i(
-	#	world_cells_size.x * (region_size + INTER_REGION_MARGIN),
-	#	(world_cells_size.y / 2 + (world_cells_size.y & 1)) * (2 * 1.75 * region_size + margin)
-	#)
-	
-	_generation_region_size = region_size
-	_generation_cells_size = world_cells_size
-	_generation_map_size = Rect2i(Vector2i.ZERO, Vector2i(800, 800))
-	
-
-	_gen_thread = Thread.new()
-	print("Starting generation in new thread")
-	_gen_thread.start(_generate)
-	print("Waiting for generation to finish")
-	#_gen_thread.wait_to_finish()
+#func _generate_biome_map() -> void:
+	#_notify_progress("Generating heightmap", 0)
+	#_create_debug_height_map()
+	#_notify_progress("Generating temperature", 30)
+	#_create_debug_temperature_map()
+	#_notify_progress("Generating terrain", 60)
+	#_create_debug_terrain_map()
+	#_notify_progress("Generating precipation", 80)
+	#_create_debug_precipation_map()
+	#_notify_progress("Generating biome", 90)
+	#_create_debug_biome_map()
+	#_notify_progress("Done", 100)
+	#
+#func _generate_hexagon_region(world_qr_coords: Vector2i) -> void:
+	#var region_object =  _world_object.get_region(world_qr_coords)
+	#
+	#var region_center_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(world_qr_coords) * (_generation_region_size + INTER_REGION_MARGIN)
+	#
+	## dimensions are in (q,r,s) system with s omited
+	## tilemap is in (x,y) system
+	#var qr_dimensions : Rect2i = region_object.get_dimensions()
+#
+	#for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
+		#for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
+			#var qr_coords := Vector2i(q,r)
+			#if region_object.contains(qr_coords):
+				## set up biome
+				#var cell_pixel : Vector2 = QrsCoordsLibrary.flat_top_qrs_to_pixel(qr_coords)
+				#var total_pixel = region_center_pixel + cell_pixel
+				#var biome = _get_biome_at_point(total_pixel.x, total_pixel.y)
+				#region_object.set_biome(qr_coords, biome)
+	#
+#func _generate_hexagons_map():
+	#_world_object = WorldObject.create_world(_generation_cells_size, _generation_region_size)
+	#
+	## Now, set biome of every cell in every region
+	#var qr_dimensions : Rect2i = _world_object.get_dimensions()
+	#print("world dimensions: ", qr_dimensions)
+#
+	#for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
+		#for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
+#
+			#var qr_coords := Vector2i(q,r)
+			#if not _world_object.contains(qr_coords):
+				#print("skipping non-existing world cell ", qr_coords)
+				#continue
+			#_generate_hexagon_region(qr_coords)
+			#
+#
+	#
+#func _generate() -> void:
+	## Now that we have map size, lets generate biome map
+	#_generate_biome_map()
+	#
+	## Now, lets build hexagon map via this generated map
+	#_generate_hexagons_map()
+	#
+	#_finish(_world_object)
+		#
+#func generate(world_cells_size: Vector2i, region_size: int) -> void:
+	#if region_size < MIN_REGION_SIZE:
+		#region_size = MIN_REGION_SIZE
+		#
+	## first, we determine required size of generated image. It doesn't have to be
+	## precise, it just have to be enough
+	## generated image size is 
+	## x - number of cells on x axis * ( region_size (region_size is diameter) + margin)
+	## y - ( number of cells on y axis / 2  rounded up) * ( 2 * sqrt(3) * region_size + margin)
+	##var generated_map_size = Vector2i(
+	##	world_cells_size.x * (region_size + INTER_REGION_MARGIN),
+	##	(world_cells_size.y / 2 + (world_cells_size.y & 1)) * (2 * 1.75 * region_size + margin)
+	##)
+	#
+	#_generation_region_size = region_size
+	#_generation_cells_size = world_cells_size
+	#_generation_map_size = Rect2i(Vector2i.ZERO, Vector2i(800, 800))
+	#
+#
+	#_gen_thread = Thread.new()
+	#print("Starting generation in new thread")
+	#_gen_thread.start(_generate)
+	#print("Waiting for generation to finish")
+	##_gen_thread.wait_to_finish()

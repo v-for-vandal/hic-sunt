@@ -10,9 +10,9 @@ namespace hs::godot {
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("save", "filename"), &WorldObject::save);
   ClassDB::bind_method(D_METHOD("load", "filename"), &WorldObject::load);
-  ClassDB::bind_method(D_METHOD("create_plane", "plane_id", "box"), &WorldObject::create_plane);
+  ClassDB::bind_method(D_METHOD("create_plane", "plane_id", "box", "region_radius"), &WorldObject::create_plane);
   ClassDB::bind_method(D_METHOD("get_plane", "plane_id"), &WorldObject::get_plane);
-  ClassDB::bind_static_method("create_world", D_METHOD("create_world"), &WorldObject::create_world);
+  ClassDB::bind_static_method("WorldObject", D_METHOD("create_world"), &WorldObject::create_world);
 }
 
 
@@ -90,8 +90,8 @@ Ref<PlaneObject> WorldObject::get_plane(StringName name) {
   return result;
 }
 
-Ref<PlaneObject> WorldObject::create_plane(StringName name, Rect2i box) {
-  auto plane_ptr = data_.AddPlane(name, cast_qrs_box(box));
+Ref<PlaneObject> WorldObject::create_plane(StringName name, Rect2i box, int region_radius) {
+  auto plane_ptr = data_.AddPlane(name, cast_qrs_box(box), region_radius);
   Ref<PlaneObject> result(memnew(PlaneObject(
         plane_ptr)));
   ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new plane");

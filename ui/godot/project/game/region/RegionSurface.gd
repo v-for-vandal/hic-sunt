@@ -87,7 +87,7 @@ func update_cell(qr_coords: Vector2i) -> void:
 		# no improvement
 		_IMPROVEMENT_LAYER.erase_cell(xy_coords)
 		
-func get_region_object() -> RegionObject:
+func get_region() -> RegionObject:
 	return _region_object
 	
 func _on_region_changed(area: Rect2i, flags: int) -> void:

@@ -30,13 +30,13 @@ auto World<BaseTypes>::GetPlane(const StringId& plane_id) const -> PlanePtr {
 }
 
 template<typename BaseTypes>
-auto World<BaseTypes>::AddPlane(const StringId& plane_id, QRSBox box) -> PlanePtr {
+auto World<BaseTypes>::AddPlane(const StringId& plane_id, QRSBox box, int region_radius) -> PlanePtr {
   if(auto fit = planes_.find(plane_id); fit != planes_.end()) {
       spdlog::error("Plane with id {} already exists", plane_id);
       return fit->second;
   }
 
-  auto plane_ptr = std::make_shared<Plane>(box);
+  auto plane_ptr = std::make_shared<Plane>(box, region_radius);
   planes_[plane_id] = plane_ptr;
 
   return plane_ptr;

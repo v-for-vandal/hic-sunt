@@ -53,6 +53,7 @@ public:
   static Dictionary convert_improvement(const hs::proto::ruleset::RegionImprovement& improvement_type);
   static Dictionary convert_job(const hs::proto::ruleset::Job& job);
   static Dictionary convert_project(const hs::proto::ruleset::Project& project);
+  static Dictionary load(String folder_path);
 };
 
 }

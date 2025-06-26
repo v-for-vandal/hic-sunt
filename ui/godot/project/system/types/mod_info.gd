@@ -8,3 +8,11 @@ var name : String
 var path : String
 ## Main module configuration file
 var config: ConfigFile
+
+func is_valid() -> bool:
+	if len(name) == 0:
+		return false
+	if len(path) == 0:
+		return false
+		
+	return true

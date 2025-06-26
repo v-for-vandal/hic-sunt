@@ -13,12 +13,13 @@ class_name CityProject
 
 ## Notify that project has changed. This signal is emited automatically
 ## by the system, there is no need to call it manually
+@warning_ignore("unused_signal")
 signal changed()
 
 ## Reimplement this static (preferably) method so that you can
 ## specify your project type.
 ## project types must be present in ruleset object
-static func get_project_type() -> StringName:
+func get_project_type() -> StringName:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
 	return &"error.uninitialized"
@@ -27,7 +28,7 @@ static func get_project_type() -> StringName:
 ## Return true if the was any change, false otherwrise. Doesn't matter what
 ## kind of chnage - return value is used to notify UI so that it can update
 ## itself
-func take_resources(resources: Dictionary) -> bool:
+func take_resources(_resources: Dictionary) -> bool:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
 	return false
@@ -90,8 +91,7 @@ func serialize_to_variant() -> Dictionary:
 	push_error("Please implement this method")
 	return {}
 	
-func parse_from_variant(data : Dictionary) -> void:
+func parse_from_variant(_data : Dictionary) -> void:
 	assert(false, "Please implement this method")
 	push_error("Please implement this method")
 	pass
-

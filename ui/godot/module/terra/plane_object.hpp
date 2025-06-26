@@ -43,7 +43,7 @@ public:
   Ref<RegionObject> get_region(Vector2i coords) const;
   Ref<RegionObject> get_region_by_id(String region_id) const;
   Dictionary get_region_info(Vector2i coords) const;
-  void foreach(const Callable& callback);
+  void foreach_surface(const Callable& callback);
   bool contains(Vector2i coords) const;
   static Dictionary create_error(const char* error);
   static Dictionary create_success();

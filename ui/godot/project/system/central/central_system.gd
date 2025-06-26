@@ -1,4 +1,4 @@
-extends HicSuntSystem
+extends Node
 
 
 var CentralSystemImpl := preload("res://system/central/impl/central_system_impl.gd")
@@ -62,7 +62,7 @@ func ask_confirm(message: String) -> bool:
 # hides native method and will not work
 func smart_load_ruleset() -> RulesetObject:
 	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/v1.0')
-	var _ruleset_dict : Dictionary = super.load_ruleset(core_ruleset_path)
+	var _ruleset_dict : Dictionary = RulesetObject.load(core_ruleset_path)
 	# TODO: Process loading errors properly
 	var _ruleset_object : RulesetObject
 	if _ruleset_dict.success:

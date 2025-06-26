@@ -12,6 +12,7 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"), &RulesetObject::get_improvement_info);
   ClassDB::bind_method(D_METHOD("get_job_info", "job_id"), &RulesetObject::get_job_info);
   ClassDB::bind_method(D_METHOD("get_project_info", "project_id"), &RulesetObject::get_project_info);
+  ClassDB::bind_static_method("RulesetObject", D_METHOD("load", "folder_path"), &RulesetObject::load);
 }
 
 Array RulesetObject::get_biomes() const {
@@ -178,5 +179,32 @@ Array RulesetObject::get_all_resources() const {
   return result;
 
 }
+
+Dictionary RulesetObject::load(String folder_path) {
+  Dictionary result;
+
+  hs::utils::ErrorsCollection errors;
+  RuleSet ruleset;
+  bool success = ruleset.Load(folder_path.utf8().get_data(), errors);
+
+
+  Array errors_godot;
+  for(auto& error_msg: errors.errors) {
+    errors_godot.append(String(error_msg.message.c_str()));
+  }
+  result[String("errors")] = errors_godot;
+
+  if(success) {
+    Ref<RulesetObject> ruleset_object(memnew(RulesetObject(std::move(ruleset))));
+    result[String("ruleset")] = ruleset_object;
+    result[String("success")] = true;
+  } else {
+    result[String("success")] = false;
+  }
+
+  return result;
+
+}
+
 
 }

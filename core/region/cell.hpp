@@ -47,6 +47,8 @@ namespace hs::region {
     bool HasImprovement() const { return !improvement_.type().empty(); }
     const proto::region::Improvement& GetImprovement() const { return improvement_; }
 
+    double GetHeight() const noexcept { return height_; }
+
     bool operator==(const Cell&) const;
 
   private:
@@ -58,15 +60,15 @@ namespace hs::region {
     void SetBiome(StringId biome) { biome_ = biome; }
     void SetFeature(StringId feature) { feature_ = feature; }
     void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
+    void SetHeight(double value) noexcept { height_ = value; }
 
   private:
     StringId biome_;
     StringId feature_;
 
     // height, in meters, above/under sea level (whatever sea this may be)
-    // double height_meters_{0};
-    // height, in abstract units
-    // TODO: think and implement later
+    // negative is under sea level, positive is above sea level
+    double height_{0};
 
     proto::region::Improvement improvement_;
 

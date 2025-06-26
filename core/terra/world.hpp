@@ -44,7 +44,7 @@ public:
   World& operator=(World&&) = default;
 
   PlanePtr GetPlane(const StringId& id) const;
-  PlanePtr AddPlane(const StringId& id, QRSBox box);
+  PlanePtr AddPlane(const StringId& id, QRSBox box, int region_radius);
 
   bool operator==(const World& other) const;
   bool operator!=(const World& other) const {

@@ -1,4 +1,4 @@
-extends HBoxContainer
+extends VBoxContainer
 
 @export var category : WorldBuilderRegistry.CATEGORY = WorldBuilderRegistry.CATEGORY.Heightmap
 @export var text: String:
@@ -8,14 +8,14 @@ extends HBoxContainer
 			return
 		$Selector/Label.text = value
 
-var _ui_elements : Dictionary = {}
-var _modules : Dictionary = {}
+var _ui_elements : Dictionary[int, Control] = {}
+var _modules : Dictionary[int, WorldBuilderRegistry.WorldGeneratorModuleHandle] = {}
 var _current_selected := -1
 
-func get_selected_module() -> WorldBuilderRegistry.ModuleInfo:
+func get_selected_module() -> WorldBuilderRegistry.WorldGeneratorModuleHandle:
 	return _modules[_current_selected]
 	
-func get_selected_module_config() -> Dictionary:
+func get_selected_config() -> Variant:
 	if _current_selected in _ui_elements:
 		var ui_element : Control = _ui_elements[_current_selected]
 		return ui_element.get_config() 
@@ -33,26 +33,36 @@ func _ready() -> void:
 	# get all possible values for selected category
 	var available_generators := WorldBuilderRegistry.get_modules_for_category(category)
 	
-	for generator_info : WorldBuilderRegistry.ModuleInfo in available_generators:
-		var name := generator_info.name
-		var generator : RefCounted = generator_info.create_instance()
+	for generator_handle : WorldBuilderRegistry.WorldGeneratorModuleHandle in available_generators:
+		var name := generator_handle.name
 		
-		var this_index : int = $Root/Selector/SelectButton.items_count
-		$Root/Selector/SelectButton.add_item(name)
+		var this_index : int = %SelectButton.item_count
+		%SelectButton.add_item(name)
 		
-		_modules[this_index] = generator_info
+		_modules[this_index] = generator_handle
 		
-		if generator.has_method("get_heightmap_ui"):
-			var ui_element : Control = generator.get_heightmap_ui()
-			$Root.Selector.add_child(ui_element)
-			ui_element.shown = false
+	if len(_modules) > 0:
+		%SelectButton.select(0)
+		_on_select_button_item_selected(0)
+		
 			
-			_ui_elements[this_index] = ui_element
-			
+func _create_ui_if_absent(index: int) -> void:
+	if index in _ui_elements and _ui_elements[index] != null:
+		return
+		
+	var control := _modules[index].create_ui()
+	if control != null:
+		self.add_child(control)
+	_ui_elements[index]  = control
+	
+	return
 
 func _on_select_button_item_selected(index: int) -> void:
 	if _current_selected in _ui_elements:
-		_ui_elements[_current_selected].shown = false
+		_ui_elements[_current_selected].visible = false
 	_current_selected = index
-	if index in _ui_elements:
-		_ui_elements[index].shown = true
+	_create_ui_if_absent(index)
+	if index in _ui_elements and _ui_elements[index] != null:
+		_ui_elements[index].visible = true
+		
+		

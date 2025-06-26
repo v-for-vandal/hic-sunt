@@ -20,7 +20,8 @@ TEST(StdPlane, Serialize) {
         4_q,
         6_r
         )
-      )
+      ),
+      4
     );
 
   std::string storage;

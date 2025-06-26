@@ -79,6 +79,21 @@ bool Region<BaseTypes>::SetBiome(QRSCoords coords, const StringId& biome)
 }
 
 template<typename BaseTypes>
+bool Region<BaseTypes>::SetHeight(QRSCoords coords, double height)
+{
+  if(!surface_.Contains(coords)) {
+    return false;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  cell.SetHeight(height);
+  min_height_ = std::min(min_height_, height);
+  max_height_ = std::max(max_height_, height);
+
+  return true;
+}
+
+template<typename BaseTypes>
 bool Region<BaseTypes>::SetFeature(QRSCoords coords, const StringId& feature)
 {
   if(!surface_.Contains(coords)) {
@@ -209,6 +224,8 @@ void Region<BaseTypes>::BuildEphemeral() {
         if(cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);
         }
+        min_height_ = std::min(min_height_, cell.GetHeight());
+        max_height_ = std::max(max_height_, cell.GetHeight());
       }
     }
   }

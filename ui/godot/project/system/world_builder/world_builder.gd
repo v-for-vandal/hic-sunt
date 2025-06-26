@@ -314,32 +314,33 @@ func _generate_hexagon_region(world_qr_coords: Vector2i) -> void:
 				var biome = _get_biome_at_point(total_pixel.x, total_pixel.y)
 				region_object.set_biome(qr_coords, biome)
 	
-func _generate_hexagons_map():
-	_world_object = WorldObject.create_world(_generation_cells_size, _generation_region_size)
-	
-	# Now, set biome of every cell in every region
-	var qr_dimensions : Rect2i = _world_object.get_dimensions()
-	print("world dimensions: ", qr_dimensions)
-
-	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
-		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
-
-			var qr_coords := Vector2i(q,r)
-			if not _world_object.contains(qr_coords):
-				print("skipping non-existing world cell ", qr_coords)
-				continue
-			_generate_hexagon_region(qr_coords)
+#func _generate_hexagons_map():
+	#_world_object = WorldObject.create_world()
+	#
+	## Now, set biome of every cell in every region
+	#var qr_dimensions : Rect2i = _world_object.get_dimensions()
+	#print("world dimensions: ", qr_dimensions)
+#
+	#for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
+		#for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
+#
+			#var qr_coords := Vector2i(q,r)
+			#if not _world_object.contains(qr_coords):
+				#print("skipping non-existing world cell ", qr_coords)
+				#continue
+			#_generate_hexagon_region(qr_coords)
 			
 
 	
 func _generate() -> void:
-	# Now that we have map size, lets generate biome map
-	_generate_biome_map()
-	
-	# Now, lets build hexagon map via this generated map
-	_generate_hexagons_map()
-	
-	_finish(_world_object)
+	pass
+	## Now that we have map size, lets generate biome map
+	#_generate_biome_map()
+	#
+	## Now, lets build hexagon map via this generated map
+	#_generate_hexagons_map()
+	#
+	#_finish(_world_object)
 		
 func generate(world_cells_size: Vector2i, region_size: int) -> void:
 	if region_size < MIN_REGION_SIZE:

@@ -5,37 +5,75 @@ signal transition_back()
 
 var _maps : Dictionary
 var _processing := false
+var _generators : Dictionary[int, WorldBuilderRegistry.WorldGeneratorHandle]
+var _ui_elements : Dictionary[int, Control]
+var _current_selected : int = -1
 
+var no_options_msg_control : Control 
 
-func _ready():
-	# get all possible values for selected category
-	var available_generators := WorldBuilderRegistry.get_modules_for_category(category)
+func _init() -> void:
+	pass
+
+func _ready() -> void:
+	_prepare_generators()
+	_prepare_cellinfo()
 	
-	for generator_info : WorldBuilderRegistry.ModuleInfo in available_generators:
-		var name := generator_info.name
-		var generator : RefCounted = generator_info.create_instance()
+	$DebugUiEventBus.set_main_interaction(self)
 		
-		var this_index : int = $Root/Selector/SelectButton.items_count
-		$Root/Selector/SelectButton.add_item(name)
+	
+func _prepare_generators() -> void:
+	# get all possible values for selected category
+	var available_generators := WorldBuilderRegistry.get_world_generators()
+	
+	for generator_handle : WorldBuilderRegistry.WorldGeneratorHandle in available_generators:
+		var _name := generator_handle.name
 		
-		_modules[this_index] = generator_info
+		var this_index : int = %SelectGeneratorButton.item_count
+		%SelectGeneratorButton.add_item(_name)
 		
-		if generator.has_method("get_heightmap_ui"):
-			var ui_element : Control = generator.get_heightmap_ui()
-			$Root.Selector.add_child(ui_element)
-			ui_element.shown = false
+		_generators[this_index] = generator_handle
+		
+	_ui_elements[-1] = %NoOptionsMsg
+	no_options_msg_control = %NoOptionsMsg
+	
+	if len(_generators) > 0 :
+		%SelectGeneratorButton.select(0)
+		# just in case signal is not working yet
+		_on_select_button_item_selected(0)
+
+func _prepare_cellinfo() -> void:
+	%CellInfo.set_headers(["data", "value"])
 			
-			_ui_elements[this_index] = ui_element
-			
+func _create_ui_if_absent(index: int) -> void:
+	if index in _ui_elements and _ui_elements[index] != null:
+		return
+		
+	var control := _generators[index].create_ui()
+	if control != null:
+		_ui_elements[index]  = control
+	else:
+		_ui_elements[index] = no_options_msg_control
+	
+	
+	return
 
 func _on_select_button_item_selected(index: int) -> void:
 	if _current_selected in _ui_elements:
-		_ui_elements[_current_selected].shown = false
+		var _current_control := _ui_elements[_current_selected]
+		_current_control.visible = false
+		if _current_control.get_parent() != null:
+			%GeneratorOptionsScroll.remove_child(_current_control)
+			
 	_current_selected = index
-	if index in _ui_elements:
-		_ui_elements[index].shown = true
+	_create_ui_if_absent(index)
+	assert(index in _ui_elements)
+	assert(_ui_elements[index] != null)
+	var new_control := _ui_elements[index]
+	new_control.visible = true
+	%GeneratorOptionsScroll.add_child(new_control)
 
-func clear():
+
+func clear() -> void:
 	_maps.clear()
 	
 	
@@ -55,46 +93,43 @@ func _add_debug_map(name: String, map: Image, legend: Dictionary) -> void:
 			"legend" : legend,
 			}
 
-func _do_generate(debug_mode: bool) -> WorldObject:
-	var selected_world_size = $%WorldSizeSelector.get_selected_id()
-	var world_cells_size = Vector2i(20, 20)
-	if(selected_world_size == WBConstants.WorldSize.Normal):
-		world_cells_size = Vector2i(40, 40)
-		
-	var selected_region_size := int($%RegionSizeSelector.value)
+func _do_generate(_debug_mode: bool) -> WorldObject:
+	if _current_selected == -1:
+		return null
 	
-	# get_tree().paused = true doesn't work the way we want it to work
-	# get_tree().paused = true
-	$WorldBuilder.debug_mode = debug_mode
-	$WorldBuilder.generate(world_cells_size, selected_region_size )
-
-	var result = await $WorldBuilder.finished
-	print("Reult is", result)
+	var _selected_generator_module := _generators[_current_selected]
+	var _selected_config : Variant = _ui_elements[_current_selected].get_config()
+	
+	var generator := _selected_generator_module.create_generator(_selected_config)
+	
+	var result := generator.create_world()
+	print('Result is: ', result)
 	return result
 
 func _on_generate_button_pressed() -> void:
 	if _processing:
 		return
 	_processing = true
-	await _do_generate(true)
+	var world_object := await _do_generate(true)
+	%WorldSurface.load_plane(world_object.get_plane(&"main"))
 	_processing = false
 
 	
 
-func _on_map_selected(name: String, widget: TextureRect) -> void:
-	assert( name.is_empty() or _maps.has(name))
-	if name.is_empty(): # thats 'none'
+func _on_map_selected(_name: String, widget: TextureRect) -> void:
+	assert( _name.is_empty() or _maps.has(_name))
+	if _name.is_empty(): # thats 'none'
 		widget.hide()
 	else:
-		widget.texture = _maps[name].texture
+		widget.texture = _maps[_name].texture
 		widget.show()
 
 func _on_background_select_item_selected(index: int) -> void:
-	var name = $%BackgroundSelect.get_item_text(index)
+	var _name : String = $%BackgroundSelect.get_item_text(index)
 	if index == 0:
-		name = ""
+		_name = ""
 		
-	_on_map_selected(name, $%DebugBackgroundView)
+	_on_map_selected(_name, $%DebugBackgroundView)
 	
 	
 
@@ -125,3 +160,35 @@ func _on_start_game_button_pressed() -> void:
 	LoadManager.new_game(world_object)
 	_processing = false
 	
+
+
+func _on_select_generator_button_item_selected(index: int) -> void:
+	pass # Replace with function body.
+	
+func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
+	if event is UiEventBus.UIMovementEvent:
+		if event.prev_qr_coords != event.qr_coords:
+			event.surface.clear_highlight(event.prev_qr_coords)
+		event.surface.highlight(event.qr_coords, true)
+		
+	if event is UiEventBus.WorldUIMovementEvent:
+		var plane : PlaneObject = event.surface.get_plane()
+		var region := plane.get_region(event.qr_coords)
+		%InfoContainer.set_region(region)
+		event.accept()
+		
+	if event is UiEventBus.WorldUIActionEvent:
+		if event.action_type == UiEventBus.ActionType.PRIMARY:
+			var plane : PlaneObject = event.surface.get_plane()
+			var region := plane.get_region(event.qr_coords)
+			%RegionSurface.load_region(region)
+			
+	if event is UiEventBus.RegionUIMovementEvent:
+		var region : RegionObject = event.surface.get_region()
+		%InfoContainer.set_cell(event.qr_coords)
+		event.accept()
+		
+	
+		
+	elif event is UiEventBus.CancellationEvent:
+		event.accept()

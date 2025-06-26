@@ -7,17 +7,16 @@ enum SurfaceType { UNDEFINED, WORLD_SURFACE, REGION_SURFACE}
 # must be set in descendant
 @export var surface_type : SurfaceType
 
+@export var event_bus : UiEventBus
+
 var _highlight_layer : TileMapLayer
 
 # last time we checked, tile under mouse cursor was this one
 var _last_tile_qr := Vector2i(0,0)
 
 func _ready()->void:
-	# find highlight layer and remember it
-	for child in self.get_children():
-		if child.name == "highlight":
-			_highlight_layer = child
-			break
+	_highlight_layer = $highlight
+
 
 func _contains(_tile_qr: Vector2i) -> bool:
 	printerr("Function must be overriden in child class")
@@ -36,7 +35,7 @@ func _unhandled_input(event : InputEvent) -> void:
 				ui_event.prev_qr_coords = _last_tile_qr
 				ui_event.qr_coords = tile_qr
 				ui_event.surface = self
-				GameUiEventBus.emit_event(ui_event)
+				event_bus.emit_event(ui_event)
 			if event is InputEventMouseButton:
 				if event.pressed and not event.is_canceled():
 					#print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
@@ -44,28 +43,29 @@ func _unhandled_input(event : InputEvent) -> void:
 					ui_event.qr_coords = tile_qr
 					ui_event.surface = self
 					ui_event.action_type = GameUiEventBus.mouse_button_to_action_type(event.button_index)
-					GameUiEventBus.emit_event(ui_event)
+					event_bus.emit_event(ui_event)
 			_last_tile_qr = tile_qr
+
 			
-func _create_movement_event() -> GameUiEventBus.UIMovementEvent:
-	var ui_event : GameUiEventBus.UIMovementEvent
+func _create_movement_event() -> UiEventBus.UIMovementEvent:
+	var ui_event : UiEventBus.UIMovementEvent
 	match surface_type:
 		SurfaceType.WORLD_SURFACE:
-			ui_event = GameUiEventBus.WorldUIMovementEvent.new()
+			ui_event = UiEventBus.WorldUIMovementEvent.new()
 		SurfaceType.REGION_SURFACE:
-			ui_event = GameUiEventBus.RegionUIMovementEvent.new()
+			ui_event = UiEventBus.RegionUIMovementEvent.new()
 		_: # default
 			push_error("surface_type is unset")
 			assert(false)
 	return ui_event
 	
-func _create_action_event() -> GameUiEventBus.UIActionEvent:
-	var ui_event : GameUiEventBus.UIActionEvent
+func _create_action_event() -> UiEventBus.UIActionEvent:
+	var ui_event : UiEventBus.UIActionEvent
 	match surface_type:
 		SurfaceType.WORLD_SURFACE:
-			ui_event = GameUiEventBus.WorldUIActionEvent.new()
+			ui_event = UiEventBus.WorldUIActionEvent.new()
 		SurfaceType.REGION_SURFACE:
-			ui_event = GameUiEventBus.RegionUIActionEvent.new()
+			ui_event = UiEventBus.RegionUIActionEvent.new()
 		_:
 			push_error("surface_type is unset")
 	return ui_event

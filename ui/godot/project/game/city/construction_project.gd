@@ -41,7 +41,7 @@ var _serializable_properties: Array[StringName] = [
 	]
 
 # TODO: Rename get_type_id
-static func get_project_type() -> StringName:
+func get_project_type() -> StringName:
 	return &"core.prj.construction"
 
 # We have two maps - one with resources cost, one with accumulated resources

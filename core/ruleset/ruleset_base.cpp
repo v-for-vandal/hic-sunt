@@ -31,7 +31,7 @@ bool ReadFromFile(const std::filesystem::path& path, auto& proto_object, utils::
 
 }
 
-bool RuleSet::Load(const std::filesystem::path& path,
+bool RuleSetBase::Load(const std::filesystem::path& path,
   ErrorsCollection& errors) {
   // TODO: Skip files that are not present
     // TODO: Must actually merge rules, not overwrite them
@@ -76,7 +76,7 @@ bool RuleSet::Load(const std::filesystem::path& path,
 
 }
 
-void RuleSet::Clear() {
+void RuleSetBase::Clear() {
   biomes_.Clear();
   improvements_.Clear();
   resources_.Clear();

@@ -40,7 +40,6 @@ private:
 public:
   Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
-  bool set_biome(Vector2i coords, String biome) const;
   bool set_feature(Vector2i coords, String feature) const;
   bool set_improvement(Vector2i coords, String improvement) const;
   bool contains(Vector2i coords) const;
@@ -51,27 +50,27 @@ public:
   Dictionary convert_to_dictionary(const hs::proto::region::Improvement& improvement) const;
   Ref<PnlObject> get_pnl_statement(Ref<RulesetObject> ruleset) const;
   Dictionary get_jobs(Ref<RulesetObject> ruleset_object) const;
+  Dictionary get_info() const;
+
+  // environmental properties
+  bool set_biome(Vector2i coords, String biome) const;
+  bool set_height(Vector2i coords, double height) const;
+  double get_height(Vector2i coords) const;
 
   // user data wrappers
-  double get_data_numeric(Vector2i coords,String key) const noexcept;
-  double set_data_numeric(Vector2i coords,String key, double value);
-  bool has_data_numeric(Vector2i coords,String key) const noexcept;
-  String get_data_string(Vector2i coords,const String& key) const noexcept;
-  String set_data_string(Vector2i coords,String key, String value);
-  bool has_data_string(Vector2i coords,const String& key) const noexcept;
+  double get_data_numeric(Vector2i coords,const StringName& key) const noexcept;
+  double set_data_numeric(Vector2i coords,const StringName& key, double value);
+  bool has_data_numeric(Vector2i coords, const StringName& key) const noexcept;
+  String get_data_string(Vector2i coords,const StringName& key) const noexcept;
+  String set_data_string(Vector2i coords, const StringName& key, String value);
+  bool has_data_string(Vector2i coords,const StringName& key) const noexcept;
 
   // signals
   void emit_signals_for_cell(Vector2i coords, int flags) const;
 
   //Array get_region_improvements() const;
 
-  static QRSCoords cast_qrs(Vector2i coords) {
-    return QRSCoords{
-      QRSCoordinateSystem::QAxis{coords.x},
-      QRSCoordinateSystem::RAxis{coords.y}
-    };
-  }
-
+  void foreach(const Callable& callback);
 };
 
 }

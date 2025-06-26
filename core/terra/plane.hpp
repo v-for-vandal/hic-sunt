@@ -45,7 +45,8 @@ public:
   Plane& operator=(Plane&&) = default;
 
   Plane(
-    QRSBox box
+    QRSBox box,
+    int region_radius
     );
 
   const StringId& GetPlaneId() const { return plane_id_; }

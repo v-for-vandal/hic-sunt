@@ -35,7 +35,7 @@ private:
 public:
   Error save(String filename);
   Error load(String filename);
-  Ref<PlaneObject> create_plane(StringName plane_id, Rect2i box);
+  Ref<PlaneObject> create_plane(StringName plane_id, Rect2i box, int region_radius);
   Ref<PlaneObject> get_plane(StringName plane_id);
   static Dictionary create_error(const char* error);
   static Dictionary create_success();

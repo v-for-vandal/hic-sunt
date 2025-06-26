@@ -79,6 +79,7 @@ void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to) {
   to.Clear();
   to.set_biome(BaseTypes::ToProtoString(source.GetBiome()));
   to.add_features(BaseTypes::ToProtoString(source.GetFeature()));
+  to.set_height(source.GetHeight());
   auto improvement_ptr = to.mutable_improvements()->Add();
   *improvement_ptr = source.GetImprovement();
 
@@ -99,6 +100,8 @@ Cell<BaseTypes> ParseFrom( const proto::region::Cell& from, serialize::To<Cell<B
   if(from.improvements_size() > 0) {
     result.SetImprovement(from.improvements(0));
   }
+
+  result.SetHeight(from.height());
 
   ParseStringIdMapFrom(BaseTypes{}, from.user_data_string(), result.user_data_string_);
   ParseStringIdMapFrom(BaseTypes{}, from.user_data_numeric(), result.user_data_numeric_);
