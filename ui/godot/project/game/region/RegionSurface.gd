@@ -62,7 +62,7 @@ func update_cell(qr_coords: Vector2i) -> void:
 	var biome : String = region_info.biome
 	#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 	# convert to xy dimensions
-	var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
+	var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
 	# fill cell
 	if visualization_data.has(biome):
 		#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])

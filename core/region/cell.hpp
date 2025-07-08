@@ -6,6 +6,7 @@
 #include <absl/container/flat_hash_map.h>
 
 #include <core/utils/serialize.hpp>
+#include <core/utils/minmax.hpp>
 #include <core/types/std_base_types.hpp>
 
 #include <fbs/world_generated.h>
@@ -48,6 +49,8 @@ namespace hs::region {
     const proto::region::Improvement& GetImprovement() const { return improvement_; }
 
     double GetHeight() const noexcept { return height_; }
+    double GetTemperature() const noexcept { return temperature_; }
+    double GetPrecipitation() const noexcept { return precipitation_; }
 
     bool operator==(const Cell&) const;
 
@@ -61,6 +64,8 @@ namespace hs::region {
     void SetFeature(StringId feature) { feature_ = feature; }
     void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
     void SetHeight(double value) noexcept { height_ = value; }
+    void SetTemperature(double value) noexcept { temperature_ = value; }
+    void SetPrecipitation(double value) noexcept { precipitation_ = value; }
 
   private:
     StringId biome_;
@@ -69,6 +74,10 @@ namespace hs::region {
     // height, in meters, above/under sea level (whatever sea this may be)
     // negative is under sea level, positive is above sea level
     double height_{0};
+    // temperature, in celsius
+    double temperature_{0};
+    // precipitation, in millimeters
+    double precipitation_{0};
 
     proto::region::Improvement improvement_;
 

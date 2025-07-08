@@ -180,63 +180,7 @@ func _create_debug_terrain_map() -> void:
 
 		_emit_debug_map("terrain", terrain_image, {})
 
-func _get_temperature_at_point(i : float, j : float) -> int:
-	i = _wrap_x(i)
-	j = _wrap_y(j)
-	# base temperature = how close is point to the borders
-	var j_percent : float  = float(j - _generation_map_size.position.y) /  _generation_map_size.size.y
-	var point_on_curve : float = temperature_curve.sample(j_percent)
-	var temperature : int = _sample_simple_range(point_on_curve, _TEMPERATURE_RANGE)
-	
-	#if i % 10 == 0 and j % 10 == 0:
-	#	print("Temperature at ", i, ",", j, ": ", j_percent, ", ", point_on_curve, ", ", temperature)
 
-	# add fluctuation from the map
-	var temp_fluctuation : int = int(terrain_noise_generator.get_noise_2d(i,j) * _TEMPERATURE_FLUCTUATION)
-	temperature += temp_fluctuation
-	
-	temperature = int(clamp(temperature, _TEMPERATURE_RANGE.x, _TEMPERATURE_RANGE.y))
-	return temperature
-
-# Create temperature map and emits it for debugging
-func _create_debug_temperature_map() -> void:
-	if not debug_mode:
-		return
-	var size = _generation_map_size.size
-	var temperature_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
-	for i in range(0, size.x):
-		for j in range(0, size.y):
-			var temp := _get_temperature_at_point(i,j)
-			var color = _DEBUG_GENERAL_GRADIENT.sample(
-				_displacement_at_range(temp, _TEMPERATURE_RANGE)
-			)
-			temperature_image.set_pixel(i, j, color)
-			
-	_emit_debug_map("temperature", temperature_image, {})
-	
-func _get_precipation_at_point(i : float, j : float) -> int:
-	i = _wrap_x(i)
-	j = _wrap_y(j)
-	# Get base height. It will be in range (-1, 1)
-	var precipation_float = terrain_noise_generator.get_noise_2d(i, j)
-	
-	var precipation_cm = _sample_simple_range(precipation_float, _PRECIPATION_RANGE)
-	return precipation_cm
-	
-func _create_debug_precipation_map() -> void:
-	if not debug_mode:
-		return
-	var size = _generation_map_size.size
-	var precipation_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
-	for i in range(0, size.x):
-		for j in range(0, size.y):
-			var precip := _get_precipation_at_point(i,j)
-			var color = _DEBUG_GENERAL_GRADIENT.sample(
-				_displacement_at_range(precip, _PRECIPATION_RANGE)
-			)
-			precipation_image.set_pixel(i, j, color)
-			
-	_emit_debug_map("precipation", precipation_image, {})
 	
 func _get_biome(temperature: int, precipation: int) -> String:
 	var point := Vector2i(temperature, precipation)

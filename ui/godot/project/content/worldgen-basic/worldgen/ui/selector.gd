@@ -18,7 +18,10 @@ func get_selected_module() -> WorldBuilderRegistry.WorldGeneratorModuleHandle:
 func get_selected_config() -> Variant:
 	if _current_selected in _ui_elements:
 		var ui_element : Control = _ui_elements[_current_selected]
-		return ui_element.get_config() 
+		if ui_element != null:
+			return ui_element.get_config() 
+		else:
+			return null
 	else:
 		return {}
 

@@ -19,14 +19,21 @@ func create_world() -> WorldObject:
 	
 	var main_plane : PlaneObject = world.create_plane(&"main", world_size, region_radius)
 	
-	global_context["region_radius"] = region_radius
-	global_context["seed"] = _config.seed
+	global_context[&"world.bbox"] = world_size
+	global_context[&"region.radius"] = region_radius
+	global_context[&"seed"] = _config.seed
 	
 	# Call height generator
 	var heightmap_generator := _config.heightmap_module.create_generator(
 		main_plane, _config.heightmap_config, global_context
 	)
 	heightmap_generator.first_pass()
+	
+	# Call climate generator
+	var climate_generator := _config.climate_module.create_generator(
+		main_plane, _config.climate_config, global_context
+	)
+	climate_generator.first_pass()
 	
 	
 	return world

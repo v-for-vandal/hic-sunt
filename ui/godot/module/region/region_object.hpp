@@ -56,6 +56,10 @@ public:
   bool set_biome(Vector2i coords, String biome) const;
   bool set_height(Vector2i coords, double height) const;
   double get_height(Vector2i coords) const;
+  bool set_temperature(Vector2i coords, double temperature) const;
+  double get_temperature(Vector2i coords) const;
+  bool set_precipitation(Vector2i coords, double precipitation) const;
+  double get_precipitation(Vector2i coords) const;
 
   // user data wrappers
   double get_data_numeric(Vector2i coords,const StringName& key) const noexcept;

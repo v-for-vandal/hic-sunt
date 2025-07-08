@@ -63,7 +63,11 @@ public:
   }
 
   bool SetHeight(QRSCoords coords, double height);
-  std::pair<double,double> GetHeightRange() const noexcept { return std::make_pair(min_height_, max_height_); }
+  std::pair<double,double> GetHeightRange() const noexcept { return height_minmax_.GetRange(); }
+  bool SetTemperature(QRSCoords coords, double temperature);
+  std::pair<double,double> GetTemperatureRange() const noexcept { return temperature_minmax_.GetRange(); }
+  bool SetPrecipitation(QRSCoords coords, double precipitation);
+  std::pair<double,double> GetPrecipitationRange() const noexcept { return precipitation_minmax_.GetRange(); }
 
   bool SetFeature(QRSCoords coords, const StringId& biome);
 
@@ -116,8 +120,9 @@ private:
   utils::Comb<BaseTypes> biome_count_;
   std::unordered_map<StringId, size_t> feature_count_;
   absl::flat_hash_set<QRSCoords> cells_with_improvements_;
-  double min_height_{std::numeric_limits<double>::max()};
-  double max_height_{std::numeric_limits<double>::min()};
+  utils::MinMax<double> height_minmax_;
+  utils::MinMax<double> temperature_minmax_;
+  utils::MinMax<double> precipitation_minmax_;
 
   static inline int next_id_{0};
 

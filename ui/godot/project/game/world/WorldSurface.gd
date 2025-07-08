@@ -25,7 +25,7 @@ func _contains(tile_qr: Vector2i) -> bool:
 		#if not event.pressed and not event.canceled:
 			#event = make_input_local(event)
 			#var tile_xy := local_to_map(to_local(event.position))
-			#var tile_qr := QrsCoordsLibrary.xy_to_qrs(tile_xy)
+			#var tile_qr := QrsCoordsLibrary.xy_to_qr(tile_xy)
 			#print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
 			#if _world_object.contains(tile_qr):
 				#GameUiEventBus.emit_world_cell_action(tile_qr,
@@ -68,7 +68,7 @@ func load_plane(plane_object : PlaneObject) -> void:
 			var has_city : bool = not region_info.city_id.is_empty()
 			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 			# convert to xy dimensions
-			var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
+			var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
 			# fill cell
 			if has_city:
 				$terrain.set_cell(xy_coords, 0, Vector2i(0,2), 0)

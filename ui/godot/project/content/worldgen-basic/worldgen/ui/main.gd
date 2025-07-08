@@ -10,4 +10,7 @@ func get_config() -> Variant:
 	result.heightmap_module = $HeightmapSelector.get_selected_module()
 	result.heightmap_config = $HeightmapSelector.get_selected_config()
 	
+	result.climate_module = $ClimateSelector.get_selected_module()
+	result.climate_config = $ClimateSelector.get_selected_config()
+	
 	return  result

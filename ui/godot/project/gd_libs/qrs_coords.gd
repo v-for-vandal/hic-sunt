@@ -3,7 +3,7 @@ extends RefCounted
 class_name QrsCoordsLibrary
 
 # function for hex-map
-static func qrs_to_xy(qr:Vector2i)->Vector2i :
+static func qr_to_xy(qr:Vector2i)->Vector2i :
 	var q := qr[0]
 	var r := qr[1]
 	@warning_ignore("integer_division")
@@ -12,7 +12,7 @@ static func qrs_to_xy(qr:Vector2i)->Vector2i :
 	return Vector2i(col, row)
 	
 # function for hex-map
-static func xy_to_qrs(xy: Vector2i)->Vector2i:
+static func xy_to_qr(xy: Vector2i)->Vector2i:
 	var col := xy[0]
 	var row := xy[1]
 	@warning_ignore("integer_division")
@@ -20,6 +20,12 @@ static func xy_to_qrs(xy: Vector2i)->Vector2i:
 	var r := row
 	
 	return Vector2i(q,r)
+	
+static func qr_to_qrs(qr:Vector2i) -> Vector3i:
+	return Vector3i(qr.x, qr.y, -(qr.x+qr.y))
+	
+static func distance_squared_qr(from: Vector2i, to: Vector2i):
+	return qr_to_qrs(from).distance_squared_to(qr_to_qrs(to))
 	
 
 static func flat_top_qrs_to_pixel(qr: Vector2i) -> Vector2 :

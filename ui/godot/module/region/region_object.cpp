@@ -4,6 +4,36 @@
 
 #include <godot_cpp/core/object.hpp>
 
+#define SETTER_GETTER_FLOAT(name, name_upper) \
+bool RegionObject::set_##name(Vector2i coords, double value) const {\
+    if(!region_) {\
+        return false;\
+    }\
+\
+  const auto qrs_coords = cast_qrs(coords);\
+\
+  auto success = region_->Set##name_upper(qrs_coords, value);\
+\
+  if( success) {\
+    emit_signals_for_cell(coords, 0);\
+  }\
+\
+  return success;\
+}\
+\
+double RegionObject::get_##name(Vector2i coords) const {\
+    if(!region_) {\
+        return 0.0;\
+    }\
+\
+  const auto qrs_coords = cast_qrs(coords);\
+  if (!region_->GetSurface().Contains(qrs_coords)) {\
+      return 0.0;\
+  }\
+\
+  return region_->GetSurface().GetCell(qrs_coords).Get##name_upper();\
+}
+
 namespace hs::godot {
 
 void RegionObject::_bind_methods() {
@@ -29,6 +59,10 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_data_numeric", "coords", "key" ), &RegionObject::get_data_numeric);
   ClassDB::bind_method(D_METHOD("get_height", "coords" ), &RegionObject::get_height);
   ClassDB::bind_method(D_METHOD("set_height", "coords", "height"  ), &RegionObject::set_height);
+  ClassDB::bind_method(D_METHOD("get_temperature", "coords" ), &RegionObject::get_temperature);
+  ClassDB::bind_method(D_METHOD("set_temperature", "coords", "temperature"  ), &RegionObject::set_temperature);
+  ClassDB::bind_method(D_METHOD("get_precipitation", "coords" ), &RegionObject::get_precipitation);
+  ClassDB::bind_method(D_METHOD("set_precipitation", "coords", "precipitation"  ), &RegionObject::set_precipitation);
 
   // iterations
   ClassDB::bind_method(D_METHOD("foreach", "callback"), &RegionObject::foreach);
@@ -79,6 +113,8 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
   result["improvement"] = convert_to_dictionary(
     cell.GetImprovement());
   result["height"] = cell.GetHeight();
+  result["temperature"] = cell.GetTemperature();
+  result["precipitation"] = cell.GetPrecipitation();
 
   return result;
 }
@@ -110,6 +146,9 @@ bool RegionObject::set_biome(Vector2i coords, String biome) const
   return success;
 }
 
+
+#if 0
+TODO: RM
 bool RegionObject::set_height(Vector2i coords, double height) const {
     if(!region_) {
         return false;
@@ -138,6 +177,7 @@ double RegionObject::get_height(Vector2i coords) const {
 
   return region_->GetSurface().GetCell(qrs_coords).GetHeight();
 }
+#endif
 
 bool RegionObject::set_feature(Vector2i coords, String feature) const
 {
@@ -203,6 +243,9 @@ Dictionary RegionObject::make_region_info(const Region& region) {
   const auto height_range = region.GetHeightRange();
   result["min_height"] = height_range.first;
   result["max_height"] = height_range.second;
+  const auto temperature_range = region.GetTemperatureRange();
+  result["min_temperature"] = temperature_range.first;
+  result["max_temperature"] = temperature_range.second;
   //result["size"] = region.GetSurface().size();
 
   return result;
@@ -343,4 +386,7 @@ void RegionObject::foreach(const Callable& callback) {
     });
 }
 
+SETTER_GETTER_FLOAT(height, Height);
+SETTER_GETTER_FLOAT(temperature, Temperature);
+SETTER_GETTER_FLOAT(precipitation, Precipitation);
 }

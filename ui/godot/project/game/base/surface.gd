@@ -28,7 +28,7 @@ func _unhandled_input(event : InputEvent) -> void:
 		# TODO: must find a way to make every layer aligned. At the moment,
 		# using highlight layer for coordinates conversion
 		var tile_xy := _highlight_layer.local_to_map(to_local(event.position))
-		var tile_qr := QrsCoordsLibrary.xy_to_qrs(tile_xy)
+		var tile_qr := QrsCoordsLibrary.xy_to_qr(tile_xy)
 		if _contains(tile_qr):
 			if tile_qr != _last_tile_qr:
 				var ui_event := _create_movement_event()
@@ -73,7 +73,7 @@ func _create_action_event() -> UiEventBus.UIActionEvent:
 func highlight(qr_coords: Vector2i, good: bool) -> void:
 	if !_contains(qr_coords):
 		return
-	var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
+	var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
 	# TODO: take atlas coords from user settings
 	var highlight_atlas_coords := Vector2i(0,0) if good else Vector2i(1,0)
 	_highlight_layer.set_cell(xy_coords, 1, highlight_atlas_coords, 0)
@@ -81,7 +81,7 @@ func highlight(qr_coords: Vector2i, good: bool) -> void:
 func clear_highlight(qr_coords: Vector2i) -> void:
 	if !_contains(qr_coords):
 		return
-	var xy_coords := QrsCoordsLibrary.qrs_to_xy(qr_coords)
+	var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
 	_highlight_layer.erase_cell(xy_coords)
 	
 func clear_all_highlight() -> void:

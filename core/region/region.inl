@@ -87,8 +87,35 @@ bool Region<BaseTypes>::SetHeight(QRSCoords coords, double height)
 
   auto& cell = surface_.GetCell(coords);
   cell.SetHeight(height);
-  min_height_ = std::min(min_height_, height);
-  max_height_ = std::max(max_height_, height);
+  height_minmax_.Account(height);
+
+  return true;
+}
+
+template<typename BaseTypes>
+bool Region<BaseTypes>::SetTemperature(QRSCoords coords, double temperature)
+{
+  if(!surface_.Contains(coords)) {
+    return false;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  cell.SetTemperature(temperature);
+  temperature_minmax_.Account(temperature);
+
+  return true;
+}
+
+template<typename BaseTypes>
+bool Region<BaseTypes>::SetPrecipitation(QRSCoords coords, double precipitation)
+{
+  if(!surface_.Contains(coords)) {
+    return false;
+  }
+
+  auto& cell = surface_.GetCell(coords);
+  cell.SetHeight(precipitation);
+  precipitation_minmax_.Account(precipitation);
 
   return true;
 }
@@ -224,8 +251,9 @@ void Region<BaseTypes>::BuildEphemeral() {
         if(cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);
         }
-        min_height_ = std::min(min_height_, cell.GetHeight());
-        max_height_ = std::max(max_height_, cell.GetHeight());
+        height_minmax_.Account(cell.GetHeight());
+        temperature_minmax_.Account(cell.GetTemperature());
+        precipitation_minmax_.Account(cell.GetPrecipitation());
       }
     }
   }
