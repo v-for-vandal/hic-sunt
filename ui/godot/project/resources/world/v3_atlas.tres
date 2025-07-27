@@ -1,8 +1,9 @@
-[gd_resource type="TileSet" load_steps=7 format=3 uid="uid://bx1c4qw1q0psg"]
+[gd_resource type="TileSet" load_steps=9 format=3 uid="uid://bx1c4qw1q0psg"]
 
 [ext_resource type="Texture2D" uid="uid://bsj5lfufkbxte" path="res://resources/terrain_atlas3.png" id="1_dtukt"]
 [ext_resource type="Texture2D" uid="uid://cmhx01j4niifn" path="res://resources/utility_atlas.png" id="2_ffwij"]
 [ext_resource type="Texture2D" uid="uid://decas66yp11m1" path="res://resources/region_improvements_atlas.png" id="3_ywp2q"]
+[ext_resource type="Texture2D" uid="uid://dnmmxadij6xis" path="res://resources/highlight_atlas.png" id="4_vpe0h"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6ffsu"]
 texture = ExtResource("1_dtukt")
@@ -39,6 +40,24 @@ texture_region_size = Vector2i(215, 120)
 1:0/0 = 0
 2:0/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pte64"]
+resource_name = "highlight_colored"
+texture = ExtResource("4_vpe0h")
+separation = Vector2i(10, 10)
+texture_region_size = Vector2i(215, 120)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+
 [resource]
 tile_shape = 3
 tile_offset_axis = 1
@@ -47,3 +66,4 @@ uv_clipping = true
 sources/0 = SubResource("TileSetAtlasSource_6ffsu")
 sources/1 = SubResource("TileSetAtlasSource_p4ns1")
 sources/2 = SubResource("TileSetAtlasSource_uwx6e")
+sources/3 = SubResource("TileSetAtlasSource_pte64")

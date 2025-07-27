@@ -4,28 +4,24 @@ class_name GutTestEnviron
 
 var ruleset : RulesetObject
 var world : WorldObject
+var plane : PlaneObject
 var zero_region : RegionObject # world.get_region(Vector2i(0,0)) - shortcut
 
 func _load_ruleset() -> RulesetObject:
 	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/utest')
-	var _ruleset_dict : Dictionary = CentralSystem.load_ruleset(core_ruleset_path)
-	# TODO: Process loading errors properly
-	var _ruleset_object : RulesetObject
-	if _ruleset_dict.success:
-		print("Successfully loaded core ruleset: ", _ruleset_dict.success)
-		_ruleset_object = _ruleset_dict.ruleset
-	else:
-		print("While loading core ruleset, there were errors: ", _ruleset_dict.errors)
+	var _ruleset_object : RulesetObject = CentralSystem.load_ruleset(core_ruleset_path)
+
 	assert(_ruleset_object != null, "Failed to load ruleset")
 	
 	return _ruleset_object
 	
 func _create_world() -> WorldObject:
-	var world := WorldObject.create_world()
-	assert_not_null(world.create_plane("test_plane", Rect2i(Vector2i(0,0), Vector2i(2,2)), 10))
-	assert_true(world.contains(Vector2i(0,0)))
+	var world_ := WorldObject.create_world()
+	var plane_ := world_.create_plane("test_plane", Rect2i(Vector2i(0,0), Vector2i(2,2)), 10, 12)
+	assert_not_null(plane_)
+	assert_true(plane_.contains(Vector2i(0,0)))
 	# each test should set biomes the way it likes
-	return world
+	return world_
 	
 	
 	
@@ -38,9 +34,11 @@ func after_all() -> void:
 	
 func before_each() -> void:
 	# create new clean world
-	world = _create_world() 
+	world = _create_world()
+	plane = world.get_plane(&"test_plane")
 	assert_not_null(world, "Failed to create a world")
-	zero_region = world.get_region(Vector2i(0,0))
+	assert_not_null(plane, "Failed to create a plane")
+	zero_region = plane.get_region(Vector2i(0,0))
 	assert_not_null(zero_region, "Failed to get (0,0) region")
 	CurrentGame.init_game(world, ruleset)
 	

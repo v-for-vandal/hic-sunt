@@ -3,7 +3,8 @@ extends TabContainer
 var _current_region: RegionObject
 var _current_cell : Vector2i
 
-func set_region(region: RegionObject) -> void:
+## region_qr_coords could be null if region is off-grid
+func set_region(region: RegionObject, region_qr_coords : Variant) -> void:
 	if _current_region != null:
 		if _current_region == region:
 			return
@@ -13,6 +14,9 @@ func set_region(region: RegionObject) -> void:
 	var data = region.get_info()
 	
 	var data_table : Array[Array] = []
+	data_table.append([&"region_id", region.get_id()])
+	if region_qr_coords != null:
+		data_table.append([&"qrs", QrsCoordsLibrary.qr_to_qrs(region_qr_coords as Vector2i)])
 	for key in data:
 		data_table.append([key, data[key]])
 		
@@ -28,6 +32,9 @@ func set_cell(qr_coords: Vector2i) -> void:
 	var data = _current_region.get_cell_info(qr_coords)
 	
 	var data_table : Array[Array] = []
+	data_table.append([&"region_id", _current_region.get_id()])
+	data_table.append([&"qrs", QrsCoordsLibrary.qr_to_qrs(qr_coords)])
+
 	for key in data:
 		data_table.append([key, data[key]])
 		

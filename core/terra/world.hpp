@@ -4,10 +4,12 @@
 #include <core/region/region.hpp>
 #include <core/region/types.hpp>
 #include <core/terra/types.hpp>
+#include <core/terra/plane.hpp>
 #include <core/terra/cell.hpp>
 #include <core/ruleset/ruleset.hpp>
 #include <core/utils/serialize.hpp>
 #include <core/types/std_base_types.hpp>
+#include <core/types/control_object.hpp>
 
 #include <flatbuffers/flatbuffers.h>
 #include <fbs/world_generated.h>
@@ -34,6 +36,7 @@ public:
   using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
   using Plane = Plane<BaseTypes>;
   using PlanePtr = PlanePtr<BaseTypes>;
+  using RegionPtr = region::RegionPtr<BaseTypes>;
   using StringId = BaseTypes::StringId;
   using String = BaseTypes::String;
 
@@ -44,12 +47,17 @@ public:
   World& operator=(World&&) = default;
 
   PlanePtr GetPlane(const StringId& id) const;
-  PlanePtr AddPlane(const StringId& id, QRSBox box, int region_radius);
+  PlanePtr AddPlane(const StringId& id, QRSBox box, int region_radius,
+      int region_external_radius);
+
+  RegionPtr GetRegionById(const StringId& region_id) const noexcept;
+  bool HasRegion(const StringId& region_id) const noexcept;
 
   bool operator==(const World& other) const;
   bool operator!=(const World& other) const {
     return !(*this == other);
   }
+
 
 private:
   friend void SerializeTo<BaseTypes>(const World& source, proto::terra::World& target);
@@ -58,6 +66,7 @@ private:
 
 private:
   std::unordered_map<StringId, PlanePtr> planes_;
+  ControlObjectPtr control_object_;
 };
 
 

@@ -39,4 +39,9 @@ layout_mode = 2
 category = 1
 text = "Climate"
 
+[node name="BiomeSelector" parent="." instance=ExtResource("1_qdhwu")]
+layout_mode = 2
+category = 2
+text = "Biome"
+
 [connection signal="pressed" from="SeedGenerator/Button" to="SeedGenerator" method="_on_button_pressed"]

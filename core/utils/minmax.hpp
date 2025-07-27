@@ -19,7 +19,7 @@ namespace hs::utils {
 
     private:
         T min_{std::numeric_limits<T>::max()};
-        T max_{std::numeric_limits<T>::min()};
+        T max_{std::numeric_limits<T>::lowest()};
     };
 
 }

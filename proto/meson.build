@@ -30,6 +30,7 @@ hs_proto_schemas = [
   'ruleset/projects.proto',
   'render/atlas.proto',
   'render/render.proto',
+  'types/control_object.proto',
   ]
 
 hs_proto_generated = proto_gen.process(

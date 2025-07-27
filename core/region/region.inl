@@ -2,13 +2,13 @@ namespace hs::region {
 
 template<typename BaseTypes>
 Region<BaseTypes>::Region():
-  Region(1)
+  Region("", 1)
 {
 }
 
 template<typename BaseTypes>
-Region<BaseTypes>::Region(int radius):
-  id_(BaseTypes::StringIdFromStdString(fmt::format("region_{}", next_id_++))),
+Region<BaseTypes>::Region(const StringId& region_id, int radius):
+  id_(region_id),
   surface_(
     QRSCoordinateSystem::QAxis(-radius),
     QRSCoordinateSystem::QAxis(radius),
@@ -87,6 +87,11 @@ bool Region<BaseTypes>::SetHeight(QRSCoords coords, double height)
 
   auto& cell = surface_.GetCell(coords);
   cell.SetHeight(height);
+  // TODO: RM
+  if (height < 0) {
+    spdlog::info("Height is negative at {}: {}",
+      coords, height);
+  }
   height_minmax_.Account(height);
 
   return true;

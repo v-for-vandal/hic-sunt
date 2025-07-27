@@ -12,7 +12,7 @@ using namespace ::hs::geometry::literals;
 using StdRegion = Region<StdBaseTypes>;
 
 TEST(StdRegion, Serialize) {
-  StdRegion ref_region(15);
+  StdRegion ref_region("test", 15);
 
   std::string storage;
 
@@ -31,7 +31,7 @@ TEST(StdRegion, Serialize) {
 }
 
 TEST(StdRegion, SerializeDefaultConstructed) {
-  StdRegion ref_region;
+  StdRegion ref_region("test", 4);
 
   std::string storage;
 
@@ -50,11 +50,10 @@ TEST(StdRegion, SerializeDefaultConstructed) {
 }
 
 TEST(StdRegion, Equality) {
-  StdRegion ref_region;
+  StdRegion ref_region("test", 2);
   EXPECT_EQ(ref_region, ref_region);
 
-  StdRegion test_region;
-  test_region.SetId(ref_region.GetId());
+  StdRegion test_region("test", 2);
   EXPECT_EQ(ref_region, test_region);
 }
 

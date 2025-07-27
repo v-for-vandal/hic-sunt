@@ -105,6 +105,15 @@ public:
   RAxis r() const noexcept { return data_.r(); }
   SAxis s() const noexcept { return data_.s(); }
 
+  // Not very type safe, try to not use it outside of tests
+  static Coords MakeCoords(int q, int r) noexcept {
+      return Coords(QAxis(q), RAxis(r));
+    }
+
+  DeltaCoords AsDelta() const noexcept {
+      return DeltaCoords(q().AsDelta(), r().AsDelta());
+  }
+
   /* TODO: RM
   bool IsUndefined() const noexcept;
   void SetUndefined() noexcept;
@@ -129,6 +138,7 @@ public:
 
   Coords operator+(const DeltaCoords& second) const noexcept;
   DeltaCoords operator-(const Coords& second) const noexcept;
+  Coords operator*(const int mult) const noexcept;
 
 private:
   details::QRSCompact<QAxis, RAxis, SAxis

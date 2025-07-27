@@ -23,7 +23,7 @@ func _init(plane: PlaneObject, config: Variant, global_context: Dictionary[Strin
 	
 func first_pass() -> void:
 	
-	var region_lambda= func(region_q: int, region_r: int, region: RegionObject) -> void:
+	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 		
 	_plane.foreach_surface(region_lambda)
@@ -36,7 +36,7 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->voi
 
 	
 	
-	var region_cell_lambda = func(cell_q: int, cell_r: int) ->void:
+	var region_cell_lambda := func(cell_q: int, cell_r: int) ->void:
 		_cell_first_pass(region, region_coords, Vector2i(cell_q, cell_r))
 		
 	region.foreach(region_cell_lambda)
@@ -44,7 +44,11 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->voi
 	
 func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qrs_coords: Vector2i) -> void:
 	var height := _get_height_at_point(region_coords.x + cell_qrs_coords.x, region_coords.y + cell_qrs_coords.y)
+	if height <= 0:
+		pass
 	region.set_height(cell_qrs_coords, height)
+	
+	assert(region.get_height(cell_qrs_coords) == height)	
 	
 	
 func _wrap_x(i: float) -> float:

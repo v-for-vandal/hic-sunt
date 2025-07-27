@@ -25,23 +25,16 @@ inline void Coords<T>::SetUndefined() noexcept { *this = kUndefinedCoords<T>; }
 
 template<typename T>
 inline Coords<T> Coords<T>::operator+(const DeltaCoords& second) const noexcept {
-  /*
-  if (IsUndefined()) {
-    return kUndefinedCoords<T>;
-  }
-  */
-
   return Coords{q() + second.q(), r() + second.r()};
 }
 
 template<typename T>
-inline DeltaCoords<T> Coords<T>::operator-(const Coords<T>& second) const noexcept {
-  /*
-  if (IsUndefined() || second.IsUndefined()) {
-    return kUndefinedDelta;
-  }
-  */
+inline Coords<T> Coords<T>::operator*(const int mult) const noexcept {
+  return Coords{q() * mult, r() * mult};
+}
 
+template<typename T>
+inline DeltaCoords<T> Coords<T>::operator-(const Coords<T>& second) const noexcept {
   return DeltaCoords{
       q() - second.q(), r() - second.r()};
 }

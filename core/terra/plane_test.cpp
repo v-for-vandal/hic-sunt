@@ -11,15 +11,19 @@ using namespace ::hs::geometry::literals;
 using StdPlane = Plane<>;
 
 TEST(StdPlane, Serialize) {
-  StdPlane ref_plane(StdPlane::QRSBox(
-      StdPlane::QRSCoords(
-        -1_q,
-        -2_r
-        ),
-      StdPlane::QRSCoords(
-        4_q,
-        6_r
-        )
+  StdPlane ref_plane(
+      ControlObjectPtr{},
+      "test",
+
+      StdPlane::QRSBox(
+          StdPlane::QRSCoords(
+            -1_q,
+            -2_r
+            ),
+          StdPlane::QRSCoords(
+            4_q,
+            6_r
+            )
       ),
       4
     );

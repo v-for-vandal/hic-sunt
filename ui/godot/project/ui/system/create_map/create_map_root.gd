@@ -19,7 +19,14 @@ func _ready() -> void:
 	_prepare_cellinfo()
 	
 	$DebugUiEventBus.set_main_interaction(self)
-		
+	
+	var ruleset = CentralSystem.load_ruleset()
+	
+	var terrain_mapping = ruleset.get_atlas_render()
+	
+	%WorldSurface.terrain_mapping = terrain_mapping
+	%RegionSurface.visualization_data = terrain_mapping
+
 	
 func _prepare_generators() -> void:
 	# get all possible values for selected category
@@ -174,7 +181,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 	if event is UiEventBus.WorldUIMovementEvent:
 		var plane : PlaneObject = event.surface.get_plane()
 		var region := plane.get_region(event.qr_coords)
-		%InfoContainer.set_region(region)
+		%InfoContainer.set_region(region, event.qr_coords)
 		event.accept()
 		
 	if event is UiEventBus.WorldUIActionEvent:

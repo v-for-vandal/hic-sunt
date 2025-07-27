@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/geometry/coords.hpp>
+#include <core/geometry/surface_shape.hpp>
 #include <core/geometry/surface_raw_view.hpp>
 #include <core/utils/serialize.hpp>
 
@@ -65,16 +66,19 @@ public:
   auto r_start() const { return r_start_; }
   auto s_start() const { return s_start_; }
 
-  bool Contains(Coords coords) const {
-    /*spdlog::info("Checking {} vs {}-{},{}-{}, {}-{}",
+  bool Contains(Coords coords) const noexcept {
+      const bool result = 
+          CheckInRange(coords.q(), q_start(), q_end()) &&
+          CheckInRange(coords.r(), r_start(), r_end()) &&
+          CheckInRange(coords.s(), s_start(), s_end());
+      /*
+    spdlog::info("Checking {} vs {}-{},{}-{}, {}-{}: {}",
       coords,
-      q_start(), q_end(), r_start(), r_end(), s_start(), s_end()
-      );*/
-    return
-      CheckInRange(coords.q(), q_start(), q_end()) &&
-      CheckInRange(coords.r(), r_start(), r_end()) &&
-      CheckInRange(coords.s(), s_start(), s_end())
-      ;
+      q_start(), q_end(), r_start(), r_end(), s_start(), s_end(),
+      result
+      );
+      */
+    return result;
   }
   bool Contains(typename Coords::QAxis q, typename Coords::RAxis r) const {
     return Contains(Coords{q,r});
@@ -110,8 +114,8 @@ public:
   Coords FromRawIndex(const size_t index) {
     // index is displacement in raw underlying array.
     // This code relies on mdspan having layout_right.
-    const int x = index / q_size().ToUnderlying();
-    const int y = index % q_size().ToUnderlying();
+    const int x = index % q_size().ToUnderlying();
+    const int y = index / q_size().ToUnderlying();
 
     const auto q_pos = q_start() + QDelta{x};
     const auto r_pos = r_start() + RDelta{y};
@@ -184,7 +188,6 @@ public:
   size_t data_size() const { return data_size_; }
   const Cell& GetCell(size_t idx) const { return data_storage_[idx]; }
   Cell& GetCell(size_t idx) { return data_storage_[idx]; }
-  //bool Contains(Coords coords) const { return cells_.Contains(coords); }
 
   auto q_size() const { return cells_.q_size(); }
   auto r_size() const { return cells_.r_size(); }

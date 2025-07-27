@@ -3,5 +3,5 @@
 [resource]
 _limits = [-1.0, 1.0, 0.0, 1.0]
 bake_resolution = 1000
-_data = [Vector2(0, -1), 0.0, 10.8536, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, -1), -9.38983, 0.0, 0, 0]
-point_count = 3
+_data = [Vector2(0, -1), 0.0, 3.25094, 0, 0, Vector2(0.994898, 1), 0.251686, 0.0, 0, 0]
+point_count = 2

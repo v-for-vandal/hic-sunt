@@ -27,7 +27,9 @@ func _ready() -> void:
 
 
 func _contains(tile_qr: Vector2i) -> bool:
-	assert(_region_object != null)
+	if _region_object == null:
+		return false
+
 	return _region_object.contains(tile_qr)
 
 func load_region(region_object : RegionObject) -> void:

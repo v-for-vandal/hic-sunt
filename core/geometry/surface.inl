@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream> // TODO: RM
-
 namespace hs::geometry {
 
 template<typename Cell, typename CoordinateSystem>
@@ -22,7 +20,6 @@ Surface<Cell, CoordinateSystem>::Surface(
 
     )
 {
-
 }
 
 template<typename Cell, typename CoordinateSystem>

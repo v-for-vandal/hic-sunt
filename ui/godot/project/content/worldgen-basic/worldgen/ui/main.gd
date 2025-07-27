@@ -13,4 +13,7 @@ func get_config() -> Variant:
 	result.climate_module = $ClimateSelector.get_selected_module()
 	result.climate_config = $ClimateSelector.get_selected_config()
 	
+	result.biome_module = $BiomeSelector.get_selected_module()
+	result.biome_config = $BiomeSelector.get_selected_config()
+	
 	return  result

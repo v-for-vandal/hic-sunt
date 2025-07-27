@@ -38,7 +38,7 @@ namespace hs::godot {
 
 void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
-  ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id);
+  ClassDB::bind_method(D_METHOD("get_id"), &RegionObject::get_region_id);
   ClassDB::bind_method(D_METHOD("get_info"), &RegionObject::get_info);
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
@@ -63,6 +63,7 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_temperature", "coords", "temperature"  ), &RegionObject::set_temperature);
   ClassDB::bind_method(D_METHOD("get_precipitation", "coords" ), &RegionObject::get_precipitation);
   ClassDB::bind_method(D_METHOD("set_precipitation", "coords", "precipitation"  ), &RegionObject::set_precipitation);
+  ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id); // deprecated
 
   // iterations
   ClassDB::bind_method(D_METHOD("foreach", "callback"), &RegionObject::foreach);
@@ -246,7 +247,9 @@ Dictionary RegionObject::make_region_info(const Region& region) {
   const auto temperature_range = region.GetTemperatureRange();
   result["min_temperature"] = temperature_range.first;
   result["max_temperature"] = temperature_range.second;
-  //result["size"] = region.GetSurface().size();
+  const auto precipitation_range = region.GetPrecipitationRange();
+  result["min_precipitation"] = precipitation_range.first;
+  result["max_precipitation"] = precipitation_range.second;
 
   return result;
 }

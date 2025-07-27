@@ -1,12 +1,15 @@
 syntax = "proto3";
 
 import "terra/plane.proto";
+import "types/control_object.proto";
 
 package hs.proto.terra;
 
 message World {
   string id = 1;
   repeated Plane planes = 2;
+  hs.proto.types.ControlObject control_object = 3;
+
 
 }
 

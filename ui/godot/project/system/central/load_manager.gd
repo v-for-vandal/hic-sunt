@@ -38,15 +38,8 @@ func _prepare_loading()-> void:
 
 # TODO: Move this function to CentralSystem
 func _load_ruleset() -> RulesetObject:
-	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/v1.0')
-	var _ruleset_dict : Dictionary = CentralSystem.load_ruleset(core_ruleset_path)
 	# TODO: Process loading errors properly
-	var _ruleset_object : RulesetObject
-	if _ruleset_dict.success:
-		print("Successfully loaded core ruleset: ", _ruleset_dict.success)
-		_ruleset_object = _ruleset_dict.ruleset
-	else:
-		print("While loading core ruleset, there were errors: ", _ruleset_dict.errors)
+	var _ruleset_object : RulesetObject = CentralSystem.load_ruleset()
 	assert(_ruleset_object != null, "Failed to load ruleset")
 	
 	return _ruleset_object

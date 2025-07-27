@@ -24,7 +24,7 @@ static func xy_to_qr(xy: Vector2i)->Vector2i:
 static func qr_to_qrs(qr:Vector2i) -> Vector3i:
 	return Vector3i(qr.x, qr.y, -(qr.x+qr.y))
 	
-static func distance_squared_qr(from: Vector2i, to: Vector2i):
+static func distance_squared_qr(from: Vector2i, to: Vector2i) -> int:
 	return qr_to_qrs(from).distance_squared_to(qr_to_qrs(to))
 	
 

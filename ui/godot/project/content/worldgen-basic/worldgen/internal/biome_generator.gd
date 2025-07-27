@@ -1,18 +1,27 @@
 extends WorldGeneratorModuleInterface
 
+const Config = preload("res://content/worldgen-basic/worldgen/internal/biome_gen_config.gd")
+
 const _TEMPERATURE_RANGE = Vector2i(-20, 40) # celsius
 const _TEMPERATURE_FLUCTUATION = 5
 
-const _HEIGHT_RANGE = Vector2i(-8000, 8000) # meters
-const _MOUNTAIN_EXTRA_HEIGHT_RANGE = Vector2i(3000, 6000) # meters
-
 const _PRECIPATION_RANGE = Vector2i(0, 400)
+
+var _config : Config
+var _plane: PlaneObject
+var _global_context : Dictionary[StringName, Variant]
+
+func _init(plane: PlaneObject, config: Variant, global_context: Dictionary[StringName, Variant]) -> void:
+	super(global_context)
+	_config = config
+	_plane = plane
+	_global_context = global_context
 
 func make_biome_rect(temp_start:int, temp_end:int, percipation_start:int, percipation_end:int) -> Rect2i:
 	return Rect2i( temp_start, percipation_start, (temp_end-temp_start), (percipation_end - percipation_start))
 	
 # TODO: Move to proto
-var biome_maps = [
+var biome_maps : Array[Dictionary]= [
 	{
 		make_biome_rect(_TEMPERATURE_RANGE.x, -10, 0, _PRECIPATION_RANGE.y+1) : "core.biome.snow",
 		make_biome_rect(-10, 0, 0,  _PRECIPATION_RANGE.y+1) : "core.biome.tundra",
@@ -25,22 +34,42 @@ var biome_maps = [
 		make_biome_rect(15, 20, 120, 230) : "core.biome.temperate_forest",
 		make_biome_rect(15, 20, 230, _PRECIPATION_RANGE.y + 1) : "core.biome.rainforest",
 		make_biome_rect(20, 30, 0, 100 ) : "core.biome.desert", # subtropical_desert
-		make_biome_rect(20, 30, 100, 230 ) : "core.biome.savanna", # subtropical_desert
+		make_biome_rect(20, 30, 100, 230 ) : "core.biome.savanna", # savanna
 		make_biome_rect(20, 30, 230, _PRECIPATION_RANGE.y + 1 ) : "core.biome.tropical_rainforest", # subtropical_desert
 		make_biome_rect(30, _TEMPERATURE_RANGE.y+1, 0, _PRECIPATION_RANGE.y+1 ) : "core.biome.desert", # subtropical_desert
 
 	}
 ]
 
-func _wrap_x(i: float) -> float:
-	# Wrapping will be done within plane object itself
-	return i
+func first_pass() -> void:
 	
+	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
+		_region_first_pass(region, Vector2i(region_q, region_r))
+		
+	_plane.foreach_surface(region_lambda)
 	
-func _wrap_y(j: float) -> float:
-	return j
+func _region_first_pass(region: RegionObject, region_qr_coords: Vector2i) ->void:		
+	var region_cell_lambda := func(cell_q: int, cell_r: int) ->void:
+		_cell_first_pass(region, Vector2i(cell_q, cell_r))
+		
+	region.foreach(region_cell_lambda)
 
-func _get_biome(temperature: int, precipation: int) -> String:
+	
+func _cell_first_pass(region: RegionObject, cell_qr_coords: Vector2i) -> void:
+	var temperature : float = region.get_temperature(cell_qr_coords)
+	var precipitation : float = region.get_precipitation(cell_qr_coords)
+	var height : float = region.get_height(cell_qr_coords)
+	
+	var biome : StringName
+	if height >= 0:
+		biome = _get_biome(int(temperature), int(precipitation))
+	else:
+		biome = &"core.biome.ocean"
+		
+	region.set_biome(cell_qr_coords, biome)
+	
+
+func _get_biome(temperature: int, precipation: int) -> StringName:
 	var point := Vector2i(temperature, precipation)
 	
 	for biome_map : Dictionary in biome_maps:

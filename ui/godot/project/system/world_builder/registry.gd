@@ -71,11 +71,13 @@ var _worldgen_modules_by_category: Dictionary[WorldBuilderRegistry.CATEGORY, Arr
 var _module_function_mapping : Dictionary[WorldBuilderRegistry.CATEGORY, StringName]= {
 	WorldBuilderRegistry.CATEGORY.Heightmap : &'create_heightmap_generator',
 	WorldBuilderRegistry.CATEGORY.Climate : &'create_climate_generator',
+	WorldBuilderRegistry.CATEGORY.Biome : &'create_biome_generator',
 }
 
 enum CATEGORY {
 	Heightmap,
 	Climate,
+	Biome,
 }
 
 

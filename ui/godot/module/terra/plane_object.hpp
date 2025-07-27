@@ -39,6 +39,7 @@ private:
   PlanePtr data_;
 
 public:
+  StringName get_id() const;
   Rect2i get_dimensions() const;
   Ref<RegionObject> get_region(Vector2i coords) const;
   Ref<RegionObject> get_region_by_id(String region_id) const;
@@ -47,6 +48,8 @@ public:
   bool contains(Vector2i coords) const;
   static Dictionary create_error(const char* error);
   static Dictionary create_success();
+  float get_distance_between_cells(Vector2i region1, Vector2i cell1,
+      Vector2i region2, Vector2i cell2);
   //String get_cell_terrain(Vector2i coords) const;
 
 };

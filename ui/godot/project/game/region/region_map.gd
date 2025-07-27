@@ -46,10 +46,10 @@ func on_ui_event(event : Variant) -> void:
 		exit_reqion_request.emit()
 		return
 
-func _connect_region_object(region_object: RegionObject) -> void:
+func _connect_region_object(_region_object: RegionObject) -> void:
 	# This class doesn't require any connections
 	pass
 	
-func _disconnect_region_object(region_object: RegionObject) -> void:
+func _disconnect_region_object(_region_object: RegionObject) -> void:
 	# keep it in sync with method _connect_region_object
 	pass

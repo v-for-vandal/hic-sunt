@@ -37,10 +37,10 @@ func _ready() -> void:
 	var available_generators := WorldBuilderRegistry.get_modules_for_category(category)
 	
 	for generator_handle : WorldBuilderRegistry.WorldGeneratorModuleHandle in available_generators:
-		var name := generator_handle.name
+		var name_ := generator_handle.name
 		
 		var this_index : int = %SelectButton.item_count
-		%SelectButton.add_item(name)
+		%SelectButton.add_item(name_)
 		
 		_modules[this_index] = generator_handle
 		

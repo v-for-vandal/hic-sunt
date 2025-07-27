@@ -57,12 +57,12 @@ func ask_confirm(message: String) -> bool:
 	return await _pimpl.ask_confirm(message, get_tree().current_scene)
 
 	
-# TODO: accept ruleset name/path as argument
-# TODO: Find solution for name problem. Can't use 'load_ruleset' because it
-# hides native method and will not work
-func smart_load_ruleset() -> RulesetObject:
+
+func load_ruleset( ruleset_path: String = "") -> RulesetObject:
 	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/v1.0')
-	var _ruleset_dict : Dictionary = RulesetObject.load(core_ruleset_path)
+	if ruleset_path == "":
+		ruleset_path = core_ruleset_path
+	var _ruleset_dict : Dictionary = RulesetObject.load(ruleset_path)
 	# TODO: Process loading errors properly
 	var _ruleset_object : RulesetObject
 	if _ruleset_dict.success:

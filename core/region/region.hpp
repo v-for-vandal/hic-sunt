@@ -44,10 +44,11 @@ public:
   Region& operator=(const Region&) = delete;
   Region& operator=(Region&&) = default;
 
-  // Create hexagonal region
+  // Create hexagonal region. Regions are always centered around
+  // (0,0,0) point and has given radius
   // TODO: Accept id in constructor instead of static next_id
   // Reason: next_id is not preserved when serializing
-  explicit Region(int radius);
+  explicit Region(const StringId& region_id, int radius);
 
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
@@ -55,7 +56,7 @@ public:
 
 
   const StringId& GetId() const { return id_; }
-  void SetId(const StringId& id) { id_ = id; }
+  //void SetId(const StringId& id) { id_ = id; }
 
   bool SetBiome(QRSCoords coords, const StringId& biome);
   std::vector<std::pair<StringId, int>> GetTopKBiomes(int k) const {

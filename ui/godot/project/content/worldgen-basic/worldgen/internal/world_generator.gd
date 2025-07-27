@@ -4,7 +4,7 @@ const Config = preload("res://content/worldgen-basic/worldgen/internal/world_gen
 
 var _config: Config
 
-func _init(config : Config):
+func _init(config : Config) -> void:
 	_config = config
 
 func create_world() -> WorldObject:
@@ -17,7 +17,7 @@ func create_world() -> WorldObject:
 	var world_size := Rect2i(Vector2i(0,0), Vector2i(10, 10))
 	var region_radius : int = 10
 	
-	var main_plane : PlaneObject = world.create_plane(&"main", world_size, region_radius)
+	var main_plane : PlaneObject = world.create_plane(&"main", world_size, region_radius, -1)
 	
 	global_context[&"world.bbox"] = world_size
 	global_context[&"region.radius"] = region_radius
@@ -34,6 +34,12 @@ func create_world() -> WorldObject:
 		main_plane, _config.climate_config, global_context
 	)
 	climate_generator.first_pass()
+	
+	# Call climate generator
+	var biome_generator := _config.biome_module.create_generator(
+		main_plane, _config.biome_config, global_context
+	)
+	biome_generator.first_pass()
 	
 	
 	return world

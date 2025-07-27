@@ -43,6 +43,5 @@ func _unhandled_input(event : InputEvent) -> void:
 		if _zoom_tween:
 			_zoom_tween.kill()
 			
-		print("zooming  to", new_zoom)
 		_zoom_tween = create_tween()
 		_zoom_tween.tween_property(self, "zoom", new_zoom, zoom_speed)

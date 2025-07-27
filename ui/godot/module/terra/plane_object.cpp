@@ -8,12 +8,19 @@
 namespace hs::godot {
 
 void PlaneObject::_bind_methods() {
+  ClassDB::bind_method(D_METHOD("get_id"), &PlaneObject::get_id);
   ClassDB::bind_method(D_METHOD("get_dimensions"), &PlaneObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_region", "coords"), &PlaneObject::get_region);
   ClassDB::bind_method(D_METHOD("get_region_by_id", "region_id"), &PlaneObject::get_region_by_id);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &PlaneObject::contains);
   ClassDB::bind_method(D_METHOD("get_region_info", "coords"), &PlaneObject::get_region_info);
+  ClassDB::bind_method(D_METHOD("get_distance_between_cells",
+          "region1", "cell1", "region2", "cell2"), &PlaneObject::get_distance_between_cells);
   ClassDB::bind_method(D_METHOD("foreach_surface", "callback"), &PlaneObject::foreach_surface);
+}
+
+StringName PlaneObject::get_id() const {
+  return data_->GetPlaneId();
 }
 
 Rect2i PlaneObject::get_dimensions() const {
@@ -86,6 +93,18 @@ Dictionary PlaneObject::get_region_info(Vector2i coords) const {
 
   auto& region = data_->GetSurface().GetCell(qrs_coords).GetRegion();
   return RegionObject::make_region_info(region);
+}
+
+float PlaneObject::get_distance_between_cells(Vector2i region1, Vector2i cell1,
+  Vector2i region2, Vector2i cell2) {
+
+    return data_->GetDistanceBetweenCells(
+        cast_qrs(region1),
+        cast_qrs(cell1),
+        cast_qrs(region2),
+        cast_qrs(cell2)
+        );
+
 }
 
 Dictionary PlaneObject::create_error(const char* error) {

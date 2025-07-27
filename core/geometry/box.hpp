@@ -26,4 +26,24 @@ private:
 
 }
 
+template <typename T>
+struct fmt::formatter<hs::geometry::Box<T>> {
+  constexpr auto parse(format_parse_context& ctx) const {
+    auto it = ctx.begin(), end = ctx.end();
+    // Check if reached the end of the range:
+    if (it != end && *it != '}') {
+      throw fmt::format_error("Invalid format for Box");
+    }
+
+    return it;
+  }
+
+  template <typename FormatCtx>
+  auto format(const hs::geometry::Box<T>& box, FormatCtx& ctx) {
+    return fmt::format_to(ctx.out(), "[{};{})", box.start(),
+        box.end());
+
+  }
+};
+
 

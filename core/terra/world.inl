@@ -30,16 +30,50 @@ auto World<BaseTypes>::GetPlane(const StringId& plane_id) const -> PlanePtr {
 }
 
 template<typename BaseTypes>
-auto World<BaseTypes>::AddPlane(const StringId& plane_id, QRSBox box, int region_radius) -> PlanePtr {
+auto World<BaseTypes>::AddPlane(const StringId& plane_id, QRSBox box, int region_radius,
+    int region_external_radius) -> PlanePtr {
   if(auto fit = planes_.find(plane_id); fit != planes_.end()) {
       spdlog::error("Plane with id {} already exists", plane_id);
       return fit->second;
   }
 
-  auto plane_ptr = std::make_shared<Plane>(box, region_radius);
-  planes_[plane_id] = plane_ptr;
+  spdlog::info("Making new plane with dimensions: {} and radius: {}",
+      box, region_radius);
+
+  StringId effective_plane_id = plane_id;
+  if (BaseTypes::IsNullToken(plane_id)) {
+    effective_plane_id = BaseTypes::StringIdFromStdString(fmt::format("plane_{}", control_object_->GetNextId()));
+  }
+
+  auto plane_ptr = std::make_shared<Plane>(control_object_, effective_plane_id, box, region_radius, region_external_radius);
+  planes_[effective_plane_id] = plane_ptr;
 
   return plane_ptr;
+}
+
+template<typename BaseTypes>
+auto World<BaseTypes>::GetRegionById(const StringId& region_id) const noexcept -> RegionPtr{
+  RegionPtr result;
+  for (auto& [_, plane_ptr] : planes_) {
+    result = plane_ptr->GetRegionById(region_id);
+    if (result != nullptr) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+template<typename BaseTypes>
+bool World<BaseTypes>::HasRegion(const StringId& region_id) const noexcept {
+  for (auto& [_, plane_ptr] : planes_) {
+    if( plane_ptr->HasRegion(region_id)) {
+      return true;
+    }
+  }
+
+  return false;
+
 }
 
 template<typename BaseTypes>
@@ -54,6 +88,8 @@ void SerializeTo(const World<BaseTypes>& source, proto::terra::World& target)
     SerializeTo(*v, *dst);
   }
 
+  SerializeTo(*source.control_object_, *target.mutable_control_object());
+
 }
 
 template<typename BaseTypes>
@@ -67,12 +103,22 @@ World<BaseTypes> ParseFrom(const proto::terra::World& source, serialize::To<Worl
     const auto plane_id = plane_obj->GetPlaneId();
     result.planes_[plane_id] = plane_obj;
   }
+  *result.control_object_ = ParseFrom(source.control_object(),
+    serialize::To<types::ControlObject>{});
+
   result.InitNonpersistent();
   return result;
 }
 
 template<typename BaseTypes>
-void World<BaseTypes>::InitNonpersistent() {}
+void World<BaseTypes>::InitNonpersistent() {
+  // set control object
+  for (auto& [_, plane_ptr] : planes_) {
+    plane_ptr->SetControlObject(control_object_);
+  }
+
+  // TODO: build region index
+}
 
 }
 
