@@ -10,12 +10,7 @@ template<typename BaseTypes>
 Region<BaseTypes>::Region(const StringId& region_id, int radius):
   id_(region_id),
   surface_(
-    QRSCoordinateSystem::QAxis(-radius),
-    QRSCoordinateSystem::QAxis(radius),
-    QRSCoordinateSystem::RAxis(-radius),
-    QRSCoordinateSystem::RAxis(radius),
-    QRSCoordinateSystem::SAxis(-radius),
-    QRSCoordinateSystem::SAxis(radius)
+    geometry::HexagonSurface(radius)
     )
   {
     BuildEphemeral();

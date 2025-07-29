@@ -97,6 +97,7 @@ public:
   using RDelta = typename CoordinateSystem::RDelta;
   using SDelta = typename CoordinateSystem::SDelta;
 
+  Coords() = default;
 
   Coords(QAxis q, RAxis r):
     data_(q,r) {}

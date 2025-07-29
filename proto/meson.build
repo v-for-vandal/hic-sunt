@@ -15,6 +15,7 @@ proto_gen_hh = generator(protoc_prg,
   arguments : ['--proto_path=@CURRENT_SOURCE_DIR@', '--cpp_out=@BUILD_DIR@', '@INPUT@'])
 
 hs_proto_schemas = [
+  'geometry/surface_shape.proto',
   'region/cell.proto',
   'region/improvement.proto',
   'region/region.proto',

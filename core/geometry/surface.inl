@@ -4,20 +4,15 @@ namespace hs::geometry {
 
 template<typename Cell, typename CoordinateSystem>
 Surface<Cell, CoordinateSystem>::Surface(
-    typename SCS::QAxis q_start ,
-    typename SCS::QAxis q_end  ,
-    typename SCS::RAxis r_start ,
-    typename SCS::RAxis r_end  ,
-    typename SCS::SAxis s_start ,
-    typename SCS::SAxis s_end
+      SurfaceShape shape
   ):
-  data_size_(make_size_sane(q_start, q_end) * make_size_sane(r_start, r_end)),
+  shape_(shape),
+  allocation_size_(GetAllocationSize(shape)),
+  data_size_(allocation_size_.first * allocation_size_.second),
   data_storage_(new Cell[data_size_]),
   cells_(
-    CellsArrayView<Cell>(data_storage_.get(), make_size_sane(q_start, q_end),
-      make_size_sane(r_start, r_end) ),
-    q_start, r_start, s_start, s_end
-
+    CellsArrayView<Cell>(data_storage_.get(), allocation_size_.first, allocation_size_.second ),
+    shape
     )
 {
 }
@@ -28,20 +23,9 @@ bool SurfaceView<Cell, CoordinateSystem>::operator==(const SurfaceView& other) c
     return true;
   }
 
-#define _HICSUNT_CMP_VAL(func) \
-  if( func() != other.func()) {\
-    SPDLOG_TRACE(#func " not equal, {} vs {}", func(), other.func());\
-    return false;\
+  if(shape_ != other.shape_) {
+      return false;
   }
-
-  _HICSUNT_CMP_VAL(q_start)
-  _HICSUNT_CMP_VAL(q_end)
-  _HICSUNT_CMP_VAL(r_start)
-  _HICSUNT_CMP_VAL(r_end)
-  _HICSUNT_CMP_VAL(s_start)
-  _HICSUNT_CMP_VAL(s_end)
-
-#undef _HICSUNT_CMP_VAL
 
   // compare cells
   for(auto q = q_start(); q != q_end(); q++) {
@@ -66,15 +50,23 @@ bool SurfaceView<Cell, CoordinateSystem>::operator==(const SurfaceView& other) c
 }
 
 template<typename Cell, typename CoordinateSystem>
+std::pair<size_t, size_t> Surface<Cell, CoordinateSystem>::GetAllocationSize(const SurfaceShape& shape) noexcept {
+    auto box = shape.BoundingBox();
+
+    return std::make_pair(size_t(box.q_size().ToUnderlying()), size_t(box.r_size().ToUnderlying()));
+}
+
+
+template<typename Cell, typename CoordinateSystem>
 inline Surface<Cell, CoordinateSystem> ParseFrom(const auto& proto_source, serialize::To<Surface<Cell, CoordinateSystem>>)
 {
+    SurfaceShape<CoordinateSystem> shape = ParseFrom(
+        proto_source.shape(),
+        serialize::To<SurfaceShape<CoordinateSystem>>{}
+        );
+
   Surface<Cell, CoordinateSystem> result{
-    typename CoordinateSystem::QAxis{proto_source.q_start()},
-    typename CoordinateSystem::QAxis{proto_source.q_end()},
-    typename CoordinateSystem::RAxis{proto_source.r_start()},
-    typename CoordinateSystem::RAxis{proto_source.r_end()},
-    typename CoordinateSystem::SAxis{proto_source.s_start()},
-    typename CoordinateSystem::SAxis{proto_source.s_end()}
+      shape
   };
 
 
@@ -113,12 +105,7 @@ auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, auto& proto_dest
     SerializeTo(source.GetCell(idx), *new_element);
   }
 
-  proto_destination.set_q_start(source.q_start().ToUnderlying());
-  proto_destination.set_q_end(source.q_end().ToUnderlying());
-  proto_destination.set_r_start(source.r_start().ToUnderlying());
-  proto_destination.set_r_end(source.r_end().ToUnderlying());
-  proto_destination.set_s_start(source.s_start().ToUnderlying());
-  proto_destination.set_s_end(source.s_end().ToUnderlying());
+  SerializeTo(source.GetShape(), *proto_destination.mutable_shape());
 }
 
 }

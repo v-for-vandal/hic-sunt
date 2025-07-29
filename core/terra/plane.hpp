@@ -38,6 +38,7 @@ public:
   using RegionPtr = region::RegionPtr<BaseTypes>;
   using Cell = Cell<BaseTypes>;
   using Surface = geometry::Surface<Cell, QRSCoordinateSystem>;
+  using SurfaceShape = geometry::SurfaceShape<QRSCoordinateSystem>;
   using SurfaceView = geometry::SurfaceView<Cell, QRSCoordinateSystem>;
   using StringId = BaseTypes::StringId;
   using String = BaseTypes::String;

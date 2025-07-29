@@ -14,8 +14,7 @@ Plane<BaseTypes>::Plane(
   ):
   control_object_(std::move(control_object)),
   plane_id_(plane_id),
-  surface_(box.start().q(), box.end().q(), box.start().r(), box.end().r(),
-    box.start().s(), box.end().s())
+  surface_(SurfaceShape(geometry::RhombusSurface(box)))
   {
       if (region_radius <= 0) {
           region_radius = 5;
@@ -77,15 +76,11 @@ template<typename BaseTypes>
 void Plane<BaseTypes>::InitNonpersistent() {
   region_index_.clear();
 
-  for(auto q = surface_.q_start(); q != surface_.q_end(); q++) {
-    for(auto r = surface_.r_start(); r != surface_.r_end(); r++) {
-      if(surface_.Contains(q,r)) {
-        auto region_ptr = surface_.GetCell(q,r).GetRegionPtr();
+  GetSurface().foreach([this](const auto&, auto& cell) {
+        auto region_ptr = cell.GetRegionPtr();
         auto region_id = region_ptr->GetId();
         region_index_[region_id] = region_ptr;
-      }
-    }
-  }
+        });
 
   for(const auto& cell : off_surface_) {
       auto region_ptr = cell.GetRegionPtr();

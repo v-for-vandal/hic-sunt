@@ -28,14 +28,14 @@ TEST(Surface, ForEach) {
   struct Cell {};
   using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
   using CoordsT = typename SurfaceT::Coords;
+  using Box = Box<QRSCoordinateSystem>;
 
   // at the moment of writing, s_coords did not matter
   auto start = CoordsT::MakeCoords(-2, -3);
   auto end = CoordsT::MakeCoords(4, 4);
   SurfaceT target{
-      start.q(), end.q(),
-      start.r(), end.r(),
-      start.s(), end.s()
+      RhombusSurface(
+          Box(start, end))
   };
 
   absl::flat_hash_set<typename SurfaceT::Coords> visited;

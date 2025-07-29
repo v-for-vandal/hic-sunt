@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hs.proto.geometry;
+
+message HexagonSurface {
+  int32 radius = 1;
+}
+
+message RhombusSurface {
+  int32 q_start = 1;
+  int32 q_end = 2;
+  int32 r_start = 3 ;
+  int32 r_end = 4;
+}
+
+message SurfaceShape {
+  oneof shape {
+    HexagonSurface hexagon = 1;
+
+    RhombusSurface rhombus = 2;
+  }
+}
+

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/geometry/coords.hpp>
+#include <core/geometry/box.hpp>
 #include <core/geometry/surface_shape.hpp>
 #include <core/geometry/surface_raw_view.hpp>
 #include <core/utils/serialize.hpp>
@@ -23,19 +24,31 @@ public:
   using Coords = geometry::Coords<CoordinateSystem>;
   using QDelta = CoordinateSystem::QDelta;
   using RDelta = CoordinateSystem::RDelta;
+  using SurfaceShape = ::hs::geometry::SurfaceShape<CoordinateSystem>;
+  using Box = ::hs::geometry::Box<CoordinateSystem>;
 
   SurfaceView() = default;
+  /*
   SurfaceView(CellsArrayView<Cell> target, typename Coords::QAxis q_start, typename Coords::RAxis r_start, typename Coords::SAxis s_start, typename Coords::SAxis s_end):
     target_(std::move(target)),
     q_start_(q_start),
     r_start_(r_start),
     s_start_(s_start),
     s_end_(s_end) {}
+    */
+  SurfaceView(CellsArrayView<Cell> target, const SurfaceShape& shape):
+      target_(std::move(target)),
+      shape_(shape),
+      bounding_box_(shape.BoundingBox())
+  {
+  }
 
   SurfaceView(const SurfaceView&) = default;
   SurfaceView(SurfaceView&&) = default;
   SurfaceView& operator=(const SurfaceView&) = default;
   SurfaceView& operator=(SurfaceView&&) = default;
+
+  const SurfaceShape& GetShape() const noexcept { return shape_; }
 
 
   Cell& GetCell(Coords coords) {
@@ -58,19 +71,15 @@ public:
   auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
   auto r_size() const { return typename CoordinateSystem::RDelta{target_.extent(1)}; }
 
-  auto q_end() const { return q_start() + q_size(); }
-  auto r_end() const { return r_start() + r_size(); }
-  auto s_end() const { return s_end_; }
+  auto q_end() const { return bounding_box_.end().q(); }
+  auto r_end() const { return bounding_box_.end().r(); }
 
-  auto q_start() const { return q_start_; }
-  auto r_start() const { return r_start_; }
-  auto s_start() const { return s_start_; }
+  auto q_start() const { return bounding_box_.start().q(); }
+  auto r_start() const { return bounding_box_.start().r(); }
 
   bool Contains(Coords coords) const noexcept {
-      const bool result = 
-          CheckInRange(coords.q(), q_start(), q_end()) &&
-          CheckInRange(coords.r(), r_start(), r_end()) &&
-          CheckInRange(coords.s(), s_start(), s_end());
+      bool result = shape_.Contains(coords);
+
       /*
     spdlog::info("Checking {} vs {}-{},{}-{}, {}-{}: {}",
       coords,
@@ -107,9 +116,6 @@ public:
   */
 
   private:
-  static bool CheckInRange(auto x, auto start, auto end) noexcept {
-    return (x.ToUnderlying() - start.ToUnderlying()) * (end.ToUnderlying() - 1 - x.ToUnderlying()) >= 0;
-  }
 
   Coords FromRawIndex(const size_t index) {
     // index is displacement in raw underlying array.
@@ -131,44 +137,33 @@ public:
 
 private:
   CellsArrayView<Cell> target_;
-  // we store s_start and s_end explicitly because it is virtual. It limits what cells
-  // are in surface, but it doesn't affect the storage itself.
-  typename Coords::QAxis q_start_{0};
-  typename Coords::RAxis r_start_{0};
-  typename Coords::SAxis s_start_{0};
-  typename Coords::SAxis s_end_{1}; // not inclusive
+  SurfaceShape shape_;
+  Box bounding_box_; // extracted from shape
 
 };
 
 template<typename Cell, typename CoordinateSystem>
 class Surface;
 
-/* TODO: RM
-template<typename Cell, typename CoordinateSystem>
-auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::FlatBufferBuilder& fbb, auto to);
-
-template<typename Cell, typename CoordinateSystem>
-Surface<Cell, CoordinateSystem> ParseFrom(const auto& fbs_class, serialize::To<Surface<Cell, CoordinateSystem>>);
-*/
-
 template<typename Cell_, typename CoordinateSystem>
 class Surface {
 public:
 
+  using SurfaceShape = ::hs::geometry::SurfaceShape<CoordinateSystem>;
   using Cell = Cell_;
   using View = SurfaceView<Cell, CoordinateSystem>;
   using Coords = geometry::Coords<CoordinateSystem>;
+  using Box = geometry::Box<CoordinateSystem>;
   using ConstView = SurfaceView<const Cell, CoordinateSystem>;
   using SCS = CoordinateSystem;
   using SCSize = DeltaCoords<CoordinateSystem>;
 
+  Surface():
+      Surface(SurfaceShape(geometry::RhombusSurface(
+              Box::MakeOne()
+              ))) {};
   explicit Surface(
-    typename SCS::QAxis q_start = typename SCS::QAxis{0},
-    typename SCS::QAxis q_end = typename SCS::QAxis{1},
-    typename SCS::RAxis r_start = typename SCS::RAxis{0},
-    typename SCS::RAxis r_end = typename SCS::RAxis{1},
-    typename SCS::SAxis s_start = typename SCS::SAxis{0},
-    typename SCS::SAxis s_end = typename SCS::SAxis{1}
+      SurfaceShape shape
     );
   Surface(const Surface&) = delete;
   Surface(Surface&&) = default;
@@ -208,16 +203,17 @@ public:
   WRLD_REDIRECT_VIEW_CONST_FUNCTION(GetCell)
   WRLD_REDIRECT_VIEW_CONST_FUNCTION(Contains)
   WRLD_REDIRECT_VIEW_FUNCTION(GetCell)
+  WRLD_REDIRECT_VIEW_CONST_FUNCTION(GetShape)
 
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(q_size)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(r_size)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(s_size)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(q_start)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(r_start)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(s_start)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(q_end)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(r_end)
-  WRLD_REDIRECT_VIEW_CONST_FUNCTION(s_end)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(q_size)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(r_size)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(s_size)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(q_start)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(r_start)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(s_start)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(q_end)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(r_end)
+  //WRLD_REDIRECT_VIEW_CONST_FUNCTION(s_end)
 
 #undef WRLD_REDIRECT_VIEW_FUNCTION
 #undef WRLD_REDIRECT_VIEW_CONST_FUNCTION
@@ -230,27 +226,15 @@ public:
   }
 
 private:
-    /* TODO: RM
-  friend Surface<Cell,CoordinateSystem> ParseFrom(const auto& fbs_class,
-    serialize::To<Surface<Cell, CoordinateSystem>>);
-  friend auto SerializeTo(const Surface<Cell, CoordinateSystem>& source, ::flatbuffers::FlatBufferBuilder& fbb, auto to);
-  */
 
+  SurfaceShape shape_;
+  std::pair<size_t, size_t> allocation_size_;
   size_t data_size_;
   std::unique_ptr<Cell[]> data_storage_;
   SurfaceView<Cell, CoordinateSystem> cells_;
 
 private:
-  // checks that everything is > 0, if not - makes it equal to 1
-  // and logs critical error
-  template<typename T>
-  static int make_size_sane(T start, T end) {
-    if( start > end) {
-      std::swap(start, end);
-    }
-
-    return (end - start).ToUnderlying();
-  }
+  static std::pair<size_t, size_t> GetAllocationSize(const SurfaceShape& shape) noexcept;
 };
 
 }
