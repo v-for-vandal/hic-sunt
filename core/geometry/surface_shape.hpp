@@ -18,7 +18,7 @@ class SurfaceShape;
 
 HexagonSurface ParseFrom(const proto::geometry::HexagonSurface& source, serialize::To<HexagonSurface>);
 
-HexagonSurface SerializeTo(const HexagonSurface& source, proto::geometry::HexagonSurface& target);
+void SerializeTo(const HexagonSurface& source, proto::geometry::HexagonSurface& target);
 
 // Hexagon is centered on (0,0,0)
 class HexagonSurface {
@@ -42,8 +42,8 @@ public:
                 RAxis{-radius}
             },
             Coords{
-                QAxis{radius+1},
-                RAxis{radius+1}
+                QAxis{radius},
+                RAxis{radius}
             }
         };
     };
@@ -57,8 +57,10 @@ public:
 
       bool Contains(Coords coords) const noexcept {
 
-          return abs(coords.q().ToUnderlying()) <= radius_ && abs(coords.r().ToUnderlying()) <=
-              radius_ && abs(coords.s().ToUnderlying()) <= radius_;
+          using std::abs;
+
+          return abs(coords.q()).ToUnderlying() <= radius_ && abs(coords.r()).ToUnderlying() <=
+              radius_ && abs(coords.s()).ToUnderlying() <= radius_;
      }
 
     bool operator==(const HexagonSurface&) const = default;
@@ -67,7 +69,7 @@ public:
 private:
     friend HexagonSurface ParseFrom(const proto::geometry::HexagonSurface& source, serialize::To<HexagonSurface>);
 
-    friend HexagonSurface SerializeTo(const HexagonSurface& source, proto::geometry::HexagonSurface& target);
+    friend void SerializeTo(const HexagonSurface& source, proto::geometry::HexagonSurface& target);
 
 private:
     int radius_{1};
@@ -77,7 +79,7 @@ private:
 
 RhombusSurface ParseFrom(const proto::geometry::RhombusSurface& source, serialize::To<RhombusSurface>);
 
-RhombusSurface SerializeTo(const RhombusSurface& source, proto::geometry::RhombusSurface& target);
+void SerializeTo(const RhombusSurface& source, proto::geometry::RhombusSurface& target);
 // Uses all available cells in the box. Shape is a bit weird, this class is
 // used mostly as placeholder
 class RhombusSurface {
@@ -101,7 +103,7 @@ public:
     }
 
       bool Contains(Coords coords) const noexcept {
-          return coords >= bounding_box_.start() && coords < bounding_box_.end();
+          return bounding_box_.Contains(coords);
       }
 
 
@@ -111,7 +113,7 @@ public:
 private:
     friend RhombusSurface ParseFrom(const proto::geometry::RhombusSurface& source, serialize::To<RhombusSurface>);
 
-    friend RhombusSurface SerializeTo(const RhombusSurface& source, proto::geometry::RhombusSurface& target);
+    friend void SerializeTo(const RhombusSurface& source, proto::geometry::RhombusSurface& target);
 
 private:
     Box bounding_box_{Coords{QAxis{-1}, RAxis{-1}},

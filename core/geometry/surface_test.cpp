@@ -24,15 +24,15 @@ TEST(Surface, MoveCapable) {
 
 }
 
-TEST(Surface, ForEach) {
+TEST(Surface, RhombusForEach) {
   struct Cell {};
   using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
   using CoordsT = typename SurfaceT::Coords;
   using Box = Box<QRSCoordinateSystem>;
 
-  // at the moment of writing, s_coords did not matter
-  auto start = CoordsT::MakeCoords(-2, -3);
-  auto end = CoordsT::MakeCoords(4, 4);
+  // coords are inclusive
+  auto start = CoordsT::MakeCoords(-2, -3); // (-2, -3, 5)
+  auto end = CoordsT::MakeCoords(4, 4); // (4, 4, -8)
   SurfaceT target{
       RhombusSurface(
           Box(start, end))
@@ -47,7 +47,31 @@ TEST(Surface, ForEach) {
 
   target.view().foreach(visitor);
 
-  EXPECT_EQ(visited.size(), 42);
+  EXPECT_EQ(visited.size(), (6+1)*(7+1));
+}
+
+TEST(Surface, HexagonForEach) {
+  struct Cell {};
+  using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
+  using CoordsT = typename SurfaceT::Coords;
+  using Box = Box<QRSCoordinateSystem>;
+
+  SurfaceT target{
+      HexagonSurface(
+          3 // radius, inclusive
+          )
+  };
+
+  absl::flat_hash_set<typename SurfaceT::Coords> visited;
+
+  auto visitor = [&visited](auto& coords, auto&) {
+      EXPECT_FALSE(visited.contains(coords));
+      visited.insert(coords);
+  };
+
+  target.view().foreach(visitor);
+
+  EXPECT_EQ(visited.size(), 37);
 }
 
 }

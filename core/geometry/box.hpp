@@ -5,13 +5,15 @@
 
 namespace hs::geometry {
 
-// A simple bounding box
+// A simple bounding box. Both points are inclusive!
 template <typename CoordinateSystem>
 class Box {
 public:
   using QAxis = typename CoordinateSystem::QAxis;
   using RAxis = typename CoordinateSystem::RAxis;
   using SAxis = typename CoordinateSystem::SAxis;
+  using QDelta = typename CoordinateSystem::QDelta;
+  using RDelta = typename CoordinateSystem::RDelta;
   using Coords = typename hs::geometry::Coords<CoordinateSystem>;
 
   Box() noexcept = default;
@@ -24,19 +26,24 @@ public:
   const auto& start() const noexcept { return start_; }
   const auto& end() const noexcept { return end_; }
 
-  auto q_size() const noexcept { return end_.q() - start_.q(); }
-  auto r_size() const noexcept { return end_.r() - start_.r(); }
+  auto q_size() const noexcept { return abs(end_.q() - start_.q()) + QDelta(1); }
+  auto r_size() const noexcept { return abs(end_.r() - start_.r()) + RDelta(1); }
 
-    bool operator==(const Box&) const = default;
-    bool operator!=(const Box&) const = default;
+  bool operator==(const Box&) const = default;
+  bool operator!=(const Box&) const = default;
 
-    static Box MakeOne() noexcept {
+  static Box MakeOne() noexcept {
         return Box{
             Coords{},
-            Coords(QAxis(1), RAxis(1))
+            Coords{},
         };
     }
 
+  bool Contains(Coords coords) const noexcept {
+      return coords.q().InRange(start_.q(), end_.q()) &&
+          coords.r().InRange(start_.r(), end_.r()) &&
+          coords.s().InRange(start_.s(), end_.s());
+  }
 
 private:
   Coords start_;

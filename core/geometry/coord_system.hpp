@@ -94,9 +94,25 @@ class IntAxis {
     return H::combine(std::move(h), a.val_);
   }
 
+  // both start and end are inclusive, start could be greater than end.
+  bool InRange(IntAxis start, IntAxis end) const noexcept {
+      return (val_ - start.val_) * (val_ - end.val_) <= 0;
+    }
+
+
  private:
   int val_;
 };
+
+template <typename Tag>
+IntAxis<Tag> abs(IntAxis<Tag> value) {
+    return IntAxis<Tag>(std::abs(value.ToUnderlying()));
+}
+
+template <typename Tag>
+IntDelta<Tag> abs(IntDelta<Tag> value) {
+    return IntDelta<Tag>(std::abs(value.ToUnderlying()));
+}
 
 namespace details {
 

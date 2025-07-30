@@ -11,36 +11,53 @@ struct overloads : Ts... { using Ts::operator()...; };
 }
 
 HexagonSurface ParseFrom(const proto::geometry::HexagonSurface& source, serialize::To<HexagonSurface>) {
+    return HexagonSurface(source.radius());
 
 }
 
-HexagonSurface SerializeTo(const HexagonSurface& source, const proto::geometry::HexagonSurface& target) {
-
+void SerializeTo(const HexagonSurface& source, proto::geometry::HexagonSurface& target) {
+    target.set_radius(source.radius_);
 }
 
 RhombusSurface ParseFrom(const proto::geometry::RhombusSurface& source, serialize::To<RhombusSurface>) {
+    using Coords = RhombusSurface::Coords;
+
+    Coords start{
+        RhombusSurface::CoordinateSystem::QAxis{source.q_start()},
+        RhombusSurface::CoordinateSystem::RAxis{source.r_start()},
+        };
+    Coords end{
+        RhombusSurface::CoordinateSystem::QAxis{source.q_end()},
+        RhombusSurface::CoordinateSystem::RAxis{source.r_end()},
+        };
+
+    return RhombusSurface{
+        RhombusSurface::Box{start, end}};
 
 }
 
-RhombusSurface SerializeTo(const RhombusSurface& source, const proto::geometry::RhombusSurface& target) {
+void SerializeTo(const RhombusSurface& source, proto::geometry::RhombusSurface& target) {
 
+    target.set_q_start(source.BoundingBox().start().q().ToUnderlying());
+    target.set_r_start(source.BoundingBox().start().r().ToUnderlying());
+    target.set_q_end(source.BoundingBox().end().q().ToUnderlying());
+    target.set_r_end(source.BoundingBox().end().r().ToUnderlying());
 }
 
 SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(const proto::geometry::SurfaceShape& source, serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>)
 {
-    SurfaceShape<geometry::QRSCoordinateSystem> result;
-
     if (source.has_hexagon()) {
-        result = SurfaceShape(
-            ParseFrom(source.hexagon(), serialize::To<HexagonSurface>{});
-            );
+        const HexagonSurface hexagon = ParseFrom(source.hexagon(), serialize::To<HexagonSurface>{});
+        return SurfaceShape<geometry::QRSCoordinateSystem>{
+            hexagon
+            };
     } else if (source.has_rhombus()) {
-        result = SurfaceShape(
-            ParseFrom(source.hexagon(), serialize::To<RhombusSurface>{});
+        return SurfaceShape<geometry::QRSCoordinateSystem>(
+            ParseFrom(source.rhombus(), serialize::To<RhombusSurface>{})
             );
     }
 
-    return result;
+    return {Box<geometry::QRSCoordinateSystem>::MakeOne()};
 }
 
 void SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem>& source, proto::geometry::SurfaceShape& target)
@@ -54,7 +71,7 @@ void SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem>& source, prot
         }
     };
 
-    data_.visit(visitor);
+    std::visit(visitor, source.data_);
 }
 
 }
