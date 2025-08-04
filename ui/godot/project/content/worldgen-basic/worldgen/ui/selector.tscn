@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://61kx4vhql3m8"]
+
+[ext_resource type="Script" uid="uid://b3j23x2gdjs75" path="res://content/worldgen-basic/worldgen/ui/selector.gd" id="1_e4wvg"]
+
+[node name="Root" type="VBoxContainer"]
+offset_right = 128.0
+offset_bottom = 47.0
+script = ExtResource("1_e4wvg")
+
+[node name="Selector" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Selector"]
+layout_mode = 2
+text = "Placeholder"
+
+[node name="SelectButton" type="OptionButton" parent="Selector"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[connection signal="item_selected" from="Selector/SelectButton" to="." method="_on_select_button_item_selected"]

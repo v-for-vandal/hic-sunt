@@ -1,17 +1,14 @@
 syntax = "proto3";
 
 import "region/cell.proto";
+import "geometry/surface_shape.proto";
 
 package hs.proto.region;
 
 message Surface {
   repeated Cell cells = 1;
-  int32 q_start = 2;
-  int32 q_end = 3;
-  int32 r_start = 4;
-  int32 r_end = 5;
-  int32 s_start = 6;
-  int32 s_end = 7;
+
+  hs.proto.geometry.SurfaceShape shape = 2;
 }
 
 message Region {

@@ -1,10 +1,49 @@
 #include "region_object.hpp"
 
+#include <ui/godot/module/utils/cast_qrs.hpp>
+
 #include <godot_cpp/core/object.hpp>
+
+#define SETTER_GETTER_FLOAT(name, name_upper) \
+bool RegionObject::set_##name(Vector2i coords, double value) const {\
+    if(!region_) {\
+        return false;\
+    }\
+\
+  const auto qrs_coords = cast_qrs(coords);\
+\
+  auto success = region_->Set##name_upper(qrs_coords, value);\
+\
+  if( success) {\
+    emit_signals_for_cell(coords, 0);\
+  }\
+\
+  return success;\
+}\
+\
+double RegionObject::get_##name(Vector2i coords) const {\
+    if(!region_) {\
+        return 0.0;\
+    }\
+\
+  const auto qrs_coords = cast_qrs(coords);\
+  if (!region_->GetSurface().Contains(qrs_coords)) {\
+      return 0.0;\
+  }\
+\
+  const auto result = region_->GetSurface().GetCell(qrs_coords).Get##name_upper();\
+  if(region_->GetId() == StringName("rgn_0")) {\
+    spdlog::info("Region {} Getting height at {}: {}", static_cast<void*>(region_.get()), qrs_coords, result);\
+    }\
+  return result;\
+}
+
+namespace hs::godot {
 
 void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
-  ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id);
+  ClassDB::bind_method(D_METHOD("get_id"), &RegionObject::get_region_id);
+  ClassDB::bind_method(D_METHOD("get_info"), &RegionObject::get_info);
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
@@ -15,6 +54,23 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
   ClassDB::bind_method(D_METHOD("get_pnl_statement", "ruleset"), &RegionObject::get_pnl_statement);
   ClassDB::bind_method(D_METHOD("get_jobs", "ruleset"), &RegionObject::get_jobs);
+
+  ClassDB::bind_method(D_METHOD("set_data_string", "coords", "key", "value"), &RegionObject::set_data_string);
+  ClassDB::bind_method(D_METHOD("has_data_string", "coords", "key" ), &RegionObject::has_data_string);
+  ClassDB::bind_method(D_METHOD("get_data_string", "coords", "key" ), &RegionObject::get_data_string);
+  ClassDB::bind_method(D_METHOD("set_data_numeric", "coords", "key", "value"), &RegionObject::set_data_numeric);
+  ClassDB::bind_method(D_METHOD("has_data_numeric", "coords", "key" ), &RegionObject::has_data_numeric);
+  ClassDB::bind_method(D_METHOD("get_data_numeric", "coords", "key" ), &RegionObject::get_data_numeric);
+  ClassDB::bind_method(D_METHOD("get_height", "coords" ), &RegionObject::get_height);
+  ClassDB::bind_method(D_METHOD("set_height", "coords", "height"  ), &RegionObject::set_height);
+  ClassDB::bind_method(D_METHOD("get_temperature", "coords" ), &RegionObject::get_temperature);
+  ClassDB::bind_method(D_METHOD("set_temperature", "coords", "temperature"  ), &RegionObject::set_temperature);
+  ClassDB::bind_method(D_METHOD("get_precipitation", "coords" ), &RegionObject::get_precipitation);
+  ClassDB::bind_method(D_METHOD("set_precipitation", "coords", "precipitation"  ), &RegionObject::set_precipitation);
+  ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id); // deprecated
+
+  // iterations
+  ClassDB::bind_method(D_METHOD("foreach", "callback"), &RegionObject::foreach);
 
   // signals
   ADD_SIGNAL(MethodInfo("region_changed",
@@ -57,10 +113,13 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
 
   // Fill result
   Dictionary result;
-  result["biome"] = cell.GetBiome().data();
-  result["feature"] = cell.GetFeature().data();
+  result["biome"] = cell.GetBiome();
+  result["feature"] = cell.GetFeature();
   result["improvement"] = convert_to_dictionary(
     cell.GetImprovement());
+  result["height"] = cell.GetHeight();
+  result["temperature"] = cell.GetTemperature();
+  result["precipitation"] = cell.GetPrecipitation();
 
   return result;
 }
@@ -71,7 +130,7 @@ Dictionary RegionObject::convert_to_dictionary(const hs::proto::region::Improvem
     return result;
   }
   result["id"] = improvement.id();
-  result["type"] = improvement.type().data();
+  result["type"] = StringName(improvement.type().c_str());
 
   return result;
 }
@@ -83,17 +142,47 @@ bool RegionObject::set_biome(Vector2i coords, String biome) const
   }
   auto qrs_coords = cast_qrs(coords);
 
-  if (!region_->GetSurface().Contains(qrs_coords)) {
-    return false;
-  }
-
-  auto success = region_->SetBiome(qrs_coords, biome.utf8().get_data());
+  // region.SetBiome will check coordinates
+  auto success = region_->SetBiome(qrs_coords, biome);
   if( success) {
     emit_signals_for_cell(coords, 0);
   }
 
   return success;
 }
+
+
+#if 0
+TODO: RM
+bool RegionObject::set_height(Vector2i coords, double height) const {
+    if(!region_) {
+        return false;
+    }
+
+  const auto qrs_coords = cast_qrs(coords);
+
+  auto success = region_->SetHeight(qrs_coords, height);
+
+  if( success) {
+    emit_signals_for_cell(coords, 0);
+  }
+
+  return success;
+}
+
+double RegionObject::get_height(Vector2i coords) const {
+    if(!region_) {
+        return 0.0;
+    }
+
+  const auto qrs_coords = cast_qrs(coords);
+  if (!region_->GetSurface().Contains(qrs_coords)) {
+      return 0.0;
+  }
+
+  return region_->GetSurface().GetCell(qrs_coords).GetHeight();
+}
+#endif
 
 bool RegionObject::set_feature(Vector2i coords, String feature) const
 {
@@ -106,7 +195,7 @@ bool RegionObject::set_feature(Vector2i coords, String feature) const
     return false;
   }
 
-  auto success = region_->SetFeature(qrs_coords, feature.utf8().get_data());
+  auto success = region_->SetFeature(qrs_coords, feature);
 
   if( success) {
     emit_signals_for_cell(coords, 0);
@@ -126,7 +215,7 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const
   // on.
   // However, it will not perform checks that this improvement follows
   // the ruleset
-  auto success = region_->SetImprovement(qrs_coords, improvement.utf8().get_data());
+  auto success = region_->SetImprovement(qrs_coords, improvement);
 
   if( success) {
     emit_signals_for_cell(coords, 0);
@@ -135,7 +224,14 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const
   return success;
 }
 
-Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
+Dictionary RegionObject::get_info() const {
+    if(!region_) {
+        return {};
+    }
+  return RegionObject::make_region_info(*region_);
+}
+
+Dictionary RegionObject::make_region_info(const Region& region) {
   Dictionary result;
   // Build top biome
   {
@@ -143,13 +239,21 @@ Dictionary RegionObject::make_region_info(const hs::region::Region& region) {
     auto top_biome = region.GetTopKBiomes(3);
     for(auto& [biome, count] : top_biome) {
       top_biome_result.append(count);
-      top_biome_result.append(String(biome.c_str()));
+      top_biome_result.append(String(biome));
     }
     result["top_biome"] = std::move(top_biome_result);
   }
-  result["city_id"] = region.GetCityId().data();
-  result["region_id"] = region.GetId().data();
-  //result["size"] = region.GetSurface().size();
+  result["city_id"] = region.GetCityId();
+  result["region_id"] = region.GetId();
+  const auto height_range = region.GetHeightRange();
+  result["min_height"] = height_range.first;
+  result["max_height"] = height_range.second;
+  const auto temperature_range = region.GetTemperatureRange();
+  result["min_temperature"] = temperature_range.first;
+  result["max_temperature"] = temperature_range.second;
+  const auto precipitation_range = region.GetPrecipitationRange();
+  result["min_precipitation"] = precipitation_range.first;
+  result["max_precipitation"] = precipitation_range.second;
 
   return result;
 }
@@ -173,20 +277,20 @@ String RegionObject::get_region_id() const {
     return {};
   }
 
-  return region_->GetId().data();
+  return region_->GetId();
 
 }
 
 String RegionObject::get_city_id() const {
   ERR_FAIL_NULL_V_MSG(region_, String{}, "null-containing region object");
 
-  return region_->GetCityId().data();
+  return region_->GetCityId();
 }
 
 bool RegionObject::set_city_id(String city_id) const {
   ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
 
-  return region_->SetCityId(city_id.utf8().get_data());
+  return region_->SetCityId(city_id);
 }
 
 Ref<PnlObject> RegionObject::get_pnl_statement(Ref<RulesetObject> ruleset) const {
@@ -242,10 +346,54 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
   return result;
 }
 
+double RegionObject::get_data_numeric(Vector2i coords,const StringName& key) const noexcept {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->GetDataNumeric(qrs_coords, key);
+}
+
+double RegionObject::set_data_numeric(Vector2i coords,const StringName& key, double value) {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->SetDataNumeric(qrs_coords, key, value);
+}
+
+bool RegionObject::has_data_numeric(Vector2i coords, const StringName& key) const noexcept {
+  ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
+  auto qrs_coords = cast_qrs(coords);
+    return region_->HasDataNumeric(qrs_coords, key);
+}
+
+String RegionObject::get_data_string(Vector2i coords,const StringName& key) const noexcept {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->GetDataString(qrs_coords,key);
+}
+
+String RegionObject::set_data_string(Vector2i coords, const StringName& key, String value) {
+  auto qrs_coords = cast_qrs(coords);
+    return region_->SetDataString(qrs_coords,key,
+        value);
+}
+
+bool RegionObject::has_data_string(Vector2i coords,const StringName& key) const noexcept {
+  ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
+  auto qrs_coords = cast_qrs(coords);
+    return region_->HasDataString(qrs_coords,key);
+}
+
 void RegionObject::emit_signals_for_cell(Vector2i coords, int flags) const
 {
   Rect2i area{coords, Vector2i{1,1}};
   const_cast<RegionObject*>(this)->emit_signal("region_changed", area, flags);
 }
 
+void RegionObject::foreach(const Callable& callback) {
+  using Cell = typename Region::Surface::Cell;
+  region_->GetSurface().foreach(
+    [&callback](QRSCoords coords, Cell& cell) {
+      callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying());
+    });
+}
 
+SETTER_GETTER_FLOAT(height, Height);
+SETTER_GETTER_FLOAT(temperature, Temperature);
+SETTER_GETTER_FLOAT(precipitation, Precipitation);
+}

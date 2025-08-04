@@ -12,13 +12,14 @@ config_version=5
 
 config/name="Hic Sunt"
 run/main_scene="res://ui/system/main_screen/MainScreen.tscn"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
 Console="*res://addons/godot-console/scripts/console.gd"
 GameUiEventBus="*res://game/ui_event_bus.gd"
+WorldBuilderRegistry="*res://system/world_builder/registry.gd"
 CentralSystem="*res://system/central/central_system.gd"
 LoadManager="*res://system/central/load_manager.gd"
 CurrentGame="*res://game/current_game.gd"
@@ -37,7 +38,7 @@ window/size/window_height_override=640
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/biome_map_editor/plugin.cfg", "res://addons/godot-console/plugin.cfg", "res://addons/gut/plugin.cfg")
+enabled=PackedStringArray("res://addons/biome_map_editor/plugin.cfg", "res://addons/dynamic_table/plugin.cfg", "res://addons/godot-console/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [input]
 

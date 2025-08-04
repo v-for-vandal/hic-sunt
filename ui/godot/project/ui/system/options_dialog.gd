@@ -10,5 +10,5 @@ func _on_save_button_pressed() -> void:
 
 
 func _on_load_button_pressed() -> void:
-	var dialog = _load_dialog_scene.instantiate()
+	var dialog := _load_dialog_scene.instantiate()
 	add_child(dialog)

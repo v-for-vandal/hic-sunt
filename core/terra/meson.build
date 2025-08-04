@@ -2,6 +2,7 @@ core_terra_lib = static_library('core_terra_lib',
   sources: [
   'cell.cpp',
   'world.cpp',
+  'plane.cpp',
   fbs_generated,
   hs_proto_generated_headers,
   ],
@@ -12,6 +13,7 @@ core_terra_lib = static_library('core_terra_lib',
 core_terra_tests = executable('unit_tests',
   sources: [
     'test_main.cpp',
+    'plane_test.cpp',
     'world_test.cpp',
     hs_proto_generated_headers
     ],

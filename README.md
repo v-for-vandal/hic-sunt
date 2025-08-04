@@ -31,7 +31,7 @@ Make build dir
 meson setup --native-file clang.native.ini --prefix ABSOLUTE/PATH build
 ```
 where ABSOLUTE/PATH is absolute path to the following subfolder:
-  ui/godot/module
+  ui/godot/project
 
 Then build as usual
 ```

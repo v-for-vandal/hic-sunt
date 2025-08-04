@@ -1,6 +1,7 @@
 core_ruleset_lib = static_library('core_ruleset_lib',
   sources: [
   'ruleset.cpp',
+  'ruleset_base.cpp',
   fbs_generated,
   hs_proto_generated_headers,
   ],

@@ -8,6 +8,8 @@
 
 namespace hs::system {
 
+#if 0
+
 terra::World System::LoadWorld(std::string_view filename) {
   /* TODO: Implement reading from mmap file */
   /*
@@ -24,52 +26,6 @@ terra::World System::LoadWorld(std::string_view filename) {
 }
 
 
-// TODO: World generation is moved to Godot code, this method is no longer
-// required
-#if 0
-terra::World System::NewWorld(NewWorldParameters params, const ruleset::RuleSet& active_rule_set) {
-  std::vector<std::string> terrain_types;
-  for(const auto& terrain_type: active_rule_set.GetTerrain().terrain_types()) {
-    terrain_types.push_back(terrain_type.id());
-  }
-
-  auto randomize_region = [&terrain_types](region::Region& region) {
-    for(auto q_pos = region.GetSurface().q_start(); q_pos < region.GetSurface().q_end(); q_pos++) {
-      for( auto r_pos = region.GetSurface().r_start(); r_pos < region.GetSurface().r_end(); r_pos++) {
-        auto coords = terra::World::QRSCoords{q_pos, r_pos};
-        if(region.GetSurface().Contains(coords)) {
-          region.SetTerrain( coords, terrain_types[ std::rand() % terrain_types.size() ] );
-        }
-      }
-    }
-  };
-
-  auto result = terra::World{
-      terra::World::QRSCoordinateSystem::QAxis{0},
-      terra::World::QRSCoordinateSystem::QAxis{0} + params.world_size.q(),
-      terra::World::QRSCoordinateSystem::RAxis{0},
-      terra::World::QRSCoordinateSystem::RAxis{0} + params.world_size.r(),
-      terra::World::QRSCoordinateSystem::SAxis{0},
-      terra::World::QRSCoordinateSystem::SAxis{0} + params.world_size.s()};
-
-  auto surface = result.GetSurface();
-  /* randomize terrain for now */
-  for(auto q_pos = surface.q_start(); q_pos < surface.q_end(); q_pos++) {
-    for( auto r_pos = surface.r_start(); r_pos < surface.r_end(); r_pos++) {
-      auto coords = terra::World::QRSCoords{q_pos, r_pos};
-      if(surface.Contains(coords)) {
-        // initialize region
-        region::Region region{params.region_size};
-        randomize_region(region);
-        result.SetRegion(coords, std::move(region));
-      }
-    }
-  }
-
-  return result;
-
-}
-#endif
 
 void System::SaveWorld(const terra::World& target, std::string_view filename) {
   proto::terra::World proto_world;
@@ -90,6 +46,8 @@ std::optional<ruleset::RuleSet> System::LoadRuleSet(const std::filesystem::path&
     return std::move(result);
   }
 }
+
+#endif
 
 
 }

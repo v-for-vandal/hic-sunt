@@ -1,5 +1,6 @@
 #include "system.hpp"
 
+#if 0
 
 namespace {
   auto to_qrs_size(Vector2i size) {
@@ -91,3 +92,5 @@ void HicSuntSystem::_bind_methods() {
   //ClassDB::bind_method(D_METHOD("create_world", "world_size", "region_size", "ruleset"), &HicSuntSystem::create_world);
   ClassDB::bind_method(D_METHOD("load_ruleset", "folder_path"), &HicSuntSystem::load_ruleset);
 }
+
+#endif

@@ -30,8 +30,8 @@ func _add_job_widget(job_id: String, job_count: int):
 	$%JobsView.add_child(value_label)
 	
 	
-func _set_jobs(jobs: Dictionary) -> void:
-	for job_id in jobs:
+func _set_jobs(jobs: Dictionary[StringName, int]) -> void:
+	for job_id : StringName in jobs:
 		_add_job_widget(job_id, jobs[job_id])
 		
 func load_region(region: RegionObject) -> void:

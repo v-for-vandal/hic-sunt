@@ -48,10 +48,10 @@ func load_world(world_object : WorldObject) -> void:
 	_switch_to_world()
 
 
-func _on_world_map_show_region_request(world_object:  WorldObject, qr_position: Vector2i) -> void:
+func _on_world_map_show_region_request(plane_object:  PlaneObject, qr_position: Vector2i) -> void:
 	#assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	assert(_region_map != null, "_region_map is somehow null")
-	var region_obj = world_object.get_region(qr_position);
+	var region_obj := plane_object.get_region(qr_position);
 	
 	if region_obj == null:
 		print("region is absent")

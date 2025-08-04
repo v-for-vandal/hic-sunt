@@ -12,6 +12,8 @@ add_project_arguments([
   '-Wno-gcc-compat',
   ], language: 'cpp', )
 
+fs = import('fs')
+
 fmt_dep = dependency('fmt', version: '>=9.1')
 
 #entt_dep = dependency('entt')

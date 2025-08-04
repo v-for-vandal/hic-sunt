@@ -15,5 +15,15 @@ message Cell {
 
   // list of features present on this cell
   repeated string features = 3;
+
+  // height, meters. Could be negative, if below sea level
+  double height = 5;
+  // average anual temperature, celsius degree
+  double temperature = 8;
+  // average anual precipatiion, in millimeters
+  double precipitation = 9;
+
+  map<string, string> user_data_string = 6;
+  map<string, double> user_data_numeric = 7;
 }
 

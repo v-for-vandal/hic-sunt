@@ -1,4 +1,4 @@
-extends RefCounted
+extends InteractionInterface
 
 var _improvement_id: String
 
@@ -14,7 +14,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 			var can_build := true
 			
 			# get current region
-			var region : RegionObject = event.surface.get_region_object()
+			var region : RegionObject = event.surface.get_region()
 			build_and_finish(region, event.qr_coords)
 			event.accept()
 			return

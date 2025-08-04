@@ -1,28 +1,14 @@
-[gd_scene load_steps=6 format=4 uid="uid://dxuoujwpadbf1"]
+[gd_scene load_steps=5 format=3 uid="uid://dxuoujwpadbf1"]
 
-[ext_resource type="Script" path="res://game/world/world_map.gd" id="1_v7u0n"]
+[ext_resource type="Script" uid="uid://c5lulo6uixan2" path="res://game/world/world_map.gd" id="1_v7u0n"]
 [ext_resource type="PackedScene" uid="uid://xbdd74ccg32f" path="res://ui/world/world_ui.tscn" id="2_2e47t"]
-[ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="2_p7kjj"]
-[ext_resource type="Script" path="res://game/world/WorldSurface.gd" id="3_tkt8m"]
+[ext_resource type="PackedScene" uid="uid://dhdak5msql21g" path="res://game/world/world_surface.tscn" id="2_5ftlr"]
 [ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="4_qv3c5"]
 
 [node name="WorldMap" type="Node2D"]
 script = ExtResource("1_v7u0n")
 
-[node name="WorldSurface" type="Node2D" parent="."]
-script = ExtResource("3_tkt8m")
-surface_type = 1
-
-[node name="terrain" type="TileMapLayer" parent="WorldSurface"]
-use_parent_material = true
-tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAAAAAAAAAAAAAABAAEAAAACAAAAAAACAAAAAAACAAAAAAABAP//AAACAAAAAAAAAP//AAACAAAAAAACAAEAAAABAAAAAAADAAAAAAABAAAAAAACAP//AAABAAAAAAACAP7/AAABAAAAAAABAP7/AAABAAAAAAACAAIAAAABAAAAAAA=")
-tile_set = ExtResource("2_p7kjj")
-
-[node name="highlight" type="TileMapLayer" parent="WorldSurface"]
-z_index = 1
-use_parent_material = true
-tile_set = ExtResource("2_p7kjj")
-navigation_enabled = false
+[node name="WorldSurface" parent="." instance=ExtResource("2_5ftlr")]
 
 [node name="WorldViewCamera" parent="." instance=ExtResource("4_qv3c5")]
 zoom = Vector2(0.5, 0.5)

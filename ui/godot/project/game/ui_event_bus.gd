@@ -1,11 +1,11 @@
 extends Node
 
-#class_name  GameUiEventBus
+class_name  UiEventBus
 
 enum ActionType { PRIMARY, SECONDARY }
-var _main_interaction
-var _region_interaction
-var _world_inetraction
+var _main_interaction : Object
+var _region_interaction : Object
+var _world_inetraction : Object
 
 class UIEvent:
 	extends RefCounted
@@ -45,7 +45,7 @@ class RegionUIActionEvent:
 	extends UIActionEvent
 	
 	func _to_string()-> String:
-		return "World: " + super() 
+		return "Region: " + super() 
 
 class WorldUIMovementEvent:
 	extends UIMovementEvent
@@ -57,7 +57,7 @@ class RegionUIMovementEvent:
 	extends UIMovementEvent
 	
 	func _to_string()-> String:
-		return "World: " + super() 
+		return "Region: " + super() 
 
 	
 class CancellationEvent:
@@ -67,7 +67,7 @@ class CancellationEvent:
 #signal region_cell_clicked(region_object: RegionObject, qr_coords: Vector2i, mouse_button_index: int)
 #signal cancelled()
 
-func _process_event( event )-> void:
+func _process_event( event : UIEvent)-> void:
 	#print("Processing event: ", event)
 	for consumer : Object in [_main_interaction, _region_interaction, _world_inetraction]:
 		if consumer != null:
@@ -82,7 +82,7 @@ func _process_event( event )-> void:
 				#print('\tevent accepted, stopping')
 				break
 			
-func emit_event(event)-> void:
+func emit_event(event : UIEvent)-> void:
 	assert(event is UIEvent)
 	
 	_process_event(event)
@@ -97,19 +97,19 @@ func set_world_interaction(interaction : Object)-> void:
 	assert(_world_inetraction == null)
 	_world_inetraction = interaction
 	
-func set_region_interaction(interaction)-> void:
+func set_region_interaction(interaction: Object)-> void:
 	assert(_region_interaction == null)
 	_region_interaction = interaction
 	
 
-func set_main_interaction(interaction) -> void:
+func set_main_interaction(interaction : Object) -> void:
 	if _main_interaction != null:
 		# notify previous interaction that it is cancelled
-		var cancellation_event = CancellationEvent.new()
+		var cancellation_event := CancellationEvent.new()
 		_main_interaction.on_ui_event(cancellation_event)
 	_main_interaction = interaction
 	
-func remove_main_interaction(interaction) -> void:
+func remove_main_interaction(interaction : Object) -> void:
 	if _main_interaction == interaction:
 		_main_interaction = null
 
@@ -129,4 +129,3 @@ func mouse_button_to_action_type(mouse_button: MouseButton) -> ActionType:
 		return ActionType.PRIMARY
 	else:
 		return ActionType.SECONDARY
-

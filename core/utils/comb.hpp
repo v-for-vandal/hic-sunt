@@ -9,27 +9,33 @@
 
 namespace hs::utils {
 
+// Structure keeps count of how many instances of given id are present.
+// It can answer the following queries:
+// 1. How many instances of given id were added
+// 2. What are top N occuring instances
+template<typename BaseTypes>
 class Comb {
 public:
+    using StringId = typename BaseTypes::StringId;
   Comb() = default;
 
-  void Add(StringTokenCRef elem) {
-    if(IsNullToken(elem) ) { return; }
+  void Add(const StringId& elem) {
+    if(BaseTypes::IsNullToken(elem) ) { return; }
     auto prev_count = count_[elem]++;
     auto curr_count = prev_count+1;
     comb_[prev_count].erase(elem);
     comb_[curr_count].insert(elem);
   }
 
-  void Remove(StringTokenCRef elem) {
-    if(IsNullToken(elem) ) { return; }
+  void Remove(const StringId& elem) {
+    if(BaseTypes::IsNullToken(elem) ) { return; }
     auto prev_count = count_[elem]--;
     auto curr_count = prev_count-1;
     comb_[prev_count].erase(elem);
     comb_[curr_count].insert(elem);
   }
 
-  int Count(StringTokenCRef elem) const {
+  int Count(const StringId& elem) const {
     auto fit = count_.find(elem);
     if( fit != count_.end()) {
       return fit->second;
@@ -37,8 +43,8 @@ public:
     return 0;
   }
 
-  std::vector<std::pair<StringToken,int>> TopK(int k) const {
-    std::vector<std::pair<StringToken,int>> result;
+  std::vector<std::pair<StringId,int>> TopK(int k) const {
+    std::vector<std::pair<StringId,int>> result;
     if(k <= 0) {
       return result;
     }
@@ -74,16 +80,18 @@ public:
   }
 
 
-  bool operator==(const Comb& other) const;
-  bool operator!=(const Comb& other) const {
+  bool operator==(const Comb& other) const noexcept;
+  bool operator!=(const Comb& other) const noexcept {
     return !(*this == other);
   }
 
 
 private:
-  std::map<int, std::unordered_set<StringToken>> comb_;
-  std::unordered_map<StringToken, int> count_;
+  std::map<int, std::unordered_set<StringId>> comb_;
+  std::unordered_map<StringId, int> count_;
 
 };
 
 }
+
+#include "comb.inl"

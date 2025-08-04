@@ -30,9 +30,9 @@ func add_project(project: CityProject, index: int) -> void:
 	inserted.emit(index)
 	
 func clear() -> void:
-	var size := _queue.size()
+	var _size := _queue.size()
 	_queue = []
-	var idx = size - 1
+	var idx := _size - 1
 	while idx >= 0:
 		removed.emit(idx)
 		idx -= 1
@@ -74,8 +74,8 @@ func process(available_resources: Dictionary) -> void:
 			project.execute_finisher()
 			
 	# now, clean up finished projects
-	var size := _queue.size()
-	var idx = size - 1
+	var _size := _queue.size()
+	var idx := _size - 1
 	while idx >= 0:
 		if _queue[idx].is_finished():
 			removed.emit(idx)
@@ -101,8 +101,8 @@ func serialize_to_variant() -> Dictionary:
 	
 func parse_from_variant(data : Dictionary) -> void:
 	clear()
-	var queue : Array = data.get("queue", []) 
-	for project in queue:
+	var queue : Array[Variant] = data.get("queue", []) 
+	for project : Dictionary in queue:
 		# deserialize project
 		var project_type : String = project.get("$type", "")
 		if project_type.is_empty():
@@ -113,7 +113,7 @@ func parse_from_variant(data : Dictionary) -> void:
 			push_error("Invalid serialized object, missing field 'data'")
 			continue
 
-		var project_data = project["data"]
+		var project_data : Variant = project["data"]
 
 		# find project with this type and its gdscript
 		var project_type_info : Dictionary = CurrentGame.get_current_player_ruleset().get_project_info(project_type)
@@ -138,7 +138,7 @@ func parse_from_variant(data : Dictionary) -> void:
 			continue
 			
 		# instantiate script
-		var project_object = script.new()
+		var project_object : RefCounted = script.new()
 		if project_object == null:
 			push_error("Failed to instantiate script: ", script_path, " for project: ", project_type)
 			continue
@@ -149,4 +149,3 @@ func parse_from_variant(data : Dictionary) -> void:
 		# add to queue
 		_queue.append(project_object)
 		
-

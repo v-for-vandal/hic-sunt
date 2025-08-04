@@ -1,7 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://b0iqgdkdgf6j2"]
 
-[ext_resource type="Script" path="res://system/world_builder/world_builder.gd" id="1_em47p"]
+[ext_resource type="Script" uid="uid://cu5bcpdvfaaig" path="res://system/world_builder/world_builder.gd" id="1_em47p"]
 [ext_resource type="Resource" uid="uid://cmaijp38ktmhb" path="res://system/world_builder/default_biome_map.tres" id="2_8vw7o"]
+[ext_resource type="Curve" uid="uid://2m3qx6goi7cf" path="res://content/worldgen-basic/worldgen/internal/temperature_curve.tres" id="2_136s6"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nnqbq"]
 seed = 1
@@ -27,17 +28,11 @@ offset = Vector3(37.04, 148.15, 72.73)
 fractal_octaves = 4
 fractal_gain = 0.25
 
-[sub_resource type="Curve" id="Curve_f3jal"]
-min_value = -1.0
-bake_resolution = 1000
-_data = [Vector2(0, -1), 0.0, 10.8536, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, -1), -9.38983, 0.0, 0, 0]
-point_count = 3
-
 [node name="WorldBuilder" type="Node"]
 script = ExtResource("1_em47p")
 terrain_noise_generator = SubResource("FastNoiseLite_nnqbq")
 mountain_noise_generator = SubResource("FastNoiseLite_wk7nx")
 temperature_noise_generator = SubResource("FastNoiseLite_5541a")
 percipation_noise_generator = SubResource("FastNoiseLite_qfstu")
-temperature_curve = SubResource("Curve_f3jal")
+temperature_curve = ExtResource("2_136s6")
 biome_map = ExtResource("2_8vw7o")

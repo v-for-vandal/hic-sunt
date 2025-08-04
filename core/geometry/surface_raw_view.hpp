@@ -12,7 +12,7 @@ using CellsArrayView =
     std::mdspan<Cell,
                   std::extents<int, std::dynamic_extent,
                                  std::dynamic_extent>,
-                  std::layout_left>;
+                  std::layout_right>;
 
 // RawView is view over raw surface data. It correspondes to physical presence -
 // method Contains returns true if such elemen is in data storage, and false

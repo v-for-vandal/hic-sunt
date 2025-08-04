@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dcacdldp7pmxy"]
 
 [ext_resource type="Texture2D" uid="uid://cuxhfkb6y8882" path="res://icon.svg" id="1_p7ulc"]
-[ext_resource type="Script" path="res://ui/region/buildings/building_list.gd" id="2_xavib"]
+[ext_resource type="Script" uid="uid://bmnk7ftwje0sl" path="res://ui/region/buildings/building_list.gd" id="2_xavib"]
 
 [node name="BuildingList" type="ItemList"]
 anchors_preset = 15

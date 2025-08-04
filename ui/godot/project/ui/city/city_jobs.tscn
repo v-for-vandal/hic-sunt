@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d2g36s2i8bc5p"]
 
-[ext_resource type="Script" path="res://ui/city/city_jobs.gd" id="1_pka0q"]
+[ext_resource type="Script" uid="uid://cp31wdftfsss4" path="res://ui/city/city_jobs.gd" id="1_pka0q"]
 
 [node name="CityJobs" type="Control"]
 layout_mode = 3

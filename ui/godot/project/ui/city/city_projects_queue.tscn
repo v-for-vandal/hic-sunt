@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cls0hdxhdqsxu"]
 
-[ext_resource type="Script" path="res://ui/city/city_projects_queue.gd" id="1_nydxd"]
+[ext_resource type="Script" uid="uid://fl4vlp2srtu1" path="res://ui/city/city_projects_queue.gd" id="1_nydxd"]
 
 [node name="CityProjectsQueue" type="Control"]
 layout_mode = 3

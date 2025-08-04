@@ -3,9 +3,13 @@
 #include <core/geometry/surface.hpp>
 #include <core/region/region.hpp>
 #include <core/region/types.hpp>
+#include <core/terra/types.hpp>
+#include <core/terra/plane.hpp>
 #include <core/terra/cell.hpp>
 #include <core/ruleset/ruleset.hpp>
 #include <core/utils/serialize.hpp>
+#include <core/types/std_base_types.hpp>
+#include <core/types/control_object.hpp>
 
 #include <flatbuffers/flatbuffers.h>
 #include <fbs/world_generated.h>
@@ -14,18 +18,27 @@
 
 namespace hs::terra {
 
+template<typename BaseTypes>
 class World;
 
-void SerializeTo(const World& source, proto::terra::World& target);
-World ParseFrom(const proto::terra::World& world, serialize::To<World>);
+template<typename BaseTypes>
+void SerializeTo(const World<BaseTypes>& source, proto::terra::World& target);
+template<typename BaseTypes>
+World<BaseTypes> ParseFrom(const proto::terra::World& world, serialize::To<World<BaseTypes>>);
 
+// World is a collection of planes
+template<typename BaseTypes = StdBaseTypes>
 class World {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
-  using Surface = geometry::Surface<Cell, QRSCoordinateSystem>;
-  using SurfaceView = geometry::SurfaceView<Cell, QRSCoordinateSystem>;
+  using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
+  using Plane = Plane<BaseTypes>;
+  using PlanePtr = PlanePtr<BaseTypes>;
+  using RegionPtr = region::RegionPtr<BaseTypes>;
+  using StringId = BaseTypes::StringId;
+  using String = BaseTypes::String;
 
   World() = default;
   World(const World&) = delete;
@@ -33,46 +46,30 @@ public:
   World& operator=(const World&) = delete;
   World& operator=(World&&) = default;
 
-  World(
-    QRSCoordinateSystem::QAxis q_start,
-    QRSCoordinateSystem::QAxis q_end,
-    QRSCoordinateSystem::RAxis r_start,
-    QRSCoordinateSystem::RAxis r_end,
-    QRSCoordinateSystem::SAxis s_start,
-    QRSCoordinateSystem::SAxis s_end
-    );
-  //explicit World(QRSSize size);
+  PlanePtr GetPlane(const StringId& id) const;
+  PlanePtr AddPlane(const StringId& id, QRSBox box, int region_radius,
+      int region_external_radius);
 
-  SurfaceView GetSurface() const { return surface_.view(); }
-  SurfaceView GetSurface() { return surface_.view(); }
-
-  const Surface& GetSurfaceObject() const { return surface_; }
-
-  region::RegionPtr GetRegionById(const std::string& region_id) const;
-  bool HasRegion(const std::string& region_id) const {
-    return region_index_.contains(region_id);
-  }
-  void SetRegion(QRSCoords coords, region::Region region);
+  RegionPtr GetRegionById(const StringId& region_id) const noexcept;
+  bool HasRegion(const StringId& region_id) const noexcept;
 
   bool operator==(const World& other) const;
   bool operator!=(const World& other) const {
     return !(*this == other);
   }
 
-private:
-  friend void SerializeTo(const World& source, proto::terra::World& target);
-  friend World ParseFrom(const proto::terra::World& world, serialize::To<World>);
 
+private:
+  friend void SerializeTo<BaseTypes>(const World& source, proto::terra::World& target);
+  friend World ParseFrom<BaseTypes>(const proto::terra::World& world, serialize::To<World>);
   void InitNonpersistent();
 
 private:
-  Surface surface_;
-  // some regions are not really part of the surface. Like caves.
-  // Or some magical land
-  std::vector<Cell> off_surface_;
-  //ruleset::RuleSet ruleset_;
-  std::unordered_map<std::string, region::RegionPtr> region_index_;
+  std::unordered_map<StringId, PlanePtr> planes_;
+  ControlObjectPtr control_object_;
 };
 
 
 }
+
+#include "world.inl"

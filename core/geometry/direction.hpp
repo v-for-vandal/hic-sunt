@@ -18,7 +18,12 @@ enum class Direction : uint_fast8_t {
   kSNegative,
   kSPositive,
 
-  kSize
+  kSize,
+
+  // TODO: Finish 
+  kNorth = kQPositive,
+  kSouth = kQNegative,
+
 };
 
 inline constexpr std::string_view ToString(Direction direction) {

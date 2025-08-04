@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d1tg0f2l6p8wc"]
 
-[ext_resource type="Script" path="res://addons/volornoi/plugin_menu/plugin_menu.gd" id="1_ns5wd"]
+[ext_resource type="Script" uid="uid://cgpxulclnqkv3" path="res://addons/volornoi/plugin_menu/plugin_menu.gd" id="1_ns5wd"]
 
 [node name="pluginMenu" type="Control"]
 layout_mode = 3

@@ -49,7 +49,7 @@ func next_turn() -> void:
 	
 	
 # TODO: move to ruleset?
-func can_build(improvement_id: String) -> bool:
+func can_build(_improvement_id: String) -> bool:
 	return true
 
 
@@ -83,7 +83,7 @@ func save_game(save_location: DirAccess) -> Error:
 		return FileAccess.get_open_error()
 	
 	
-	var serialize_data = _current_player_civ.serialize_to_variant()
+	var serialize_data := _current_player_civ.serialize_to_variant()
 	game_data_file.store_string(JSON.stringify(serialize_data, "\t"))
 
 	return OK
@@ -92,7 +92,7 @@ func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
 	current_player_ruleset = ruleset
 	# Create empty world
 	# TODO: Have some method to create empty world
-	var world : WorldObject = WorldObject.create_world(Vector2i(1, 1), 1)
+	var world : WorldObject = WorldObject.new()
 	assert(world != null)
 	var world_file_path := _world_file_path(save_location)
 	var status : Error = world.load(ProjectSettings.globalize_path(world_file_path))

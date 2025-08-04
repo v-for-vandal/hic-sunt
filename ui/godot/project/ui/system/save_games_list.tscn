@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dko1560jvly1k"]
 
-[ext_resource type="Script" path="res://ui/system/save_games.gd" id="1_balxw"]
+[ext_resource type="Script" uid="uid://xpuv8xb2y7yy" path="res://ui/system/save_games.gd" id="1_balxw"]
 
 [node name="SaveGames" type="ItemList"]
 custom_minimum_size = Vector2(0, 400)

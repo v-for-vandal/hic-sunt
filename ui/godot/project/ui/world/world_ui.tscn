@@ -1,9 +1,9 @@
 [gd_scene load_steps=6 format=3 uid="uid://xbdd74ccg32f"]
 
 [ext_resource type="PackedScene" uid="uid://ccnpnxy6gvlwm" path="res://ui/system/options_dialog.tscn" id="1_8kfrc"]
-[ext_resource type="Script" path="res://ui/world/world_ui.gd" id="1_xc8cv"]
-[ext_resource type="Script" path="res://ui/world/InfoTabContainer.gd" id="3_fovtq"]
-[ext_resource type="Script" path="res://ui/world/CellInfo.gd" id="4_ye4d0"]
+[ext_resource type="Script" uid="uid://b5lasabfxiwgp" path="res://ui/world/world_ui.gd" id="1_xc8cv"]
+[ext_resource type="Script" uid="uid://bps81is67jlqo" path="res://ui/world/InfoTabContainer.gd" id="3_fovtq"]
+[ext_resource type="Script" uid="uid://cupjn1uapiruw" path="res://ui/world/CellInfo.gd" id="4_ye4d0"]
 [ext_resource type="PackedScene" uid="uid://bxc5r6hxq4tjo" path="res://ui/system/save_dialog.tscn" id="5_c3bvn"]
 
 [node name="WorldUI" type="Control"]
