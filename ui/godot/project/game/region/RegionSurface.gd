@@ -47,7 +47,10 @@ func load_region(region_object : RegionObject) -> void:
 		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
 			var qr_coords := Vector2i(q,r)
 			if _contains(qr_coords):
+				print("Updating region cell ", qr_coords)
 				update_cell(qr_coords)
+			else:
+				print("Skippig out-of-bounds region cell ", qr_coords)
 
 func _clear_old_region()->void:
 	super.clear()
@@ -62,9 +65,8 @@ func _clear_old_region()->void:
 func update_cell(qr_coords: Vector2i) -> void:
 	var region_info : Dictionary = _region_object.get_cell_info(qr_coords)
 	var biome : String = region_info.biome
-	#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 	# convert to xy dimensions
-	var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
+	var xy_coords := axial_to_map(qr_coords)
 	# fill cell
 	if visualization_data.has(biome):
 		#print("setting terrail of tile map xy=", xy_coords, " to ", terrain_mapping[terrain])

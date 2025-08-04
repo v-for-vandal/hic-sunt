@@ -81,12 +81,12 @@ bool Region<BaseTypes>::SetHeight(QRSCoords coords, double height)
   }
 
   auto& cell = surface_.GetCell(coords);
-  cell.SetHeight(height);
   // TODO: RM
-  if (height < 0) {
-    spdlog::info("Height is negative at {}: {}",
-      coords, height);
-  }
+  //if (height < 0) {
+    spdlog::info("Region {} Setting height  at {}: {}",
+      static_cast<void*>(this), coords, height);
+  //}
+  cell.SetHeight(height);
   height_minmax_.Account(height);
 
   return true;
@@ -114,7 +114,7 @@ bool Region<BaseTypes>::SetPrecipitation(QRSCoords coords, double precipitation)
   }
 
   auto& cell = surface_.GetCell(coords);
-  cell.SetHeight(precipitation);
+  cell.SetPrecipitation(precipitation);
   precipitation_minmax_.Account(precipitation);
 
   return true;

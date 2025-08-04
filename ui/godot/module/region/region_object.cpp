@@ -31,7 +31,11 @@ double RegionObject::get_##name(Vector2i coords) const {\
       return 0.0;\
   }\
 \
-  return region_->GetSurface().GetCell(qrs_coords).Get##name_upper();\
+  const auto result = region_->GetSurface().GetCell(qrs_coords).Get##name_upper();\
+  if(region_->GetId() == StringName("rgn_0")) {\
+    spdlog::info("Region {} Getting height at {}: {}", static_cast<void*>(region_.get()), qrs_coords, result);\
+    }\
+  return result;\
 }
 
 namespace hs::godot {

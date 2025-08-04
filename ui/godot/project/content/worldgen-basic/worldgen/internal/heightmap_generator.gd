@@ -27,8 +27,12 @@ func first_pass() -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 		
 	_plane.foreach_surface(region_lambda)
+	pass
 	
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->void:
+	# TODO: RM!
+	if region_qrs_coords != Vector2i(0,0):
+		return
 	var radius : int = _global_context[&"region.radius"]
 	var region_coords := Vector2i(
 		 region_qrs_coords.x * (radius + RADIUS_MARGIN),
@@ -44,8 +48,6 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->voi
 	
 func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qrs_coords: Vector2i) -> void:
 	var height := _get_height_at_point(region_coords.x + cell_qrs_coords.x, region_coords.y + cell_qrs_coords.y)
-	if height <= 0:
-		pass
 	region.set_height(cell_qrs_coords, height)
 	
 	assert(region.get_height(cell_qrs_coords) == height)	

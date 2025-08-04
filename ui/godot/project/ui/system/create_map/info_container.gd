@@ -37,6 +37,8 @@ func set_cell(qr_coords: Vector2i) -> void:
 
 	for key in data:
 		data_table.append([key, data[key]])
+	
+	data_table.append(["r height", _current_region.get_height(qr_coords)])
 		
 	%CellInfo.set_data(data_table)
 	_current_cell = qr_coords

@@ -50,11 +50,10 @@ TEST(Surface, RhombusForEach) {
   EXPECT_EQ(visited.size(), (6+1)*(7+1));
 }
 
-TEST(Surface, HexagonForEach) {
+TEST(Surface, HexagonContains) {
   struct Cell {};
   using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
   using CoordsT = typename SurfaceT::Coords;
-  using Box = Box<QRSCoordinateSystem>;
 
   SurfaceT target{
       HexagonSurface(
@@ -62,7 +61,24 @@ TEST(Surface, HexagonForEach) {
           )
   };
 
-  absl::flat_hash_set<typename SurfaceT::Coords> visited;
+  EXPECT_TRUE(target.Contains(CoordsT::MakeCoords(0,0)));
+  EXPECT_TRUE(target.Contains(CoordsT::MakeCoords(3,0)));
+  EXPECT_TRUE(target.Contains(CoordsT::MakeCoords(-3,0)));
+}
+
+
+TEST(Surface, HexagonForEach) {
+  struct Cell {};
+  using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
+  using CoordsT = typename SurfaceT::Coords;
+
+  SurfaceT target{
+      HexagonSurface(
+          3 // radius, inclusive
+          )
+  };
+
+  absl::flat_hash_set<CoordsT> visited;
 
   auto visitor = [&visited](auto& coords, auto&) {
       EXPECT_FALSE(visited.contains(coords));

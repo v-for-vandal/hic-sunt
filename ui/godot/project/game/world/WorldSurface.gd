@@ -40,9 +40,7 @@ func load_plane(plane_object : PlaneObject) -> void:
 	clear()
 	
 	_plane_object = plane_object
-	
-	print("type of world object:", type_string(typeof(plane_object)))
-	
+		
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system
 	var qr_dimensions : Rect2i = _plane_object.get_dimensions()
@@ -68,7 +66,7 @@ func load_plane(plane_object : PlaneObject) -> void:
 			var has_city : bool = not region_info.city_id.is_empty()
 			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 			# convert to xy dimensions
-			var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
+			var xy_coords := axial_to_map(qr_coords)
 			# fill cell
 			if has_city:
 				$terrain.set_cell(xy_coords, 0, Vector2i(0,2), 0)

@@ -110,7 +110,6 @@ func _do_generate(_debug_mode: bool) -> WorldObject:
 	var generator := _selected_generator_module.create_generator(_selected_config)
 	
 	var result := generator.create_world()
-	print('Result is: ', result)
 	return result
 
 func _on_generate_button_pressed() -> void:

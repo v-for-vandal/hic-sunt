@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include <absl/container/flat_hash_map.h>
+#include <spdlog/spdlog.h>
 
 #include <core/utils/serialize.hpp>
 #include <core/utils/minmax.hpp>
@@ -48,7 +49,10 @@ namespace hs::region {
     bool HasImprovement() const { return !improvement_.type().empty(); }
     const proto::region::Improvement& GetImprovement() const { return improvement_; }
 
-    double GetHeight() const noexcept { return height_; }
+    double GetHeight() const noexcept {
+      /*spdlog::info("Getting height: {}",
+        height_);*/
+      return height_; }
     double GetTemperature() const noexcept { return temperature_; }
     double GetPrecipitation() const noexcept { return precipitation_; }
 
@@ -63,7 +67,11 @@ namespace hs::region {
     void SetBiome(StringId biome) { biome_ = biome; }
     void SetFeature(StringId feature) { feature_ = feature; }
     void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
-    void SetHeight(double value) noexcept { height_ = value; }
+    void SetHeight(double value) noexcept {
+      spdlog::info("(private) Setting height: {}",
+        value);
+      height_ = value;
+    }
     void SetTemperature(double value) noexcept { temperature_ = value; }
     void SetPrecipitation(double value) noexcept { precipitation_ = value; }
 

@@ -12,10 +12,21 @@ enum SurfaceType { UNDEFINED, WORLD_SURFACE, REGION_SURFACE}
 var _highlight_layer : TileMapLayer
 
 # last time we checked, tile under mouse cursor was this one
-var _last_tile_qr := Vector2i(0,0)
+var _last_tile_qr := Vector2i(-1000000, -1000000)
+
+var _cube_to_map : Callable
+var _map_to_cube : Callable
 
 func _ready()->void:
 	_highlight_layer = $highlight
+	
+	# init conversion methods
+	var conversion_methods := HexagonTileMap.get_conversion_methods_for(
+		_highlight_layer.tile_set.tile_offset_axis,
+		_highlight_layer.tile_set.tile_layout)
+	_cube_to_map = conversion_methods.cube_to_map
+	_map_to_cube = conversion_methods.map_to_cube
+		
 
 
 func _contains(_tile_qr: Vector2i) -> bool:
@@ -26,9 +37,10 @@ func _unhandled_input(event : InputEvent) -> void:
 	if event is InputEventMouse:
 		event = make_input_local(event)
 		# TODO: must find a way to make every layer aligned. At the moment,
-		# using highlight layer for coordinates conversion
+		# using highlight QrsCoordsLibrary.xy_to_qr(tile_xy) layer for coordinates conversion
 		var tile_xy := _highlight_layer.local_to_map(to_local(event.position))
-		var tile_qr := QrsCoordsLibrary.xy_to_qr(tile_xy)
+		var tile_qr := map_to_axial(tile_xy)
+		
 		if _contains(tile_qr):
 			if tile_qr != _last_tile_qr:
 				var ui_event := _create_movement_event()
@@ -70,10 +82,18 @@ func _create_action_event() -> UiEventBus.UIActionEvent:
 			push_error("surface_type is unset")
 	return ui_event
 	
+func axial_to_map(qr_coords: Vector2i) -> Vector2i:
+	var qrs_coords := Vector3i(qr_coords.x, qr_coords.y, - qr_coords.x - qr_coords.y)
+	return _cube_to_map.call(qrs_coords)
+	
+func map_to_axial(xy_coords: Vector2i) -> Vector2i:
+	var qrs_coords := _map_to_cube.call(xy_coords) as Vector3i
+	return Vector2i(qrs_coords.x, qrs_coords.y)
+	
 func highlight(qr_coords: Vector2i, good: bool) -> void:
 	if !_contains(qr_coords):
 		return
-	var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
+	var xy_coords := axial_to_map(qr_coords)
 	# TODO: take atlas coords from user settings
 	var highlight_atlas_coords := Vector2i(0,0) if good else Vector2i(1,0)
 	_highlight_layer.set_cell(xy_coords, 1, highlight_atlas_coords, 0)
@@ -81,7 +101,7 @@ func highlight(qr_coords: Vector2i, good: bool) -> void:
 func clear_highlight(qr_coords: Vector2i) -> void:
 	if !_contains(qr_coords):
 		return
-	var xy_coords := QrsCoordsLibrary.qr_to_xy(qr_coords)
+	var xy_coords := axial_to_map(qr_coords)
 	_highlight_layer.erase_cell(xy_coords)
 	
 func clear_all_highlight() -> void:
