@@ -6,10 +6,9 @@
 
 namespace hs::region {
 
-template<typename BaseTypes>
-class Region;
+template <typename BaseTypes> class Region;
 
-template<typename BaseTypes>
+template <typename BaseTypes>
 using RegionPtr = std::shared_ptr<Region<BaseTypes>>;
 
-}
+} // namespace hs::region

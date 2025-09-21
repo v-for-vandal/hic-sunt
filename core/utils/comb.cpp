@@ -2,7 +2,4 @@
 
 #include <spdlog/spdlog.h>
 
-namespace hs::utils {
-
-
-}
+namespace hs::utils {}

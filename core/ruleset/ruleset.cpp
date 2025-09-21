@@ -1,6 +1,3 @@
 #include "ruleset.hpp"
 
-namespace hs::ruleset {
-
-
-}
+namespace hs::ruleset {}

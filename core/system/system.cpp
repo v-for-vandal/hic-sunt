@@ -5,7 +5,6 @@
 
 #include <core/utils/serialize.hpp>
 
-
 namespace hs::system {
 
 #if 0
@@ -49,5 +48,4 @@ std::optional<ruleset::RuleSet> System::LoadRuleSet(const std::filesystem::path&
 
 #endif
 
-
-}
+} // namespace hs::system

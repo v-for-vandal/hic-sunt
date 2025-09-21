@@ -11,7 +11,7 @@ namespace hs::terra {
 class ConnectedTerritory {
 public:
   // Return all regions bordering this one
-  const absl::flat_hash_set<region::RegionId>& GetBorder();
+  const absl::flat_hash_set<region::RegionId> &GetBorder();
 
   // Add region. Returns false if this new region is not connected
   // to territory
@@ -27,9 +27,8 @@ private:
 // grouping, other then game logic
 class Territory {
 public:
-
 private:
   std::vector<ConnectedTerritory> connected_territories_;
 };
 
-}
+} // namespace hs::terra

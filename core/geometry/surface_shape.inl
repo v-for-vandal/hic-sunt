@@ -2,7 +2,4 @@
 
 #include <core/utils/serialize.hpp>
 
-namespace hs::geometry {
-
-
-}
+namespace hs::geometry {}

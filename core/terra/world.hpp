@@ -3,32 +3,31 @@
 #include <core/geometry/surface.hpp>
 #include <core/region/region.hpp>
 #include <core/region/types.hpp>
-#include <core/terra/types.hpp>
-#include <core/terra/plane.hpp>
-#include <core/terra/cell.hpp>
 #include <core/ruleset/ruleset.hpp>
-#include <core/utils/serialize.hpp>
-#include <core/types/std_base_types.hpp>
+#include <core/terra/cell.hpp>
+#include <core/terra/plane.hpp>
+#include <core/terra/types.hpp>
 #include <core/types/control_object.hpp>
+#include <core/types/std_base_types.hpp>
+#include <core/utils/serialize.hpp>
 
-#include <flatbuffers/flatbuffers.h>
 #include <fbs/world_generated.h>
+#include <flatbuffers/flatbuffers.h>
 
 #include <terra/world.pb.h>
 
 namespace hs::terra {
 
-template<typename BaseTypes>
-class World;
+template <typename BaseTypes> class World;
 
-template<typename BaseTypes>
-void SerializeTo(const World<BaseTypes>& source, proto::terra::World& target);
-template<typename BaseTypes>
-World<BaseTypes> ParseFrom(const proto::terra::World& world, serialize::To<World<BaseTypes>>);
+template <typename BaseTypes>
+void SerializeTo(const World<BaseTypes> &source, proto::terra::World &target);
+template <typename BaseTypes>
+World<BaseTypes> ParseFrom(const proto::terra::World &world,
+                           serialize::To<World<BaseTypes>>);
 
 // World is a collection of planes
-template<typename BaseTypes = StdBaseTypes>
-class World {
+template <typename BaseTypes = StdBaseTypes> class World {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
@@ -41,27 +40,26 @@ public:
   using String = BaseTypes::String;
 
   World() = default;
-  World(const World&) = delete;
-  World(World&&) = default;
-  World& operator=(const World&) = delete;
-  World& operator=(World&&) = default;
+  World(const World &) = delete;
+  World(World &&) = default;
+  World &operator=(const World &) = delete;
+  World &operator=(World &&) = default;
 
-  PlanePtr GetPlane(const StringId& id) const;
-  PlanePtr AddPlane(const StringId& id, QRSBox box, int region_radius,
-      int region_external_radius);
+  PlanePtr GetPlane(const StringId &id) const;
+  PlanePtr AddPlane(const StringId &id, QRSBox box, int region_radius,
+                    int region_external_radius);
 
-  RegionPtr GetRegionById(const StringId& region_id) const noexcept;
-  bool HasRegion(const StringId& region_id) const noexcept;
+  RegionPtr GetRegionById(const StringId &region_id) const noexcept;
+  bool HasRegion(const StringId &region_id) const noexcept;
 
-  bool operator==(const World& other) const;
-  bool operator!=(const World& other) const {
-    return !(*this == other);
-  }
-
+  bool operator==(const World &other) const;
+  bool operator!=(const World &other) const { return !(*this == other); }
 
 private:
-  friend void SerializeTo<BaseTypes>(const World& source, proto::terra::World& target);
-  friend World ParseFrom<BaseTypes>(const proto::terra::World& world, serialize::To<World>);
+  friend void SerializeTo<BaseTypes>(const World &source,
+                                     proto::terra::World &target);
+  friend World ParseFrom<BaseTypes>(const proto::terra::World &world,
+                                    serialize::To<World>);
   void InitNonpersistent();
 
 private:
@@ -69,7 +67,6 @@ private:
   ControlObjectPtr control_object_;
 };
 
-
-}
+} // namespace hs::terra
 
 #include "world.inl"

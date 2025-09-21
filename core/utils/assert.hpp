@@ -16,20 +16,20 @@ namespace std {
 #endif
 }
 
-}  // namespace std
+} // namespace std
 #endif
 
-#define VERIFY(x)                                           \
-  if (!(x)) {                                               \
-    spdlog::critical("Verify failed at expression {}", #x); \
-    std::terminate();                                       \
+#define VERIFY(x)                                                              \
+  if (!(x)) {                                                                  \
+    spdlog::critical("Verify failed at expression {}", #x);                    \
+    std::terminate();                                                          \
   }
 
-#define VERIFY_MSG(x, msg, ...)                                            \
-  if (!(x)) {                                                              \
-    spdlog::critical("Verify failed at expression {}. Message is: {}", #x, \
-                     fmt::format(msg, __VA_ARGS__));                       \
-    std::terminate();                                                      \
+#define VERIFY_MSG(x, msg, ...)                                                \
+  if (!(x)) {                                                                  \
+    spdlog::critical("Verify failed at expression {}. Message is: {}", #x,     \
+                     fmt::format(msg, __VA_ARGS__));                           \
+    std::terminate();                                                          \
   }
 
 #ifdef _NDEBUG

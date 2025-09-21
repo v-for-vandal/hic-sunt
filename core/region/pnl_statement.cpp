@@ -1,5 +1,3 @@
 #include "pnl_statement.hpp"
 
-namespace hs::region {
-
-}
+namespace hs::region {}
