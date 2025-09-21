@@ -10,8 +10,8 @@ namespace hs {
     public:
         // TODO: use boost flyweight ?
         using StringId = std::string;
-
         using String = std::string;
+        using NumericValue = double;
 
         static StringId StringIdFromStdString(const std::string& data) noexcept {
             return data;

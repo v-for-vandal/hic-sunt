@@ -3,7 +3,7 @@ syntax = "proto3";
 package hs.proto.region;
 
 import "region/improvement.proto";
-
+import "types/scope.proto";
 
 message Cell {
   reserved 2;
@@ -19,11 +19,13 @@ message Cell {
   // height, meters. Could be negative, if below sea level
   double height = 5;
   // average anual temperature, celsius degree
-  double temperature = 8;
+  // double temperature = 8;
   // average anual precipatiion, in millimeters
-  double precipitation = 9;
+  // double precipitation = 9;
 
   map<string, string> user_data_string = 6;
   map<string, double> user_data_numeric = 7;
+
+  types.Scope scope = 8;
 }
 

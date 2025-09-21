@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package hs.proto.types;
+
+message VariableDescriptor {
+   string name = 1;
+
+   double min = 2;
+   double max = 3;
+};
+
+message NumericVariable {
+   //double base_value = 1;
+
+   map<string, double> additions = 2;
+   map<string, double> multipliers = 3;
+}
+
+message StringVariable {
+   string value = 1;
+
+   // ideas: repeated<{value, priority}> to allow overriding
+}
+
+message Scope {
+  repeated NumericVariable numeric_variables = 1;
+  repeated StringVariable string_variables = 2;
+
+
+}
+
