@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <ui/godot/module/scope/scope.hpp>
+#include <ui/godot/module/scope/scope_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 
@@ -25,9 +25,9 @@ public:
 
   Ref<ScopeObject> get_scope(this auto& self) {
     auto scope_ptr = self.GetScope();
-    ERR_FAIL_NULL_V_MSG(scope_ptr.ptr(), Ref<ScopeObject>{}, "Failed to get scope object");
+    ERR_FAIL_NULL_V_MSG(scope_ptr, Ref<ScopeObject>{}, "Failed to get scope object");
 
-    Ref<ScopeObject> result(memnew(ScopeObject(scope_)));
+    Ref<ScopeObject> result(memnew(ScopeObject(self.scope_)));
     ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to get scope object");
     return result;
   }

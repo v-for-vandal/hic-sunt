@@ -54,8 +54,8 @@ public:
   }
 
   const Cell &GetCell(Coords coords) const {
-    return target_((coords.q() - q_start()).ToUnderlying(),
-                   (coords.r() - r_start()).ToUnderlying());
+    return target_[(coords.q() - q_start()).ToUnderlying(),
+                   (coords.r() - r_start()).ToUnderlying()];
   }
   const Cell &GetCell(typename Coords::QAxis q,
                       typename Coords::RAxis r) const {

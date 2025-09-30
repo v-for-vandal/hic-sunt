@@ -6,7 +6,7 @@
 #include <ui/godot/module/terra/world.hpp>
 #include <ui/godot/module/game/pnl_object.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
-#include <ui/godot/module/game/cell_object.hpp>
+#include <ui/godot/module/region/cell_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
 
@@ -40,6 +40,7 @@ private:
 
 public:
   ScopePtr GetScope() const;
+  Ref<ScopeObject> get_scope() const { return ScopeMixin::get_scope(); }
   Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
   bool set_feature(Vector2i coords, String feature) const;

@@ -92,7 +92,7 @@ public:
 
   double GetNumericValue(const StringId &variable);
 
-  double GetStringValue(const StringId &variable);
+  String GetStringValue(const StringId &variable);
 
   bool AddNumericModifier(const StringId &variable, const StringId &key,
                        NumericValue add, NumericValue mult);

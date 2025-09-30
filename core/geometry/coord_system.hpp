@@ -144,26 +144,26 @@ struct QRSCoordinateSystem {
 };
 
 namespace literals {
-inline QRSCoordinateSystem::QAxis operator"" _q(unsigned long long int value) {
+inline QRSCoordinateSystem::QAxis operator""_q(unsigned long long int value) {
   return QRSCoordinateSystem::QAxis{static_cast<int>(value)};
 }
-inline QRSCoordinateSystem::RAxis operator"" _r(unsigned long long int value) {
+inline QRSCoordinateSystem::RAxis operator""_r(unsigned long long int value) {
   return QRSCoordinateSystem::RAxis{static_cast<int>(value)};
 }
-inline QRSCoordinateSystem::SAxis operator"" _s(unsigned long long int value) {
+inline QRSCoordinateSystem::SAxis operator""_s(unsigned long long int value) {
   return QRSCoordinateSystem::SAxis{static_cast<int>(value)};
 }
 
 inline QRSCoordinateSystem::QDelta
-operator"" _dq(unsigned long long int value) {
+operator""_dq(unsigned long long int value) {
   return QRSCoordinateSystem::QDelta{static_cast<int>(value)};
 }
 inline QRSCoordinateSystem::RDelta
-operator"" _dr(unsigned long long int value) {
+operator""_dr(unsigned long long int value) {
   return QRSCoordinateSystem::RDelta{static_cast<int>(value)};
 }
 inline QRSCoordinateSystem::SDelta
-operator"" _ds(unsigned long long int value) {
+operator""_ds(unsigned long long int value) {
   return QRSCoordinateSystem::SDelta{static_cast<int>(value)};
 }
 
@@ -183,7 +183,7 @@ template <typename T> struct fmt::formatter<::hs::geometry::IntAxis<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const ::hs::geometry::IntAxis<T> &v, FormatCtx &ctx) {
+  auto format(const ::hs::geometry::IntAxis<T> &v, FormatCtx &ctx)  const {
     return fmt::format_to(ctx.out(), "{}", v.ToUnderlying());
   }
 };
@@ -200,7 +200,7 @@ template <typename T> struct fmt::formatter<::hs::geometry::IntDelta<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const ::hs::geometry::IntDelta<T> &v, FormatCtx &ctx) {
+  auto format(const ::hs::geometry::IntDelta<T> &v, FormatCtx &ctx) const {
     return fmt::format_to(ctx.out(), "{}", v.ToUnderlying());
   }
 };

@@ -67,6 +67,12 @@ public:
     return biome_count_.TopK(k);
   }
 
+  /* TODO: RM
+  std::pair<double, double> GetHeightRange() const noexcept;
+  std::pair<double, double> GetTemperatureRange() const noexcept;
+  std::pair<double, double> GetPrecipitationRange() const noexcept;
+  */
+
   /* TODO: REMOVE
   bool SetHeight(QRSCoords coords, double height);
   std::pair<double, double> GetHeightRange() const noexcept {

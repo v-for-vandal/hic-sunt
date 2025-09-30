@@ -150,7 +150,7 @@ template <typename T> struct fmt::formatter<hs::geometry::Coords<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const hs::geometry::Coords<T> &coords, FormatCtx &ctx) {
+  auto format(const hs::geometry::Coords<T> &coords, FormatCtx &ctx) const {
     return fmt::format_to(ctx.out(), "({},{},{})", coords.q().ToUnderlying(),
                           coords.r().ToUnderlying(), coords.s().ToUnderlying());
   }

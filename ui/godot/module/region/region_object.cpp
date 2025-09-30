@@ -263,6 +263,7 @@ Dictionary RegionObject::make_region_info(const Region& region) {
   }
   result["city_id"] = region.GetCityId();
   result["region_id"] = region.GetId();
+  /* TODO: RM
   const auto height_range = region.GetHeightRange();
   result["min_height"] = height_range.first;
   result["max_height"] = height_range.second;
@@ -272,6 +273,7 @@ Dictionary RegionObject::make_region_info(const Region& region) {
   const auto precipitation_range = region.GetPrecipitationRange();
   result["min_precipitation"] = precipitation_range.first;
   result["max_precipitation"] = precipitation_range.second;
+  */
 
   return result;
 }

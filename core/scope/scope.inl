@@ -42,13 +42,18 @@ double Scope<BaseTypes>::GetNumericValue(const StringId &variable)
 
 
   mult = 1 + mult;
-  mult = max(mult, 0);
+  mult = std::max(mult, 0);
 
   auto value = add * mult;
 
   //value = std::clamp(value, vardef->minimum, vardef->maximum);
 
   return value;
+}
+
+template <typename BaseTypes>
+auto Scope::GetStringValue(const StringId &variable) -> String {
+    return String{"NOT_IMPLEMENTED"};
 }
 
 template <typename BaseTypes>

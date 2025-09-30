@@ -4,8 +4,8 @@
 
 #include <ui/godot/module/region/region.hpp>
 #include <ui/godot/module/scope/scope_mixin.hpp>
+#include <ui/godot/module/scope/scope_object.hpp>
 #include <ui/godot/module/terra/world.hpp>
-#include <ui/godot/module/terra/scope_object.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
 
 #include <godot_cpp/classes/ref.hpp>
@@ -26,7 +26,7 @@ public:
 
   CellObject() {}
   CellObject(std::shared_ptr<Region> region, QRSCoords cell_coords):
-    region_(std::move(region))a,
+    region_(std::move(region)),
     cell_coords_(cell_coords) {}
 
 
