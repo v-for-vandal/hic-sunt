@@ -237,7 +237,7 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
       if (surface.Contains(coords)) {
         auto &cell = surface.GetCell(coords);
         // Set parent scope for cell
-        cell.GetScope()->SetParent(scope_);
+        cell.GetScope()->SetParent(this->GetScope());
         // calculate some statistics
         biome_count_.Add(cell.GetBiome());
         feature_count_[cell.GetFeature()]++;

@@ -86,6 +86,7 @@ private:
   void SetHeight(double value) noexcept {
     height_ = value;
   }
+  */
   /* TODO: REMOVE, replaced with modifiers
   void SetTemperature(double value) noexcept { temperature_ = value; }
   void SetPrecipitation(double value) noexcept { precipitation_ = value; }

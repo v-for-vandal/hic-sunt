@@ -1,6 +1,12 @@
+#pragma once
+
+#include <core/types/std_base_types.hpp>
+#include <core/utils/non_null_ptr.hpp>
+
+#include <spdlog/spdlog.h>
 #include <absl/container/flat_hash_map.h>
 
-namespace hs::scope {
+namespace hs::ruleset {
 
 template <typename BaseTypes = StdBaseTypes>
 class NumericVariableDefinition {
@@ -26,7 +32,7 @@ class VariableDefinitions {
 
       const auto fit = numeric_definitions_->find(id);
       if (fit == numeric_definitions_.end()) {
-        spdlog::error("Variable {} is unknown or is not numeric", variable);
+        spdlog::error("Variable {} is unknown or is not numeric", id);
         return ADHOC_VAR_DEF;
       }
 
@@ -38,6 +44,6 @@ class VariableDefinitions {
 };
 
 template <typename BaseTypes>
-using VariableDefinitionsPtr = NonNullSharedPtr<const VariableDefinitions<BaseTypes>>;
+using VariableDefinitionsPtr = utils::NonNullSharedPtr<const VariableDefinitions<BaseTypes>>;
 
 }

@@ -65,6 +65,7 @@ private:
   void InitNonpersistent();
 
 private:
+  // ScopePtr scope_ is inherited from ScopedObject
   std::unordered_map<StringId, PlanePtr> planes_;
   ControlObjectPtr control_object_;
 };

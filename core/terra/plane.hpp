@@ -28,7 +28,7 @@ Plane<BaseTypes> ParseFrom(const proto::terra::Plane &world,
 
 // Plane is essentially one playable map that consists of multiple regions
 template <typename BaseTypes = StdBaseTypes> class Plane:
-    public ScopedObject {
+    public scope::ScopedObject<BaseTypes> {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;

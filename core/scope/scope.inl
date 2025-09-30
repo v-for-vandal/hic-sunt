@@ -1,6 +1,15 @@
 #pragma once
 
+#include <core/utils/serialize.hpp>
+
 namespace hs::scope {
+
+template <typename BaseTypes>
+Scope<BaseTypes>::Scope(
+  StringId id):
+    id_(id)
+{
+}
 
 template <typename BaseTypes>
 void Scope<BaseTypes>::FillNumericModifiers(const StringId &variable,
@@ -21,8 +30,10 @@ void Scope<BaseTypes>::FillNumericModifiers(const StringId &variable,
 template <typename BaseTypes>
 double Scope<BaseTypes>::GetNumericValue(const StringId &variable)
 {
+    /*
   const NumericVariableDefinition vardef = definitions_->FindNumericVariable(
       variable);
+      */
 
   NumericValue add{0};
   NumericValue mult{0};
@@ -35,7 +46,7 @@ double Scope<BaseTypes>::GetNumericValue(const StringId &variable)
 
   auto value = add * mult;
 
-  value = std::clamp(value, vardef->minimum, vardef->maximum);
+  //value = std::clamp(value, vardef->minimum, vardef->maximum);
 
   return value;
 }

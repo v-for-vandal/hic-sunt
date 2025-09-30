@@ -72,14 +72,14 @@ template <typename BaseTypes> void Plane<BaseTypes>::InitNonpersistent() {
   GetSurface().foreach ([this](auto &, auto &cell) {
     auto region_ptr = cell.GetRegionPtr();
     auto region_id = region_ptr->GetId();
-    region_ptr->GetScope().SetParent(scope_);
+    region_ptr->GetScope()->SetParent(this->GetScope());
     region_index_[region_id] = region_ptr;
   });
 
   for (auto &cell : off_surface_) {
     auto region_ptr = cell.GetRegionPtr();
     auto region_id = region_ptr->GetId();
-    region_ptr->GetScope().SetParent(scope_);
+    region_ptr->GetScope()->SetParent(this->GetScope());
     region_index_[region_id] = region_ptr;
   }
 }
@@ -182,7 +182,7 @@ void SerializeTo(const Plane<BaseTypes> &source, proto::terra::Plane &target) {
   target.set_id(BaseTypes::ToProtoString(source.plane_id_));
   target.set_external_region_radius(source.external_region_radius_);
   SerializeTo(source.surface_, *target.mutable_surface());
-  SerializeTo(source.scope_, *target.mutable_scope());
+  SerializeTo(*source.scope_, *target.mutable_scope());
   hs::SerializeTo(source.off_surface_, *target.mutable_off_surface());
 }
 
@@ -198,7 +198,7 @@ Plane<BaseTypes> ParseFrom(const proto::terra::Plane &source,
         source.surface(), serialize::To<typename Plane<BaseTypes>::Surface>{});
   }
   result.scope_ = ParseFrom(source.scope(),
-      serialize::To<typename Scope<BaseTypes>>{});
+      serialize::To<typename Plane<BaseTypes>::Scope>{});
   result.InitNonpersistent();
   return result;
 }

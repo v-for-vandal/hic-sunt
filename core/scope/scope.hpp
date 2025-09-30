@@ -2,7 +2,9 @@
 
 #include <absl/container/flat_hash_map.h>
 #include <scope/scope.pb.h>
-#include <core/scope/variable_definition.hpp>
+#include <core/utils/non_null_ptr.hpp>
+#include <core/types/std_base_types.hpp>
+//#include <core/scope/variable_definition.hpp>
 
 namespace hs::scope {
 
@@ -48,7 +50,14 @@ private:
 template <typename BaseTypes> class Scope;
 
 template <typename BaseTypes>
-using ScopePtr = NonNullSharedPtr<Scope<BaseTypes>>;
+void SerializeTo(const Scope<BaseTypes> &source, proto::scope::Scope &to);
+
+template <typename BaseTypes>
+Scope<BaseTypes> ParseFrom(const proto::scope::Scope &from,
+                            serialize::To<Scope<BaseTypes>>);
+
+template <typename BaseTypes>
+using ScopePtr = utils::NonNullSharedPtr<Scope<BaseTypes>>;
 
 /** \brief Scope is a collection of variables (numeric and strings)
  *
@@ -59,8 +68,10 @@ public:
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
   using NumericValue = typename BaseTypes::NumericValue;
-  using VariableDefinitions = hs::scope::VariableDefinitions<BaseTypes>;
-  using VariableDefinitionsPtr = hs::scope::VariableDefinitionsPtr<BaseTypes>;
+  using NumericVariable = scope::NumericVariable<BaseTypes>;
+  using StringVariable = scope::StringVariable<BaseTypes>;
+  //using VariableDefinitions = hs::scope::VariableDefinitions<BaseTypes>;
+  //using VariableDefinitionsPtr = hs::scope::VariableDefinitionsPtr<BaseTypes>;
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
@@ -69,13 +80,15 @@ public:
    *         id can be empty if this is leaf scope, that can not be referenced
    *         by other scopes
    */
-  Scope(StringId id, const VariableDefinitionsPtr& definitions);
-  Scope(StringId id, const ScopePtr &parent);
+  //Scope(StringId id, const VariableDefinitionsPtr& definitions);
+  Scope(StringId id);
+  Scope():
+    Scope(StringId{}) {}
 
   const ScopePtr& GetParent() const { return parent_; }
   void SetParent(const ScopePtr& parent) { parent_ = parent; }
 
-  const VariableDefinitions *Definitions() const;
+  //const VariableDefinitions *Definitions() const;
 
   double GetNumericValue(const StringId &variable);
 
@@ -103,9 +116,15 @@ private:
   absl::flat_hash_map<StringId, NumericVariable> numeric_variables_;
   absl::flat_hash_map<StringId, StringVariable> string_variables_;
 
-  VariableDefinitionsPtr definitions_{};
+  //VariableDefinitionsPtr definitions_{};
 
   // Note: it may be beneficial to replace it with prefix tree?
+
+private:
+  friend void SerializeTo<BaseTypes>(const Scope &source,
+                                     proto::scope::Scope &to);
+  friend Scope ParseFrom<BaseTypes>(const proto::scope::Scope &from,
+                                     serialize::To<Scope>);
 
 };
 

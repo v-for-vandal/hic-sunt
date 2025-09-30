@@ -6,6 +6,7 @@
 #include <absl/container/flat_hash_map.h>
 
 #include <core/ruleset/ruleset_base.hpp>
+#include <core/ruleset/variable_definition.hpp>
 
 #include <core/types/std_base_types.hpp>
 #include <core/utils/error_message.hpp>
@@ -33,6 +34,8 @@ private:
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
+
+  VariableDefinitions<BaseTypes> variable_definitions_;
 };
 
 } // namespace hs::ruleset

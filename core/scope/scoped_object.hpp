@@ -11,6 +11,7 @@ namespace hs::scope {
 template <typename BaseTypes = StdBaseTypes>
 class ScopedObject {
 public:
+  using Scope = scope::Scope<BaseTypes>;
   using ScopePtr = scope::ScopePtr<BaseTypes>;
 
   const ScopePtr& GetScope() const { return scope_; }
