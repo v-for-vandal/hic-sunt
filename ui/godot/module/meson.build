@@ -4,9 +4,11 @@ godot_module_sources = [
     'system/surface_event.cpp',
     'game/ruleset_object.cpp',
     'game/pnl_object.cpp',
+    'scope/scope_object.cpp',
     'terra/world_object.cpp',
     'terra/plane_object.cpp',
     'region/region_object.cpp',
+    'region/cell_object.cpp',
     hs_proto_generated_headers,
 ]
 

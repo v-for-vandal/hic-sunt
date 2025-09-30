@@ -3,7 +3,7 @@ syntax = "proto3";
 package hs.proto.region;
 
 import "region/improvement.proto";
-import "types/scope.proto";
+import "scope/scope.proto";
 
 message Cell {
   reserved 2;
@@ -26,6 +26,6 @@ message Cell {
   map<string, string> user_data_string = 6;
   map<string, double> user_data_numeric = 7;
 
-  types.Scope scope = 8;
+  scope.Scope scope = 8;
 }
 

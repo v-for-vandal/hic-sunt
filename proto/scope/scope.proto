@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package hs.proto.types;
+package hs.proto.scope;
 
 message VariableDescriptor {
    string name = 1;
@@ -23,8 +23,13 @@ message StringVariable {
 }
 
 message Scope {
-  repeated NumericVariable numeric_variables = 1;
-  repeated StringVariable string_variables = 2;
+  string id = 1;
+  repeated NumericVariable numeric_variables = 2;
+  repeated StringVariable string_variables = 3;
+
+  // We probably don't need parent_scope_id other then for verification
+  //string parent_scope_id = 4;
+  repeated string tag_scope_ids = 5;
 
 
 }

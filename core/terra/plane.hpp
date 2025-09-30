@@ -8,6 +8,8 @@
 #include <core/terra/types.hpp>
 #include <core/types/control_object.hpp>
 #include <core/types/std_base_types.hpp>
+#include <core/scope/scope.hpp>
+#include <core/scope/scoped_object.hpp>
 #include <core/utils/serialize.hpp>
 
 #include <terra/world.pb.h>
@@ -25,7 +27,8 @@ Plane<BaseTypes> ParseFrom(const proto::terra::Plane &world,
                            serialize::To<Plane<BaseTypes>>);
 
 // Plane is essentially one playable map that consists of multiple regions
-template <typename BaseTypes = StdBaseTypes> class Plane {
+template <typename BaseTypes = StdBaseTypes> class Plane:
+    public ScopedObject {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
@@ -106,6 +109,7 @@ private:
   }
 
 private:
+  // ScopePtr scope_ will be inherited from ScopedObject
   ControlObjectPtr control_object_;
   StringId plane_id_;
   Surface surface_;

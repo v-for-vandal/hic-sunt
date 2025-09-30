@@ -7,6 +7,8 @@
 #include <spdlog/spdlog.h>
 
 #include <core/types/std_base_types.hpp>
+#include <core/scope/scope.hpp>
+#include <core/scope/scoped_object.hpp>
 #include <core/utils/minmax.hpp>
 #include <core/utils/serialize.hpp>
 
@@ -25,17 +27,23 @@ Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
                           serialize::To<Cell<BaseTypes>>);
 
 /// One cell in region map
-template <typename BaseTypes = StdBaseTypes> class Cell {
+template <typename BaseTypes = StdBaseTypes> class Cell :
+  public scope::ScopedObject<BaseTypes> {
 
 public:
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
 
+
   StringId GetBiome() const { return biome_; }
   StringId GetFeature() const { return feature_; }
+  /* TODO: Remove
+   * it was replaced with variable in Scope
+  */
 
   // This is abstract storage for data. It never throws. If key is absent,
   // default value is returned.
+  /* TODO: REMOVE
   double GetDataNumeric(StringId key) const noexcept;
   double SetDataNumeric(StringId key, double value);
   bool HasDataNumeric(StringId key) const noexcept;
@@ -43,19 +51,21 @@ public:
   const String &GetDataString(StringId key) const noexcept;
   const String &SetDataString(StringId key, String value);
   bool HasDataString(StringId key) const noexcept;
+  */
 
   bool HasImprovement() const { return !improvement_.type().empty(); }
   const proto::region::Improvement &GetImprovement() const {
     return improvement_;
   }
 
+  /* TODO: REMOVE
+   * replaced with vairable in Scope
   double GetHeight() const noexcept {
-    /*spdlog::info("Getting height: {}",
-      height_);*/
     return height_;
   }
   double GetTemperature() const noexcept { return temperature_; }
   double GetPrecipitation() const noexcept { return precipitation_; }
+  */
 
   bool operator==(const Cell &) const;
 
@@ -72,17 +82,22 @@ private:
   void SetImprovement(proto::region::Improvement improvement) {
     improvement_ = improvement;
   }
+  /* TODO: REMOVE?
   void SetHeight(double value) noexcept {
-    spdlog::info("(private) Setting height: {}", value);
     height_ = value;
   }
+  /* TODO: REMOVE, replaced with modifiers
   void SetTemperature(double value) noexcept { temperature_ = value; }
   void SetPrecipitation(double value) noexcept { precipitation_ = value; }
+  */
 
 private:
+  // Note: ScopePtr scope_ will be inherited from ScopedObject
+
   StringId biome_;
   StringId feature_;
 
+  /* TODO: REMOVE
   // height, in meters, above/under sea level (whatever sea this may be)
   // negative is under sea level, positive is above sea level
   double height_{0};
@@ -90,6 +105,7 @@ private:
   double temperature_{0};
   // precipitation, in millimeters
   double precipitation_{0};
+  */
 
   proto::region::Improvement improvement_;
 

@@ -10,6 +10,7 @@
 #include <core/region/pnl_statement.hpp>
 #include <core/region/types.hpp>
 #include <core/types/std_base_types.hpp>
+#include <core/scope/scoped_object.hpp>
 #include <core/utils/comb.hpp>
 #include <core/utils/enum_bitset.hpp>
 
@@ -26,7 +27,9 @@ template <typename BaseTypes>
 Region<BaseTypes> ParseFrom(const proto::region::Region &from,
                             serialize::To<Region<BaseTypes>>);
 
-template <typename BaseTypes = StdBaseTypes> class Region {
+template <typename BaseTypes = StdBaseTypes> class Region :
+  public scope::ScopedObject<BaseTypes>
+{
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
@@ -64,6 +67,7 @@ public:
     return biome_count_.TopK(k);
   }
 
+  /* TODO: REMOVE
   bool SetHeight(QRSCoords coords, double height);
   std::pair<double, double> GetHeightRange() const noexcept {
     return height_minmax_.GetRange();
@@ -76,6 +80,7 @@ public:
   std::pair<double, double> GetPrecipitationRange() const noexcept {
     return precipitation_minmax_.GetRange();
   }
+  */
 
   bool SetFeature(QRSCoords coords, const StringId &biome);
 
@@ -92,6 +97,8 @@ public:
   PnlStatement
   BuildPnlStatement(const ruleset::RuleSet<BaseTypes> &ruleset) const;
 
+  /* TODO: REMOVE
+   * replaced with Scope
   // This is abstract storage for data. It never throws. If key is absent,
   // default value is returned.
   double GetDataNumeric(QRSCoords coords, const StringId &key) const noexcept;
@@ -103,6 +110,7 @@ public:
   const String &SetDataString(QRSCoords coords, const StringId &key,
                               const StringId &value);
   bool HasDataString(QRSCoords coords, const StringId &key) const noexcept;
+  */
 
   bool operator==(const Region &other) const;
   bool operator!=(const Region &other) const = default;
@@ -137,7 +145,7 @@ private:
 
   static inline int next_id_{0};
 
-  void BuildEphemeral();
+  void InitNonpersistent();
 
 private:
   friend void SerializeTo<BaseTypes>(const Region &source,

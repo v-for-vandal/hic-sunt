@@ -5,7 +5,7 @@ template <typename BaseTypes> Region<BaseTypes>::Region() : Region("", 1) {}
 template <typename BaseTypes>
 Region<BaseTypes>::Region(const StringId &region_id, int radius)
     : id_(region_id), surface_(geometry::HexagonSurface(radius)) {
-  BuildEphemeral();
+  InitNonpersistent();
 }
 
 template <typename BaseTypes>
@@ -62,6 +62,7 @@ bool Region<BaseTypes>::SetBiome(QRSCoords coords, const StringId &biome) {
   return true;
 }
 
+/*
 template <typename BaseTypes>
 bool Region<BaseTypes>::SetHeight(QRSCoords coords, double height) {
   if (!surface_.Contains(coords)) {
@@ -106,6 +107,7 @@ bool Region<BaseTypes>::SetPrecipitation(QRSCoords coords,
 
   return true;
 }
+*/
 
 template <typename BaseTypes>
 bool Region<BaseTypes>::SetFeature(QRSCoords coords, const StringId &feature) {
@@ -154,6 +156,7 @@ bool Region<BaseTypes>::SetCityId(const StringId &city_id) {
   return true;
 }
 
+/*
 template <typename BaseTypes>
 double Region<BaseTypes>::GetDataNumeric(QRSCoords coords,
                                          const StringId &key) const noexcept {
@@ -221,8 +224,9 @@ bool Region<BaseTypes>::HasDataString(QRSCoords coords,
   auto &cell = surface_.GetCell(coords);
   return cell.HasDataString(key);
 }
+*/
 
-template <typename BaseTypes> void Region<BaseTypes>::BuildEphemeral() {
+template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
   biome_count_.clear();
   feature_count_.clear();
   cells_with_improvements_.clear();
@@ -232,14 +236,19 @@ template <typename BaseTypes> void Region<BaseTypes>::BuildEphemeral() {
       QRSCoords coords(q, r);
       if (surface.Contains(coords)) {
         auto &cell = surface.GetCell(coords);
+        // Set parent scope for cell
+        cell.GetScope()->SetParent(scope_);
+        // calculate some statistics
         biome_count_.Add(cell.GetBiome());
         feature_count_[cell.GetFeature()]++;
         if (cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);
         }
+        /* TODO: REMOVE
         height_minmax_.Account(cell.GetHeight());
         temperature_minmax_.Account(cell.GetTemperature());
         precipitation_minmax_.Account(cell.GetPrecipitation());
+        */
       }
     }
   }
@@ -317,7 +326,7 @@ Region<BaseTypes> ParseFrom(const proto::region::Region &region,
   result.next_unique_id_ = region.unique_id_counter();
 
   // Restore non-persistent data
-  result.BuildEphemeral();
+  result.InitNonpersistent();
 
   return result;
 }

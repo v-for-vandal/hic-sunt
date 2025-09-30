@@ -4,8 +4,7 @@
 
 namespace hs::utils {
 
-// The sole purpose is to provide operator== that compares items
-// by value, not by address
+// Shared ptr that can never be null. Class T must be default-constructible.
 template <typename T> class NonNullSharedPtr {
 private:
   std::shared_ptr<T> value;

@@ -1,19 +1,19 @@
-//#include "register_types.h"
-
 #include <iostream>
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include <ui/godot/module/terra/world_object.hpp>
-#include <ui/godot/module/terra/plane_object.hpp>
-#include <ui/godot/module/region/region_object.hpp>
-#include <ui/godot/module/system/system.hpp>
-#include <ui/godot/module/game/ruleset_object.hpp>
 #include <ui/godot/module/game/pnl_object.hpp>
+#include <ui/godot/module/game/ruleset_object.hpp>
+#include <ui/godot/module/region/region_object.hpp>
+#include <ui/godot/module/region/cell_object.hpp>
+#include <ui/godot/module/scope/scope_object.hpp>
 #include <ui/godot/module/system/spdlog_sink.hpp>
 #include <ui/godot/module/system/surface_event.hpp>
+#include <ui/godot/module/system/system.hpp>
+#include <ui/godot/module/terra/plane_object.hpp>
+#include <ui/godot/module/terra/world_object.hpp>
 
 namespace hs::godot {
 
@@ -34,6 +34,8 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<PlaneObject>();
     ClassDB::register_class<WorldObject>();
     ClassDB::register_class<RulesetObject>();
+    ClassDB::register_class<CellObject>();
+    ClassDB::register_class<ScopeObject>();
   }
 }
 

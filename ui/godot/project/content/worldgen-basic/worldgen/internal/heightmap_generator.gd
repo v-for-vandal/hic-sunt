@@ -30,9 +30,6 @@ func first_pass() -> void:
 	pass
 	
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->void:
-	# TODO: RM!
-	if region_qrs_coords != Vector2i(0,0):
-		return
 	var radius : int = _global_context[&"region.radius"]
 	var region_coords := Vector2i(
 		 region_qrs_coords.x * (radius + RADIUS_MARGIN),

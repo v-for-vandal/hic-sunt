@@ -113,6 +113,7 @@ template <typename BaseTypes> void World<BaseTypes>::InitNonpersistent() {
   // set control object
   for (auto &[_, plane_ptr] : planes_) {
     plane_ptr->SetControlObject(control_object_);
+    plane_ptr->GetScope().SetParent(scope_);
   }
 
   // TODO: build region index

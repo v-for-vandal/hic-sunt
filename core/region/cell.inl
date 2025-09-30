@@ -23,6 +23,7 @@ bool Cell<BaseTypes>::operator==(const Cell<BaseTypes> &other) const {
   return true;
 }
 
+/*
 template <typename BaseTypes>
 double Cell<BaseTypes>::GetDataNumeric(StringId key) const noexcept {
   auto fit = user_data_numeric_.find(key);
@@ -74,13 +75,14 @@ template <typename BaseTypes>
 bool Cell<BaseTypes>::HasDataString(StringId key) const noexcept {
   return user_data_string_.contains(key);
 }
+*/
 
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes> &source, proto::region::Cell &to) {
   to.Clear();
   to.set_biome(BaseTypes::ToProtoString(source.GetBiome()));
   to.add_features(BaseTypes::ToProtoString(source.GetFeature()));
-  to.set_height(source.GetHeight());
+  //to.set_height(source.GetHeight());
   auto improvement_ptr = to.mutable_improvements()->Add();
   *improvement_ptr = source.GetImprovement();
 
@@ -107,7 +109,8 @@ Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
 
   spdlog::info("parsing from protobuf, height is {}", from.height());
 
-  result.SetHeight(from.height());
+  // TODO: RM
+  //result.SetHeight(from.height());
 
   ParseStringIdMapFrom(BaseTypes{}, from.user_data_string(),
                        result.user_data_string_);

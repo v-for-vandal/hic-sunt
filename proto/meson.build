@@ -31,6 +31,7 @@ hs_proto_schemas = [
   'ruleset/projects.proto',
   'render/atlas.proto',
   'render/render.proto',
+  'scope/scope.proto',
   'types/control_object.proto',
   ]
 

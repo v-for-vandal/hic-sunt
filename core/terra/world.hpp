@@ -4,6 +4,7 @@
 #include <core/region/region.hpp>
 #include <core/region/types.hpp>
 #include <core/ruleset/ruleset.hpp>
+#include <core/scope/scoped_object.hpp>
 #include <core/terra/cell.hpp>
 #include <core/terra/plane.hpp>
 #include <core/terra/types.hpp>
@@ -27,7 +28,8 @@ World<BaseTypes> ParseFrom(const proto::terra::World &world,
                            serialize::To<World<BaseTypes>>);
 
 // World is a collection of planes
-template <typename BaseTypes = StdBaseTypes> class World {
+template <typename BaseTypes = StdBaseTypes> class World :
+    public scope::ScopedObject<BaseTypes> {
 public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
