@@ -28,7 +28,7 @@ bool ScopeObject::add_numeric_modifier(const StringName& variable, const StringN
 {
     ERR_FAIL_NULL_V_MSG(scope_, false, "Scope is not present");
 
-    scope_->AddNumericModifier(variables, key, add, mult);
+    scope_->AddNumericModifier(variable, key, add, mult);
     return true;
 }
 

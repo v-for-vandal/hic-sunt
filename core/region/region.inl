@@ -1,3 +1,6 @@
+#pragma once
+#include <spdlog/spdlog.h>
+
 namespace hs::region {
 
 template <typename BaseTypes> Region<BaseTypes>::Region() : Region("", 1) {}

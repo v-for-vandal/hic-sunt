@@ -2,50 +2,14 @@
 
 #include <absl/container/flat_hash_map.h>
 #include <scope/scope.pb.h>
+#include <core/scope/numeric_variable.hpp>
+#include <core/scope/string_variable.hpp>
 #include <core/utils/non_null_ptr.hpp>
 #include <core/types/std_base_types.hpp>
 //#include <core/scope/variable_definition.hpp>
 
 namespace hs::scope {
 
-
-template <typename BaseTypes = StdBaseTypes>
-class NumericVariable {
-public:
-  using StringId = typename BaseTypes::StringId;
-  using NumericValue = typename BaseTypes::NumericValue;
-
-  void AddModifiers(const StringId &key,
-                       NumericValue add, NumericValue mult);
-
-  /** \brief Get total addictive and multiplicative modifiers for this
-   *  variable
-   */
-  void FillModifiers(NumericValue& add, NumericValue& mult) const {
-    for(auto& [_,v] : add_modifiers_) {
-      add += v;
-    }
-
-    for(auto& [_,v] : mult_modifiers_) {
-      mult+= v;
-    }
-  }
-
-
-private:
-  absl::flat_hash_map<StringId, NumericValue> add_modifiers_;
-  absl::flat_hash_map<StringId, NumericValue> mult_modifiers_;
-};
-
-template <typename BaseTypes = StdBaseTypes>
-class StringVariable {
-public:
-  using String = typename BaseTypes::String;
-
-private:
-  String value_{};
-
-};
 
 template <typename BaseTypes> class Scope;
 
@@ -70,8 +34,6 @@ public:
   using NumericValue = typename BaseTypes::NumericValue;
   using NumericVariable = scope::NumericVariable<BaseTypes>;
   using StringVariable = scope::StringVariable<BaseTypes>;
-  //using VariableDefinitions = hs::scope::VariableDefinitions<BaseTypes>;
-  //using VariableDefinitionsPtr = hs::scope::VariableDefinitionsPtr<BaseTypes>;
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
@@ -82,24 +44,30 @@ public:
    */
   //Scope(StringId id, const VariableDefinitionsPtr& definitions);
   Scope(StringId id);
-  Scope():
-    Scope(StringId{}) {}
+  Scope() = default;
 
   const ScopePtr& GetParent() const { return parent_; }
   void SetParent(const ScopePtr& parent) { parent_ = parent; }
 
   //const VariableDefinitions *Definitions() const;
 
-  double GetNumericValue(const StringId &variable);
+  NumericValue GetNumericValue(const StringId &variable);
 
-  String GetStringValue(const StringId &variable);
+  StringId GetStringValue(const StringId &variable);
 
   bool AddNumericModifier(const StringId &variable, const StringId &key,
                        NumericValue add, NumericValue mult);
 
+  bool AddStringModifier(const StringId& variables, const StringId& key,
+    const StringId& value, NumericValue level);
+
 private:
   void FillNumericModifiers(const StringId &variable,
     NumericValue& add, NumericValue& mult) const;
+
+  void FillStringModifiers(const StringId& variable,
+    StringId& value, NumericValue& level);
+
 
 private:
   StringId id_;

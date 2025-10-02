@@ -38,7 +38,8 @@ double RegionObject::get_##name(Vector2i coords) const {\
   return result;\
 }
 
-#define ERR_FAIL_NULL_REGION(result) ERR_FAIL_NULL_V_MSG(region_, result, ERR_MSG_REGION_IS_NULL)
+#define ERR_FAIL_NULL_TARGET_REGION(region, result) ERR_FAIL_NULL_V_MSG(region, result, ERR_MSG_REGION_IS_NULL)
+#define ERR_FAIL_NULL_REGION(result) ERR_FAIL_NULL_TARGET_REGION(region_, result)
 
 namespace hs::godot {
 
@@ -55,7 +56,7 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
-  ClassDB::bind_method(D_METHOD("set_biome", "coords", "biome"), &RegionObject::set_biome);
+  //ClassDB::bind_method(D_METHOD("set_biome", "coords", "biome"), &RegionObject::set_biome);
   ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"), &RegionObject::set_feature);
   ClassDB::bind_method(D_METHOD("set_improvement", "coords", "improvement"), &RegionObject::set_improvement);
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
@@ -70,12 +71,12 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("has_data_numeric", "coords", "key" ), &RegionObject::has_data_numeric);
   ClassDB::bind_method(D_METHOD("get_data_numeric", "coords", "key" ), &RegionObject::get_data_numeric);
   */
-  ClassDB::bind_method(D_METHOD("get_height", "coords" ), &RegionObject::get_height);
-  ClassDB::bind_method(D_METHOD("set_height", "coords", "height"  ), &RegionObject::set_height);
-  ClassDB::bind_method(D_METHOD("get_temperature", "coords" ), &RegionObject::get_temperature);
-  ClassDB::bind_method(D_METHOD("set_temperature", "coords", "temperature"  ), &RegionObject::set_temperature);
-  ClassDB::bind_method(D_METHOD("get_precipitation", "coords" ), &RegionObject::get_precipitation);
-  ClassDB::bind_method(D_METHOD("set_precipitation", "coords", "precipitation"  ), &RegionObject::set_precipitation);
+  //ClassDB::bind_method(D_METHOD("get_height", "coords" ), &RegionObject::get_height);
+  //ClassDB::bind_method(D_METHOD("set_height", "coords", "height"  ), &RegionObject::set_height);
+  //ClassDB::bind_method(D_METHOD("get_temperature", "coords" ), &RegionObject::get_temperature);
+  //ClassDB::bind_method(D_METHOD("set_temperature", "coords", "temperature"  ), &RegionObject::set_temperature);
+  //ClassDB::bind_method(D_METHOD("get_precipitation", "coords" ), &RegionObject::get_precipitation);
+  //ClassDB::bind_method(D_METHOD("set_precipitation", "coords", "precipitation"  ), &RegionObject::set_precipitation);
   ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id); // deprecated
 
   // iterations
@@ -90,7 +91,7 @@ void RegionObject::_bind_methods() {
 
 ScopePtr RegionObject::GetScope() const
 {
-  ERR_FAIL_NULL_REGION(Ref<ScopeObject>{});
+  ERR_FAIL_NULL_REGION(ScopePtr{});
 
   return region_->GetScope();
 }
@@ -154,6 +155,7 @@ Dictionary RegionObject::convert_to_dictionary(const hs::proto::region::Improvem
   return result;
 }
 
+/*
 bool RegionObject::set_biome(Vector2i coords, String biome) const
 {
   if(!region_) {
@@ -169,6 +171,7 @@ bool RegionObject::set_biome(Vector2i coords, String biome) const
 
   return success;
 }
+*/
 
 
 #if 0
@@ -250,7 +253,6 @@ Dictionary RegionObject::get_info() const {
 
 Dictionary RegionObject::make_region_info(const Region& region) {
   Dictionary result;
-  ERR_FAIL_NULL_REGION(result);
   // Build top biome
   {
     Array top_biome_result;
@@ -410,7 +412,7 @@ void RegionObject::foreach(const Callable& callback) {
     });
 }
 
-Ref<CellObject> RegionObject::get_plane(Vector2i coords) {
+Ref<CellObject> RegionObject::get_cell(Vector2i coords) {
   ERR_FAIL_NULL_REGION(Ref<CellObject>{});
   auto qrs_coords = cast_qrs(coords);
 

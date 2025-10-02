@@ -17,18 +17,32 @@ void Scope<BaseTypes>::FillNumericModifiers(const StringId &variable,
 {
   auto it = numeric_variables_.find(variable);
   if (it != numeric_variables_.end()) {
-      it->second.FillNumericModifiers(add, mult);
+      it->second.FillModifiers(add, mult);
   }
 
   if(parent_ != nullptr) {
       parent_->FillNumericModifiers(variable, add, mult);
   }
+}
 
+template <typename BaseTypes>
+void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
+    StringId& value, NumericValue& level)
+{
+    auto fit = string_variables_.find(variable);
+    if( fit != string_variables_.end()) {
+        fit->second.FillModifiers(value, level);
+    }
+
+    // get parent value
+    if(parent_ != nullptr) {
+        parent_->FillStringModifiers(variable, value, level);
+    }
 
 }
 
 template <typename BaseTypes>
-double Scope<BaseTypes>::GetNumericValue(const StringId &variable)
+auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> Scope::NumericValue
 {
     /*
   const NumericVariableDefinition vardef = definitions_->FindNumericVariable(
@@ -42,7 +56,7 @@ double Scope<BaseTypes>::GetNumericValue(const StringId &variable)
 
 
   mult = 1 + mult;
-  mult = std::max(mult, 0);
+  mult = std::max<NumericValue>(mult, 0);
 
   auto value = add * mult;
 
@@ -52,8 +66,29 @@ double Scope<BaseTypes>::GetNumericValue(const StringId &variable)
 }
 
 template <typename BaseTypes>
-auto Scope::GetStringValue(const StringId &variable) -> String {
-    return String{"NOT_IMPLEMENTED"};
+auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> Scope::StringId {
+    NumericValue level{0};
+    StringId result;
+
+    FillStringModifiers(variable, result, level);
+
+    return result;
+}
+
+template <typename BaseTypes>
+bool Scope<BaseTypes>::AddNumericModifier(const StringId &variable, const StringId &key,
+                       NumericValue add, NumericValue mult)
+{
+    numeric_variables_[variable].AddModifiers(key, add, mult);
+    return true;
+}
+
+template <typename BaseTypes>
+bool Scope<BaseTypes>::AddStringModifier(const StringId &variable, const StringId &key,
+                       const StringId& value, NumericValue level)
+{
+    string_variables_[variable].AddModifiers(key, value, level);
+    return true;
 }
 
 template <typename BaseTypes>

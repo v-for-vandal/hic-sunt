@@ -24,8 +24,8 @@ void CellObject::_bind_methods() {
 
 ScopePtr CellObject::GetScope() const
 {
-  ERR_FAIL_NULL_REGION(Ref<ScopeObject>{});
-  ERR_FAIL_REGION_NO_CELL(Ref<ScopeObject>{});
+  ERR_FAIL_NULL_REGION(ScopePtr{});
+  ERR_FAIL_REGION_NO_CELL(ScopePtr{});
 
   auto& cell = region_->GetSurface().GetCell(cell_coords_);
 
@@ -34,11 +34,7 @@ ScopePtr CellObject::GetScope() const
 
 
 String CellObject::get_region_id() const {
-  String result;
-  ERR_FAIL_NULL_V_MSG(region_, result, "Failed to get scope object");
-  if(!region_) {
-    return {};
-  }
+  ERR_FAIL_NULL_REGION(String{});
 
   return region_->GetId();
 

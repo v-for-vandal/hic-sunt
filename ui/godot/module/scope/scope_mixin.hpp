@@ -27,7 +27,7 @@ public:
     auto scope_ptr = self.GetScope();
     ERR_FAIL_NULL_V_MSG(scope_ptr, Ref<ScopeObject>{}, "Failed to get scope object");
 
-    Ref<ScopeObject> result(memnew(ScopeObject(self.scope_)));
+    Ref<ScopeObject> result(memnew(ScopeObject(self.GetScope())));
     ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to get scope object");
     return result;
   }

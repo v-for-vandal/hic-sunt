@@ -45,7 +45,7 @@ private:
 
 public:
 
-  Ref<ScopeObject> get_scope();
+  Ref<ScopeObject> get_scope() { return ScopeMixin::get_scope(); }
   String get_region_id() const;
 
 };

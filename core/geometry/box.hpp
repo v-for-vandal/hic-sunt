@@ -66,7 +66,7 @@ template <typename T> struct fmt::formatter<hs::geometry::Box<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const hs::geometry::Box<T> &box, FormatCtx &ctx) {
+  auto format(const hs::geometry::Box<T> &box, FormatCtx &ctx) const {
     return fmt::format_to(ctx.out(), "[{};{})", box.start(), box.end());
   }
 };
