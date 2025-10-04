@@ -18,18 +18,28 @@ public:
   using StringId = typename BaseTypes::StringId;
   using NumericValue = typename BaseTypes::NumericValue;
 
-  void AddModifiers(const StringId &key,
+  bool AddModifiers(const StringId &key,
                        NumericValue add, NumericValue mult);
 
   /** \brief Get total addictive and multiplicative modifiers for this
    *  variable. It only works within this scope.
    */
-  void FillModifiers(NumericValue& add, NumericValue& mult) const;
+  void CalculateModifiers(NumericValue& add, NumericValue& mult) const;
+
+  /** \brief get all modifiers in an explainable way
+   * Should be used for UI purposes
+   */
+  void ExplainModifiers(auto&& output_fn) const;
+
 
 
 private:
-  absl::flat_hash_map<StringId, NumericValue> add_modifiers_;
-  absl::flat_hash_map<StringId, NumericValue> mult_modifiers_;
+  struct Modifier {
+      NumericValue add;
+      NumericValue mult;
+  };
+
+  absl::flat_hash_map<StringId, Modifier> modifiers_;
 };
 
 }

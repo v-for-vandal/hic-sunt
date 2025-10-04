@@ -13,6 +13,11 @@ class ScopedObject {
 public:
   using Scope = scope::Scope<BaseTypes>;
   using ScopePtr = scope::ScopePtr<BaseTypes>;
+  using StringId = typename BaseTypes::StringId;
+
+  ScopedObject() = default;
+  ScopedObject(const StringId& id):
+    scope_(id) {}
 
   const ScopePtr& GetScope() const { return scope_; }
   ScopePtr& GetScope() { return scope_; }

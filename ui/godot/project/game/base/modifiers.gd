@@ -1,4 +1,4 @@
-extends Object
+extends Node
 
 const GEOGRAPHY_HEIGHT := &"core.geography.height"
 

@@ -13,15 +13,24 @@ public:
   using StringId = typename BaseTypes::StringId;
   using NumericValue = typename BaseTypes::NumericValue;
 
-  void AddModifiers(const StringId& key, const StringId& val,
+  bool AddModifiers(const StringId& key, const StringId& val,
     NumericValue level);
 
   // Method takes current level as input, and if this variable has
   // value with higher level, it will overwrite both value and level
-  void FillModifiers(StringId& value, NumericValue& level);
+  void CalculateModifiers(StringId& value, NumericValue& level);
+
+  /** \brief get all modifiers in an explainable way
+   * Should be used for UI purposes
+   */
+  void ExplainModifiers(auto&& output_fn) const;
 
 private:
-  absl::flat_hash_map<StringId, std::pair<NumericValue, StringId> > modifiers_;
+  struct Modifier {
+      StringId value;
+      NumericValue level;
+  };
+  absl::flat_hash_map<StringId, Modifier> modifiers_;
 
 };
 

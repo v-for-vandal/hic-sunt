@@ -41,7 +41,7 @@ public:
   using StringId = BaseTypes::StringId;
   using String = BaseTypes::String;
 
-  World() = default;
+  World(): scope::ScopedObject<BaseTypes>("world.root") {}
   World(const World &) = delete;
   World(World &&) = default;
   World &operator=(const World &) = delete;

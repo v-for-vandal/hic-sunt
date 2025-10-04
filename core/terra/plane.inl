@@ -8,7 +8,7 @@ template <typename BaseTypes>
 Plane<BaseTypes>::Plane(ControlObjectPtr control_object, StringId plane_id,
                         QRSBox box, int region_radius,
                         int external_region_radius)
-    : control_object_(std::move(control_object)), plane_id_(plane_id),
+    : scope::ScopedObject<BaseTypes>(plane_id), control_object_(std::move(control_object)), plane_id_(plane_id),
       surface_(SurfaceShape(geometry::RhombusSurface(box))) {
   if (region_radius <= 0) {
     region_radius = 5;

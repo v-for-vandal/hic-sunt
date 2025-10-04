@@ -58,8 +58,13 @@ public:
   bool AddNumericModifier(const StringId &variable, const StringId &key,
                        NumericValue add, NumericValue mult);
 
-  bool AddStringModifier(const StringId& variables, const StringId& key,
+  bool AddStringModifier(const StringId& variable, const StringId& key,
     const StringId& value, NumericValue level);
+
+  auto ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
+  auto ExplainStringVariable(const StringId& variable, auto&& collect_fn);
+  auto ExplainAllVariables(auto&& collect_fn);
+
 
 private:
   void FillNumericModifiers(const StringId &variable,

@@ -17,7 +17,7 @@ void Scope<BaseTypes>::FillNumericModifiers(const StringId &variable,
 {
   auto it = numeric_variables_.find(variable);
   if (it != numeric_variables_.end()) {
-      it->second.FillModifiers(add, mult);
+      it->second.CalculateModifiers(add, mult);
   }
 
   if(parent_ != nullptr) {
@@ -31,7 +31,7 @@ void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
 {
     auto fit = string_variables_.find(variable);
     if( fit != string_variables_.end()) {
-        fit->second.FillModifiers(value, level);
+        fit->second.CalculateModifiers(value, level);
     }
 
     // get parent value
@@ -89,6 +89,57 @@ bool Scope<BaseTypes>::AddStringModifier(const StringId &variable, const StringI
 {
     string_variables_[variable].AddModifiers(key, value, level);
     return true;
+}
+
+template <typename BaseTypes>
+auto Scope<BaseTypes>::ExplainNumericVariable(const StringId& variable, auto&& collect_fn) {
+  auto it = numeric_variables_.find(variable);
+  if (it != numeric_variables_.end()) {
+      it->second.ExplainModifiers([this, &collect_fn, &variable](const StringId& modifier,
+              NumericValue add, NumericValue mult) {
+          collect_fn(this->id_, variable, modifier, add, mult);
+          });
+
+  }
+
+  if(parent_ != nullptr) {
+      parent_->ExplainNumericVariable(variable, collect_fn);
+  }
+
+}
+
+template <typename BaseTypes>
+auto Scope<BaseTypes>::ExplainStringVariable(const StringId& variable, auto&& collect_fn) {
+  auto it = string_variables_.find(variable);
+  if (it != string_variables_.end()) {
+      it->second.ExplainModifiers([this, &collect_fn, &variable](const StringId& modifier,
+              const StringId& value, NumericValue level) {
+          collect_fn(this->id_, variable, modifier, value, level);
+          });
+
+  }
+
+  if(parent_ != nullptr) {
+      parent_->ExplainStringVariable(variable, collect_fn);
+  }
+}
+
+template <typename BaseTypes>
+auto Scope<BaseTypes>::ExplainAllVariables(auto&& collect_fn) {
+    // TODO: Replace empty id with hex-string for address
+    for(const auto& [k,v] : numeric_variables_) {
+        v.ExplainModifiers([this, &collect_fn, &k] (const StringId& modifier,
+              NumericValue add, NumericValue mult) {
+              collect_fn(this->id_, k, modifier, add, mult);
+          });
+    }
+    for(const auto& [k,v] : string_variables_) {
+        v.ExplainModifiers([this, &collect_fn, &k] (const StringId& modifier,
+              const StringId& value, NumericValue level) {
+              collect_fn(this->id_, k, modifier, value, level);
+          });
+    }
+
 }
 
 template <typename BaseTypes>

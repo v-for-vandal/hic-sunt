@@ -5,11 +5,15 @@
 namespace hs::scope {
 
 template <typename BaseTypes>
-void StringVariable<BaseTypes>::AddModifiers(const StringId& key, const StringId& val,
+bool StringVariable<BaseTypes>::AddModifiers(const StringId& key, const StringId& val,
     NumericValue level)
 {
+    if(BaseTypes::IsNullToken(key)) {
+      spdlog::error("Empty modifier key is not allowed");
+      return false;
+    }
     if (level != 0) {
-        modifiers_[key] = std::make_pair<NumericValue, StringId>(level, val);
+        modifiers_[key] = Modifier{.value=val, .level=level};
     } else {
         if (!BaseTypes::IsNullToken(key)) {
             spdlog::debug(
@@ -17,15 +21,23 @@ void StringVariable<BaseTypes>::AddModifiers(const StringId& key, const StringId
         }
         modifiers_.erase(key);
     }
+    return true;
 }
 
 template <typename BaseTypes>
-void StringVariable<BaseTypes>::FillModifiers(StringId& value, NumericValue& level) {
+void StringVariable<BaseTypes>::CalculateModifiers(StringId& value, NumericValue& level) {
     for (auto& [k, v] : modifiers_) {
-        if (v.first > level) {
-            level = v.first;
-            value = v.second;
+        if (v.level > level) {
+            level = v.level;
+            value = v.value;
         }
+    }
+}
+
+template <typename BaseTypes>
+void StringVariable<BaseTypes>::ExplainModifiers(auto&& output_fn) const {
+    for(auto& [k,v] : modifiers_) {
+        output_fn(k, v.value, v.level);
     }
 }
 

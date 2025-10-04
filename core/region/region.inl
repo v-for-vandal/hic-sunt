@@ -7,7 +7,9 @@ template <typename BaseTypes> Region<BaseTypes>::Region() : Region("", 1) {}
 
 template <typename BaseTypes>
 Region<BaseTypes>::Region(const StringId &region_id, int radius)
-    : id_(region_id), surface_(geometry::HexagonSurface(radius)) {
+    : scope::ScopedObject<BaseTypes>(region_id),
+    id_(region_id),
+    surface_(geometry::HexagonSurface(radius)) {
   InitNonpersistent();
 }
 

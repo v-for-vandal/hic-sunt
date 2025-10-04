@@ -57,4 +57,13 @@ TEST(StdRegion, Equality) {
   EXPECT_EQ(ref_region, test_region);
 }
 
+TEST(StdRegion, Scope) {
+  StdRegion ref_region("test", 2);
+  ASSERT_NE(ref_region.GetScope(), nullptr);
+
+  ref_region.GetScope()->AddNumericModifier("some_var", "some_key", 1.0, 2.0);
+  auto result = ref_region.GetScope()->GetNumericValue("some_var");
+  EXPECT_EQ(result, 2.0); // add=1.0 * mult=2.0
+}
+
 } // namespace hs::region

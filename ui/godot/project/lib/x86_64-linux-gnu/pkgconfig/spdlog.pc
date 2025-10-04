@@ -1,0 +1,11 @@
+prefix=/home/aserebriyskiy/Dev/hic-sunt/ui/godot/project
+includedir=${prefix}/include
+libdir=${prefix}/lib/x86_64-linux-gnu
+
+Name: libspdlog
+Description: Fast C++ logging library.
+URL: https://github.com/gabime/spdlog
+Version: 1.15.3
+Requires: fmt
+Libs: -L${libdir} -lspdlog -pthread
+Cflags: -I${includedir} -pthread -DSPDLOG_FMT_EXTERNAL -DSPDLOG_COMPILED_LIB

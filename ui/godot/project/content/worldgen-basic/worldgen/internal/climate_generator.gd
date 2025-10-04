@@ -50,6 +50,12 @@ func first_pass() -> void:
 	
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->void:
 	var radius : int = _global_context[&"region.radius"]
+	
+	var temperature := _get_temperature_at_point(region_qrs_coords, Vector2i.ZERO)
+	var precipitation := _get_precipation_at_point(region_qrs_coords, Vector2i.ZERO)
+	
+	region.scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, temperature, 0.0)
+	region.scope().add_numeric_modifier(Modifiers.ECOSYSTEM_PRECIPITATION, precipitation, 0.0)
 
 	var region_cell_lambda := func(cell_q: int, cell_r: int) ->void:
 		_cell_first_pass(region, region_qrs_coords, Vector2i(cell_q, cell_r))
@@ -58,11 +64,8 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->voi
 
 	
 func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qr_coords: Vector2i) -> void:
-	var temperature := _get_temperature_at_point(region_coords, cell_qr_coords)
-	region.set_temperature(cell_qr_coords, temperature)
-	
-	var precipitation := _get_precipation_at_point(region_coords, cell_qr_coords)
-	region.set_precipitation(cell_qr_coords, precipitation)
+	pass
+	# We can do some fine tuning here
 	
 func _distance_from_poles(region_coords: Vector2i, cell_qr_coords: Vector2i) -> float:
 	var distance := _plane.get_distance_between_cells(region_coords, cell_qr_coords,
