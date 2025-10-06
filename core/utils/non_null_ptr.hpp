@@ -26,6 +26,13 @@ public:
     return *this;
   }
   NonNullSharedPtr<T> &operator=(const NonNullSharedPtr<T> &other) = default;
+  NonNullSharedPtr<T> &operator=(const std::shared_ptr<T> &other) {
+    if(other == nullptr) {
+      reset();
+    } else {
+      value = other;
+    }
+  }
 
   operator std::shared_ptr<T>() const { return value; }
 
@@ -39,6 +46,9 @@ public:
   const auto &operator->() const { return value; }
 
   bool operator==(const NonNullSharedPtr<T> &other) const noexcept = default;
+  bool operator==(const std::shared_ptr<T> &other) const noexcept {
+    return value == other;
+  }
 
   bool operator!=(const NonNullSharedPtr<T> &other) const noexcept = default;
 

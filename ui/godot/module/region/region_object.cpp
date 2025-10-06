@@ -55,6 +55,7 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
+  ClassDB::bind_method(D_METHOD("get_cell", "coords"), &RegionObject::get_cell);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
   //ClassDB::bind_method(D_METHOD("set_biome", "coords", "biome"), &RegionObject::set_biome);
   ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"), &RegionObject::set_feature);
@@ -131,11 +132,11 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
 
   // Fill result
   Dictionary result;
-  /*
-  result["biome"] = cell.GetBiome();
   result["feature"] = cell.GetFeature();
   result["improvement"] = convert_to_dictionary(
     cell.GetImprovement());
+  /* TODO: RM
+  result["biome"] = cell.GetBiome();
   result["height"] = cell.GetHeight();
   result["temperature"] = cell.GetTemperature();
   result["precipitation"] = cell.GetPrecipitation();

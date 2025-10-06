@@ -45,9 +45,7 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->voi
 	
 func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qrs_coords: Vector2i) -> void:
 	var height := _get_height_at_point(region_coords.x + cell_qrs_coords.x, region_coords.y + cell_qrs_coords.y)
-	region.get_cell(cell_qrs_coords).scope().add_numeric_modifier(Modifiers.GEOGRAPHY_HEIGHT, height, 0)
-	
-	assert(region.get_height(cell_qrs_coords) == height)
+	region.get_cell(cell_qrs_coords).get_scope().add_numeric_modifier(Modifiers.GEOGRAPHY_HEIGHT, &"wordlgen.basic", height, 0)
 	
 	
 func _wrap_x(i: float) -> float:

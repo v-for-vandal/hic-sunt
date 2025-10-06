@@ -235,16 +235,12 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
   biome_count_.clear();
   feature_count_.clear();
   cells_with_improvements_.clear();
-  auto surface = surface_.view();
-  for (auto q = surface.q_start(); q != surface.q_end(); ++q) {
-    for (auto r = surface.r_start(); r != surface.r_end(); ++r) {
-      QRSCoords coords(q, r);
-      if (surface.Contains(coords)) {
-        auto &cell = surface.GetCell(coords);
+  GetSurface().foreach([this](QRSCoords coords, Cell<BaseTypes>& cell) {
         // Set parent scope for cell
         cell.GetScope()->SetParent(this->GetScope());
         // calculate some statistics
-        biome_count_.Add(cell.GetBiome());
+        // TODO: Restore?
+        //biome_count_.Add(cell.GetBiome());
         feature_count_[cell.GetFeature()]++;
         if (cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);
@@ -255,8 +251,7 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
         precipitation_minmax_.Account(cell.GetPrecipitation());
         */
       }
-    }
-  }
+    );
 
   ephemeral_ready_.set();
 }

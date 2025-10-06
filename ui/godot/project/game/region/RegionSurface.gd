@@ -64,7 +64,8 @@ func _clear_old_region()->void:
 	
 func update_cell(qr_coords: Vector2i) -> void:
 	var region_info : Dictionary = _region_object.get_cell_info(qr_coords)
-	var biome : String = region_info.biome
+	var biome : String = _region_object.get_cell(qr_coords).get_scope().get_string_value(
+		Modifiers.ECOSYSTEM_BIOME)
 	# convert to xy dimensions
 	var xy_coords := axial_to_map(qr_coords)
 	# fill cell

@@ -51,8 +51,6 @@ public:
 
   // Create hexagonal region. Regions are always centered around
   // (0,0,0) point and has given radius
-  // TODO: Accept id in constructor instead of static next_id
-  // Reason: next_id is not preserved when serializing
   explicit Region(const StringId &region_id, int radius);
 
   SurfaceView GetSurface() const { return surface_.view(); }

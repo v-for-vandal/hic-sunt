@@ -46,8 +46,8 @@ public:
   Scope(StringId id);
   Scope() = default;
 
-  const ScopePtr& GetParent() const { return parent_; }
-  void SetParent(const ScopePtr& parent) { parent_ = parent; }
+  const std::shared_ptr<Scope>& GetParent() const { return parent_; }
+  void SetParent(const std::shared_ptr<Scope>& parent) { parent_ = parent; }
 
   //const VariableDefinitions *Definitions() const;
 
@@ -81,7 +81,7 @@ private:
   // fixed. E.g. parent of region is always world
   // Benifit of having one parent scope set explicitly as parent is that it is
   // easier to write mods and extensions
-  ScopePtr parent_;
+  std::shared_ptr<Scope> parent_;
   // All other 'parental' scopes are considered tag-scopes and are assigned
   // or removed as game progresses
   std::vector<ScopePtr> tag_scopes_;

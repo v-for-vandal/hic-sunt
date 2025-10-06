@@ -1,6 +1,6 @@
 #include "scope_object.hpp"
 
-#include <core/utils/overriden.hpp>
+#include <core/utils/overloaded.hpp>
 
 #define ERR_FAIL_NULL_SCOPE(result) ERR_FAIL_NULL_V_MSG(scope_, result, ERR_MSG_SCOPE_IS_NULL)
 
@@ -75,11 +75,9 @@ Dictionary ScopeObject::explain_all() {
           ).set(modifier, leaf);
     };
 
-    /*
-    scope_->ExplainAllVariables(hs::utils::Overriden{
+    scope_->ExplainAllVariables(hs::utils::Overloaded{
       add_numeric_element_fn,
       add_string_element_fn});
-      */
     return result;
 
 }
