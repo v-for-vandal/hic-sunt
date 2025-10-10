@@ -17,6 +17,8 @@ void ScopeObject::_bind_methods() {
       &ScopeObject::add_numeric_modifier);
   ClassDB::bind_method(D_METHOD("add_string_modifier", "variable", "key", "value", "level"),
       &ScopeObject::add_string_modifier);
+  ClassDB::bind_method(D_METHOD("explain_all"),
+      &ScopeObject::explain_all);
 }
 
 float ScopeObject::get_numeric_value(const StringName& variable)

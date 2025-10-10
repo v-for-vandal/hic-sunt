@@ -11,6 +11,8 @@ func set_region(region: RegionObject, region_qr_coords : Variant) -> void:
 		if _current_region.get_region_id() == region.get_region_id():
 			return
 			
+	%ScopeEditor.set_scope(region.get_scope())
+			
 	var data = region.get_info()
 	
 	var data_table : Array[Array] = []
@@ -36,6 +38,7 @@ func set_cell(qr_coords: Vector2i) -> void:
 	if not cell:
 		return
 	var data = _current_region.get_cell_info(qr_coords)
+	%ScopeEditor.set_scope(cell.get_scope())
 	
 	var data_table : Array[Array] = []
 	data_table.append([&"region_id", _current_region.get_id()])

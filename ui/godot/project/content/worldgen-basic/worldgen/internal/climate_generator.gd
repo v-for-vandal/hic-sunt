@@ -64,8 +64,12 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->voi
 
 	
 func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qr_coords: Vector2i) -> void:
-	pass
+	var cell : CellObject = region.get_cell(cell_qr_coords)
+	var height : float = cell.get_scope().get_numeric_value(Modifiers.GEOGRAPHY_HEIGHT)
+	# temperature decreases at rate 6.5 celsius / 1000m
+	var temperature_modifier := (-6.5 / 1000.0) * height
 	# We can do some fine tuning here
+	cell.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"worldgen.lapse_rate", temperature_modifier, 0.0)
 	
 func _distance_from_poles(region_coords: Vector2i, cell_qr_coords: Vector2i) -> float:
 	var distance := _plane.get_distance_between_cells(region_coords, cell_qr_coords,
