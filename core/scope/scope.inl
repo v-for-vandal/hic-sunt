@@ -9,6 +9,11 @@ Scope<BaseTypes>::Scope(
   StringId id):
     id_(id)
 {
+  if( BaseTypes::IsNullToken(id_)) {
+    const uint64_t address_as_uint = reinterpret_cast<uint64_t>(this);
+    id_ = BaseTypes::StringIdFromStdString(
+      fmt::format("{:x}", address_as_uint));
+  }
 }
 
 template <typename BaseTypes>
@@ -92,7 +97,7 @@ bool Scope<BaseTypes>::AddStringModifier(const StringId &variable, const StringI
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::ExplainNumericVariable(const StringId& variable, auto&& collect_fn) {
+void Scope<BaseTypes>::ExplainNumericVariable(const StringId& variable, auto&& collect_fn) {
   auto it = numeric_variables_.find(variable);
   if (it != numeric_variables_.end()) {
       it->second.ExplainModifiers([this, &collect_fn, &variable](const StringId& modifier,
@@ -109,7 +114,7 @@ auto Scope<BaseTypes>::ExplainNumericVariable(const StringId& variable, auto&& c
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::ExplainStringVariable(const StringId& variable, auto&& collect_fn) {
+void Scope<BaseTypes>::ExplainStringVariable(const StringId& variable, auto&& collect_fn) {
   auto it = string_variables_.find(variable);
   if (it != string_variables_.end()) {
       it->second.ExplainModifiers([this, &collect_fn, &variable](const StringId& modifier,
@@ -125,7 +130,7 @@ auto Scope<BaseTypes>::ExplainStringVariable(const StringId& variable, auto&& co
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::ExplainAllVariables(auto&& collect_fn) {
+void Scope<BaseTypes>::ExplainAllVariables(auto&& collect_fn) {
     // TODO: Replace empty id with hex-string for address
     for(const auto& [k,v] : numeric_variables_) {
         v.ExplainModifiers([this, &collect_fn, &k] (const StringId& modifier,
@@ -139,6 +144,9 @@ auto Scope<BaseTypes>::ExplainAllVariables(auto&& collect_fn) {
               collect_fn(this->id_, k, modifier, value, level);
           });
     }
+  if(parent_ != nullptr) {
+      parent_->ExplainAllVariables(collect_fn);
+  }
 
 }
 

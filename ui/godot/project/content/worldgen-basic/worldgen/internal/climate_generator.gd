@@ -23,7 +23,7 @@ var _global_context : Dictionary[StringName, Variant]
 # This is actually incorrect math, but at the moment we don't care
 var _pole_1 := Vector2i(0, 0)
 # North/Source pole effect gradually decreases over this number of cells
-var _pole_effect_distance: = 3.0
+var _pole_effect_distance: = 7.0
 # This is total region radius, with margin
 var _region_radius : int = 1
 
@@ -37,8 +37,6 @@ func _init(plane: PlaneObject, config: Variant, global_context: Dictionary[Strin
 	_region_radius = _global_context[&"region.radius"] + RADIUS_MARGIN
 	# that is definetly wrong, but at the moment it will suffice
 	var world_bbox : Rect2i = _global_context[&"world.bbox"]
-	# TODO: don't use constant :)
-	_pole_effect_distance = 400
 
 	
 func first_pass() -> void:
@@ -51,12 +49,12 @@ func first_pass() -> void:
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->void:
 	var radius : int = _global_context[&"region.radius"]
 	
-	var temperature := _get_temperature_at_point(region_qrs_coords, Vector2i.ZERO)
 	var precipitation := _get_precipation_at_point(region_qrs_coords, Vector2i.ZERO)
 	
-	region.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"wordlgen.basic", temperature, 0.0)
+	_set_baseline_temperature(region, region_qrs_coords)
 	region.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_PRECIPITATION, &"wordlgen.basic", precipitation, 0.0)
 
+	
 	var region_cell_lambda := func(cell_q: int, cell_r: int) ->void:
 		_cell_first_pass(region, region_qrs_coords, Vector2i(cell_q, cell_r))
 		
@@ -71,12 +69,31 @@ func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qr_coo
 	# We can do some fine tuning here
 	cell.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"worldgen.lapse_rate", temperature_modifier, 0.0)
 	
+	# add some random fluctuation
+	var total_coords := region_coords * _region_radius + cell_qr_coords
+	var temp_fluctuation : float = _temperature_noise.get_noise_2d(total_coords.x,total_coords.y) * _TEMPERATURE_FLUCTUATION
+	cell.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"wordgeо.random_fluctuation", temp_fluctuation, 0.0)
+
+	
 func _distance_from_poles(region_coords: Vector2i, cell_qr_coords: Vector2i) -> float:
 	var distance := _plane.get_distance_between_cells(region_coords, cell_qr_coords,
 	_pole_1, Vector2i(0,0))
 	return distance
 
-	
+func _set_baseline_temperature(region: RegionObject, region_coords: Vector2i) -> void:
+	var distance_from_poles := _distance_from_poles(region_coords, Vector2i.ZERO) 
+	var j_percent := distance_from_poles / _pole_effect_distance
+	j_percent = clampf(j_percent, 0.0, 1.0)
+	var point_on_curve : float = _temperature_curve.sample(j_percent)
+	# sample_simple_range_i expects value between -1.0, 1.0
+	assert(point_on_curve >= -1.0 && point_on_curve <= 1.0)
+	var temperature : int = NoiseToolsLibrary.sample_simple_range_i(point_on_curve, _TEMPERATURE_RANGE)
+	region.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"worldgen.basic.dist_to_poles", temperature, 0.0)
+	# region.get_scope().add_numeric_modifier(&"debug.dist_to_poles_percent", &"worldgen.basic", j_percent, 0.0)
+	# region.get_scope().add_numeric_modifier(&"debug.temp_point_on_curve", &"worldgen.basic", point_on_curve, 0.0)
+	# region.get_scope().add_numeric_modifier(&"debug.distance_to_pole", &"worldgen.basic", distance_from_poles, 0.0)
+
+
 func _get_temperature_at_point(region_coords: Vector2i, cell_qr_coords: Vector2i) -> int:
 	var total_coords := region_coords * _region_radius + cell_qr_coords
 

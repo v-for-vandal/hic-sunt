@@ -44,7 +44,14 @@ public:
    */
   //Scope(StringId id, const VariableDefinitionsPtr& definitions);
   Scope(StringId id);
-  Scope() = default;
+  Scope():
+    Scope(StringId{}) {}
+  // Delete copying for now, we can do it, but we must propertly re-initialized
+  // id because id must be unique
+  Scope(const Scope&) = delete;
+  Scope& operator=(const Scope&) = delete;
+  Scope(Scope&&) = default;
+  Scope& operator=(Scope&&) = default;
 
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
   void SetParent(const std::shared_ptr<Scope>& parent) { parent_ = parent; }
@@ -61,9 +68,9 @@ public:
   bool AddStringModifier(const StringId& variable, const StringId& key,
     const StringId& value, NumericValue level);
 
-  auto ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
-  auto ExplainStringVariable(const StringId& variable, auto&& collect_fn);
-  auto ExplainAllVariables(auto&& collect_fn);
+  void ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
+  void ExplainStringVariable(const StringId& variable, auto&& collect_fn);
+  void ExplainAllVariables(auto&& collect_fn);
 
 
 private:
