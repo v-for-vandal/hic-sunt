@@ -5,8 +5,7 @@
 
 namespace hs::geometry {
 
-template <int xt, int yt, int zt>
-struct IntVectorConstant {
+template <int xt, int yt, int zt> struct IntVectorConstant {
   static constexpr int x = xt;
   static constexpr int y = yt;
   static constexpr int z = zt;
@@ -15,17 +14,16 @@ struct IntVectorConstant {
 using ZeroIntVectorConstant = IntVectorConstant<0, 0, 0>;
 using OnesIntVectorConstant = IntVectorConstant<1, 1, 1>;
 
-template <typename Tag>
-class IntDelta {
- public:
+template <typename Tag> class IntDelta {
+public:
   constexpr IntDelta() noexcept {}
   constexpr explicit IntDelta(int val) noexcept : val_(val) {}
-  constexpr IntDelta(const IntDelta&) noexcept = default;
-  constexpr IntDelta(IntDelta&&) noexcept = default;
-  constexpr IntDelta& operator=(const IntDelta&) noexcept = default;
-  constexpr IntDelta& operator=(IntDelta&&) noexcept = default;
+  constexpr IntDelta(const IntDelta &) noexcept = default;
+  constexpr IntDelta(IntDelta &&) noexcept = default;
+  constexpr IntDelta &operator=(const IntDelta &) noexcept = default;
+  constexpr IntDelta &operator=(IntDelta &&) noexcept = default;
 
-  auto operator<=>(const IntDelta& other) const noexcept = default;
+  auto operator<=>(const IntDelta &other) const noexcept = default;
 
   auto operator<=>(int val) const noexcept { return val_ <=> val; }
 
@@ -50,22 +48,21 @@ class IntDelta {
 
   int ToUnderlying() const noexcept { return val_; }
 
- private:
+private:
   int val_;
 };
 
-template <typename Tag>
-class IntAxis {
- public:
+template <typename Tag> class IntAxis {
+public:
   using Delta = IntDelta<Tag>;
   IntAxis() noexcept {}
   explicit IntAxis(int val) noexcept : val_(val) {}
-  IntAxis(const IntAxis&) noexcept = default;
-  IntAxis(IntAxis&&) noexcept = default;
-  IntAxis& operator=(const IntAxis&) noexcept = default;
-  IntAxis& operator=(IntAxis&&) noexcept = default;
+  IntAxis(const IntAxis &) noexcept = default;
+  IntAxis(IntAxis &&) noexcept = default;
+  IntAxis &operator=(const IntAxis &) noexcept = default;
+  IntAxis &operator=(IntAxis &&) noexcept = default;
 
-  auto operator<=>(const IntAxis& other) const noexcept = default;
+  auto operator<=>(const IntAxis &other) const noexcept = default;
 
   auto operator<=>(int val) const noexcept { return val_ <=> val; }
 
@@ -89,43 +86,36 @@ class IntAxis {
 
   Delta AsDelta() const noexcept { return Delta{val_}; }
 
-  template <typename H>
-  friend H AbslHashValue(H h, const IntAxis& a) {
+  template <typename H> friend H AbslHashValue(H h, const IntAxis &a) {
     return H::combine(std::move(h), a.val_);
   }
 
   // both start and end are inclusive, start could be greater than end.
   bool InRange(IntAxis start, IntAxis end) const noexcept {
-      return (val_ - start.val_) * (val_ - end.val_) <= 0;
-    }
+    return (val_ - start.val_) * (val_ - end.val_) <= 0;
+  }
 
-
- private:
+private:
   int val_;
 };
 
-template <typename Tag>
-IntAxis<Tag> abs(IntAxis<Tag> value) {
-    return IntAxis<Tag>(std::abs(value.ToUnderlying()));
+template <typename Tag> IntAxis<Tag> abs(IntAxis<Tag> value) {
+  return IntAxis<Tag>(std::abs(value.ToUnderlying()));
 }
 
-template <typename Tag>
-IntDelta<Tag> abs(IntDelta<Tag> value) {
-    return IntDelta<Tag>(std::abs(value.ToUnderlying()));
+template <typename Tag> IntDelta<Tag> abs(IntDelta<Tag> value) {
+  return IntDelta<Tag>(std::abs(value.ToUnderlying()));
 }
 
 namespace details {
 
-template <typename T>
-struct QAxisTag {};
+template <typename T> struct QAxisTag {};
 
-template <typename T>
-struct RAxisTag {};
+template <typename T> struct RAxisTag {};
 
-template <typename T>
-struct SAxisTag {};
+template <typename T> struct SAxisTag {};
 
-}  // namespace details
+} // namespace details
 template <typename CoordinateSystem>
 using QAxisBase = IntAxis<details::QAxisTag<CoordinateSystem>>;
 
@@ -153,38 +143,36 @@ struct QRSCoordinateSystem {
   using SDelta = SDeltaBase<QRSCoordinateSystem>;
 };
 
-
 namespace literals {
-  inline QRSCoordinateSystem::QAxis operator"" _q(unsigned long long int value) {
-    return QRSCoordinateSystem::QAxis{static_cast<int>(value)};
-  }
-  inline QRSCoordinateSystem::RAxis operator"" _r(unsigned long long int value) {
-    return QRSCoordinateSystem::RAxis{static_cast<int>(value)};
-  }
-  inline QRSCoordinateSystem::SAxis operator"" _s(unsigned long long int value) {
-    return QRSCoordinateSystem::SAxis{static_cast<int>(value)};
-  }
-
-  inline QRSCoordinateSystem::QDelta operator"" _dq(
-      unsigned long long int value) {
-    return QRSCoordinateSystem::QDelta{static_cast<int>(value)};
-  }
-  inline QRSCoordinateSystem::RDelta operator"" _dr(
-      unsigned long long int value) {
-    return QRSCoordinateSystem::RDelta{static_cast<int>(value)};
-  }
-  inline QRSCoordinateSystem::SDelta operator"" _ds(
-      unsigned long long int value) {
-    return QRSCoordinateSystem::SDelta{static_cast<int>(value)};
-  }
-
+inline QRSCoordinateSystem::QAxis operator""_q(unsigned long long int value) {
+  return QRSCoordinateSystem::QAxis{static_cast<int>(value)};
+}
+inline QRSCoordinateSystem::RAxis operator""_r(unsigned long long int value) {
+  return QRSCoordinateSystem::RAxis{static_cast<int>(value)};
+}
+inline QRSCoordinateSystem::SAxis operator""_s(unsigned long long int value) {
+  return QRSCoordinateSystem::SAxis{static_cast<int>(value)};
 }
 
-}  // namespace hs::geometry
+inline QRSCoordinateSystem::QDelta
+operator""_dq(unsigned long long int value) {
+  return QRSCoordinateSystem::QDelta{static_cast<int>(value)};
+}
+inline QRSCoordinateSystem::RDelta
+operator""_dr(unsigned long long int value) {
+  return QRSCoordinateSystem::RDelta{static_cast<int>(value)};
+}
+inline QRSCoordinateSystem::SDelta
+operator""_ds(unsigned long long int value) {
+  return QRSCoordinateSystem::SDelta{static_cast<int>(value)};
+}
 
-template <typename T>
-struct fmt::formatter<::hs::geometry::IntAxis<T>> {
-  constexpr auto parse(format_parse_context& ctx) const {
+} // namespace literals
+
+} // namespace hs::geometry
+
+template <typename T> struct fmt::formatter<::hs::geometry::IntAxis<T>> {
+  constexpr auto parse(format_parse_context &ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
     if (it != end && *it != '}') {
@@ -195,14 +183,13 @@ struct fmt::formatter<::hs::geometry::IntAxis<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const ::hs::geometry::IntAxis<T>& v, FormatCtx& ctx) {
+  auto format(const ::hs::geometry::IntAxis<T> &v, FormatCtx &ctx)  const {
     return fmt::format_to(ctx.out(), "{}", v.ToUnderlying());
   }
 };
 
-template <typename T>
-struct fmt::formatter<::hs::geometry::IntDelta<T>> {
-  constexpr auto parse(format_parse_context& ctx) const {
+template <typename T> struct fmt::formatter<::hs::geometry::IntDelta<T>> {
+  constexpr auto parse(format_parse_context &ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
     if (it != end && *it != '}') {
@@ -213,8 +200,7 @@ struct fmt::formatter<::hs::geometry::IntDelta<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const ::hs::geometry::IntDelta<T>& v, FormatCtx& ctx) {
+  auto format(const ::hs::geometry::IntDelta<T> &v, FormatCtx &ctx) const {
     return fmt::format_to(ctx.out(), "{}", v.ToUnderlying());
   }
 };
-

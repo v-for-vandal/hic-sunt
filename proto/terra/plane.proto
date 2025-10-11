@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "terra/cell.proto";
+import "scope/scope.proto";
 import "geometry/surface_shape.proto";
 
 package hs.proto.terra;
@@ -18,6 +19,8 @@ message Plane {
   repeated Cell off_surface = 3;
 
   int32 external_region_radius = 5;
+
+  hs.proto.scope.Scope scope = 6;
 
   // world map image. png.
   //bytes world_map_image = 4;

@@ -1,0 +1,9 @@
+prefix=/home/aserebriyskiy/Dev/hic-sunt/ui/godot/project
+includedir=${prefix}/include
+libdir=${prefix}/lib/x86_64-linux-gnu
+
+Name: fmt
+Description: hic-sunt: fmt
+Version: 11.2.0
+Libs: -L${libdir} -lfmt
+Cflags: -I${includedir}

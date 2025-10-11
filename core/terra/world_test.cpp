@@ -8,8 +8,6 @@ namespace hs::terra {
 
 using namespace ::hs::geometry::literals;
 
-TEST(World, Serialize) {
-}
+TEST(World, Serialize) {}
 
-
-}
+} // namespace hs::terra

@@ -1,17 +1,14 @@
 #pragma once
 
 namespace hs::utils {
-  struct ErrorMessage {
-    std::string message;
-  };
+struct ErrorMessage {
+  std::string message;
+};
 
-  struct ErrorsCollection {
-    std::vector<ErrorMessage> errors;
+struct ErrorsCollection {
+  std::vector<ErrorMessage> errors;
 
-    void AddError(ErrorMessage msg) {
-      errors.emplace_back(std::move(msg));
-    }
-  };
+  void AddError(ErrorMessage msg) { errors.emplace_back(std::move(msg)); }
+};
 
-
-}
+} // namespace hs::utils

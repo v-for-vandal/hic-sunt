@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package hs.proto.scope;
+
+message VariableDescriptor {
+   string name = 1;
+
+   double min = 2;
+   double max = 3;
+};
+
+message NumericVariable {
+   //double base_value = 1;
+
+   map<string, double> additions = 2;
+   map<string, double> multipliers = 3;
+}
+
+message StringVariable {
+   string value = 1;
+
+   // ideas: repeated<{value, priority}> to allow overriding
+}
+
+message Scope {
+  string id = 1;
+  repeated NumericVariable numeric_variables = 2;
+  repeated StringVariable string_variables = 3;
+
+  // We probably don't need parent_scope_id other then for verification
+  //string parent_scope_id = 4;
+  repeated string tag_scope_ids = 5;
+
+
+}
+

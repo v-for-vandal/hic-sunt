@@ -1,5 +1,3 @@
 #include "cell.hpp"
 
-namespace hs::region {
-
-}
+namespace hs::region {}

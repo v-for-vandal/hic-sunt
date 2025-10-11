@@ -14,6 +14,8 @@ namespace hs::godot {
 
         using String = ::godot::String;
 
+        using NumericValue = float;
+
         static bool IsNullToken(const auto& string) noexcept {
             return string.length() == 0;
         }

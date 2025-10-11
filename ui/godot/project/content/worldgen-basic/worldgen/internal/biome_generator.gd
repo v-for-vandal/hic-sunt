@@ -56,9 +56,9 @@ func _region_first_pass(region: RegionObject, region_qr_coords: Vector2i) ->void
 
 	
 func _cell_first_pass(region: RegionObject, cell_qr_coords: Vector2i) -> void:
-	var temperature : float = region.get_temperature(cell_qr_coords)
-	var precipitation : float = region.get_precipitation(cell_qr_coords)
-	var height : float = region.get_height(cell_qr_coords)
+	var temperature : float = region.get_cell(cell_qr_coords).get_scope().get_numeric_value(Modifiers.ECOSYSTEM_TEMPERATURE)
+	var precipitation : float = region.get_cell(cell_qr_coords).get_scope().get_numeric_value(Modifiers.ECOSYSTEM_PRECIPITATION)
+	var height : float = region.get_cell(cell_qr_coords).get_scope().get_numeric_value(Modifiers.GEOGRAPHY_HEIGHT)
 	
 	var biome : StringName
 	if height >= 0:
@@ -66,7 +66,7 @@ func _cell_first_pass(region: RegionObject, cell_qr_coords: Vector2i) -> void:
 	else:
 		biome = &"core.biome.ocean"
 		
-	region.set_biome(cell_qr_coords, biome)
+	region.get_cell(cell_qr_coords).get_scope().add_string_modifier(Modifiers.ECOSYSTEM_BIOME, &"worldgen.basic", biome, Modifiers.ECOSYSTEM_BIOME_MAX_LEVEL)
 	
 
 func _get_biome(temperature: int, precipation: int) -> StringName:

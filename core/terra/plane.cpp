@@ -1,6 +1,3 @@
 #include "plane.hpp"
 
-namespace hs::terra {
-
-}
-
+namespace hs::terra {}

@@ -11,6 +11,8 @@ func set_region(region: RegionObject, region_qr_coords : Variant) -> void:
 		if _current_region.get_region_id() == region.get_region_id():
 			return
 			
+	%ScopeEditor.set_scope(region.get_scope())
+			
 	var data = region.get_info()
 	
 	var data_table : Array[Array] = []
@@ -19,7 +21,10 @@ func set_region(region: RegionObject, region_qr_coords : Variant) -> void:
 		data_table.append([&"qrs", QrsCoordsLibrary.qr_to_qrs(region_qr_coords as Vector2i)])
 	for key in data:
 		data_table.append([key, data[key]])
-		
+	data_table.append([&"height", region.get_scope().get_numeric_value(Modifiers.GEOGRAPHY_HEIGHT)])
+	data_table.append([&"temperature", region.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_TEMPERATURE)])
+	data_table.append([&"precipitation", region.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_PRECIPITATION)])
+
 	%CellInfo.set_data(data_table)
 	_current_region = region
 	
@@ -28,17 +33,22 @@ func set_cell(qr_coords: Vector2i) -> void:
 			return
 	if _current_region == null:
 		return
-			
+	
+	var cell = _current_region.get_cell(qr_coords)
+	if not cell:
+		return
 	var data = _current_region.get_cell_info(qr_coords)
+	%ScopeEditor.set_scope(cell.get_scope())
 	
 	var data_table : Array[Array] = []
 	data_table.append([&"region_id", _current_region.get_id()])
 	data_table.append([&"qrs", QrsCoordsLibrary.qr_to_qrs(qr_coords)])
+	data_table.append([&"height", cell.get_scope().get_numeric_value(Modifiers.GEOGRAPHY_HEIGHT)])
+	data_table.append([&"temperature", cell.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_TEMPERATURE)])
+	data_table.append([&"precipitation", cell.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_PRECIPITATION)])
 
 	for key in data:
 		data_table.append([key, data[key]])
-	
-	data_table.append(["r height", _current_region.get_height(qr_coords)])
 		
 	%CellInfo.set_data(data_table)
 	_current_cell = qr_coords

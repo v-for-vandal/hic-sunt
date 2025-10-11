@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://cb5s3dxd63nmp"]
+
+[ext_resource type="Script" uid="uid://w0wbhpobsp4n" path="res://ui/system/debug/scope_editor.gd" id="1_1kqo3"]
+
+[node name="ScopeEditor" type="VBoxContainer"]
+custom_minimum_size = Vector2(100, 100)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_1kqo3")
+
+[node name="Tree" type="Tree" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 3
+columns = 3
+column_titles_visible = true

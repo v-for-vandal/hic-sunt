@@ -23,22 +23,21 @@ template<typename T>
 inline void Coords<T>::SetUndefined() noexcept { *this = kUndefinedCoords<T>; }
 #endif
 
-template<typename T>
-inline Coords<T> Coords<T>::operator+(const DeltaCoords& second) const noexcept {
+template <typename T>
+inline Coords<T>
+Coords<T>::operator+(const DeltaCoords &second) const noexcept {
   return Coords{q() + second.q(), r() + second.r()};
 }
 
-template<typename T>
+template <typename T>
 inline Coords<T> Coords<T>::operator*(const int mult) const noexcept {
   return Coords{q() * mult, r() * mult};
 }
 
-template<typename T>
-inline DeltaCoords<T> Coords<T>::operator-(const Coords<T>& second) const noexcept {
-  return DeltaCoords{
-      q() - second.q(), r() - second.r()};
+template <typename T>
+inline DeltaCoords<T>
+Coords<T>::operator-(const Coords<T> &second) const noexcept {
+  return DeltaCoords{q() - second.q(), r() - second.r()};
 }
 
-
-}
-
+} // namespace hs::geometry

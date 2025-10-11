@@ -2,25 +2,20 @@
 
 namespace hs::geometry {
 
-    enum class Rotation {
-      kNoRotation,
-      kRotation90,
-      kRotation180,
-      kRotation270,
+enum class Rotation {
+  kNoRotation,
+  kRotation90,
+  kRotation180,
+  kRotation270,
 
-      kSize
-    };
+  kSize
+};
 
-    enum class kMirror {
-      kNoMirror,
-      kMirror,
-      kSize
-    };
+enum class kMirror { kNoMirror, kMirror, kSize };
 
-    struct Transform {
-      Rotation rotation{Rotation::kNoRotation};
-      Mirror mirror{Rotation::kNoMirror};
-    };
+struct Transform {
+  Rotation rotation{Rotation::kNoRotation};
+  Mirror mirror{Rotation::kNoMirror};
+};
 
-}
-
+} // namespace hs::geometry

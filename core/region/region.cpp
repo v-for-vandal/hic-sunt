@@ -1,5 +1,3 @@
 #include "region.hpp"
 
-namespace hs::region {
-
-}
+namespace hs::region {}

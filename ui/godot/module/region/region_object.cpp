@@ -38,35 +38,46 @@ double RegionObject::get_##name(Vector2i coords) const {\
   return result;\
 }
 
+#define ERR_FAIL_NULL_TARGET_REGION(region, result) ERR_FAIL_NULL_V_MSG(region, result, ERR_MSG_REGION_IS_NULL)
+#define ERR_FAIL_NULL_REGION(result) ERR_FAIL_NULL_TARGET_REGION(region_, result)
+
 namespace hs::godot {
 
+static constexpr const char* ERR_MSG_REGION_IS_NULL = "null-containing region object";
+
+
 void RegionObject::_bind_methods() {
+  ScopeMixin::_bind_methods<RegionObject>();
+
   ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_id"), &RegionObject::get_region_id);
   ClassDB::bind_method(D_METHOD("get_info"), &RegionObject::get_info);
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
+  ClassDB::bind_method(D_METHOD("get_cell", "coords"), &RegionObject::get_cell);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
-  ClassDB::bind_method(D_METHOD("set_biome", "coords", "biome"), &RegionObject::set_biome);
+  //ClassDB::bind_method(D_METHOD("set_biome", "coords", "biome"), &RegionObject::set_biome);
   ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"), &RegionObject::set_feature);
   ClassDB::bind_method(D_METHOD("set_improvement", "coords", "improvement"), &RegionObject::set_improvement);
   ClassDB::bind_method(D_METHOD("get_available_improvements"), &RegionObject::get_available_improvements);
   ClassDB::bind_method(D_METHOD("get_pnl_statement", "ruleset"), &RegionObject::get_pnl_statement);
   ClassDB::bind_method(D_METHOD("get_jobs", "ruleset"), &RegionObject::get_jobs);
 
+  /* TODO: RM ?
   ClassDB::bind_method(D_METHOD("set_data_string", "coords", "key", "value"), &RegionObject::set_data_string);
   ClassDB::bind_method(D_METHOD("has_data_string", "coords", "key" ), &RegionObject::has_data_string);
   ClassDB::bind_method(D_METHOD("get_data_string", "coords", "key" ), &RegionObject::get_data_string);
   ClassDB::bind_method(D_METHOD("set_data_numeric", "coords", "key", "value"), &RegionObject::set_data_numeric);
   ClassDB::bind_method(D_METHOD("has_data_numeric", "coords", "key" ), &RegionObject::has_data_numeric);
   ClassDB::bind_method(D_METHOD("get_data_numeric", "coords", "key" ), &RegionObject::get_data_numeric);
-  ClassDB::bind_method(D_METHOD("get_height", "coords" ), &RegionObject::get_height);
-  ClassDB::bind_method(D_METHOD("set_height", "coords", "height"  ), &RegionObject::set_height);
-  ClassDB::bind_method(D_METHOD("get_temperature", "coords" ), &RegionObject::get_temperature);
-  ClassDB::bind_method(D_METHOD("set_temperature", "coords", "temperature"  ), &RegionObject::set_temperature);
-  ClassDB::bind_method(D_METHOD("get_precipitation", "coords" ), &RegionObject::get_precipitation);
-  ClassDB::bind_method(D_METHOD("set_precipitation", "coords", "precipitation"  ), &RegionObject::set_precipitation);
+  */
+  //ClassDB::bind_method(D_METHOD("get_height", "coords" ), &RegionObject::get_height);
+  //ClassDB::bind_method(D_METHOD("set_height", "coords", "height"  ), &RegionObject::set_height);
+  //ClassDB::bind_method(D_METHOD("get_temperature", "coords" ), &RegionObject::get_temperature);
+  //ClassDB::bind_method(D_METHOD("set_temperature", "coords", "temperature"  ), &RegionObject::set_temperature);
+  //ClassDB::bind_method(D_METHOD("get_precipitation", "coords" ), &RegionObject::get_precipitation);
+  //ClassDB::bind_method(D_METHOD("set_precipitation", "coords", "precipitation"  ), &RegionObject::set_precipitation);
   ClassDB::bind_method(D_METHOD("get_region_id"), &RegionObject::get_region_id); // deprecated
 
   // iterations
@@ -79,15 +90,21 @@ void RegionObject::_bind_methods() {
     );
 }
 
+ScopePtr RegionObject::GetScope() const
+{
+  ERR_FAIL_NULL_REGION(ScopePtr{});
+
+  return region_->GetScope();
+}
+
 Rect2i RegionObject::get_dimensions() const {
-  if(!region_) {
-    return Rect2i{
+  auto result =  Rect2i{
       Vector2i{0,0},
       Vector2i{1,1}
     };
-  }
+  ERR_FAIL_NULL_REGION(result);
 
-  return Rect2i{
+  result = Rect2i{
     Vector2i{
       region_->GetSurface().q_start().ToUnderlying(),
       region_->GetSurface().r_start().ToUnderlying()
@@ -97,6 +114,8 @@ Rect2i RegionObject::get_dimensions() const {
       region_->GetSurface().r_size().ToUnderlying()
     }
   };
+
+  return result;
 }
 
 Dictionary RegionObject::get_cell_info(Vector2i coords) const {
@@ -113,13 +132,15 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
 
   // Fill result
   Dictionary result;
-  result["biome"] = cell.GetBiome();
   result["feature"] = cell.GetFeature();
   result["improvement"] = convert_to_dictionary(
     cell.GetImprovement());
+  /* TODO: RM
+  result["biome"] = cell.GetBiome();
   result["height"] = cell.GetHeight();
   result["temperature"] = cell.GetTemperature();
   result["precipitation"] = cell.GetPrecipitation();
+  */
 
   return result;
 }
@@ -135,6 +156,7 @@ Dictionary RegionObject::convert_to_dictionary(const hs::proto::region::Improvem
   return result;
 }
 
+/*
 bool RegionObject::set_biome(Vector2i coords, String biome) const
 {
   if(!region_) {
@@ -150,6 +172,7 @@ bool RegionObject::set_biome(Vector2i coords, String biome) const
 
   return success;
 }
+*/
 
 
 #if 0
@@ -225,9 +248,7 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const
 }
 
 Dictionary RegionObject::get_info() const {
-    if(!region_) {
-        return {};
-    }
+  ERR_FAIL_NULL_REGION(Dictionary{});
   return RegionObject::make_region_info(*region_);
 }
 
@@ -245,6 +266,7 @@ Dictionary RegionObject::make_region_info(const Region& region) {
   }
   result["city_id"] = region.GetCityId();
   result["region_id"] = region.GetId();
+  /* TODO: RM
   const auto height_range = region.GetHeightRange();
   result["min_height"] = height_range.first;
   result["max_height"] = height_range.second;
@@ -254,6 +276,7 @@ Dictionary RegionObject::make_region_info(const Region& region) {
   const auto precipitation_range = region.GetPrecipitationRange();
   result["min_precipitation"] = precipitation_range.first;
   result["max_precipitation"] = precipitation_range.second;
+  */
 
   return result;
 }
@@ -263,39 +286,33 @@ Array RegionObject::get_available_improvements() const {
 }
 
 bool RegionObject::contains(Vector2i coords) const {
+  ERR_FAIL_NULL_REGION(false);
   auto qrs_coords = cast_qrs(coords);
-
-  if(!region_) {
-    return false;
-  }
 
   return region_->GetSurface().Contains(qrs_coords);
 }
 
 String RegionObject::get_region_id() const {
-  if(!region_) {
-    return {};
-  }
-
+  ERR_FAIL_NULL_REGION(String{});
   return region_->GetId();
 
 }
 
 String RegionObject::get_city_id() const {
-  ERR_FAIL_NULL_V_MSG(region_, String{}, "null-containing region object");
+  ERR_FAIL_NULL_REGION(String{});
 
   return region_->GetCityId();
 }
 
 bool RegionObject::set_city_id(String city_id) const {
-  ERR_FAIL_NULL_V_MSG(region_, false, "null-containing region object");
+  ERR_FAIL_NULL_REGION(false);
 
   return region_->SetCityId(city_id);
 }
 
 Ref<PnlObject> RegionObject::get_pnl_statement(Ref<RulesetObject> ruleset) const {
-  ERR_FAIL_NULL_V_MSG(region_, Ref<RegionObject>{}, "null-containing region object");
-  ERR_FAIL_NULL_V_MSG(ruleset, Ref<RegionObject>{}, "null-containing ruleset object");
+  ERR_FAIL_NULL_REGION(Ref<PnlObject>{});
+  ERR_FAIL_NULL_V_MSG(ruleset, Ref<PnlObject>{}, "null-containing ruleset object");
 
   Ref<PnlObject> result(memnew(PnlObject(
         region_->BuildPnlStatement(ruleset->GetRuleSet())
@@ -346,6 +363,8 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
   return result;
 }
 
+/*
+
 double RegionObject::get_data_numeric(Vector2i coords,const StringName& key) const noexcept {
   auto qrs_coords = cast_qrs(coords);
     return region_->GetDataNumeric(qrs_coords, key);
@@ -378,6 +397,7 @@ bool RegionObject::has_data_string(Vector2i coords,const StringName& key) const 
   auto qrs_coords = cast_qrs(coords);
     return region_->HasDataString(qrs_coords,key);
 }
+*/
 
 void RegionObject::emit_signals_for_cell(Vector2i coords, int flags) const
 {
@@ -393,7 +413,19 @@ void RegionObject::foreach(const Callable& callback) {
     });
 }
 
+Ref<CellObject> RegionObject::get_cell(Vector2i coords) {
+  ERR_FAIL_NULL_REGION(Ref<CellObject>{});
+  auto qrs_coords = cast_qrs(coords);
+
+  Ref<CellObject> result(memnew(CellObject(
+        region_, qrs_coords)));
+  ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create cell object");
+  return result;
+}
+
+/* TODO: RM
 SETTER_GETTER_FLOAT(height, Height);
 SETTER_GETTER_FLOAT(temperature, Temperature);
 SETTER_GETTER_FLOAT(precipitation, Precipitation);
+*/
 }
