@@ -65,8 +65,8 @@ Ref<RegionObject> PlaneObject::get_region_by_id(String region_id) const {
 }
 
 void PlaneObject::foreach_surface(const Callable& callback) {
-  data_->GetSurface().foreach ([&callback, data(this->data_)](QRSCoords coords,
-                                                              Cell& cell) {
+  data_->GetSurface().Foreach([&callback, data(this->data_)](QRSCoords coords,
+                                                             Cell& cell) {
     Ref<RegionObject> region(memnew(
         RegionObject(data->GetSurface().GetCell(coords).GetRegionPtr())));
     callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying(), region);

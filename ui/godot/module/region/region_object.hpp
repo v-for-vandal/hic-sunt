@@ -34,6 +34,10 @@ class RegionObject : public RefCounted, public ScopeMixin {
  public:
   ScopePtr GetScope() const;
   Ref<ScopeObject> get_scope() const { return ScopeMixin::get_scope(); }
+  // iterates over cells and gets N most frequent values of given variable
+  // For values with eqaul frequency, sort by alphabet
+  TypedArray<StringName> get_topn_string_values(StringName variable,
+                                                int N) const;
   Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
   bool set_feature(Vector2i coords, String feature) const;

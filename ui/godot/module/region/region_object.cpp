@@ -59,6 +59,8 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"),
                        &RegionObject::set_city_id);
+  ClassDB::bind_method(D_METHOD("get_topn_string_values", "variable", "N"),
+                       &RegionObject::get_topn_string_values);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"),
                        &RegionObject::get_cell_info);
   ClassDB::bind_method(D_METHOD("get_cell", "coords"), &RegionObject::get_cell);
@@ -116,6 +118,36 @@ ScopePtr RegionObject::GetScope() const {
   ERR_FAIL_NULL_REGION(ScopePtr{});
 
   return region_->GetScope();
+}
+
+TypedArray<StringName> RegionObject::get_topn_string_values(StringName variable,
+                                                            int N) const {
+  std::unordered_map<StringName, size_t> count;
+
+  std::vector<std::pair<size_t, StringName>> topN;
+
+  region_->GetSurface().Foreach([&count, variable](auto, auto& cell) {
+    StringName value = cell.GetScope()->GetStringValue(variable);
+    count[value]++;
+  });
+
+  topN.reserve(count.size());
+
+  for (auto& [k, v] : count) {
+    topN.push_back(std::make_pair(v, k));
+  }
+
+  N = std::min<int>(N, topN.size());
+  std::partial_sort(topN.begin(), topN.begin() + N, topN.end());
+
+  topN.resize(N);
+
+  TypedArray<StringName> result;
+  for (auto& [k, v] : topN) {
+    result.push_back(v);
+  }
+
+  return result;
 }
 
 Rect2i RegionObject::get_dimensions() const {
@@ -413,7 +445,7 @@ void RegionObject::emit_signals_for_cell(Vector2i coords, int flags) const {
 
 void RegionObject::foreach (const Callable& callback) {
   using Cell = typename Region::Surface::Cell;
-  region_->GetSurface().foreach ([&callback](QRSCoords coords, Cell& cell) {
+  region_->GetSurface().Foreach([&callback](QRSCoords coords, Cell& cell) {
     callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying());
   });
 }

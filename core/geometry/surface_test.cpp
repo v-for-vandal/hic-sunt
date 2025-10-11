@@ -39,7 +39,7 @@ TEST(Surface, RhombusForEach) {
     visited.insert(coords);
   };
 
-  target.view().foreach (visitor);
+  target.view().Foreach(visitor);
 
   EXPECT_EQ(visited.size(), (6 + 1) * (7 + 1));
 }
@@ -72,7 +72,7 @@ TEST(Surface, HexagonForEach) {
     visited.insert(coords);
   };
 
-  target.view().foreach (visitor);
+  target.view().Foreach(visitor);
 
   EXPECT_EQ(visited.size(), 37);
 }

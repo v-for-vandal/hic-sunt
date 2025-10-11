@@ -53,17 +53,29 @@ func load_plane(plane_object : PlaneObject) -> void:
 			if not _plane_object.contains(qr_coords):
 				print("skipping non-existing world cell ", qr_coords)
 				continue
-			var region_info : Dictionary = _plane_object.get_region_info(qr_coords)
-			if region_info.is_empty():
+				
+			var region := _plane_object.get_region(qr_coords)
+			if not region:
 				push_error("Can't get region at: ", qr_coords)
 				continue
+			var topBiomes := region.get_topn_string_values(Modifiers.ECOSYSTEM_BIOME, 1)
+			if topBiomes.is_empty():
+				push_error("No biome at all in region at: ", qr_coords)
+				continue
 				
-			var top_terrain: Array = region_info.top_biome
-			var terrain : String = "core.biome.none"
-			if len(top_terrain) > 0:
-				terrain = top_terrain[1]
+			var terrain : StringName = &"core.biome.none"
+			terrain = topBiomes[0]
+			
+			
+			
+			# var region_info : Dictionary = _plane_object.get_region_info(qr_coords)
+			#if region_info.is_empty():
+			#	push_error("Can't get region at: ", qr_coords)
+			#	continue
 				
-			var has_city : bool = not region_info.city_id.is_empty()
+				
+			# var has_city : bool = not region_info.city_id.is_empty()
+			var has_city : bool = false
 			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
 			# convert to xy dimensions
 			var xy_coords := axial_to_map(qr_coords)

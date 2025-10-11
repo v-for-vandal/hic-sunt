@@ -70,7 +70,7 @@ TEST(StdRegion, CellScopeParent) {
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
 
-  region.GetSurface().foreach ([&region](auto, auto& cell) {
+  region.GetSurface().Foreach([&region](auto, auto& cell) {
     ASSERT_EQ(cell.GetScope()->GetParent(), region.GetScope());
   });
 }

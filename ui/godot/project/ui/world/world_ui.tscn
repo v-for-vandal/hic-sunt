@@ -63,12 +63,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+current_tab = 0
 script = ExtResource("3_fovtq")
 
 [node name="CellInfo" type="GridContainer" parent="InfoTabContainer"]
 layout_mode = 2
 columns = 2
 script = ExtResource("4_ye4d0")
+metadata/_tab_index = 0
 
 [connection signal="world_cell_selected" from="." to="InfoTabContainer/CellInfo" method="_on_world_cell_selected"]
 [connection signal="toggled" from="TopPanel/OptionsButton" to="." method="_on_options_button_toggled"]
