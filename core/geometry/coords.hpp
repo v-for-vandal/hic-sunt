@@ -11,8 +11,9 @@ namespace hs::geometry {
 
 namespace details {
 
-template <typename QAxis, typename RAxis, typename SAxis> class QRSCompact {
-public:
+template <typename QAxis, typename RAxis, typename SAxis>
+class QRSCompact {
+ public:
   QRSCompact(QAxis q, RAxis r) : q_(q), r_(r) {}
 
   QRSCompact() noexcept = default;
@@ -29,11 +30,12 @@ public:
   RAxis r_{0};
 };
 
-} // namespace details
+}  // namespace details
 
 /* Axial coordinate system */
-template <typename CoordinateSystem> class DeltaCoords {
-public:
+template <typename CoordinateSystem>
+class DeltaCoords {
+ public:
   using QDelta = typename CoordinateSystem::QDelta;
   using RDelta = typename CoordinateSystem::RDelta;
   using SDelta = typename CoordinateSystem::SDelta;
@@ -51,7 +53,7 @@ public:
   static DeltaCoords GetUndefinedDelta();
   */
 
-private:
+ private:
   details::QRSCompact<QDelta, RDelta, SDelta> data_;
 };
 
@@ -80,8 +82,9 @@ private:
 
 #endif
 
-template <typename CoordinateSystem> class Coords {
-public:
+template <typename CoordinateSystem>
+class Coords {
+ public:
   using DeltaCoords = ::hs::geometry::DeltaCoords<CoordinateSystem>;
   using QAxis = typename CoordinateSystem::QAxis;
   using RAxis = typename CoordinateSystem::RAxis;
@@ -114,13 +117,14 @@ public:
 
   bool operator==(const Coords &) const noexcept = default;
 
-  template <typename H> friend H AbslHashValue(H h, const Coords &c) {
+  template <typename H>
+  friend H AbslHashValue(H h, const Coords &c) {
     return H::combine(std::move(h), c.data_.q(), c.data_.r());
   }
 
-#define COORDS_CMP(op)                                                         \
-  bool operator op(const Coords &other) const noexcept {                       \
-    return q() op other.q() && r() op other.r() && s() op other.s();           \
+#define COORDS_CMP(op)                                               \
+  bool operator op(const Coords &other) const noexcept {             \
+    return q() op other.q() && r() op other.r() && s() op other.s(); \
   }
 
   COORDS_CMP(<)
@@ -132,13 +136,14 @@ public:
   DeltaCoords operator-(const Coords &second) const noexcept;
   Coords operator*(const int mult) const noexcept;
 
-private:
+ private:
   details::QRSCompact<QAxis, RAxis, SAxis> data_;
 };
 
-} // namespace hs::geometry
+}  // namespace hs::geometry
 
-template <typename T> struct fmt::formatter<hs::geometry::Coords<T>> {
+template <typename T>
+struct fmt::formatter<hs::geometry::Coords<T>> {
   constexpr auto parse(format_parse_context &ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:

@@ -1,10 +1,10 @@
 #pragma once
 
+#include <geometry/surface_shape.pb.h>
+
 #include <core/geometry/box.hpp>
 #include <core/geometry/coords.hpp>
 #include <core/utils/serialize.hpp>
-#include <geometry/surface_shape.pb.h>
-
 #include <mdspan>
 
 namespace hs::geometry {
@@ -12,7 +12,8 @@ namespace hs::geometry {
 class HexagonSurface;
 class RhombusSurface;
 
-template <typename CoordinateSystem> class SurfaceShape;
+template <typename CoordinateSystem>
+class SurfaceShape;
 
 HexagonSurface ParseFrom(const proto::geometry::HexagonSurface &source,
                          serialize::To<HexagonSurface>);
@@ -22,7 +23,7 @@ void SerializeTo(const HexagonSurface &source,
 
 // Hexagon is centered on (0,0,0)
 class HexagonSurface {
-public:
+ public:
   using CoordinateSystem = geometry::QRSCoordinateSystem;
   using Coords = geometry::Coords<CoordinateSystem>;
   using Box = geometry::Box<CoordinateSystem>;
@@ -46,7 +47,6 @@ public:
   Box BoundingBox() const noexcept { return bounding_box_; }
 
   bool Contains(Coords coords) const noexcept {
-
     using std::abs;
 
     return abs(coords.q()).ToUnderlying() <= radius_ &&
@@ -57,14 +57,14 @@ public:
   bool operator==(const HexagonSurface &) const = default;
   bool operator!=(const HexagonSurface &) const = default;
 
-private:
+ private:
   friend HexagonSurface ParseFrom(const proto::geometry::HexagonSurface &source,
                                   serialize::To<HexagonSurface>);
 
   friend void SerializeTo(const HexagonSurface &source,
                           proto::geometry::HexagonSurface &target);
 
-private:
+ private:
   int radius_{1};
   Box bounding_box_{Coords{QAxis{-1}, RAxis{-1}}, Coords{QAxis{2}, RAxis{2}}};
 };
@@ -77,7 +77,7 @@ void SerializeTo(const RhombusSurface &source,
 // Uses all available cells in the box. Shape is a bit weird, this class is
 // used mostly as placeholder
 class RhombusSurface {
-public:
+ public:
   using CoordinateSystem = geometry::QRSCoordinateSystem;
   using Coords = geometry::Coords<CoordinateSystem>;
   using Box = geometry::Box<CoordinateSystem>;
@@ -99,30 +99,32 @@ public:
   bool operator==(const RhombusSurface &) const = default;
   bool operator!=(const RhombusSurface &) const = default;
 
-private:
+ private:
   friend RhombusSurface ParseFrom(const proto::geometry::RhombusSurface &source,
                                   serialize::To<RhombusSurface>);
 
   friend void SerializeTo(const RhombusSurface &source,
                           proto::geometry::RhombusSurface &target);
 
-private:
+ private:
   Box bounding_box_{Coords{QAxis{-1}, RAxis{-1}}, Coords{QAxis{2}, RAxis{2}}};
 };
 
 // This class is not defined because surface shape is highly dependent on
 // coordinate system
-template <typename CoordinateSystem> class SurfaceShape;
+template <typename CoordinateSystem>
+class SurfaceShape;
 
-SurfaceShape<geometry::QRSCoordinateSystem>
-ParseFrom(const proto::geometry::SurfaceShape &source,
-          serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>);
+SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(
+    const proto::geometry::SurfaceShape &source,
+    serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>);
 void SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem> &source,
                  proto::geometry::SurfaceShape &target);
 
 // Implementation of SurfaceShape for QRSCoordinateSystem
-template <> class SurfaceShape<geometry::QRSCoordinateSystem> {
-public:
+template <>
+class SurfaceShape<geometry::QRSCoordinateSystem> {
+ public:
   using CoordinateSystem = geometry::QRSCoordinateSystem;
   using Coords = geometry::Coords<CoordinateSystem>;
   using Box = geometry::Box<CoordinateSystem>;
@@ -143,18 +145,18 @@ public:
   bool operator==(const SurfaceShape &) const = default;
   bool operator!=(const SurfaceShape &) const = default;
 
-private:
-  friend SurfaceShape<geometry::QRSCoordinateSystem>
-  ParseFrom(const proto::geometry::SurfaceShape &source,
-            serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>);
-  friend void
-  SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem> &source,
-              proto::geometry::SurfaceShape &target);
+ private:
+  friend SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(
+      const proto::geometry::SurfaceShape &source,
+      serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>);
+  friend void SerializeTo(
+      const SurfaceShape<geometry::QRSCoordinateSystem> &source,
+      proto::geometry::SurfaceShape &target);
 
-private:
+ private:
   std::variant<RhombusSurface, HexagonSurface> data_;
 };
 
-} // namespace hs::geometry
+}  // namespace hs::geometry
 
 #include "surface_shape.inl"

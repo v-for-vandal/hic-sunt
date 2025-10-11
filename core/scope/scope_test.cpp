@@ -1,9 +1,9 @@
 #include "scope.hpp"
 
+#include <gtest/gtest.h>
+
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
-
-#include <gtest/gtest.h>
 
 namespace hs::scope {
 
@@ -11,9 +11,9 @@ using StdScope = Scope<StdBaseTypes>;
 using StdScopePtr = ScopePtr<StdBaseTypes>;
 
 TEST(StdScope, Create) {
-    StdScope stack_scope;
+  StdScope stack_scope;
 
-    StdScopePtr ptr_scope;
+  StdScopePtr ptr_scope;
 }
 
 TEST(StdScope, NumericVariable) {
@@ -21,7 +21,7 @@ TEST(StdScope, NumericVariable) {
 
   scope.AddNumericModifier("some_var", "some_key", 1.0, 2.0);
   auto result = scope.GetNumericValue("some_var");
-  EXPECT_EQ(result, 3.0); // add=1.0 * (1 + mult=2.0)
+  EXPECT_EQ(result, 3.0);  // add=1.0 * (1 + mult=2.0)
 }
 
 TEST(StdScope, InheritanceParent) {
@@ -33,7 +33,7 @@ TEST(StdScope, InheritanceParent) {
   scope.AddNumericModifier("some_var", "some_key", 1.0, 1.0);
   parent_scope->AddNumericModifier("some_var", "other_key", 1.0, 1.0);
   auto result = scope.GetNumericValue("some_var");
-  EXPECT_EQ(result, 6.0); // add=(1+1) * (1 + mult=(1+1))
+  EXPECT_EQ(result, 6.0);  // add=(1+1) * (1 + mult=(1+1))
 }
 
-}
+}  // namespace hs::scope

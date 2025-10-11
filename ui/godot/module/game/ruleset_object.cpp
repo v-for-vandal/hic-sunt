@@ -5,14 +5,21 @@
 namespace hs::godot {
 
 void RulesetObject::_bind_methods() {
-  ClassDB::bind_method(D_METHOD("get_all_region_improvements"), &RulesetObject::get_all_region_improvements);
+  ClassDB::bind_method(D_METHOD("get_all_region_improvements"),
+                       &RulesetObject::get_all_region_improvements);
   ClassDB::bind_method(D_METHOD("get_biomes"), &RulesetObject::get_biomes);
-  ClassDB::bind_method(D_METHOD("get_all_resources"), &RulesetObject::get_all_resources);
-  ClassDB::bind_method(D_METHOD("get_atlas_render"), &RulesetObject::get_atlas_render);
-  ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"), &RulesetObject::get_improvement_info);
-  ClassDB::bind_method(D_METHOD("get_job_info", "job_id"), &RulesetObject::get_job_info);
-  ClassDB::bind_method(D_METHOD("get_project_info", "project_id"), &RulesetObject::get_project_info);
-  ClassDB::bind_static_method("RulesetObject", D_METHOD("load", "folder_path"), &RulesetObject::load);
+  ClassDB::bind_method(D_METHOD("get_all_resources"),
+                       &RulesetObject::get_all_resources);
+  ClassDB::bind_method(D_METHOD("get_atlas_render"),
+                       &RulesetObject::get_atlas_render);
+  ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"),
+                       &RulesetObject::get_improvement_info);
+  ClassDB::bind_method(D_METHOD("get_job_info", "job_id"),
+                       &RulesetObject::get_job_info);
+  ClassDB::bind_method(D_METHOD("get_project_info", "project_id"),
+                       &RulesetObject::get_project_info);
+  ClassDB::bind_static_method("RulesetObject", D_METHOD("load", "folder_path"),
+                              &RulesetObject::load);
 }
 
 Array RulesetObject::get_biomes() const {
@@ -20,14 +27,15 @@ Array RulesetObject::get_biomes() const {
 
   const auto& biome = ruleset_.GetBiomes();
 
-  for(const auto& biome_type : biome.biomes()) {
+  for (const auto& biome_type : biome.biomes()) {
     result.append(convert_biome_type(biome_type));
   }
 
   return result;
 }
 
-Dictionary RulesetObject::convert_biome_type(const hs::proto::ruleset::Biome& biome_type) {
+Dictionary RulesetObject::convert_biome_type(
+    const hs::proto::ruleset::Biome& biome_type) {
   Dictionary result;
   result["id"] = biome_type.id().c_str();
 
@@ -37,21 +45,21 @@ Dictionary RulesetObject::convert_biome_type(const hs::proto::ruleset::Biome& bi
 Dictionary RulesetObject::get_atlas_render() const {
   Dictionary result;
 
-  for(auto& render_info : ruleset_.GetRendering().atlas_rendering()) {
+  for (auto& render_info : ruleset_.GetRendering().atlas_rendering()) {
     result[render_info.id().c_str()] = convert_render(render_info);
   }
 
   return result;
 }
 
-Dictionary RulesetObject::convert_improvement(const hs::proto::ruleset::RegionImprovement& improvement_type)
-{
+Dictionary RulesetObject::convert_improvement(
+    const hs::proto::ruleset::RegionImprovement& improvement_type) {
   Dictionary result;
   result["id"] = improvement_type.id().c_str();
 
   {
     Dictionary cost;
-    for(const auto& [k,v] : improvement_type.cost().amounts()) {
+    for (const auto& [k, v] : improvement_type.cost().amounts()) {
       cost[k.c_str()] = v;
     }
     result["cost"] = std::move(cost);
@@ -60,7 +68,8 @@ Dictionary RulesetObject::convert_improvement(const hs::proto::ruleset::RegionIm
   return result;
 }
 
-Dictionary RulesetObject::convert_render(const hs::proto::render::AtlasRender& render) {
+Dictionary RulesetObject::convert_render(
+    const hs::proto::render::AtlasRender& render) {
   Dictionary result;
   result["resource"] = render.resource().c_str();
   result["source_id"] = render.source_id();
@@ -73,7 +82,7 @@ Dictionary RulesetObject::convert_render(const hs::proto::render::AtlasRender& r
     if (render.atlas_coords_size() > 0) {
       y = render.atlas_coords(1);
     }
-    result["atlas_coords"] = Vector2i(x,y);
+    result["atlas_coords"] = Vector2i(x, y);
   }
 
   return result;
@@ -84,12 +93,12 @@ Dictionary RulesetObject::convert_job(const hs::proto::ruleset::Job& job) {
   result["id"] = job.id().c_str();
 
   Dictionary input;
-  for(const auto& [k,v] : job.input()) {
+  for (const auto& [k, v] : job.input()) {
     input[k.c_str()] = v;
   }
 
   Dictionary output;
-  for(const auto& [k,v] : job.output()) {
+  for (const auto& [k, v] : job.output()) {
     output[k.c_str()] = v;
   }
 
@@ -99,7 +108,8 @@ Dictionary RulesetObject::convert_job(const hs::proto::ruleset::Job& job) {
   return result;
 }
 
-Dictionary RulesetObject::convert_project(const hs::proto::ruleset::Project& project) {
+Dictionary RulesetObject::convert_project(
+    const hs::proto::ruleset::Project& project) {
   Dictionary result;
   result["id"] = project.id().c_str();
   result["script"] = project.script().c_str();
@@ -111,7 +121,7 @@ Array RulesetObject::get_projects() const {
   const auto& projects = ruleset_.GetProjects();
 
   Array result;
-  for(auto& project: projects.projects()) {
+  for (auto& project : projects.projects()) {
     result.append(convert_project(project));
   }
 
@@ -123,7 +133,7 @@ Array RulesetObject::get_all_region_improvements() const {
 
   Array result;
 
-  for(auto& improvement: improvements.improvements()) {
+  for (auto& improvement : improvements.improvements()) {
     result.append(convert_improvement(improvement));
   }
 
@@ -132,9 +142,10 @@ Array RulesetObject::get_all_region_improvements() const {
 
 Dictionary RulesetObject::get_improvement_info(String id) const {
   auto ascii_id = id.ascii();
-  const auto* improvement = ruleset_.FindRegionImprovementByType(ascii_id.get_data());
+  const auto* improvement =
+      ruleset_.FindRegionImprovementByType(ascii_id.get_data());
 
-  if(improvement == nullptr) {
+  if (improvement == nullptr) {
     spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
     return {};
   }
@@ -145,7 +156,7 @@ Dictionary RulesetObject::get_improvement_info(String id) const {
 Dictionary RulesetObject::get_job_info(String id) const {
   auto ascii_id = id.ascii();
   const auto* job = ruleset_.FindJobByType(ascii_id.get_data());
-  if(job == nullptr) {
+  if (job == nullptr) {
     spdlog::error("Can't find job with id {}", ascii_id.get_data());
     return {};
   }
@@ -156,7 +167,7 @@ Dictionary RulesetObject::get_job_info(String id) const {
 Dictionary RulesetObject::get_project_info(String id) const {
   auto ascii_id = id.ascii();
   const auto* project = ruleset_.FindProjectByType(ascii_id.get_data());
-  if(project == nullptr) {
+  if (project == nullptr) {
     spdlog::error("Can't find project with id {}", ascii_id.get_data());
     return {};
   }
@@ -164,20 +175,17 @@ Dictionary RulesetObject::get_project_info(String id) const {
   return convert_project(*project);
 }
 
-
 Array RulesetObject::get_all_resources() const {
-
   const auto& resources = ruleset_.GetResources();
   Array result;
 
-  for(const auto& res: resources.resources()) {
+  for (const auto& res : resources.resources()) {
     Dictionary resource_info;
     resource_info["id"] = res.id().c_str();
     result.append(std::move(resource_info));
   }
 
   return result;
-
 }
 
 Dictionary RulesetObject::load(String folder_path) {
@@ -187,15 +195,15 @@ Dictionary RulesetObject::load(String folder_path) {
   RuleSet ruleset;
   bool success = ruleset.Load(folder_path.utf8().get_data(), errors);
 
-
   Array errors_godot;
-  for(auto& error_msg: errors.errors) {
+  for (auto& error_msg : errors.errors) {
     errors_godot.append(String(error_msg.message.c_str()));
   }
   result[String("errors")] = errors_godot;
 
-  if(success) {
-    Ref<RulesetObject> ruleset_object(memnew(RulesetObject(std::move(ruleset))));
+  if (success) {
+    Ref<RulesetObject> ruleset_object(
+        memnew(RulesetObject(std::move(ruleset))));
     result[String("ruleset")] = ruleset_object;
     result[String("success")] = true;
   } else {
@@ -203,8 +211,6 @@ Dictionary RulesetObject::load(String folder_path) {
   }
 
   return result;
-
 }
 
-
-}
+}  // namespace hs::godot

@@ -25,21 +25,22 @@ constexpr auto AllAxes() noexcept {
 inline constexpr std::string_view ToString(Axis axis) {
   using namespace std::literals;
   switch (axis) {
-  case Axis::kQ:
-    return "Q"sv;
-  case Axis::kR:
-    return "R"sv;
-  case Axis::kS:
-    return "S"sv;
-  default:
-    return "UB"sv;
+    case Axis::kQ:
+      return "Q"sv;
+    case Axis::kR:
+      return "R"sv;
+    case Axis::kS:
+      return "S"sv;
+    default:
+      return "UB"sv;
   }
 }
-} // namespace hs::geometry
+}  // namespace hs::geometry
 
-template <> struct fmt::formatter<::hs::geometry::Axis> {
-  constexpr auto
-  parse(format_parse_context &ctx) const -> decltype(ctx.begin()) {
+template <>
+struct fmt::formatter<::hs::geometry::Axis> {
+  constexpr auto parse(format_parse_context &ctx) const
+      -> decltype(ctx.begin()) {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
     if (it != end && *it != '}') {

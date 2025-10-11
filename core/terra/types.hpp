@@ -5,9 +5,10 @@
 
 namespace hs::terra {
 
-template <typename BaseTypes> class Plane;
+template <typename BaseTypes>
+class Plane;
 
 template <typename BaseTypes>
 using PlanePtr = utils::SharedPtr<Plane<BaseTypes>>;
 
-} // namespace hs::terra
+}  // namespace hs::terra

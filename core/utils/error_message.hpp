@@ -11,4 +11,4 @@ struct ErrorsCollection {
   void AddError(ErrorMessage msg) { errors.emplace_back(std::move(msg)); }
 };
 
-} // namespace hs::utils
+}  // namespace hs::utils

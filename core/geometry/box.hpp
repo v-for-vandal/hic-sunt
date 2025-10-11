@@ -6,8 +6,9 @@
 namespace hs::geometry {
 
 // A simple bounding box. Both points are inclusive!
-template <typename CoordinateSystem> class Box {
-public:
+template <typename CoordinateSystem>
+class Box {
+ public:
   using QAxis = typename CoordinateSystem::QAxis;
   using RAxis = typename CoordinateSystem::RAxis;
   using SAxis = typename CoordinateSystem::SAxis;
@@ -47,14 +48,15 @@ public:
            coords.s().InRange(start_.s(), end_.s());
   }
 
-private:
+ private:
   Coords start_;
   Coords end_;
 };
 
-} // namespace hs::geometry
+}  // namespace hs::geometry
 
-template <typename T> struct fmt::formatter<hs::geometry::Box<T>> {
+template <typename T>
+struct fmt::formatter<hs::geometry::Box<T>> {
   constexpr auto parse(format_parse_context &ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:

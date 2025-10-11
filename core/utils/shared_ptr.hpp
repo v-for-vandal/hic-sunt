@@ -6,8 +6,9 @@ namespace hs::utils {
 
 // The sole purpose is to provide operator== that compares items
 // by value, not by address
-template <typename T> class SharedPtr {
-public:
+template <typename T>
+class SharedPtr {
+ public:
   std::shared_ptr<T> value;
 
   template <typename... Args>
@@ -48,4 +49,4 @@ public:
   bool operator!=(nullptr_t) const noexcept { return value != nullptr; }
 };
 
-} // namespace hs::utils
+}  // namespace hs::utils

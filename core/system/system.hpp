@@ -1,10 +1,9 @@
 #pragma once
 
-#include <filesystem>
-#include <memory>
-
 #include <core/ruleset/ruleset.hpp>
 #include <core/terra/world.hpp>
+#include <filesystem>
+#include <memory>
 
 namespace hs::system {
 
@@ -35,4 +34,4 @@ public:
 
 #endif
 
-} // namespace hs::system
+}  // namespace hs::system

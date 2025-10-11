@@ -2,7 +2,6 @@
 
 #include <core/geometry/coords.hpp>
 #include <core/utils/serialize.hpp>
-
 #include <mdspan>
 
 namespace hs::geometry {
@@ -19,8 +18,9 @@ using CellsArrayView =
 // QR coordinates
 // It is not intended to be used directly - instead other views are based on
 // this one.
-template <typename Cell, typename CoordinateSystem> class SurfaceRawView {
-public:
+template <typename Cell, typename CoordinateSystem>
+class SurfaceRawView {
+ public:
   using Coords = geometry::Coords<CoordinateSystem>;
 
   SurfaceRawView() = default;
@@ -88,14 +88,14 @@ public:
   auto end() const { return target_.end(); }
   */
 
-private:
+ private:
   static bool CheckInRange(auto x, auto start, auto end) {
     return (x.ToUnderlying() - start.ToUnderlying()) *
                (end.ToUnderlying() - 1 - x.ToUnderlying()) >=
            0;
   }
 
-private:
+ private:
   CellsArrayView<Cell> target_;
   // we store s_start and s_end explicitly because it is virtual. It limits what
   // cells are in surface, but it doesn't affect the storage itself.
@@ -103,4 +103,4 @@ private:
   typename Coords::RAxis r_start_{0};
 };
 
-} // namespace hs::geometry
+}  // namespace hs::geometry

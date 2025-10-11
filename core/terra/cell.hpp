@@ -1,18 +1,19 @@
 #pragma once
 
+#include <terra/cell.pb.h>
+
+#include <core/region/region.hpp>
+#include <core/utils/serialize.hpp>
 #include <memory>
 #include <string>
 #include <string_view>
 
-#include <core/region/region.hpp>
-#include <core/utils/serialize.hpp>
-
-#include <terra/cell.pb.h>
-
 namespace hs::terra {
 
-template <typename BaseTypes> class Plane;
-template <typename BaseTypes> class Cell;
+template <typename BaseTypes>
+class Plane;
+template <typename BaseTypes>
+class Cell;
 
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes> &source,
@@ -21,8 +22,9 @@ template <typename BaseTypes>
 Cell<BaseTypes> ParseFrom(const proto::terra::Cell &source,
                           serialize::To<Cell<BaseTypes>>);
 
-template <typename BaseTypes> class Cell {
-public:
+template <typename BaseTypes>
+class Cell {
+ public:
   using Region = region::Region<BaseTypes>;
   Cell() : region_(std::make_shared<Region>()) {}
 
@@ -33,8 +35,7 @@ public:
     other.region_ = std::make_shared<Region>();
   }
   Cell &operator=(Cell &&other) {
-    if (this == &other)
-      return *this;
+    if (this == &other) return *this;
     region_ = other.region_;
     other.region_ = std::make_shared<Region>();
     return *this;
@@ -51,7 +52,7 @@ public:
 
   bool operator!=(const Cell &other) const { return !(*this == other); }
 
-private:
+ private:
   friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source,
                                      proto::terra::Cell &proto_destination);
   friend Cell<BaseTypes> ParseFrom<BaseTypes>(const proto::terra::Cell &source,
@@ -61,10 +62,10 @@ private:
   // Call this method via World object, not directly
   auto SetRegion(Region region) { *region_ = std::move(region); }
 
-private:
+ private:
   std::shared_ptr<Region> region_;
 };
 
-} // namespace hs::terra
+}  // namespace hs::terra
 
 #include "cell.inl"

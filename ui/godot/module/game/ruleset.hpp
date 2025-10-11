@@ -5,7 +5,6 @@
 
 namespace hs::godot {
 
-    using RuleSet = hs::ruleset::RuleSet<GodotBaseTypes>;
+using RuleSet = hs::ruleset::RuleSet<GodotBaseTypes>;
 
 }
-

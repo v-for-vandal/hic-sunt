@@ -1,13 +1,6 @@
 #pragma once
 
-#include <filesystem>
-#include <string_view>
-
 #include <absl/container/flat_hash_map.h>
-
-#include <core/utils/error_message.hpp>
-#include <core/utils/string_token.hpp>
-
 #include <render/atlas.pb.h>
 #include <render/render.pb.h>
 #include <ruleset/biome.pb.h>
@@ -16,10 +9,15 @@
 #include <ruleset/region_improvements.pb.h>
 #include <ruleset/resources.pb.h>
 
+#include <core/utils/error_message.hpp>
+#include <core/utils/string_token.hpp>
+#include <filesystem>
+#include <string_view>
+
 namespace hs::ruleset {
 
 class RuleSetBase {
-public:
+ public:
   using ErrorsCollection = utils::ErrorsCollection;
   void Clear();
   // Adds data to ruleset
@@ -37,7 +35,7 @@ public:
 
   auto &GetProjects() const { return projects_; }
 
-protected:
+ protected:
   proto::ruleset::RegionImprovements improvements_;
   proto::ruleset::Biomes biomes_;
   proto::ruleset::Resources resources_;
@@ -54,4 +52,4 @@ protected:
   static inline std::filesystem::path projects_file{"projects.txt"};
 };
 
-} // namespace hs::ruleset
+}  // namespace hs::ruleset

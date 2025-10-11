@@ -9,7 +9,7 @@ namespace hs::terra {
 // World regions that are connected to each other
 // Can work with off-surface regions as well
 class ConnectedTerritory {
-public:
+ public:
   // Return all regions bordering this one
   const absl::flat_hash_set<region::RegionId> &GetBorder();
 
@@ -19,16 +19,16 @@ public:
 
   // TODO: Remove region ?
 
-private:
+ private:
   absl::flat_hash_set<hs::utils::StringToken> regions_;
 };
 
 // Set, possibly disjoin, of world region. There is no logic behind this
 // grouping, other then game logic
 class Territory {
-public:
-private:
+ public:
+ private:
   std::vector<ConnectedTerritory> connected_territories_;
 };
 
-} // namespace hs::terra
+}  // namespace hs::terra

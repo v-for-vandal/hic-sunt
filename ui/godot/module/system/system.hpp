@@ -1,14 +1,11 @@
 #pragma once
 
-#include <memory>
-
-#include <godot_cpp/classes/ref.hpp>
-#include <godot_cpp/classes/node.hpp>
-
-#include <ui/godot/module/terra/world_object.hpp>
-#include <ui/godot/module/game/ruleset_object.hpp>
-
 #include <core/system/system.hpp>
+#include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/ref.hpp>
+#include <memory>
+#include <ui/godot/module/game/ruleset_object.hpp>
+#include <ui/godot/module/terra/world_object.hpp>
 
 namespace hs::godot {
 
@@ -60,5 +57,4 @@ private:
 
 #endif
 
-
-}
+}  // namespace hs::godot

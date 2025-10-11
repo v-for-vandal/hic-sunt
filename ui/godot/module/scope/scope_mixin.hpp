@@ -1,10 +1,8 @@
 #pragma once
 
-#include <memory>
-
-#include <ui/godot/module/scope/scope_object.hpp>
-
 #include <godot_cpp/classes/ref.hpp>
+#include <memory>
+#include <ui/godot/module/scope/scope_object.hpp>
 
 namespace hs::godot {
 
@@ -14,26 +12,23 @@ using namespace ::godot;
  *         and it will provide godot bindings
  */
 class ScopeMixin {
-
-public:
+ public:
   ScopeMixin() {}
 
-  template<typename T>
+  template <typename T>
   static void _bind_methods() {
     ClassDB::bind_method(D_METHOD("get_scope"), &T::get_scope);
   }
 
   Ref<ScopeObject> get_scope(this auto& self) {
     auto scope_ptr = self.GetScope();
-    ERR_FAIL_NULL_V_MSG(scope_ptr, Ref<ScopeObject>{}, "Failed to get scope object");
+    ERR_FAIL_NULL_V_MSG(scope_ptr, Ref<ScopeObject>{},
+                        "Failed to get scope object");
 
     Ref<ScopeObject> result(memnew(ScopeObject(self.GetScope())));
     ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to get scope object");
     return result;
   }
-
 };
 
-
-}
-
+}  // namespace hs::godot

@@ -1,11 +1,11 @@
 #include "region.hpp"
 
 #include <absl/container/flat_hash_map.h>
+#include <gtest/gtest.h>
+
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/string_name.hpp>
 #include <ui/godot/module/types/godot_base_types.hpp>
-
-#include <gtest/gtest.h>
 
 namespace hs::godot {
 
@@ -26,5 +26,4 @@ TEST(RegionObject, AbseilMap) {
 }
 */
 
-
-}
+}  // namespace hs::godot

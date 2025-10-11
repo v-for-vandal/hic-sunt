@@ -5,6 +5,6 @@
 
 namespace hs::godot {
 
-    using World = hs::terra::World<GodotBaseTypes>;
+using World = hs::terra::World<GodotBaseTypes>;
 
 }

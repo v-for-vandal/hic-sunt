@@ -2,10 +2,9 @@
 
 namespace hs::utils {
 
-template<typename ...T>
+template <typename... T>
 struct Overloaded : public T... {
-    using T::operator()...;
+  using T::operator()...;
 };
 
-}
-
+}  // namespace hs::utils

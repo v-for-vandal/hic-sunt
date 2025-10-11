@@ -1,24 +1,26 @@
 #pragma once
 
+#include <terra/world.pb.h>
+
 #include <core/geometry/surface.hpp>
 #include <core/region/region.hpp>
 #include <core/region/types.hpp>
 #include <core/ruleset/ruleset.hpp>
+#include <core/scope/scope.hpp>
+#include <core/scope/scoped_object.hpp>
 #include <core/terra/cell.hpp>
 #include <core/terra/types.hpp>
 #include <core/types/control_object.hpp>
 #include <core/types/std_base_types.hpp>
-#include <core/scope/scope.hpp>
-#include <core/scope/scoped_object.hpp>
 #include <core/utils/serialize.hpp>
-
-#include <terra/world.pb.h>
 
 namespace hs::terra {
 
-template <typename BaseTypes> class Plane;
+template <typename BaseTypes>
+class Plane;
 
-template <typename BaseTypes> class World;
+template <typename BaseTypes>
+class World;
 
 template <typename BaseTypes>
 void SerializeTo(const Plane<BaseTypes> &source, proto::terra::Plane &target);
@@ -27,9 +29,9 @@ Plane<BaseTypes> ParseFrom(const proto::terra::Plane &world,
                            serialize::To<Plane<BaseTypes>>);
 
 // Plane is essentially one playable map that consists of multiple regions
-template <typename BaseTypes = StdBaseTypes> class Plane:
-    public scope::ScopedObject<BaseTypes> {
-public:
+template <typename BaseTypes = StdBaseTypes>
+class Plane : public scope::ScopedObject<BaseTypes> {
+ public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
@@ -95,7 +97,7 @@ public:
   float GetDistanceBetweenCells(QRSCoords region1, QRSCoords cell1,
                                 QRSCoords region2, QRSCoords cell2);
 
-private:
+ private:
   friend void SerializeTo<BaseTypes>(const Plane &source,
                                      proto::terra::Plane &target);
   friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane &world,
@@ -108,7 +110,7 @@ private:
     control_object_ = control_object;
   }
 
-private:
+ private:
   // ScopePtr scope_ will be inherited from ScopedObject
   ControlObjectPtr control_object_;
   StringId plane_id_;
@@ -119,6 +121,6 @@ private:
   std::unordered_map<StringId, RegionPtr> region_index_;
 };
 
-} // namespace hs::terra
+}  // namespace hs::terra
 
 #include "plane.inl"

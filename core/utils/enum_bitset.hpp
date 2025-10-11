@@ -11,7 +11,7 @@ class EnumBitset : public std::bitset<static_cast<size_t>(E::kSize)> {
   static_assert(static_cast<int64_t>(E::kSize) > 0,
                 "enum must have at least one element");
 
-public:
+ public:
   static constexpr int kSize{E::kSize};
   using Base = std::bitset<static_cast<size_t>(E::kSize)>;
   using Base::Base;
@@ -26,4 +26,4 @@ public:
   void reset(E value) { Base::reset(static_cast<size_t>(value)); }
 };
 
-} // namespace hs::utils
+}  // namespace hs::utils

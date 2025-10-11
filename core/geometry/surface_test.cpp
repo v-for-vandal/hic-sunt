@@ -1,13 +1,11 @@
 #include "surface.hpp"
 
 #include <absl/container/flat_hash_set.h>
-
 #include <gtest/gtest.h>
 
 namespace hs::geometry {
 
 TEST(Surface, MoveCapable) {
-
   struct Cell {};
   using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
 
@@ -30,8 +28,8 @@ TEST(Surface, RhombusForEach) {
   using Box = Box<QRSCoordinateSystem>;
 
   // coords are inclusive
-  auto start = CoordsT::MakeCoords(-2, -3); // (-2, -3, 5)
-  auto end = CoordsT::MakeCoords(4, 4);     // (4, 4, -8)
+  auto start = CoordsT::MakeCoords(-2, -3);  // (-2, -3, 5)
+  auto end = CoordsT::MakeCoords(4, 4);      // (4, 4, -8)
   SurfaceT target{RhombusSurface(Box(start, end))};
 
   absl::flat_hash_set<typename SurfaceT::Coords> visited;
@@ -51,7 +49,7 @@ TEST(Surface, HexagonContains) {
   using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
   using CoordsT = typename SurfaceT::Coords;
 
-  SurfaceT target{HexagonSurface(3 // radius, inclusive
+  SurfaceT target{HexagonSurface(3  // radius, inclusive
                                  )};
 
   EXPECT_TRUE(target.Contains(CoordsT::MakeCoords(0, 0)));
@@ -64,7 +62,7 @@ TEST(Surface, HexagonForEach) {
   using SurfaceT = Surface<Cell, QRSCoordinateSystem>;
   using CoordsT = typename SurfaceT::Coords;
 
-  SurfaceT target{HexagonSurface(3 // radius, inclusive
+  SurfaceT target{HexagonSurface(3  // radius, inclusive
                                  )};
 
   absl::flat_hash_set<CoordsT> visited;
@@ -79,4 +77,4 @@ TEST(Surface, HexagonForEach) {
   EXPECT_EQ(visited.size(), 37);
 }
 
-} // namespace hs::geometry
+}  // namespace hs::geometry

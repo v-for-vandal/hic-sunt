@@ -8,8 +8,9 @@
 namespace hs::region {
 
 // Profit and losses
-template <typename BaseTypes = StdBaseTypes> class PnlStatement {
-public:
+template <typename BaseTypes = StdBaseTypes>
+class PnlStatement {
+ public:
   using ResourceId = typename BaseTypes::StringId;
 
   // List of resources and their per-turn values. Positive means income,
@@ -24,13 +25,13 @@ public:
 
   ResourceFlow GetTotal() const;
 
-private:
+ private:
   // All values here are positive
   ResourceFlow profit_;
   // All values here are negative
   ResourceFlow losses_;
 };
 
-} // namespace hs::region
+}  // namespace hs::region
 
 #include "pnl_statement.inl"

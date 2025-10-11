@@ -5,11 +5,12 @@
 namespace hs::utils {
 
 // Shared ptr that can never be null. Class T must be default-constructible.
-template <typename T> class NonNullSharedPtr {
-private:
+template <typename T>
+class NonNullSharedPtr {
+ private:
   std::shared_ptr<T> value;
 
-public:
+ public:
   template <typename... Args>
   NonNullSharedPtr(Args... args)
       : value(std::make_shared<T>(std::forward<Args>(args)...)) {}
@@ -27,7 +28,7 @@ public:
   }
   NonNullSharedPtr<T> &operator=(const NonNullSharedPtr<T> &other) = default;
   NonNullSharedPtr<T> &operator=(const std::shared_ptr<T> &other) {
-    if(other == nullptr) {
+    if (other == nullptr) {
       reset();
     } else {
       value = other;
@@ -58,4 +59,4 @@ public:
   void reset() { value = std::make_shared<T>(); }
 };
 
-} // namespace hs::utils
+}  // namespace hs::utils

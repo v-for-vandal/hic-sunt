@@ -5,8 +5,6 @@
 
 namespace hs::godot {
 
-    using PnlStatement = hs::region::PnlStatement<GodotBaseTypes>;
+using PnlStatement = hs::region::PnlStatement<GodotBaseTypes>;
 
 }
-
-

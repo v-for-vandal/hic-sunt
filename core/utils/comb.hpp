@@ -1,11 +1,10 @@
 #pragma once
 
-#include <map>
-#include <unordered_set>
-
 #include <spdlog/spdlog.h>
 
 #include <core/utils/string_token.hpp>
+#include <map>
+#include <unordered_set>
 
 namespace hs::utils {
 
@@ -13,8 +12,9 @@ namespace hs::utils {
 // It can answer the following queries:
 // 1. How many instances of given id were added
 // 2. What are top N occuring instances
-template <typename BaseTypes> class Comb {
-public:
+template <typename BaseTypes>
+class Comb {
+ public:
   using StringId = typename BaseTypes::StringId;
   Comb() = default;
 
@@ -85,11 +85,11 @@ public:
     return !(*this == other);
   }
 
-private:
+ private:
   std::map<int, std::unordered_set<StringId>> comb_;
   std::unordered_map<StringId, int> count_;
 };
 
-} // namespace hs::utils
+}  // namespace hs::utils
 
 #include "comb.inl"

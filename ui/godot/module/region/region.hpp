@@ -5,8 +5,6 @@
 
 namespace hs::godot {
 
-    using Region = hs::region::Region<GodotBaseTypes>;
+using Region = hs::region::Region<GodotBaseTypes>;
 
 }
-
-

@@ -1,11 +1,10 @@
-#include <core/utils/non_null_ptr.hpp>
-
 #include <gtest/gtest.h>
+
+#include <core/utils/non_null_ptr.hpp>
 
 namespace hs::utils {
 
 TEST(NonNullSharedPtr, Basic) {
-
   NonNullSharedPtr<int> ptr;
 
   ASSERT_NE(ptr, nullptr);
@@ -30,4 +29,4 @@ TEST(NonNullSharedPtr, Basic) {
   ASSERT_EQ(*ptr3, 5);
 }
 
-} // namespace hs::utils
+}  // namespace hs::utils
