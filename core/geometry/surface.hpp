@@ -63,6 +63,13 @@ class SurfaceView {
     return GetCell(Coords{q, r});
   }
 
+  /** \brief returns approximate number of elements on a surface.
+   *
+   * Real number will be less then this value. Could be used to call .reserve()
+   * on containers
+   */
+  auto BoundingSize() const { return target_.size(); }
+
   auto q_size() const {
     return typename CoordinateSystem::QDelta{target_.extent(0)};
   }
@@ -96,7 +103,7 @@ class SurfaceView {
   bool operator!=(const SurfaceView &other) const { return !(*this == other); }
 
   template <typename Callback>
-  void foreach (Callback &&callback) {
+  void Foreach(Callback &&callback) {
     for (size_t idx = 0; idx < target_.size(); ++idx) {
       const auto coords = FromRawIndex(idx);
       if (Contains(coords)) [[likely]] {

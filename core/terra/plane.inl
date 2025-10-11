@@ -19,7 +19,7 @@ Plane<BaseTypes>::Plane(ControlObjectPtr control_object, StringId plane_id,
   }
   external_region_radius_ = external_region_radius;
   // Init regions
-  GetSurface().foreach ([region_radius, control_object(this->control_object_)](
+  GetSurface().Foreach ([region_radius, control_object(this->control_object_)](
                             QRSCoords, Cell &cell) {
     auto region_id = BaseTypes::StringIdFromStdString(
         fmt::format("rgn_{}", control_object->GetNextId()));
@@ -69,7 +69,7 @@ bool Plane<BaseTypes>::operator==(const Plane &other) const {
 template <typename BaseTypes> void Plane<BaseTypes>::InitNonpersistent() {
   region_index_.clear();
 
-  GetSurface().foreach ([this](auto &, auto &cell) {
+  GetSurface().Foreach ([this](auto &, auto &cell) {
     auto region_ptr = cell.GetRegionPtr();
     auto region_id = region_ptr->GetId();
     region_ptr->GetScope()->SetParent(this->GetScope());

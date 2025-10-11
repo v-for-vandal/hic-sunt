@@ -235,7 +235,7 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
   biome_count_.clear();
   feature_count_.clear();
   cells_with_improvements_.clear();
-  GetSurface().foreach([this](QRSCoords coords, Cell<BaseTypes>& cell) {
+  GetSurface().Foreach([this](QRSCoords coords, Cell<BaseTypes>& cell) {
         // Set parent scope for cell
         cell.GetScope()->SetParent(this->GetScope());
         // calculate some statistics

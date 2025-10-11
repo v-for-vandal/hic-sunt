@@ -28,6 +28,7 @@ func _ready() -> void:
 	
 func set_scope(scope: ScopeObject) -> void:
 	var data : Dictionary = scope.explain_all()
+	data.sort()
 	var tree = %Tree
 	tree.clear()
 	var root : TreeItem = tree.create_item()
