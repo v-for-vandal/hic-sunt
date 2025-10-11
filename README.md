@@ -42,5 +42,5 @@ ninja .
 Then install compiled library
 ```
 cd build
-meson install
+meson install --skip-subprojects
 ```
