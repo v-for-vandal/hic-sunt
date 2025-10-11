@@ -2,19 +2,20 @@
 
 #include <absl/container/flat_hash_map.h>
 #include <scope/scope.pb.h>
+
 #include <core/types/std_base_types.hpp>
 
 namespace hs::scope {
 
 template <typename BaseTypes = StdBaseTypes>
 class StringVariable {
-public:
+ public:
   using String = typename BaseTypes::String;
   using StringId = typename BaseTypes::StringId;
   using NumericValue = typename BaseTypes::NumericValue;
 
   bool AddModifiers(const StringId& key, const StringId& val,
-    NumericValue level);
+                    NumericValue level);
 
   // Method takes current level as input, and if this variable has
   // value with higher level, it will overwrite both value and level
@@ -25,15 +26,14 @@ public:
    */
   void ExplainModifiers(auto&& output_fn) const;
 
-private:
+ private:
   struct Modifier {
-      StringId value;
-      NumericValue level;
+    StringId value;
+    NumericValue level;
   };
   absl::flat_hash_map<StringId, Modifier> modifiers_;
-
 };
 
-}
+}  // namespace hs::scope
 
 #include "string_variable.inl"

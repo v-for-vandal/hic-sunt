@@ -1,22 +1,19 @@
 #pragma once
 
-#include <memory>
-
 #include <absl/container/flat_hash_set.h>
+#include <region/region.pb.h>
 
 #include <core/geometry/box.hpp>
 #include <core/geometry/surface.hpp>
 #include <core/region/cell.hpp>
 #include <core/region/pnl_statement.hpp>
 #include <core/region/types.hpp>
-#include <core/types/std_base_types.hpp>
+#include <core/ruleset/ruleset.hpp>
 #include <core/scope/scoped_object.hpp>
+#include <core/types/std_base_types.hpp>
 #include <core/utils/comb.hpp>
 #include <core/utils/enum_bitset.hpp>
-
-#include <core/ruleset/ruleset.hpp>
-
-#include <region/region.pb.h>
+#include <memory>
 
 namespace hs::region {
 
@@ -27,10 +24,9 @@ template <typename BaseTypes>
 Region<BaseTypes> ParseFrom(const proto::region::Region &from,
                             serialize::To<Region<BaseTypes>>);
 
-template <typename BaseTypes = StdBaseTypes> class Region :
-  public scope::ScopedObject<BaseTypes>
-{
-public:
+template <typename BaseTypes = StdBaseTypes>
+class Region : public scope::ScopedObject<BaseTypes> {
+ public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
@@ -98,8 +94,8 @@ public:
   const auto &GetImprovedCells() const { return cells_with_improvements_; }
 
   // TODO: Perhaphs this method should not be inside region?
-  PnlStatement
-  BuildPnlStatement(const ruleset::RuleSet<BaseTypes> &ruleset) const;
+  PnlStatement BuildPnlStatement(
+      const ruleset::RuleSet<BaseTypes> &ruleset) const;
 
   /* TODO: REMOVE
    * replaced with Scope
@@ -119,7 +115,7 @@ public:
   bool operator==(const Region &other) const;
   bool operator!=(const Region &other) const = default;
 
-private:
+ private:
   // === persistent data
   StringId id_;
   Surface surface_;
@@ -151,13 +147,13 @@ private:
 
   void InitNonpersistent();
 
-private:
+ private:
   friend void SerializeTo<BaseTypes>(const Region &source,
                                      proto::region::Region &to);
   friend Region ParseFrom<BaseTypes>(const proto::region::Region &from,
                                      serialize::To<Region>);
 };
 
-} // namespace hs::region
+}  // namespace hs::region
 
 #include "region.inl"

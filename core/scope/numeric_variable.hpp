@@ -2,10 +2,10 @@
 
 #include <absl/container/flat_hash_map.h>
 #include <scope/scope.pb.h>
+
 #include <core/types/std_base_types.hpp>
 
 namespace hs::scope {
-
 
 /** \brief This class stores all modifires that make up value of this variable
  *
@@ -14,12 +14,11 @@ namespace hs::scope {
  */
 template <typename BaseTypes = StdBaseTypes>
 class NumericVariable {
-public:
+ public:
   using StringId = typename BaseTypes::StringId;
   using NumericValue = typename BaseTypes::NumericValue;
 
-  bool AddModifiers(const StringId &key,
-                       NumericValue add, NumericValue mult);
+  bool AddModifiers(const StringId& key, NumericValue add, NumericValue mult);
 
   /** \brief Get total addictive and multiplicative modifiers for this
    *  variable. It only works within this scope.
@@ -31,17 +30,15 @@ public:
    */
   void ExplainModifiers(auto&& output_fn) const;
 
-
-
-private:
+ private:
   struct Modifier {
-      NumericValue add;
-      NumericValue mult;
+    NumericValue add;
+    NumericValue mult;
   };
 
   absl::flat_hash_map<StringId, Modifier> modifiers_;
 };
 
-}
+}  // namespace hs::scope
 
 #include "numeric_variable.inl"

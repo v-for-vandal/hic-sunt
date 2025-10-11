@@ -3,7 +3,6 @@
 #include <core/geometry/coords.hpp>
 #include <core/geometry/surface_raw_view.hpp>
 #include <core/utils/serialize.hpp>
-
 #include <mdspan>
 
 namespace hs::geometry {
@@ -13,8 +12,9 @@ namespace hs::geometry {
 // physically in storage
 // However, SurfaceRectView still uses qr-coords, not xy-coords. It is just
 // Contains() that is changed
-template <typename Cell, typename CoordinateSystem> class SurfaceRectView {
-public:
+template <typename Cell, typename CoordinateSystem>
+class SurfaceRectView {
+ public:
   using Coords = geometry::Coords<CoordinateSystem>;
 
   SurfaceRectView() = default;
@@ -84,21 +84,21 @@ public:
   auto end() const { return target_.end(); }
   */
 
-private:
+ private:
   static bool CheckInRange(auto x, auto start, auto end) {
     return (x.ToUnderlying() - start.ToUnderlying()) *
                (end.ToUnderlying() - 1 - x.ToUnderlying()) >=
            0;
   }
 
-private:
+ private:
   SurfaceRawView raw_view_;
   // we store s_start and s_end explicitly because it is virtual. It limits what
   // cells are in surface, but it doesn't affect the storage itself.
   typename Coords::QAxis x_start_{0};
   typename Coords::RAxis y_start_{0};
   typename Coords::SAxis x_end{1};
-  typename Coords::SAxis y_end_{1}; // not inclusive
+  typename Coords::SAxis y_end_{1};  // not inclusive
 };
 
-} // namespace hs::geometry
+}  // namespace hs::geometry

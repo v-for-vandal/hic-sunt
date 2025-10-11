@@ -16,4 +16,4 @@ class StrongTypedef {
   T value_;
 };
 
-}
+}  // namespace utils

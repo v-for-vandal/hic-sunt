@@ -1,5 +1,9 @@
 #pragma once
 
+#include <fbs/world_generated.h>
+#include <flatbuffers/flatbuffers.h>
+#include <terra/world.pb.h>
+
 #include <core/geometry/surface.hpp>
 #include <core/region/region.hpp>
 #include <core/region/types.hpp>
@@ -12,14 +16,10 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
 
-#include <fbs/world_generated.h>
-#include <flatbuffers/flatbuffers.h>
-
-#include <terra/world.pb.h>
-
 namespace hs::terra {
 
-template <typename BaseTypes> class World;
+template <typename BaseTypes>
+class World;
 
 template <typename BaseTypes>
 void SerializeTo(const World<BaseTypes> &source, proto::terra::World &target);
@@ -28,9 +28,9 @@ World<BaseTypes> ParseFrom(const proto::terra::World &world,
                            serialize::To<World<BaseTypes>>);
 
 // World is a collection of planes
-template <typename BaseTypes = StdBaseTypes> class World :
-    public scope::ScopedObject<BaseTypes> {
-public:
+template <typename BaseTypes = StdBaseTypes>
+class World : public scope::ScopedObject<BaseTypes> {
+ public:
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
@@ -41,7 +41,7 @@ public:
   using StringId = BaseTypes::StringId;
   using String = BaseTypes::String;
 
-  World(): scope::ScopedObject<BaseTypes>("world.root") {}
+  World() : scope::ScopedObject<BaseTypes>("world.root") {}
   World(const World &) = delete;
   World(World &&) = default;
   World &operator=(const World &) = delete;
@@ -57,19 +57,19 @@ public:
   bool operator==(const World &other) const;
   bool operator!=(const World &other) const { return !(*this == other); }
 
-private:
+ private:
   friend void SerializeTo<BaseTypes>(const World &source,
                                      proto::terra::World &target);
   friend World ParseFrom<BaseTypes>(const proto::terra::World &world,
                                     serialize::To<World>);
   void InitNonpersistent();
 
-private:
+ private:
   // ScopePtr scope_ is inherited from ScopedObject
   std::unordered_map<StringId, PlanePtr> planes_;
   ControlObjectPtr control_object_;
 };
 
-} // namespace hs::terra
+}  // namespace hs::terra
 
 #include "world.inl"

@@ -1,8 +1,8 @@
 #include "plane.hpp"
 
-#include <core/utils/serialize.hpp>
-
 #include <gtest/gtest.h>
+
+#include <core/utils/serialize.hpp>
 
 namespace hs::terra {
 
@@ -33,4 +33,4 @@ TEST(StdPlane, Serialize) {
             parse_plane.GetSurfaceObject().data_size());
 }
 
-} // namespace hs::terra
+}  // namespace hs::terra

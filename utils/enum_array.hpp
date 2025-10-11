@@ -8,7 +8,6 @@ namespace utils {
 struct fill_tag_t {};
 constexpr fill_tag_t fill_tag;
 
-
 template <typename T, typename E>
 class EnumArray : public std::array<T, static_cast<size_t>(E::kSize)> {
   // TODO: use std::to_underlying as soon as it is ready

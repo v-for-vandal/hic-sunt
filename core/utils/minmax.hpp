@@ -2,8 +2,9 @@
 
 namespace hs::utils {
 
-template <typename T> class MinMax {
-public:
+template <typename T>
+class MinMax {
+ public:
   T GetMin() const noexcept { return min_; }
   T GetMax() const noexcept { return max_; }
 
@@ -16,9 +17,9 @@ public:
     max_ = std::max(max_, value);
   }
 
-private:
+ private:
   T min_{std::numeric_limits<T>::max()};
   T max_{std::numeric_limits<T>::lowest()};
 };
 
-} // namespace hs::utils
+}  // namespace hs::utils

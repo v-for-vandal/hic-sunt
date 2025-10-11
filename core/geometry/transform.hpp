@@ -18,4 +18,4 @@ struct Transform {
   Mirror mirror{Rotation::kNoMirror};
 };
 
-} // namespace hs::geometry
+}  // namespace hs::geometry

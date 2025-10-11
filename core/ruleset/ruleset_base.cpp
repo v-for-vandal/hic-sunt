@@ -1,13 +1,12 @@
 #include "ruleset_base.hpp"
 
-#include <fstream>
-
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
+#include <ruleset/region_improvements.pb.h>
 #include <spdlog/spdlog.h>
 
-#include <ruleset/region_improvements.pb.h>
+#include <fstream>
 
 namespace hs::ruleset {
 
@@ -29,7 +28,7 @@ bool ReadFromFile(const std::filesystem::path &path, auto &proto_object,
   }
 }
 
-} // namespace
+}  // namespace
 
 bool RuleSetBase::Load(const std::filesystem::path &path,
                        ErrorsCollection &errors) {
@@ -83,4 +82,4 @@ void RuleSetBase::Clear() {
   projects_.Clear();
 }
 
-} // namespace hs::ruleset
+}  // namespace hs::ruleset

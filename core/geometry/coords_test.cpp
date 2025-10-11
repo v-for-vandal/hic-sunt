@@ -1,7 +1,8 @@
-#include "coord_system.hpp"
 #include "coords.hpp"
 
 #include <gtest/gtest.h>
+
+#include "coord_system.hpp"
 
 namespace hs::geometry {
 
@@ -21,4 +22,4 @@ EXPECT_FALSE((RawCoords{4_q, 5_r}) < (RawCoords{5_q, 4_r}));
 }
 */
 
-} // namespace hs::geometry
+}  // namespace hs::geometry

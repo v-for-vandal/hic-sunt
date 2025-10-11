@@ -62,4 +62,4 @@ void ParseStringIdMapFrom(BaseTypes, const ProtoM &source, M &target) {
   }
 }
 
-} // namespace hs
+}  // namespace hs

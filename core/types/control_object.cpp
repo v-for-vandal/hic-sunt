@@ -15,4 +15,4 @@ ControlObject ParseFrom(const proto::types::ControlObject &source,
   return result;
 }
 
-} // namespace hs::types
+}  // namespace hs::types

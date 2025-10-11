@@ -1,44 +1,37 @@
 #pragma once
 
+#include <godot_cpp/classes/ref.hpp>
 #include <memory>
-
-#include <ui/godot/module/region/region.hpp>
-#include <ui/godot/module/terra/world.hpp>
 #include <ui/godot/module/game/pnl_object.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
 #include <ui/godot/module/region/cell_object.hpp>
-
-#include <godot_cpp/classes/ref.hpp>
-
+#include <ui/godot/module/region/region.hpp>
+#include <ui/godot/module/terra/world.hpp>
 
 namespace hs::godot {
 
 using namespace ::godot;
 
-
 class RegionObject : public RefCounted, public ScopeMixin {
   GDCLASS(RegionObject, RefCounted);
 
-public:
+ public:
   RegionObject() {}
-  RegionObject(std::shared_ptr<Region> region):
-    region_(std::move(region)) {}
+  RegionObject(std::shared_ptr<Region> region) : region_(std::move(region)) {}
 
   using QRSCoordinateSystem = World::QRSCoordinateSystem;
   using QRSCoords = World::QRSCoords;
 
-  void _init() {
-  }
+  void _init() {}
 
   static void _bind_methods();
 
   static Dictionary make_region_info(const Region& region);
 
-
-private:
+ private:
   std::shared_ptr<Region> region_;
 
-public:
+ public:
   ScopePtr GetScope() const;
   Ref<ScopeObject> get_scope() const { return ScopeMixin::get_scope(); }
   Rect2i get_dimensions() const;
@@ -50,7 +43,8 @@ public:
   bool set_city_id(String city_id) const;
   Array get_available_improvements() const;
   String get_region_id() const;
-  Dictionary convert_to_dictionary(const hs::proto::region::Improvement& improvement) const;
+  Dictionary convert_to_dictionary(
+      const hs::proto::region::Improvement& improvement) const;
   Ref<PnlObject> get_pnl_statement(Ref<RulesetObject> ruleset) const;
   Dictionary get_jobs(Ref<RulesetObject> ruleset_object) const;
   Dictionary get_info() const;
@@ -61,8 +55,7 @@ public:
   String get_string_value(const StringName& variable);
 
   int add_numeric_modifier(const StringName& variables, const StringName& key,
-      float add, float mult);
-
+                           float add, float mult);
 
   // environmental properties
   /*
@@ -88,9 +81,9 @@ public:
   // signals
   void emit_signals_for_cell(Vector2i coords, int flags) const;
 
-  //Array get_region_improvements() const;
+  // Array get_region_improvements() const;
 
-  void foreach(const Callable& callback);
+  void foreach (const Callable& callback);
 };
 
-}
+}  // namespace hs::godot

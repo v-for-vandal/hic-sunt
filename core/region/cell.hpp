@@ -1,24 +1,24 @@
 #pragma once
 
-#include <string>
-#include <string_view>
-
 #include <absl/container/flat_hash_map.h>
-#include <spdlog/spdlog.h>
-
-#include <core/types/std_base_types.hpp>
-#include <core/scope/scope.hpp>
-#include <core/scope/scoped_object.hpp>
-#include <core/utils/minmax.hpp>
-#include <core/utils/serialize.hpp>
-
 #include <fbs/world_generated.h>
 #include <region/cell.pb.h>
 #include <region/improvement.pb.h>
+#include <spdlog/spdlog.h>
+
+#include <core/scope/scope.hpp>
+#include <core/scope/scoped_object.hpp>
+#include <core/types/std_base_types.hpp>
+#include <core/utils/minmax.hpp>
+#include <core/utils/serialize.hpp>
+#include <string>
+#include <string_view>
 
 namespace hs::region {
-template <typename BaseTypes> class Region;
-template <typename BaseTypes> class Cell;
+template <typename BaseTypes>
+class Region;
+template <typename BaseTypes>
+class Cell;
 
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes> &source, proto::region::Cell &to);
@@ -27,19 +27,17 @@ Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
                           serialize::To<Cell<BaseTypes>>);
 
 /// One cell in region map
-template <typename BaseTypes = StdBaseTypes> class Cell :
-  public scope::ScopedObject<BaseTypes> {
-
-public:
+template <typename BaseTypes = StdBaseTypes>
+class Cell : public scope::ScopedObject<BaseTypes> {
+ public:
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
-
 
   StringId GetBiome() const { return biome_; }
   StringId GetFeature() const { return feature_; }
   /* TODO: Remove
    * it was replaced with variable in Scope
-  */
+   */
 
   // This is abstract storage for data. It never throws. If key is absent,
   // default value is returned.
@@ -69,7 +67,7 @@ public:
 
   bool operator==(const Cell &) const;
 
-private:
+ private:
   friend Region<BaseTypes>;
   friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source,
                                      proto::region::Cell &to);
@@ -92,7 +90,7 @@ private:
   void SetPrecipitation(double value) noexcept { precipitation_ = value; }
   */
 
-private:
+ private:
   // Note: ScopePtr scope_ will be inherited from ScopedObject
 
   StringId biome_;
@@ -114,6 +112,6 @@ private:
   absl::flat_hash_map<StringId, String> user_data_string_;
 };
 
-} // namespace hs::region
+}  // namespace hs::region
 
 #include "cell.inl"

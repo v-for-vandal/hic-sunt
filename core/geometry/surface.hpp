@@ -5,7 +5,6 @@
 #include <core/geometry/surface_raw_view.hpp>
 #include <core/geometry/surface_shape.hpp>
 #include <core/utils/serialize.hpp>
-
 #include <mdspan>
 
 namespace hs::geometry {
@@ -16,8 +15,9 @@ using CellsArrayView =
                 std::extents<int, std::dynamic_extent, std::dynamic_extent>,
                 std::layout_right>;
 
-template <typename Cell_, typename CoordinateSystem> class SurfaceView {
-public:
+template <typename Cell_, typename CoordinateSystem>
+class SurfaceView {
+ public:
   using Cell = Cell_;
   using Coords = geometry::Coords<CoordinateSystem>;
   using QDelta = CoordinateSystem::QDelta;
@@ -35,7 +35,8 @@ public:
     s_end_(s_end) {}
     */
   SurfaceView(CellsArrayView<Cell> target, const SurfaceShape &shape)
-      : target_(std::move(target)), shape_(shape),
+      : target_(std::move(target)),
+        shape_(shape),
         bounding_box_(shape.BoundingBox()) {}
 
   SurfaceView(const SurfaceView &) = default;
@@ -94,7 +95,8 @@ public:
   bool operator==(const SurfaceView &other) const;
   bool operator!=(const SurfaceView &other) const { return !(*this == other); }
 
-  template <typename Callback> void foreach (Callback &&callback) {
+  template <typename Callback>
+  void foreach (Callback &&callback) {
     for (size_t idx = 0; idx < target_.size(); ++idx) {
       const auto coords = FromRawIndex(idx);
       if (Contains(coords)) [[likely]] {
@@ -110,7 +112,7 @@ public:
   auto end() const { return target_.end(); }
   */
 
-private:
+ private:
   Coords FromRawIndex(const size_t index) {
     // index is displacement in raw underlying array.
     // This code relies on mdspan having layout_right.
@@ -127,16 +129,18 @@ private:
   const Cell &GetCell(size_t idx) const { return target_.data_handle[idx]; }
   Cell &GetCell(size_t idx) { return target_.data_handle[idx]; }
 
-private:
+ private:
   CellsArrayView<Cell> target_;
   SurfaceShape shape_;
-  Box bounding_box_; // extracted from shape
+  Box bounding_box_;  // extracted from shape
 };
 
-template <typename Cell, typename CoordinateSystem> class Surface;
+template <typename Cell, typename CoordinateSystem>
+class Surface;
 
-template <typename Cell_, typename CoordinateSystem> class Surface {
-public:
+template <typename Cell_, typename CoordinateSystem>
+class Surface {
+ public:
   using SurfaceShape = ::hs::geometry::SurfaceShape<CoordinateSystem>;
   using Cell = Cell_;
   using View = SurfaceView<Cell, CoordinateSystem>;
@@ -172,14 +176,16 @@ public:
   auto r_size() const { return cells_.r_size(); }
   auto s_size() const { return cells_.s_size(); }
 
-#define WRLD_REDIRECT_VIEW_CONST_FUNCTION(func)                                \
-  template <typename... Args> decltype(auto) func(Args... args) const {        \
-    return cells_.func(std::forward<Args>(args)...);                           \
+#define WRLD_REDIRECT_VIEW_CONST_FUNCTION(func)      \
+  template <typename... Args>                        \
+  decltype(auto) func(Args... args) const {          \
+    return cells_.func(std::forward<Args>(args)...); \
   }
 
-#define WRLD_REDIRECT_VIEW_FUNCTION(func)                                      \
-  template <typename... Args> decltype(auto) func(Args... args) {              \
-    return cells_.func(std::forward<Args>(args)...);                           \
+#define WRLD_REDIRECT_VIEW_FUNCTION(func)            \
+  template <typename... Args>                        \
+  decltype(auto) func(Args... args) {                \
+    return cells_.func(std::forward<Args>(args)...); \
   }
 
   WRLD_REDIRECT_VIEW_CONST_FUNCTION(GetCell)
@@ -203,18 +209,18 @@ public:
   bool operator==(const Surface &other) const { return view() == other.view(); }
   bool operator!=(const Surface &other) const { return !(*this == other); }
 
-private:
+ private:
   SurfaceShape shape_;
   std::pair<size_t, size_t> allocation_size_;
   size_t data_size_;
   std::unique_ptr<Cell[]> data_storage_;
   SurfaceView<Cell, CoordinateSystem> cells_;
 
-private:
-  static std::pair<size_t, size_t>
-  GetAllocationSize(const SurfaceShape &shape) noexcept;
+ private:
+  static std::pair<size_t, size_t> GetAllocationSize(
+      const SurfaceShape &shape) noexcept;
 };
 
-} // namespace hs::geometry
+}  // namespace hs::geometry
 
 #include "surface.inl"

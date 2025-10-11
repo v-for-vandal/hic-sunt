@@ -5,11 +5,12 @@ namespace hs::geometry {
 namespace {
 
 // helper type for the visitor
-template <class... Ts> struct overloads : Ts... {
+template <class... Ts>
+struct overloads : Ts... {
   using Ts::operator()...;
 };
 
-} // namespace
+}  // namespace
 
 HexagonSurface ParseFrom(const proto::geometry::HexagonSurface &source,
                          serialize::To<HexagonSurface>) {
@@ -39,16 +40,15 @@ RhombusSurface ParseFrom(const proto::geometry::RhombusSurface &source,
 
 void SerializeTo(const RhombusSurface &source,
                  proto::geometry::RhombusSurface &target) {
-
   target.set_q_start(source.BoundingBox().start().q().ToUnderlying());
   target.set_r_start(source.BoundingBox().start().r().ToUnderlying());
   target.set_q_end(source.BoundingBox().end().q().ToUnderlying());
   target.set_r_end(source.BoundingBox().end().r().ToUnderlying());
 }
 
-SurfaceShape<geometry::QRSCoordinateSystem>
-ParseFrom(const proto::geometry::SurfaceShape &source,
-          serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>) {
+SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(
+    const proto::geometry::SurfaceShape &source,
+    serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>) {
   if (source.has_hexagon()) {
     const HexagonSurface hexagon =
         ParseFrom(source.hexagon(), serialize::To<HexagonSurface>{});
@@ -73,4 +73,4 @@ void SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem> &source,
   std::visit(visitor, source.data_);
 }
 
-} // namespace hs::geometry
+}  // namespace hs::geometry

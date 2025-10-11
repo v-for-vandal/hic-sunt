@@ -1,9 +1,8 @@
 #include "system.hpp"
 
+#include <core/utils/serialize.hpp>
 #include <fstream>
 #include <vector>
-
-#include <core/utils/serialize.hpp>
 
 namespace hs::system {
 
@@ -48,4 +47,4 @@ std::optional<ruleset::RuleSet> System::LoadRuleSet(const std::filesystem::path&
 
 #endif
 
-} // namespace hs::system
+}  // namespace hs::system

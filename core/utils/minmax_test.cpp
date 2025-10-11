@@ -3,7 +3,6 @@
 #include <core/utils/minmax.hpp>
 
 TEST(MinMax, BasicInt) {
-
   hs::utils::MinMax<int> target;
   target.Account(-10);
 
@@ -20,7 +19,6 @@ TEST(MinMax, BasicInt) {
 }
 
 TEST(MinMax, BasicFloat) {
-
   hs::utils::MinMax<float> target;
   target.Account(-10);
 

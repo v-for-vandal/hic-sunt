@@ -5,8 +5,7 @@
 
 namespace hs::godot {
 
-    using Plane = hs::terra::Plane<GodotBaseTypes>;
-    using PlanePtr = hs::terra::PlanePtr<GodotBaseTypes>;
+using Plane = hs::terra::Plane<GodotBaseTypes>;
+using PlanePtr = hs::terra::PlanePtr<GodotBaseTypes>;
 
-}
-
+}  // namespace hs::godot

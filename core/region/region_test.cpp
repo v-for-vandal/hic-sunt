@@ -1,9 +1,9 @@
 #include "region.hpp"
 
+#include <gtest/gtest.h>
+
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
-
-#include <gtest/gtest.h>
 
 namespace hs::region {
 
@@ -63,18 +63,16 @@ TEST(StdRegion, Scope) {
 
   ref_region.GetScope()->AddNumericModifier("some_var", "some_key", 1.0, 2.0);
   auto result = ref_region.GetScope()->GetNumericValue("some_var");
-  EXPECT_EQ(result, 3.0); // add=1.0 * mult=(1+2.0)
+  EXPECT_EQ(result, 3.0);  // add=1.0 * mult=(1+2.0)
 }
 
 TEST(StdRegion, CellScopeParent) {
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
 
-  region.GetSurface().foreach(
-    [&region](auto, auto& cell) {
+  region.GetSurface().foreach ([&region](auto, auto& cell) {
     ASSERT_EQ(cell.GetScope()->GetParent(), region.GetScope());
-    }
-    );
+  });
 }
 
-} // namespace hs::region
+}  // namespace hs::region

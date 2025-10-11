@@ -1,11 +1,8 @@
 #pragma once
 
-#include <memory>
-
-#include <ui/godot/module/game/pnl_statement.hpp>
-
 #include <godot_cpp/classes/ref.hpp>
-
+#include <memory>
+#include <ui/godot/module/game/pnl_statement.hpp>
 
 namespace hs::godot {
 
@@ -14,14 +11,11 @@ using namespace ::godot;
 class PnlObject : public RefCounted {
   GDCLASS(PnlObject, RefCounted);
 
-public:
+ public:
   PnlObject() {}
-  PnlObject(PnlStatement&& data):
-    pnl_statement_(std::move(data)) {}
+  PnlObject(PnlStatement&& data) : pnl_statement_(std::move(data)) {}
 
-
-  void _init() {
-  }
+  void _init() {}
 
   static void _bind_methods();
 
@@ -29,12 +23,11 @@ public:
     pnl_statement_ = std::move(statement);
   }
 
-
-private:
+ private:
   PnlStatement pnl_statement_;
 
-public:
+ public:
   Dictionary get_total() const;
 };
 
-}
+}  // namespace hs::godot
