@@ -100,7 +100,10 @@ class SurfaceView {
     for (size_t idx = 0; idx < target_.size(); ++idx) {
       const auto coords = FromRawIndex(idx);
       if (Contains(coords)) [[likely]] {
-        callback(coords, GetCell(coords));
+        const bool should_continue = callback(coords, GetCell(coords));
+        if(!should_continue) {
+          break;
+        }
       }
     }
   }

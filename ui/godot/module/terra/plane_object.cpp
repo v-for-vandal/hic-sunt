@@ -69,7 +69,13 @@ void PlaneObject::foreach_surface(const Callable& callback) {
                                                               Cell& cell) {
     Ref<RegionObject> region(memnew(
         RegionObject(data->GetSurface().GetCell(coords).GetRegionPtr())));
-    callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying(), region);
+    auto result = callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying(), region);
+    // special treatment for callbacks that don't return anything
+    if(result.get_type() ==  Variant::NIL) {
+      return true;
+    }
+
+    return result.booleanize();
   });
 }
 
