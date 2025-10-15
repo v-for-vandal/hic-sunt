@@ -154,10 +154,9 @@ Rect2i RegionObject::get_dimensions() const {
   auto result = Rect2i{Vector2i{0, 0}, Vector2i{1, 1}};
   ERR_FAIL_NULL_REGION(result);
 
-  result = Rect2i{Vector2i{region_->GetSurface().q_start().ToUnderlying(),
-                           region_->GetSurface().r_start().ToUnderlying()},
-                  Vector2i{region_->GetSurface().q_size().ToUnderlying(),
-                           region_->GetSurface().r_size().ToUnderlying()}};
+  auto box = region_->GetSurface().GetShape().BoundingBox();
+  result = Rect2i(Vector2i(box.start().q().ToUnderlying(), box.start().r().ToUnderlying()),
+    Vector2i(box.q_size().ToUnderlying(), box.r_size().ToUnderlying()));
 
   return result;
 }

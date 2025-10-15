@@ -175,6 +175,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 	if event is UiEventBus.UIMovementEvent:
 		if event.prev_qr_coords != event.qr_coords:
 			event.surface.clear_highlight(event.prev_qr_coords)
+			print("Highlighting %s" % [event.qr_coords])
 		event.surface.highlight(event.qr_coords, true)
 		
 	if event is UiEventBus.WorldUIMovementEvent:

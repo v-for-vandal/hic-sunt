@@ -1,21 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://clsw3n3vibrhp"]
+[gd_scene load_steps=6 format=3 uid="uid://clsw3n3vibrhp"]
 
 [ext_resource type="Script" uid="uid://dasud4j0s1l5u" path="res://game/region/RegionSurface.gd" id="1_eguag"]
-[ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="2_5aled"]
+[ext_resource type="Shader" uid="uid://basfbwomq7kso" path="res://game/region/hexagon_surface.gdshader" id="3_ly3jk"]
+[ext_resource type="Script" uid="uid://csndhhhdv47k8" path="res://game/region/biomes.gd" id="4_htarr"]
+[ext_resource type="TileSet" uid="uid://ifgtbjk2got" path="res://resources/world/v5_simple.tres" id="4_ly3jk"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ke7yf"]
+shader = ExtResource("3_ly3jk")
+shader_parameter/origin = Vector2i(0, 0)
+shader_parameter/cell_size = 32
 
 [node name="RegionSurface" type="Node2D" groups=["ui:region"]]
 script = ExtResource("1_eguag")
 surface_type = 2
 
-[node name="biomes" type="TileMapLayer" parent="."]
-use_parent_material = true
-tile_map_data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-tile_set = ExtResource("2_5aled")
+[node name="biomes" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_ke7yf")
+script = ExtResource("4_htarr")
 
 [node name="highlight" type="TileMapLayer" parent="."]
 use_parent_material = true
-tile_set = ExtResource("2_5aled")
+tile_set = ExtResource("4_ly3jk")
 
 [node name="improvements" type="TileMapLayer" parent="."]
 use_parent_material = true
-tile_set = ExtResource("2_5aled")
+tile_set = ExtResource("4_ly3jk")

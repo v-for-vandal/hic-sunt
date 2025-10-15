@@ -62,6 +62,34 @@ func load_mod_content_files(target_dir: String) -> Array[Resource]:
 			result.append(script)
 			
 	return result
+	
+func load_mod_images(target_dir: String) -> Array[Resource]:
+	var result: Array[Resource] = []
+	var target_files := DirAccess.get_files_at(target_dir)
+	for file : String in target_files:
+		var full_file_path := target_dir.path_join(file)
+		if file.get_extension() == "import":
+			var resource := load(full_file_path.get_basename()) # remove .import extension
+			
+			if not resource:
+				push_error("Failed to load %s" % [full_file_path])
+				continue
+			if not (resource is Image):
+				push_error("Resource at %s is not an image" % [full_file_path])
+				continue
+			result.append(resource as Image)
+	return result
+	
+func load_mod_gfx(target_dir: String) -> void:
+	# load biomes gfx
+	var biomes_dir_path := target_dir.path_join("biomes")
+	if DirAccess.dir_exists_absolute(biomes_dir_path):
+		var images := load_mod_images(biomes_dir_path)
+		for image in images:
+			var biome_name : StringName = image.resource_path.get_basename().get_file()
+			print("Registering image for biome: %s" % [biome_name])
+		
+	
 			
 	
 ## Load content of the module. Looks for appropriate files in appropriate
@@ -91,6 +119,9 @@ func load_mod_content(modconfig: ConfigFile) -> bool:
 		var target_scripts := load_mod_content_files(world_gen_folder_path)
 		for script: Script in target_scripts:
 			WorldBuilderRegistry.register_module(mod_info, script)
+	if mod_dir.dir_exists("gfx"):
+		print("Loading gfx")
+		load_mod_gfx(loaded_mod_path.path_join("gfx"))
 		
 	
 	return true

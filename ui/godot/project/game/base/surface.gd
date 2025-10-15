@@ -90,13 +90,18 @@ func map_to_axial(xy_coords: Vector2i) -> Vector2i:
 	var qrs_coords := _map_to_cube.call(xy_coords) as Vector3i
 	return Vector2i(qrs_coords.x, qrs_coords.y)
 	
+## Overwrite this method if you need to change source id for atlas with hightlighted
+## overlays
+func _get_highlight_source_id():
+	return 1
+	
 func highlight(qr_coords: Vector2i, good: bool) -> void:
 	if !_contains(qr_coords):
 		return
 	var xy_coords := axial_to_map(qr_coords)
 	# TODO: take atlas coords from user settings
 	var highlight_atlas_coords := Vector2i(0,0) if good else Vector2i(1,0)
-	_highlight_layer.set_cell(xy_coords, 1, highlight_atlas_coords, 0)
+	_highlight_layer.set_cell(xy_coords, _get_highlight_source_id(), highlight_atlas_coords, 0)
 	
 func clear_highlight(qr_coords: Vector2i) -> void:
 	if !_contains(qr_coords):

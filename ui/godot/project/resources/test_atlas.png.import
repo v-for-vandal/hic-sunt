@@ -1,0 +1,26 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://dgtvkaaogfbkv"
+path="res://.godot/imported/test_atlas.png-1c611dbd5788136445bea230bca98aa5.ctexarray"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://resources/test_atlas.png"
+dest_files=["res://.godot/imported/test_atlas.png-1c611dbd5788136445bea230bca98aa5.ctexarray"]
+
+[params]
+
+compress/mode=0
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/channel_pack=0
+mipmaps/generate=false
+mipmaps/limit=-1
+slices/horizontal=2
+slices/vertical=2

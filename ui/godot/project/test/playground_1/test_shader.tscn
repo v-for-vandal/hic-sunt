@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://cdhoptk0tukxe"]
+
+[ext_resource type="Shader" uid="uid://bdutngbuw4mne" path="res://test/playground_1/test_hexagon.gdshader" id="1_wqnsj"]
+[ext_resource type="Texture2D" uid="uid://dr2rpatys3l6f" path="res://resources/red_simplex_noise.png" id="2_0uuol"]
+[ext_resource type="CompressedTexture2DArray" uid="uid://35bwxx7txk6i" path="res://test/playground_1/test_atlas.png" id="3_tful4"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0uuol"]
+shader = ExtResource("1_wqnsj")
+shader_parameter/textureAtlas = ExtResource("3_tful4")
+shader_parameter/textureAtlasCount = 4
+shader_parameter/textureAtlasDimensions = 512.0
+shader_parameter/mapData = ExtResource("2_0uuol")
+shader_parameter/CellSize = 32
+shader_parameter/GridSizePlusOne = Vector2(256, 256)
+shader_parameter/WorldPixelSize = Vector2(1000, 1000)
+
+[node name="TestShader" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_0uuol")
+texture = ExtResource("2_0uuol")
