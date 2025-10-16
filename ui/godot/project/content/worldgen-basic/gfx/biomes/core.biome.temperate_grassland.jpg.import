@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://nl3nsdqrbeum"
+path="res://.godot/imported/core.biome.temperate_grassland.jpg-9451b38560696769774c314828c313d8.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.temperate_grassland.jpg"
+dest_files=["res://.godot/imported/core.biome.temperate_grassland.jpg-9451b38560696769774c314828c313d8.image"]
+
+[params]
+

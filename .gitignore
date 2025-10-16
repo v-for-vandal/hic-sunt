@@ -41,3 +41,4 @@ subprojects/godot-cpp-4.2
 # temp files
 *.png~
 *.kra~
+*.kate-swp

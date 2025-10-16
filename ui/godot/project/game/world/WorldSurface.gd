@@ -17,19 +17,6 @@ func _contains(tile_qr: Vector2i) -> bool:
 
 	assert(_plane_object != null)
 	return _plane_object.contains(tile_qr)
-	
-
-#func _unhandled_input(event) -> void:
-	#if event is InputEventMouseButton:
-		## react on mouse release, not on mouse press
-		#if not event.pressed and not event.canceled:
-			#event = make_input_local(event)
-			#var tile_xy := local_to_map(to_local(event.position))
-			#var tile_qr := QrsCoordsLibrary.xy_to_qr(tile_xy)
-			#print("WorldSurface: Cell coords xy:", tile_xy, " qr:", tile_qr)
-			#if _world_object.contains(tile_qr):
-				#GameUiEventBus.emit_world_cell_action(tile_qr,
-				#GameUiEventBus.mouse_button_to_action_type(event.button_index))
 
 
 func get_plane() -> PlaneObject:
@@ -45,49 +32,18 @@ func load_plane(plane_object : PlaneObject) -> void:
 	# tilemap is in (x,y) system
 	var qr_dimensions : Rect2i = _plane_object.get_dimensions()
 	print("world dimensions: ", qr_dimensions)
+	
+	var update_cell_lambda := func(region_q: int, region_r: int, region: RegionObject)-> void:
+		update_cell(Vector2i(region_q, region_r), region)
+		
+	plane_object.foreach_surface(update_cell_lambda)
 
-	for q in range(qr_dimensions.position.x, qr_dimensions.end.x):
-		for r in range(qr_dimensions.position.y, qr_dimensions.end.y):
-
-			var qr_coords := Vector2i(q,r)
-			if not _plane_object.contains(qr_coords):
-				print("skipping non-existing world cell ", qr_coords)
-				continue
-				
-			var region := _plane_object.get_region(qr_coords)
-			if not region:
-				push_error("Can't get region at: ", qr_coords)
-				continue
-			var topBiomes := region.get_topn_string_values(Modifiers.ECOSYSTEM_BIOME, 1)
-			if topBiomes.is_empty():
-				push_error("No biome at all in region at: ", qr_coords)
-				continue
-				
-			var terrain : StringName = &"core.biome.none"
-			terrain = topBiomes[0]
-			
-			
-			
-			# var region_info : Dictionary = _plane_object.get_region_info(qr_coords)
-			#if region_info.is_empty():
-			#	push_error("Can't get region at: ", qr_coords)
-			#	continue
-				
-				
-			# var has_city : bool = not region_info.city_id.is_empty()
-			var has_city : bool = false
-			#print("Terrain of a cell qr=", Vector2i(q,r), " is \"", terrain, "\"")
-			# convert to xy dimensions
-			var xy_coords := axial_to_map(qr_coords)
-			# fill cell
-			if has_city:
-				$terrain.set_cell(xy_coords, 0, Vector2i(0,2), 0)
-			elif terrain_mapping.has(terrain):
-				#print("setting terrail of tile map xy=", xy_coords, " qr=", qr_coords, " to ",
-				#	terrain_mapping[terrain])
-				$terrain.set_cell( xy_coords,
-					terrain_mapping[terrain].source_id,
-					terrain_mapping[terrain].atlas_coords,0)
-			else:
-				push_error("unknown terrain \"%s\"" % [terrain])
-				$terrain.set_cell(xy_coords, 0, Vector2i(0,0), 0)
+func update_cell(qr_coords: Vector2i, region: RegionObject) -> void:
+	# convert to xy dimensions
+	var xy_coords := axial_to_map(qr_coords)
+	
+	$biomes.set_cell(xy_coords, 0, Vector2i.ZERO, 1)
+	pass
+	
+func _get_select_source_id():
+	return 5

@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://dp6clttg373ea"
+path="res://.godot/imported/core.biome.snow.jpg-c77db404b934bb9c390a2f0f3c9385fc.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.snow.jpg"
+dest_files=["res://.godot/imported/core.biome.snow.jpg-c77db404b934bb9c390a2f0f3c9385fc.image"]
+
+[params]
+

@@ -87,7 +87,9 @@ func load_mod_gfx(target_dir: String) -> void:
 		var images := load_mod_images(biomes_dir_path)
 		for image in images:
 			var biome_name : StringName = image.resource_path.get_basename().get_file()
-			print("Registering image for biome: %s" % [biome_name])
+			if not (image is Image):
+				print("%s is not an Image instance. Did you forget to set up import settings properly?" % [image.resource_path] )
+			GfxRegistry.register_biome_image(biome_name, image as Image)
 		
 	
 			

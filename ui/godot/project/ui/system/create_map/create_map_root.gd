@@ -174,9 +174,8 @@ func _on_select_generator_button_item_selected(index: int) -> void:
 func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 	if event is UiEventBus.UIMovementEvent:
 		if event.prev_qr_coords != event.qr_coords:
-			event.surface.clear_highlight(event.prev_qr_coords)
-			print("Highlighting %s" % [event.qr_coords])
-		event.surface.highlight(event.qr_coords, true)
+			event.surface.clear_select(event.prev_qr_coords)
+		event.surface.select(event.qr_coords, true)
 		
 	if event is UiEventBus.WorldUIMovementEvent:
 		var plane : PlaneObject = event.surface.get_plane()

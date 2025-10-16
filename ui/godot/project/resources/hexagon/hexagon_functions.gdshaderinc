@@ -49,4 +49,3 @@ ivec2 pixel_to_horizontal_axial(vec2 point, int size) {
 	//return _axial_round(vec2(q, r));
 
 }
-

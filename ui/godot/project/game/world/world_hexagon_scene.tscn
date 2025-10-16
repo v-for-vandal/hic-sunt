@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://dgodac1qe7g7b"]
+
+[ext_resource type="Script" uid="uid://dc0und7strnfa" path="res://game/world/world_hexagon_scene.gd" id="1_fk17k"]
+[ext_resource type="Texture2D" uid="uid://dut60birk0aeg" path="res://resources/green512x512.png" id="2_55cmn"]
+
+[node name="WorldHexagonScene" type="Node2D"]
+script = ExtResource("1_fk17k")
+
+[node name="Biome" type="Polygon2D" parent="."]
+texture = ExtResource("2_55cmn")
+polygon = PackedVector2Array(-55.426, -32, 0, -64, 55.426, -32, 55.426, 32, 0, 64, -55.426, 32)
+uv = PackedVector2Array(0.922251, 378.138, 286.02, 513.184, 513.24, 379.001, 504.666, 116.62, 215.281, 5.15301, -1.22134, 138.056)
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D"]
+polygon = PackedVector2Array(-55.426, -32, 0, -64, 55.426, -32, 55.426, 32, 0, 64, -55.426, 32)
+
+[connection signal="input_event" from="Area2D" to="." method="_on_input_event"]
+[connection signal="mouse_entered" from="Area2D" to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Area2D" to="." method="_on_mouse_exited"]

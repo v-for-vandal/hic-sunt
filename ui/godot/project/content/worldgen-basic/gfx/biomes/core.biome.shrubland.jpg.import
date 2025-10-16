@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://bh1g0xexoy0p2"
+path="res://.godot/imported/core.biome.shrubland.jpg-6f91e4c2a25b7c621da5b7137a9a5d43.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.shrubland.jpg"
+dest_files=["res://.godot/imported/core.biome.shrubland.jpg-6f91e4c2a25b7c621da5b7137a9a5d43.image"]
+
+[params]
+
