@@ -7,7 +7,7 @@ var _unknown_biome : Image = _load_unknown_biome_image()
 var _unknown_biome_texture : ImageTexture = _load_unknown_biome_texture()
 
 static func _load_unknown_biome_image() -> Image:
-	var result = load("res://resources/pink512x512.png") as Image
+	var result := load("res://resources/pink512x512.png") as Image
 	result.resize(_BIOME_IMAGE_SIZE.x, _BIOME_IMAGE_SIZE.y, Image.INTERPOLATE_NEAREST)
 	return result
 	

@@ -9,6 +9,18 @@ enum SurfaceType { UNDEFINED, WORLD_SURFACE, REGION_SURFACE}
 
 @export var event_bus : UiEventBus
 
+var highlighter: HighlighterInterface:
+	get:
+		return highlighter
+	set(value):
+		highlighter = value
+		_display_settings_changed.emit(self)
+		
+
+# emited when some settings affecting how cells should be displayed are
+# changed. This is internal signal, used by scenes in tilemap
+signal _display_settings_changed(surface: GameTileSurface)
+
 var _select_layer : TileMapLayer
 
 # last time we checked, tile under mouse cursor was this one

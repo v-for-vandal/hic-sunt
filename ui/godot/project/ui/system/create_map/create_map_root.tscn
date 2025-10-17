@@ -64,17 +64,14 @@ layout_mode = 2
 layout_mode = 2
 columns = 2
 
-[node name="BackgroundLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
+[node name="HighlightLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 layout_mode = 2
-text = "Background"
+text = "Highlight"
 
-[node name="BackgroundSelect" type="OptionButton" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
+[node name="HighlightSelect" type="OptionButton" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 selected = 0
-item_count = 1
-popup/item_0/text = "None"
-popup/item_0/id = 0
 
 [node name="ForegroundLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 layout_mode = 2
@@ -193,7 +190,7 @@ metadata/_custom_type_script = "uid://dte46f0jc5d54"
 
 [connection signal="item_selected" from="HBoxContainer/Controls/GeneratorSelectorSection/SelectGeneratorButton" to="." method="_on_select_generator_button_item_selected"]
 [connection signal="pressed" from="HBoxContainer/Controls/GeneratorSelectorSection/GenerateButton" to="." method="_on_generate_button_pressed"]
-[connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/BackgroundSelect" to="." method="_on_background_select_item_selected"]
+[connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/HighlightSelect" to="." method="_on_highlight_select_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/ForegroundSelect" to="." method="_on_foreground_select_item_selected"]
 [connection signal="pressed" from="HBoxContainer/Controls/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/Controls/StartGameButton" to="." method="_on_start_game_button_pressed"]

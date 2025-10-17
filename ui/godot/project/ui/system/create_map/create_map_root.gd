@@ -17,12 +17,13 @@ func _init() -> void:
 func _ready() -> void:
 	_prepare_generators()
 	_prepare_cellinfo()
+	_prepare_highlighters()
 	
 	$DebugUiEventBus.set_main_interaction(self)
 	
-	var ruleset = CentralSystem.load_ruleset()
+	var ruleset := CentralSystem.load_ruleset()
 	
-	var terrain_mapping = ruleset.get_atlas_render()
+	var terrain_mapping := ruleset.get_atlas_render()
 	
 	%WorldSurface.terrain_mapping = terrain_mapping
 	%RegionSurface.visualization_data = terrain_mapping
@@ -50,7 +51,19 @@ func _prepare_generators() -> void:
 
 func _prepare_cellinfo() -> void:
 	%CellInfo.set_headers(["data", "value"])
-			
+	
+func _prepare_highlighters() -> void:
+	
+	_add_highlighter(null, &"None")
+	_add_highlighter(preload("res://resources/highlighters/temperature_highlighter.tres"), &"Temperature")
+	_add_highlighter(preload("res://resources/highlighters/precipitation_highlighter.tres"), &"Precipitation")
+	_add_highlighter(preload("res://resources/highlighters/height_highlighter.tres"), &"Height")
+
+func _add_highlighter(highlighter: HighlighterInterface, label: StringName) -> void:
+		var idx : int = %HighlightSelect.item_count
+		%HighlightSelect.add_item(label, idx)
+		%HighlightSelect.set_item_metadata(idx,  highlighter)
+		
 func _create_ui_if_absent(index: int) -> void:
 	if index in _ui_elements and _ui_elements[index] != null:
 		return
@@ -120,8 +133,6 @@ func _on_generate_button_pressed() -> void:
 	%WorldSurface.load_plane(world_object.get_plane(&"main"))
 	_processing = false
 
-	
-
 func _on_map_selected(_name: String, widget: TextureRect) -> void:
 	assert( _name.is_empty() or _maps.has(_name))
 	if _name.is_empty(): # thats 'none'
@@ -130,18 +141,14 @@ func _on_map_selected(_name: String, widget: TextureRect) -> void:
 		widget.texture = _maps[_name].texture
 		widget.show()
 
-func _on_background_select_item_selected(index: int) -> void:
-	var _name : String = $%BackgroundSelect.get_item_text(index)
-	if index == 0:
-		_name = ""
-		
-	_on_map_selected(_name, $%DebugBackgroundView)
-	
-	
+func _on_highlight_select_item_selected(index: int) -> void:
+	var highlighter := %HighlightSelect.get_item_metadata(index) as HighlighterInterface
+	%RegionSurface.highlighter = highlighter
+	%WorldSurface.highlighter = highlighter
 
 
 func _on_foreground_select_item_selected(index: int) -> void:
-	var name = $%ForegroundSelect.get_item_text(index)
+	var name : String = $%ForegroundSelect.get_item_text(index)
 	if index == 0:
 		name = ""
 		

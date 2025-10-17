@@ -23,6 +23,7 @@ func _ready() -> void:
 	_offset_coords = (get_parent() as TileMapLayer).local_to_map(self.position)
 	_qr_coords = surface.map_to_axial(_offset_coords)
 	input_event.connect(surface._on_input_event_from_cell)
+	surface._display_settings_changed.connect(self._on_display_settings_changed)
 
 
 ## This method relies on the fact that parent TileMapLayer
@@ -44,3 +45,7 @@ func _get_qr_coordinates() -> Vector2i:
 	
 func _on_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
 	input_event.emit(qr_coords, event)
+	
+func _on_display_settings_changed(surface: GameTileSurface):
+	pass
+	

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="NumericVariableHighlighter" load_steps=3 format=3 uid="uid://d3g1s5l35tt1u"]
+
+[ext_resource type="Script" uid="uid://rshygb47jjs5" path="res://game/highlighters/numeric_variable_highlighter.gd" id="1_6lfpj"]
+
+[sub_resource type="Gradient" id="Gradient_6lfpj"]
+offsets = PackedFloat32Array(0, 0.155, 0.36, 0.565, 0.78, 1)
+colors = PackedColorArray(0.527263, 0.00442476, 0.613716, 1, 0.180392, 0.156863, 0.67451, 1, 1.92523e-07, 0.497319, 0.398985, 1, 0.85098, 0.811765, 0, 1, 0.866667, 0.258824, 0, 1, 1, 0, 0, 1)
+
+[resource]
+script = ExtResource("1_6lfpj")
+gradient = SubResource("Gradient_6lfpj")
+variable_name = "core.geography.height"
+metadata/_custom_type_script = "uid://rshygb47jjs5"
