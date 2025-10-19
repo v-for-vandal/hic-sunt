@@ -1,21 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://clsw3n3vibrhp"]
+[gd_scene load_steps=4 format=3 uid="uid://clsw3n3vibrhp"]
 
 [ext_resource type="Script" uid="uid://dasud4j0s1l5u" path="res://game/region/RegionSurface.gd" id="1_eguag"]
-[ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="2_5aled"]
+[ext_resource type="TileSet" uid="uid://d24nswtlwd1wm" path="res://game/region/region_tileset.tres" id="2_5aled"]
+[ext_resource type="TileSet" uid="uid://ifgtbjk2got" path="res://resources/world/v5_simple.tres" id="4_ly3jk"]
 
 [node name="RegionSurface" type="Node2D" groups=["ui:region"]]
 script = ExtResource("1_eguag")
 surface_type = 2
 
 [node name="biomes" type="TileMapLayer" parent="."]
-use_parent_material = true
-tile_map_data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 tile_set = ExtResource("2_5aled")
 
-[node name="highlight" type="TileMapLayer" parent="."]
+[node name="select" type="TileMapLayer" parent="."]
 use_parent_material = true
-tile_set = ExtResource("2_5aled")
+tile_set = ExtResource("4_ly3jk")
 
 [node name="improvements" type="TileMapLayer" parent="."]
+visible = false
 use_parent_material = true
-tile_set = ExtResource("2_5aled")
+tile_set = ExtResource("4_ly3jk")

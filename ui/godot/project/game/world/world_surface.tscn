@@ -1,19 +1,18 @@
-[gd_scene load_steps=3 format=4 uid="uid://dhdak5msql21g"]
+[gd_scene load_steps=4 format=3 uid="uid://dhdak5msql21g"]
 
 [ext_resource type="Script" uid="uid://cv7ec3tvxs77o" path="res://game/world/WorldSurface.gd" id="1_j50n3"]
-[ext_resource type="TileSet" uid="uid://bx1c4qw1q0psg" path="res://resources/world/v3_atlas.tres" id="2_y53jn"]
+[ext_resource type="TileSet" uid="uid://b1kbclauq8xc5" path="res://game/world/world_tileset.tres" id="2_sttcl"]
+[ext_resource type="TileSet" uid="uid://ifgtbjk2got" path="res://resources/world/v5_simple.tres" id="3_y53jn"]
 
 [node name="WorldSurface" type="Node2D"]
 script = ExtResource("1_j50n3")
 surface_type = 1
 
-[node name="terrain" type="TileMapLayer" parent="."]
-use_parent_material = true
-tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAAAAAAAAAAAAAABAAEAAAACAAAAAAACAAAAAAACAAAAAAABAP//AAACAAAAAAAAAP//AAACAAAAAAACAAEAAAABAAAAAAADAAAAAAABAAAAAAACAP//AAABAAAAAAACAP7/AAABAAAAAAABAP7/AAABAAAAAAACAAIAAAABAAAAAAA=")
-tile_set = ExtResource("2_y53jn")
+[node name="biomes" type="TileMapLayer" parent="."]
+tile_set = ExtResource("2_sttcl")
 
-[node name="highlight" type="TileMapLayer" parent="."]
+[node name="select" type="TileMapLayer" parent="."]
 z_index = 1
 use_parent_material = true
-tile_set = ExtResource("2_y53jn")
+tile_set = ExtResource("3_y53jn")
 navigation_enabled = false

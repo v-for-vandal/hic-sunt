@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://dl1puojxyxo1p"
+path="res://.godot/imported/green512x512.png-40726199482d4d63600715eae33269dd.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/green512x512.png"
+dest_files=["res://.godot/imported/green512x512.png-40726199482d4d63600715eae33269dd.image"]
+
+[params]
+

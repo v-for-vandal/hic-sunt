@@ -3,42 +3,6 @@
 #include <godot_cpp/core/object.hpp>
 #include <ui/godot/module/utils/cast_qrs.hpp>
 
-#define SETTER_GETTER_FLOAT(name, name_upper)                              \
-  bool RegionObject::set_##name(Vector2i coords, double value) const {     \
-    if (!region_) {                                                        \
-      return false;                                                        \
-    }                                                                      \
-                                                                           \
-    const auto qrs_coords = cast_qrs(coords);                              \
-                                                                           \
-    auto success = region_->Set##name_upper(qrs_coords, value);            \
-                                                                           \
-    if (success) {                                                         \
-      emit_signals_for_cell(coords, 0);                                    \
-    }                                                                      \
-                                                                           \
-    return success;                                                        \
-  }                                                                        \
-                                                                           \
-  double RegionObject::get_##name(Vector2i coords) const {                 \
-    if (!region_) {                                                        \
-      return 0.0;                                                          \
-    }                                                                      \
-                                                                           \
-    const auto qrs_coords = cast_qrs(coords);                              \
-    if (!region_->GetSurface().Contains(qrs_coords)) {                     \
-      return 0.0;                                                          \
-    }                                                                      \
-                                                                           \
-    const auto result =                                                    \
-        region_->GetSurface().GetCell(qrs_coords).Get##name_upper();       \
-    if (region_->GetId() == StringName("rgn_0")) {                         \
-      spdlog::info("Region {} Getting height at {}: {}",                   \
-                   static_cast<void*>(region_.get()), qrs_coords, result); \
-    }                                                                      \
-    return result;                                                         \
-  }
-
 #define ERR_FAIL_NULL_TARGET_REGION(region, result) \
   ERR_FAIL_NULL_V_MSG(region, result, ERR_MSG_REGION_IS_NULL)
 #define ERR_FAIL_NULL_REGION(result) \
@@ -59,8 +23,10 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"),
                        &RegionObject::set_city_id);
-  ClassDB::bind_method(D_METHOD("get_topn_string_values", "variable", "N"),
-                       &RegionObject::get_topn_string_values);
+  ClassDB::bind_method(D_METHOD("get_string_value_topn", "variable", "N"),
+                       &RegionObject::get_string_value_topn);
+  ClassDB::bind_method(D_METHOD("get_numeric_value_aggregates", "variable"),
+                       &RegionObject::get_numeric_value_aggregates);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"),
                        &RegionObject::get_cell_info);
   ClassDB::bind_method(D_METHOD("get_cell", "coords"), &RegionObject::get_cell);
@@ -120,27 +86,11 @@ ScopePtr RegionObject::GetScope() const {
   return region_->GetScope();
 }
 
-TypedArray<StringName> RegionObject::get_topn_string_values(StringName variable,
-                                                            int N) const {
-  std::unordered_map<StringName, size_t> count;
+TypedArray<StringName> RegionObject::get_string_value_topn(StringName variable,
+                                                           int N) const {
+  ERR_FAIL_NULL_REGION(TypedArray<StringName>{});
 
-  std::vector<std::pair<size_t, StringName>> topN;
-
-  region_->GetSurface().Foreach([&count, variable](auto, auto& cell) {
-    StringName value = cell.GetScope()->GetStringValue(variable);
-    count[value]++;
-  });
-
-  topN.reserve(count.size());
-
-  for (auto& [k, v] : count) {
-    topN.push_back(std::make_pair(v, k));
-  }
-
-  N = std::min<int>(N, topN.size());
-  std::partial_sort(topN.begin(), topN.begin() + N, topN.end());
-
-  topN.resize(N);
+  auto topN = region_->GetTopNStringValues(variable, N);
 
   TypedArray<StringName> result;
   for (auto& [k, v] : topN) {
@@ -150,14 +100,29 @@ TypedArray<StringName> RegionObject::get_topn_string_values(StringName variable,
   return result;
 }
 
+TypedDictionary<StringName, GodotBaseTypes::NumericValue>
+RegionObject::get_numeric_value_aggregates(StringName variable) const {
+  ERR_FAIL_NULL_REGION({});
+
+  const auto aggregation = region_->GetNumericValueAggregates(variable);
+
+  TypedDictionary<StringName, GodotBaseTypes::NumericValue> result;
+  result[StringName("median")] = aggregation.median;
+  result[StringName("min")] = aggregation.min;
+  result[StringName("max")] = aggregation.max;
+  result[StringName("avg")] = aggregation.avg;
+
+  return result;
+}
+
 Rect2i RegionObject::get_dimensions() const {
   auto result = Rect2i{Vector2i{0, 0}, Vector2i{1, 1}};
   ERR_FAIL_NULL_REGION(result);
 
-  result = Rect2i{Vector2i{region_->GetSurface().q_start().ToUnderlying(),
-                           region_->GetSurface().r_start().ToUnderlying()},
-                  Vector2i{region_->GetSurface().q_size().ToUnderlying(),
-                           region_->GetSurface().r_size().ToUnderlying()}};
+  auto box = region_->GetSurface().GetShape().BoundingBox();
+  result = Rect2i(
+      Vector2i(box.start().q().ToUnderlying(), box.start().r().ToUnderlying()),
+      Vector2i(box.q_size().ToUnderlying(), box.r_size().ToUnderlying()));
 
   return result;
 }

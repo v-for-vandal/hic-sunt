@@ -17,6 +17,9 @@ class Box {
   using Coords = typename hs::geometry::Coords<CoordinateSystem>;
 
   Box() noexcept = default;
+  /** \brief Create a box from start and end position. Both start and end are
+   *         inclusive
+   */
   Box(Coords start, Coords end) : start_(start), end_(end) {
     start_ = Coords(std::min(start.q(), end.q()), std::min(start.r(), end.r()));
     end_ = Coords(std::max(start.q(), end.q()), std::max(start.r(), end.r()));
@@ -50,6 +53,7 @@ class Box {
 
  private:
   Coords start_;
+  // end_ is inclusive
   Coords end_;
 };
 

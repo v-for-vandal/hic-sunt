@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://l2yfqmi6oxqi"
+path="res://.godot/imported/core.biome.ocean.png-bc57f6e8f42cfdfc8d7a9796ce10bce0.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.ocean.png"
+dest_files=["res://.godot/imported/core.biome.ocean.png-bc57f6e8f42cfdfc8d7a9796ce10bce0.image"]
+
+[params]
+

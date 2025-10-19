@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NumericVariableHighlighter" load_steps=3 format=3 uid="uid://bj142hk063wvu"]
+
+[ext_resource type="Gradient" uid="uid://7q7jixbvmby2" path="res://resources/highlighters/rainbow_gradient.tres" id="1_c6u8n"]
+[ext_resource type="Script" uid="uid://rshygb47jjs5" path="res://game/highlighters/numeric_variable_highlighter.gd" id="2_kv4lw"]
+
+[resource]
+script = ExtResource("2_kv4lw")
+gradient = ExtResource("1_c6u8n")
+variable_name = "core.ecosystem.temperature"
+range = Vector2i(-20, 40)
+metadata/_custom_type_script = "uid://rshygb47jjs5"

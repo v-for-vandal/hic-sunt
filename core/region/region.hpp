@@ -13,6 +13,7 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/comb.hpp>
 #include <core/utils/enum_bitset.hpp>
+#include <core/utils/percentile.hpp>
 #include <memory>
 
 namespace hs::region {
@@ -37,6 +38,7 @@ class Region : public scope::ScopedObject<BaseTypes> {
       geometry::SurfaceView<Cell<BaseTypes>, QRSCoordinateSystem>;
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
+  using NumericValue = typename BaseTypes::NumericValue;
   using PnlStatement = PnlStatement<BaseTypes>;
 
   Region();
@@ -61,27 +63,6 @@ class Region : public scope::ScopedObject<BaseTypes> {
     return biome_count_.TopK(k);
   }
 
-  /* TODO: RM
-  std::pair<double, double> GetHeightRange() const noexcept;
-  std::pair<double, double> GetTemperatureRange() const noexcept;
-  std::pair<double, double> GetPrecipitationRange() const noexcept;
-  */
-
-  /* TODO: REMOVE
-  bool SetHeight(QRSCoords coords, double height);
-  std::pair<double, double> GetHeightRange() const noexcept {
-    return height_minmax_.GetRange();
-  }
-  bool SetTemperature(QRSCoords coords, double temperature);
-  std::pair<double, double> GetTemperatureRange() const noexcept {
-    return temperature_minmax_.GetRange();
-  }
-  bool SetPrecipitation(QRSCoords coords, double precipitation);
-  std::pair<double, double> GetPrecipitationRange() const noexcept {
-    return precipitation_minmax_.GetRange();
-  }
-  */
-
   bool SetFeature(QRSCoords coords, const StringId &biome);
 
   bool SetImprovement(QRSCoords coords, const StringId &improvement_type);
@@ -96,6 +77,12 @@ class Region : public scope::ScopedObject<BaseTypes> {
   // TODO: Perhaphs this method should not be inside region?
   PnlStatement BuildPnlStatement(
       const ruleset::RuleSet<BaseTypes> &ruleset) const;
+
+  // Auxilary methods for aggregation over cells
+  std::vector<std::pair<size_t, StringId>> GetTopNStringValues(
+      StringId variable, int N) const;
+  utils::NumericAggregationInfo<NumericValue> GetNumericValueAggregates(
+      StringId variable) const;
 
   /* TODO: REMOVE
    * replaced with Scope
@@ -139,9 +126,6 @@ class Region : public scope::ScopedObject<BaseTypes> {
   utils::Comb<BaseTypes> biome_count_;
   std::unordered_map<StringId, size_t> feature_count_;
   absl::flat_hash_set<QRSCoords> cells_with_improvements_;
-  utils::MinMax<double> height_minmax_;
-  utils::MinMax<double> temperature_minmax_;
-  utils::MinMax<double> precipitation_minmax_;
 
   static inline int next_id_{0};
 

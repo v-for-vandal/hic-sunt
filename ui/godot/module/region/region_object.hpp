@@ -1,6 +1,7 @@
 #pragma once
 
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/variant/typed_dictionary.hpp>
 #include <memory>
 #include <ui/godot/module/game/pnl_object.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
@@ -36,8 +37,11 @@ class RegionObject : public RefCounted, public ScopeMixin {
   Ref<ScopeObject> get_scope() const { return ScopeMixin::get_scope(); }
   // iterates over cells and gets N most frequent values of given variable
   // For values with eqaul frequency, sort by alphabet
-  TypedArray<StringName> get_topn_string_values(StringName variable,
-                                                int N) const;
+  TypedArray<StringName> get_string_value_topn(StringName variable,
+                                               int N) const;
+  TypedDictionary<StringName, GodotBaseTypes::NumericValue>
+  get_numeric_value_aggregates(StringName variable) const;
+
   Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
   bool set_feature(Vector2i coords, String feature) const;

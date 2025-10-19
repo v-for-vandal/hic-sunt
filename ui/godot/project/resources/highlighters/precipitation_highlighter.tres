@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NumericVariableHighlighter" load_steps=3 format=3 uid="uid://dne8e07xu47qt"]
+
+[ext_resource type="Gradient" uid="uid://7q7jixbvmby2" path="res://resources/highlighters/rainbow_gradient.tres" id="1_enidn"]
+[ext_resource type="Script" uid="uid://rshygb47jjs5" path="res://game/highlighters/numeric_variable_highlighter.gd" id="2_8a44h"]
+
+[resource]
+script = ExtResource("2_8a44h")
+gradient = ExtResource("1_enidn")
+variable_name = "core.ecosystem.precipitation"
+range = Vector2i(0, 400)
+metadata/_custom_type_script = "uid://rshygb47jjs5"

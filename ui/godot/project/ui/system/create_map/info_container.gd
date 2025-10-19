@@ -21,9 +21,12 @@ func set_region(region: RegionObject, region_qr_coords : Variant) -> void:
 		data_table.append([&"qrs", QrsCoordsLibrary.qr_to_qrs(region_qr_coords as Vector2i)])
 	for key in data:
 		data_table.append([key, data[key]])
-	data_table.append([&"height", region.get_scope().get_numeric_value(Modifiers.GEOGRAPHY_HEIGHT)])
-	data_table.append([&"temperature", region.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_TEMPERATURE)])
-	data_table.append([&"precipitation", region.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_PRECIPITATION)])
+	data_table.append([&"height (baseline)", region.get_scope().get_numeric_value(Modifiers.GEOGRAPHY_HEIGHT)])
+	data_table.append([&"temperature (avg)", region.get_numeric_value_aggregates(Modifiers.ECOSYSTEM_TEMPERATURE).avg])
+	data_table.append([&"precipitation (avg)", region.get_numeric_value_aggregates(Modifiers.ECOSYSTEM_PRECIPITATION).avg])
+	var topn_biomes = region.get_string_value_topn(Modifiers.ECOSYSTEM_BIOME, 1)
+	if topn_biomes.size() > 0:
+		data_table.append([&"biome (main)", topn_biomes[0]])
 
 	%CellInfo.set_data(data_table)
 	_current_region = region
@@ -46,6 +49,7 @@ func set_cell(qr_coords: Vector2i) -> void:
 	data_table.append([&"height", cell.get_scope().get_numeric_value(Modifiers.GEOGRAPHY_HEIGHT)])
 	data_table.append([&"temperature", cell.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_TEMPERATURE)])
 	data_table.append([&"precipitation", cell.get_scope().get_numeric_value(Modifiers.ECOSYSTEM_PRECIPITATION)])
+	data_table.append([&"biome", cell.get_scope().get_string_value(Modifiers.ECOSYSTEM_BIOME)])
 
 	for key in data:
 		data_table.append([key, data[key]])

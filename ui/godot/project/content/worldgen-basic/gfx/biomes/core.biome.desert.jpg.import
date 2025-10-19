@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://cc47ppph4i77x"
+path="res://.godot/imported/core.biome.desert.jpg-aed5c139cba02761ad3638acb2e2b805.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.desert.jpg"
+dest_files=["res://.godot/imported/core.biome.desert.jpg-aed5c139cba02761ad3638acb2e2b805.image"]
+
+[params]
+
