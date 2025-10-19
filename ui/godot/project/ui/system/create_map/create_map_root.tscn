@@ -71,7 +71,6 @@ text = "Highlight"
 [node name="HighlightSelect" type="OptionButton" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-selected = 0
 
 [node name="ForegroundLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer"]
 layout_mode = 2

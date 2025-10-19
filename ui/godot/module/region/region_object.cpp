@@ -23,8 +23,8 @@ void RegionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
   ClassDB::bind_method(D_METHOD("set_city_id", "city_id"),
                        &RegionObject::set_city_id);
-  ClassDB::bind_method(D_METHOD("get_topn_string_values", "variable", "N"),
-                       &RegionObject::get_topn_string_values);
+  ClassDB::bind_method(D_METHOD("get_string_value_topn", "variable", "N"),
+                       &RegionObject::get_string_value_topn);
   ClassDB::bind_method(D_METHOD("get_numeric_value_aggregates", "variable"),
                        &RegionObject::get_numeric_value_aggregates);
   ClassDB::bind_method(D_METHOD("get_cell_info", "coords"),
@@ -86,8 +86,8 @@ ScopePtr RegionObject::GetScope() const {
   return region_->GetScope();
 }
 
-TypedArray<StringName> RegionObject::get_topn_string_values(StringName variable,
-                                                            int N) const {
+TypedArray<StringName> RegionObject::get_string_value_topn(StringName variable,
+                                                           int N) const {
   ERR_FAIL_NULL_REGION(TypedArray<StringName>{});
 
   auto topN = region_->GetTopNStringValues(variable, N);

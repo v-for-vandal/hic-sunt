@@ -2,7 +2,7 @@
 
 namespace hs::utils {
 
-template<typename T>
+template <typename T>
 struct NumericAggregationInfo {
   T min{};
   T max{};
@@ -13,7 +13,7 @@ struct NumericAggregationInfo {
 
 template <typename T>
 class PercentileBuilder {
-public:
+ public:
   void Account(T value) {
     values_.push_back(value);
     sum_ += value;
@@ -34,16 +34,14 @@ public:
 
     result.avg = sum_ / count;
     result.count = count;
-    result.median = (values_[count / 2] + values_[count-1 - count / 2] )/ 2.0;
-
+    result.median = (values_[count / 2] + values_[count - 1 - count / 2]) / 2.0;
 
     return result;
   }
 
-private:
+ private:
   std::vector<T> values_;
   double sum_{0};
 };
 
 }  // namespace hs::utils
-

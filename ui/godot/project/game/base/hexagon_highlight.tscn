@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://qqworkfnfqd2"]
+
+[ext_resource type="Shader" uid="uid://v8d7xplmbu5l" path="res://game/base/radial_gradient_hexagon.gdshader" id="1_5jlpq"]
+[ext_resource type="Texture2D" uid="uid://ckjwji45ola2l" path="res://resources/110_128.png" id="2_rccya"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vyke5"]
+shader = ExtResource("1_5jlpq")
+
+[node name="Highlight" type="Polygon2D"]
+visible = false
+material = SubResource("ShaderMaterial_vyke5")
+texture = ExtResource("2_rccya")
+polygon = PackedVector2Array(-55.426, -32, 0, -64, 55.426, -32, 55.426, 32, 0, 64, -55.426, 32)
+uv = PackedVector2Array(-55.426, -32, 0, -64, 55.426, -32, 55.426, 32, 0, 64, -55.426, 32)

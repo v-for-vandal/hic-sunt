@@ -67,53 +67,6 @@ bool Region<BaseTypes>::SetBiome(QRSCoords coords, const StringId &biome) {
   return true;
 }
 
-/*
-template <typename BaseTypes>
-bool Region<BaseTypes>::SetHeight(QRSCoords coords, double height) {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  // TODO: RM
-  // if (height < 0) {
-  spdlog::info("Region {} Setting height  at {}: {}", static_cast<void *>(this),
-               coords, height);
-  //}
-  cell.SetHeight(height);
-  height_minmax_.Account(height);
-
-  return true;
-}
-
-template <typename BaseTypes>
-bool Region<BaseTypes>::SetTemperature(QRSCoords coords, double temperature) {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  cell.SetTemperature(temperature);
-  temperature_minmax_.Account(temperature);
-
-  return true;
-}
-
-template <typename BaseTypes>
-bool Region<BaseTypes>::SetPrecipitation(QRSCoords coords,
-                                         double precipitation) {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  cell.SetPrecipitation(precipitation);
-  precipitation_minmax_.Account(precipitation);
-
-  return true;
-}
-*/
-
 template <typename BaseTypes>
 bool Region<BaseTypes>::SetFeature(QRSCoords coords, const StringId &feature) {
   if (!surface_.Contains(coords)) {
@@ -161,76 +114,6 @@ bool Region<BaseTypes>::SetCityId(const StringId &city_id) {
   return true;
 }
 
-/*
-template <typename BaseTypes>
-double Region<BaseTypes>::GetDataNumeric(QRSCoords coords,
-                                         const StringId &key) const noexcept {
-  if (!surface_.Contains(coords)) {
-    return 0.0;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  return cell.GetDataNumeric(key);
-}
-
-template <typename BaseTypes>
-double Region<BaseTypes>::SetDataNumeric(QRSCoords coords, const StringId &key,
-                                         double value) {
-  if (!surface_.Contains(coords)) {
-    return 0.0;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  return cell.SetDataNumeric(key, value);
-}
-
-template <typename BaseTypes>
-bool Region<BaseTypes>::HasDataNumeric(QRSCoords coords,
-                                       const StringId &key) const noexcept {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  return cell.HasDataNumeric(key);
-}
-
-template <typename BaseTypes>
-auto Region<BaseTypes>::GetDataString(
-    QRSCoords coords, const StringId &key) const noexcept -> const String & {
-  if (!surface_.Contains(coords)) {
-    static String empty_value;
-    return empty_value;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  return cell.GetDataString(key);
-}
-
-template <typename BaseTypes>
-auto Region<BaseTypes>::SetDataString(QRSCoords coords, const StringId &key,
-                                      const StringId &value) -> const String & {
-  if (!surface_.Contains(coords)) {
-    static String empty_value;
-    return empty_value;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  return cell.SetDataString(key, value);
-}
-
-template <typename BaseTypes>
-bool Region<BaseTypes>::HasDataString(QRSCoords coords,
-                                      const StringId &key) const noexcept {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  return cell.HasDataString(key);
-}
-*/
-
 template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
   biome_count_.clear();
   feature_count_.clear();
@@ -243,7 +126,7 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
           cells_with_improvements_.insert(coords);
         }
       }
-    );
+  );
 
   ephemeral_ready_.set();
 }
