@@ -238,18 +238,10 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
   GetSurface().Foreach([this](QRSCoords coords, Cell<BaseTypes>& cell) {
         // Set parent scope for cell
         cell.GetScope()->SetParent(this->GetScope());
-        // calculate some statistics
-        // TODO: Restore?
-        //biome_count_.Add(cell.GetBiome());
         feature_count_[cell.GetFeature()]++;
         if (cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);
         }
-        /* TODO: REMOVE
-        height_minmax_.Account(cell.GetHeight());
-        temperature_minmax_.Account(cell.GetTemperature());
-        precipitation_minmax_.Account(cell.GetPrecipitation());
-        */
       }
     );
 
@@ -300,6 +292,49 @@ auto Region<BaseTypes>::BuildPnlStatement(
 #endif
 
   return result;
+}
+
+template <typename BaseTypes>
+auto Region<BaseTypes>::GetTopNStringValues(
+    StringId variable, int N) const -> std::vector<std::pair<size_t, StringId>>
+{
+  std::unordered_map<StringId, size_t> count;
+
+  std::vector<std::pair<size_t, StringId>> topN;
+
+  GetSurface().Foreach([&count, variable](auto, auto& cell) {
+    StringId value = cell.GetScope()->GetStringValue(variable);
+    count[value]++;
+  });
+
+  topN.reserve(count.size());
+
+  for (auto& [k, v] : count) {
+    if(!BaseTypes::IsNullToken(k)) {
+      topN.push_back(std::make_pair(v, k));
+    }
+  }
+
+  N = std::min<int>(N, topN.size());
+  std::ranges::partial_sort(topN.begin(), topN.begin() + N, topN.end(),
+    std::ranges::greater{});
+
+  topN.resize(N);
+  return topN;
+}
+
+template <typename BaseTypes>
+auto Region<BaseTypes>::GetNumericValueAggregates(
+    StringId variable) const -> utils::NumericAggregationInfo<NumericValue>
+{
+  utils::PercentileBuilder<NumericValue> builder;
+
+  GetSurface().Foreach([&builder, variable](auto, auto& cell) {
+    NumericValue value = cell.GetScope()->GetNumericValue(variable);
+    builder.Account(value);
+  });
+
+  return builder.GetAggregationInfo();
 }
 
 template <typename BaseTypes>

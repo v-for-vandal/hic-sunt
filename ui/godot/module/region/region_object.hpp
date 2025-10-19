@@ -1,6 +1,7 @@
 #pragma once
 
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/variant/typed_dictionary.hpp>
 #include <memory>
 #include <ui/godot/module/game/pnl_object.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
@@ -38,6 +39,9 @@ class RegionObject : public RefCounted, public ScopeMixin {
   // For values with eqaul frequency, sort by alphabet
   TypedArray<StringName> get_topn_string_values(StringName variable,
                                                 int N) const;
+  TypedDictionary<StringName, GodotBaseTypes::NumericValue>
+  get_numeric_value_aggregates(StringName variable) const;
+
   Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
   bool set_feature(Vector2i coords, String feature) const;
