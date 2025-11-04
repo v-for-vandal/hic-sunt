@@ -8,3 +8,6 @@
 [submodule "ui/godot/project/addons/godot-console"]
 	path = ui/godot/project/addons/godot-console
 	url = git@github.com:4d49/godot-console.git
+[submodule "ui/godot/project/addons/Delaunator-GDScript"]
+	path = ui/godot/project/addons/Delaunator-GDScript
+	url = git@github.com:v-for-vandal/Delaunator-GDScript.git

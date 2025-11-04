@@ -10,4 +10,5 @@ colors = PackedColorArray(0.527263, 0.00442476, 0.613716, 1, 0.180392, 0.156863,
 script = ExtResource("1_6lfpj")
 gradient = SubResource("Gradient_6lfpj")
 variable_name = "core.geography.height"
+range = Vector2i(0, 0)
 metadata/_custom_type_script = "uid://rshygb47jjs5"
