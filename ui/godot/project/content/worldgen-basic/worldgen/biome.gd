@@ -7,7 +7,7 @@ var _biome_generator := preload("res://content/worldgen-basic/worldgen/internal/
 func get_module_info() -> Dictionary:
 	return {}
 
-func create_biome_generator(plane: PlaneObject, config: Variant, global_context: Dictionary[StringName, Variant]) -> WorldGeneratorModuleInterface:
+func create_biome_generator(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
 	return _biome_generator.new(plane, config, global_context)
 	
 func create_biome_generator_ui() -> Control:

@@ -6,7 +6,7 @@ var _heightmap_generator := preload("res://content/worldgen-basic/worldgen/inter
 func get_module_info() -> Dictionary:
 	return {}
 
-func create_heightmap_generator(plane: PlaneObject, config: Variant, global_context: Dictionary[StringName, Variant]) -> WorldGeneratorModuleInterface:
+func create_heightmap_generator(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
 	return _heightmap_generator.new(plane, config, global_context)
 	
 func create_heightmap_generator_ui() -> Control:

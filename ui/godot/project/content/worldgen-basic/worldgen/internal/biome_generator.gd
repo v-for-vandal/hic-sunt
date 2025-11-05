@@ -9,9 +9,9 @@ const _PRECIPATION_RANGE = Vector2i(0, 400)
 
 var _config : Config
 var _plane: PlaneObject
-var _global_context : Dictionary[StringName, Variant]
+var _global_context : WorldGeneratorGlobalContext
 
-func _init(plane: PlaneObject, config: Variant, global_context: Dictionary[StringName, Variant]) -> void:
+func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
 	super(global_context)
 	_config = config
 	_plane = plane

@@ -3,14 +3,17 @@ extends WorldGeneratorInterface
 const Config = preload("res://content/worldgen-basic/worldgen/internal/world_generator_config.gd")
 
 var _config: Config
+var _debug_control : WorldGeneratorDebugControl
 
-func _init(config : Config) -> void:
+func _init(config : Config, debug_control: WorldGeneratorDebugControl) -> void:
 	_config = config
+	_debug_control = debug_control
 
 func create_world() -> WorldObject:
 	var world := WorldObject.new()
 	
-	var global_context : Dictionary[StringName, Variant] = {}
+	var global_context := WorldGeneratorGlobalContext.new()
+	global_context.debug_control = _debug_control
 	
 	# add plane
 	# For now, size is fixed
@@ -19,9 +22,9 @@ func create_world() -> WorldObject:
 	
 	var main_plane : PlaneObject = world.create_plane(&"main", world_size, region_radius, -1)
 	
-	global_context[&"world.bbox"] = world_size
-	global_context[&"region.radius"] = region_radius
-	global_context[&"seed"] = _config.seed
+	global_context.custom[&"world.bbox"] = world_size
+	global_context.custom[&"region.radius"] = region_radius
+	global_context.seed = _config.seed
 	
 	# Call height generator
 	var heightmap_generator := _config.heightmap_module.create_generator(

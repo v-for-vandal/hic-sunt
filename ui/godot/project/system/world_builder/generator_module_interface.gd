@@ -17,7 +17,7 @@ class_name WorldGeneratorModuleInterface
 ## shared between different modules/generators.
 ## 2. region_radius - radius of a region. Not every region will follow this
 ##    radius, but in general this information can be used for some caluclations
-func _init(_global_context: Dictionary[StringName, Variant]) -> void:
+func _init(_global_context: WorldGeneratorGlobalContext) -> void:
 	pass
 
 ## First pass.

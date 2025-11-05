@@ -17,7 +17,7 @@ const RADIUS_MARGIN : int = 2
 
 var _config : Config
 var _plane: PlaneObject
-var _global_context : Dictionary[StringName, Variant]
+var _global_context : WorldGeneratorGlobalContext
 
 # extracted from _global_context
 # This is actually incorrect math, but at the moment we don't care
@@ -28,7 +28,7 @@ var _pole_effect_distance: = 7.0
 var _region_radius : int = 1
 
 
-func _init(plane: PlaneObject, config: Variant, global_context: Dictionary[StringName, Variant]) -> void:
+func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
 	super(global_context)
 	_config = config
 	_plane = plane

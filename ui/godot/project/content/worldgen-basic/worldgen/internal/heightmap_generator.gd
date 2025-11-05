@@ -2,32 +2,49 @@ extends WorldGeneratorModuleInterface
 
 # user-selected options
 const Config = preload("res://content/worldgen-basic/worldgen/internal/heightmap_gen_config.gd")
+const VoronoizVisualization = preload("res://addons/Delaunator-GDScript/VoronoiVisualization.tscn")
 
 var _config : Config
 var _plane: PlaneObject
-var _global_context : Dictionary[StringName, Variant]
+var _global_context : WorldGeneratorGlobalContext
+
 var _terrain_noise_generator : FastNoiseLite = preload(
 	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_base.tres").duplicate()
 var _mountain_noise_generator: FastNoiseLite = preload(
 	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_mountain.tres").duplicate()
 	
+var _delaunay : Delaunator
+var _voronoi : Voronoinator
+var _voronoi_viz : Node
+
+var _rng := RandomNumberGenerator.new()
+
+	
 const RADIUS_MARGIN : int = 2
 
 
-func _init(plane: PlaneObject, config: Variant, global_context: Dictionary[StringName, Variant]) -> void:
+func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
 	super(global_context)
 	_config = config
 	_plane = plane
 	_global_context = global_context
+	_rng.seed = _global_context.seed
+	_voronoi_viz = VoronoizVisualization.instantiate()
+
+	
+func _ready():
+	add_child(_voronoi_viz)
 	
 	
 func first_pass() -> void:
+	# Create delaunator
+	_create_voronoi()
 	
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 		
 	_plane.foreach_surface(region_lambda)
-	pass
+
 	
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->void:
 	var radius : int = _global_context[&"region.radius"]
@@ -55,6 +72,24 @@ func _wrap_x(i: float) -> float:
 	
 func _wrap_y(j: float) -> float:
 	return j
+	
+func _create_voronoi():
+	var max_i := 100
+	var max_j := 100
+	var points := PackedVector2Array()
+	points.resize(max_i * max_j)
+	
+	for i in range(0, 100):
+		for j in range(0, 100):
+			var point = Vector2(i, j)
+			# apply some randomness
+			point.x += _rng.randfn(0.0, 3.0)
+			point.y += _rng.randfn(0.0, 3.0)
+			
+	_delaunay = Delaunator.new(points)
+	_voronoi = Voronoinator.new(_delaunay)
+	_voronoi_viz.set_voronoi(_voronoi)
+			
 
 # TODO: Make some other formula
 var _MOUNTAIN_EXTRA_HEIGHT_RANGE := Vector2i(1000, 2000)

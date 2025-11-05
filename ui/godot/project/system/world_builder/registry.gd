@@ -48,7 +48,7 @@ class WorldGeneratorModuleHandle:
 
 	
 	## Create generator
-	func create_generator(plane: PlaneObject, config:Variant, global_context: Dictionary[StringName, Variant]) -> WorldGeneratorModuleInterface:
+	func create_generator(plane: PlaneObject, config:Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
 		assert(_generator_function != null)
 		return _generator_function.call(plane, config, global_context)
 	

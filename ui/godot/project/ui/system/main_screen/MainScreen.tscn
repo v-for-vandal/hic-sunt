@@ -38,5 +38,18 @@ text = "New Game"
 layout_mode = 2
 text = "Load Game"
 
+[node name="Window" type="Window" parent="."]
+title = "Debug"
+
+[node name="Control" type="Control" parent="Window"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/NewGameButton" to="." method="_on_new_game_button_pressed"]
 [connection signal="pressed" from="MainMenuRoot/CenterContainer/MainMenu/LoadGameButton" to="." method="_on_load_game_button_pressed"]
