@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://bolb7s312u47r"]
+
+[ext_resource type="Script" uid="uid://cdrw8npyn5owr" path="res://addons/debug-tree-view/demo/demo.gd" id="1_dme15"]
+[ext_resource type="PackedScene" uid="uid://cb7x5en48uq3" path="res://addons/debug-tree-view/debug-tree.tscn" id="2_2tnyh"]
+
+[node name="Demo" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dme15")
+
+[node name="DebugTree" parent="." instance=ExtResource("2_2tnyh")]
+layout_mode = 1
