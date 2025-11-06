@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://dfcsc5fmw03f4" path="res://addons/dynamic_table/dynamic_table.gd" id="3_vfc6v"]
 [ext_resource type="PackedScene" uid="uid://clsw3n3vibrhp" path="res://game/region/region_surface.tscn" id="3_yu3tf"]
 [ext_resource type="Script" uid="uid://dte46f0jc5d54" path="res://game/ui_event_bus.gd" id="4_bg8nu"]
-[ext_resource type="PackedScene" uid="uid://cb5s3dxd63nmp" path="res://ui/debug/ScopeEditor.tscn" id="7_2ks8r"]
+[ext_resource type="PackedScene" uid="uid://cb5s3dxd63nmp" path="res://ui/system/debug/ScopeEditor.tscn" id="7_2ks8r"]
 
 [node name="CreateMapRoot" type="PanelContainer"]
 anchors_preset = 15

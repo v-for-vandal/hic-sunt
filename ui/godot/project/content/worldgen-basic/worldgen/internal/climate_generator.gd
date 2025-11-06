@@ -34,9 +34,9 @@ func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGl
 	_plane = plane
 	_global_context = global_context
 	
-	_region_radius = _global_context[&"region.radius"] + RADIUS_MARGIN
+	_region_radius = _global_context.custom[&"region.radius"] + RADIUS_MARGIN
 	# that is definetly wrong, but at the moment it will suffice
-	var world_bbox : Rect2i = _global_context[&"world.bbox"]
+	var world_bbox : Rect2i = _global_context.custom[&"world.bbox"]
 
 	
 func first_pass() -> void:
@@ -47,7 +47,7 @@ func first_pass() -> void:
 	_plane.foreach_surface(region_lambda)
 	
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->void:
-	var radius : int = _global_context[&"region.radius"]
+	var radius : int = _global_context.custom[&"region.radius"]
 	
 	var precipitation := _get_precipation_at_point(region_qrs_coords, Vector2i.ZERO)
 	

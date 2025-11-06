@@ -26,9 +26,9 @@ class WorldGeneratorHandle:
 	extends HandleBase
 	
 	## Create generator
-	func create_generator( config: Variant) -> WorldGeneratorInterface:
+	func create_generator( config: Variant, debug_control: DebugTree.ControlInterface) -> WorldGeneratorInterface:
 		assert(_generator_function != null)
-		return _generator_function.call(config)
+		return _generator_function.call(config, debug_control)
 	
 	## Create Control node for this generator. Control node must have additional
 	## method get_config. The result is passed to create_generator method.

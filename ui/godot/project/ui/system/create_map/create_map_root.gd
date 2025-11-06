@@ -120,7 +120,9 @@ func _do_generate(_debug_mode: bool) -> WorldObject:
 	var _selected_generator_module := _generators[_current_selected]
 	var _selected_config : Variant = _ui_elements[_current_selected].get_config()
 	
-	var generator := _selected_generator_module.create_generator(_selected_config)
+	var _debug_control := DebugRoot.get_debug_control().add_random_group()
+	
+	var generator := _selected_generator_module.create_generator(_selected_config, _debug_control)
 	
 	var result := generator.create_world()
 	return result

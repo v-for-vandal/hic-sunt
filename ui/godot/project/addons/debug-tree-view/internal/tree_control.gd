@@ -12,9 +12,23 @@ func _init(debug_tree: DebugTree, item: TreeItem) -> void:
 func _wrap_in_class(item: TreeItem) -> RefCounted:
 	return get_script().new(_debug_tree, item)
 	
+func _add_element(key: String, node: Control) -> TreeItem:
+	return _debug_tree._add_element(_item, key, node)
+	
+	
 
 func add_2d_node(key: String, node: Node2D) -> RefCounted:
-	return null
+	if node == null:
+		return add_text_node(key, "Error: Node2D object is null")
+		
+	var display_container := SubViewportContainer.new()
+	var subviewport := SubViewport.new()
+	display_container.add_child(subviewport)
+	subviewport.add_child(node)
+	
+	return _wrap_in_class(
+		_add_element(key, display_container)
+	)
 	
 	
 	
@@ -22,7 +36,7 @@ func add_text_node(key: String, text: String) -> RefCounted:
 	# create text node
 	var text_node := RichTextLabel.new()
 	text_node.add_text(text)
-	var new_item := _debug_tree._add_element(_item, key, text_node)
+	var new_item := _add_element(key, text_node)
 	
 	return _wrap_in_class(new_item)
 	
@@ -41,9 +55,18 @@ func add_group(path: String) -> RefCounted:
 	for component in components:
 		var child_item := _debug_tree._get_element(item, component)
 		if child_item == null: # no such item
-			child_item = _debug_tree._add_element(item, component, null)
+			child_item = _add_element(component, null)
 		
 		assert(child_item != null)
 		item = child_item
 			
 	return _wrap_in_class(item)
+	
+## Create a new empty node with random name
+func add_random_group() -> RefCounted:
+	var key : String  = "%X" % randi()
+	var element := _debug_tree._get_element(_item, key)
+	while element != null:
+		key = "%X" % randi()
+	
+	return _wrap_in_class(_add_element(key, null))

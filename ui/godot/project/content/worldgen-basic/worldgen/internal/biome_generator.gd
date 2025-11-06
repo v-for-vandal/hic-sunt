@@ -43,6 +43,8 @@ var biome_maps : Array[Dictionary]= [
 
 func first_pass() -> void:
 	
+	_global_context.debug_control.add_text_node("biome", "")
+	
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 		

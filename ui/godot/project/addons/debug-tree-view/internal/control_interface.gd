@@ -20,3 +20,8 @@ func add_text_node(key: String, text: String) -> RefCounted:
 func add_group(path: String) -> RefCounted:
 	assert(false, "Unimplemented")
 	return RefCounted.new()
+	
+## Create a new empty node with random name
+func add_random_group() -> RefCounted:
+	assert(false, "Unimplemented")
+	return RefCounted.new()

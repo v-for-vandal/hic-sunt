@@ -8,7 +8,7 @@ func get_module_info() -> Dictionary[StringName, Variant]:
 		&'name' : 'SimpleWorldGenerator'
 	}
 
-func create_world_generator(config: Variant, debug_control: WorldGeneratorDebugControl) -> WorldGeneratorInterface:
+func create_world_generator(config: Variant, debug_control: DebugTree.ControlInterface) -> WorldGeneratorInterface:
 	return _world_generator.new(config, debug_control)
 	
 func create_world_generator_ui() -> Control:

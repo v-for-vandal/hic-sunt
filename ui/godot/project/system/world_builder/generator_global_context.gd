@@ -4,8 +4,8 @@ extends RefCounted
 ## in your own world generator, or just stick to this one
 class_name WorldGeneratorGlobalContext
 
-## Debug control. Allows one to send debug views to the system.
-var debug_control: WorldGeneratorDebugControl
+## Debug control. Allows one to send debug items (text, images, etc) to the system.
+var debug_control: DebugTree.ControlInterface
 
 ## Some seed. No meaning attached
 var seed : int = 0

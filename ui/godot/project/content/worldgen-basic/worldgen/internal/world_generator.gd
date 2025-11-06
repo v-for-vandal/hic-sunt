@@ -3,11 +3,11 @@ extends WorldGeneratorInterface
 const Config = preload("res://content/worldgen-basic/worldgen/internal/world_generator_config.gd")
 
 var _config: Config
-var _debug_control : WorldGeneratorDebugControl
+var _debug_control : DebugTree.ControlInterface
 
-func _init(config : Config, debug_control: WorldGeneratorDebugControl) -> void:
+func _init(config : Config, debug_control: DebugTree.ControlInterface) -> void:
 	_config = config
-	_debug_control = debug_control
+	_debug_control = debug_control.add_text_node("worldgen", "")
 
 func create_world() -> WorldObject:
 	var world := WorldObject.new()
