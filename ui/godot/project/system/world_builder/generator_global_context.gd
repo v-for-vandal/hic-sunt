@@ -8,7 +8,7 @@ class_name WorldGeneratorGlobalContext
 var debug_control: DebugTree.ControlInterface
 
 ## Some seed. No meaning attached
-var seed : int = 0
+var seed: int = 0
 
 ## Arbitary attributes
-var custom :  Dictionary[StringName, Variant] = {}
+var custom: Dictionary[StringName, Variant] = { }

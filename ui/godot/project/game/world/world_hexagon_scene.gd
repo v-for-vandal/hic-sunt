@@ -31,7 +31,7 @@ func _update_highlighting(surface: GameTileSurface) -> void:
 		
 	var region := plane.get_region(qr_coords)
 	var highlighter := surface.highlighter
-	var input_description = highlighter.get_input_description()
+	var input_description := highlighter.get_input_description()
 	var input : Dictionary[StringName, Variant] = {}
 	for variable in input_description.variables:
 		# Note: there is in fact no guarantee that this variable is numeric, we should
@@ -48,5 +48,5 @@ func _on_mouse_entered() -> void:
 func _on_mouse_exited() -> void:
 	pass # Replace with function body.
 
-func _on_display_settings_changed(surface: GameTileSurface):
+func _on_display_settings_changed(surface: GameTileSurface) -> void:
 	_update_highlighting(surface)

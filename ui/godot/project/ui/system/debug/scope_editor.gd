@@ -1,24 +1,22 @@
 extends VBoxContainer
 
-var _scope : ScopeObject
-
 const ADD_KEY = &"add"
 const MULT_KEY = &"mult"
 const VALUE_KEY = &"value"
 const LEVEL_KEY = &"level"
 
 func _ready() -> void:
-	var tree = %Tree
+	var tree : Tree = %Tree
 	tree.set_column_custom_minimum_width(0, 200)
 	tree.set_column_custom_minimum_width(1, 70)
 	tree.set_column_custom_minimum_width(2, 70)
-	var root = tree.create_item()
+	var root := tree.create_item()
 	tree.hide_root = true
-	var var1 = tree.create_item(root)
+	var var1  := tree.create_item(root)
 	var1.set_text(0, "variable")
-	var scope1 = tree.create_item(var1)
+	var scope1 := tree.create_item(var1)
 	scope1.set_text(0, "scope1")
-	var scope2 = tree.create_item(var1)
+	var scope2 := tree.create_item(var1)
 	scope2.set_text(0, "scope2")
 	self._add_modifier("test_modifier1", {ADD_KEY : 0.2, MULT_KEY : 0.4}, scope1)
 	self._add_modifier("test_modifier2", {VALUE_KEY: "string1", LEVEL_KEY: 100}, scope1)
@@ -29,7 +27,7 @@ func _ready() -> void:
 func set_scope(scope: ScopeObject) -> void:
 	var data : Dictionary = scope.explain_all()
 	data.sort()
-	var tree = %Tree
+	var tree := %Tree
 	tree.clear()
 	var root : TreeItem = tree.create_item()
 	
@@ -46,8 +44,8 @@ func set_scope(scope: ScopeObject) -> void:
 				
 			
 func _add_modifier(modifier: String, modifier_data: Dictionary, parent: TreeItem) -> void:
-	var tree = %Tree
-	var moditem : TreeItem = tree.create_item(parent)
+	var tree : Tree = %Tree
+	var moditem := tree.create_item(parent)
 	moditem.set_text(0, modifier)
 	if ADD_KEY in modifier_data:
 		moditem.set_text(1, str(modifier_data[ADD_KEY]))

@@ -2,25 +2,33 @@ extends WorldGeneratorModuleInterface
 
 # user-selected options
 const Config = preload("res://content/worldgen-basic/worldgen/internal/heightmap_gen_config.gd")
-const VoronoizVisualization = preload("res://addons/Delaunator-GDScript/VoronoiVisualization.tscn")
+const _VoronoizVisualization = preload("res://addons/Delaunator-GDScript/VoronoiVisualization.tscn")
+const _CellClusterization := preload("res://content/worldgen-basic/worldgen/internal/cell_clusterization.gd")
 
-var _config : Config
+const MAX_ATTEMPTS := 10000
+
+var _config: Config
 var _plane: PlaneObject
-var _global_context : WorldGeneratorGlobalContext
+var _global_context: WorldGeneratorGlobalContext
 
-var _terrain_noise_generator : FastNoiseLite = preload(
-	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_base.tres").duplicate()
+var _terrain_noise_generator: FastNoiseLite = preload(
+	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_base.tres"
+).duplicate()
 var _mountain_noise_generator: FastNoiseLite = preload(
-	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_mountain.tres").duplicate()
-	
-var _delaunay : Delaunator
-var _voronoi : Voronoinator
-var _voronoi_viz : Node
+	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_mountain.tres"
+).duplicate()
+
+var _debug_control: DebugTree.ControlInterface
+
+var _debug_coloring_ui: OptionButton
+var _debug_voronoi_viz_node: Node2D
+
+var _delaunay: Delaunator
+var _voronoi: Voronoinator
 
 var _rng := RandomNumberGenerator.new()
 
-	
-const RADIUS_MARGIN : int = 2
+const RADIUS_MARGIN: int = 2
 
 
 func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
@@ -29,91 +37,188 @@ func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGl
 	_plane = plane
 	_global_context = global_context
 	_rng.seed = _global_context.seed
-	_voronoi_viz = VoronoizVisualization.instantiate()
 
-	
-func _ready():
-	add_child(_voronoi_viz)
-	
-	
+	_debug_control = _global_context.debug_control.add_text_node("heightmap", "")
+
+
+func _ready() -> void:
+	pass
+
+
 func first_pass() -> void:
-	# Create delaunator
+	# Create voronoi
 	_create_voronoi()
-	
+
+	_create_tectonic_plates()
+
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
-		
+
 	_plane.foreach_surface(region_lambda)
 
-	
-func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) ->void:
-	var radius : int = _global_context.custom[&"region.radius"]
-	var region_coords := Vector2i(
-		 region_qrs_coords.x * (radius + RADIUS_MARGIN),
-		region_qrs_coords.y * (radius + RADIUS_MARGIN))
 
-	
-	
-	var region_cell_lambda := func(cell_q: int, cell_r: int) ->void:
+func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> void:
+	var radius: int = _global_context.custom[&"region.radius"]
+	var region_coords := Vector2i(
+		region_qrs_coords.x * (radius + RADIUS_MARGIN),
+		region_qrs_coords.y * (radius + RADIUS_MARGIN),
+	)
+
+	var region_cell_lambda := func(cell_q: int, cell_r: int) -> void:
 		_cell_first_pass(region, region_coords, Vector2i(cell_q, cell_r))
-		
+
 	region.foreach(region_cell_lambda)
 
-	
+
 func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qrs_coords: Vector2i) -> void:
 	var height := _get_height_at_point(region_coords.x + cell_qrs_coords.x, region_coords.y + cell_qrs_coords.y)
 	region.get_cell(cell_qrs_coords).get_scope().add_numeric_modifier(Modifiers.GEOGRAPHY_HEIGHT, &"wordlgen.basic", height, 0)
-	
-	
+
+
 func _wrap_x(i: float) -> float:
 	# Wrapping will be done within plane object itself
 	return i
-	
-	
+
+
 func _wrap_y(j: float) -> float:
 	return j
-	
-func _create_voronoi():
+
+
+func _create_voronoi() -> void:
 	var max_i := 100
 	var max_j := 100
+	var k: int = 0
 	var points := PackedVector2Array()
 	points.resize(max_i * max_j)
-	
+
 	for i in range(0, 100):
 		for j in range(0, 100):
-			var point = Vector2(i, j)
+			var point := Vector2(i, j)
 			# apply some randomness
 			point.x += _rng.randfn(0.0, 3.0)
 			point.y += _rng.randfn(0.0, 3.0)
-			
+
+			# don't allow outside of borders
+			point = point.clamp(Vector2(-5, -5), Vector2(max_i + 5, max_j + 5))
+
+			points[k] = point
+			k += 1
+
 	_delaunay = Delaunator.new(points)
-	_voronoi = Voronoinator.new(_delaunay)
-	_voronoi_viz.set_voronoi(_voronoi)
-			
+	_voronoi = Voronoinator.new(_delaunay, Rect2(Vector2(-5, -5), Vector2(110, 110)))
+	if _debug_control.is_debug_enabled():
+		# visualization is computationally expensive, so avoid it when debug
+		# is disabled
+		_debug_voronoi_viz_node = _VoronoizVisualization.instantiate()
+		_debug_voronoi_viz_node.set_voronoi(_voronoi)
+		_debug_voronoi_viz_node.add_random_coloring(&"base", Vector3(-1.0, -1.0, 1.0))
+
+		_debug_coloring_ui = OptionButton.new()
+		_debug_coloring_ui.add_item("base")
+		var coloring_selector_fn := func(index: int) -> void:
+			if index != -1:
+				var text := _debug_coloring_ui.get_item_text(index)
+				_debug_voronoi_viz_node.select_coloring(text)
+
+		_debug_coloring_ui.item_selected.connect(coloring_selector_fn)
+
+		_debug_control.add_2d_node("voronoi", _debug_voronoi_viz_node, Rect2i(0, 0, 100, 100), _debug_coloring_ui)
+
+
+func _create_tectonic_plates() -> void:
+	assert(_voronoi.voronoi_cells.size() > 0)
+
+	var clusterization := _CellClusterization.new(_voronoi)
+
+	const inter_tectonic_cluster := 1
+	const tectonic_section_start := 2
+	var next_cluster_id := tectonic_section_start
+
+	# choose 4 different numbers from range
+	for _z in range(MAX_ATTEMPTS): # prevent infinite cycle
+		if clusterization.clusters_count() == 4:
+			break
+
+		var cluster_start := _rng.randi_range(0, _voronoi.voronoi_cells.size() - 1)
+		if clusterization.cell_cluster(cluster_start) != 0:
+			# already taken
+			continue
+		if clusterization.is_neighbour_to_any_cluster(cluster_start):
+			# dont allow tectonic plates to touch each other
+			continue
+
+		# ok, good cluster start
+		clusterization.add_to_cluster(cluster_start, next_cluster_id)
+		next_cluster_id += 1
+
+	# now, start expanding
+	var has_expanded := true
+	while has_expanded:
+		has_expanded = false
+		for cluster_id: int in range(tectonic_section_start, tectonic_section_start + clusterization.clusters_count()):
+			# expand this cluster
+			var neighbours := clusterization.cluster_neighbours(cluster_id)
+
+			for neighbour: int in neighbours:
+				if clusterization.cell_cluster(neighbour) != 0:
+					# already taken, continue
+					continue
+				if clusterization.is_neighbour_to_any_cluster(neighbour, [cluster_id, inter_tectonic_cluster]):
+					# it has other neighbours. In this case, mark is as inter-tectonic
+					clusterization.add_to_cluster(neighbour, inter_tectonic_cluster)
+					has_expanded = true # not strictly true, but helps with algorithm
+					continue
+
+				clusterization.add_to_cluster(neighbour, cluster_id)
+				has_expanded = true
+
+	if _debug_voronoi_viz_node != null:
+		# add coloring for tectonic plates
+		var cluster_colors: Dictionary[int, Color] = {
+			inter_tectonic_cluster: Color("#fe663e"),
+			0: Color("#ff3df3"),
+		}
+
+		for cluster_id: int in range(tectonic_section_start, tectonic_section_start + clusterization.clusters_count()):
+			cluster_colors[cluster_id] = Color(0.3, randf(), randf())
+
+		var tectonic_coloring := PackedColorArray()
+		tectonic_coloring.resize(_voronoi.voronoi_cells.size())
+		for i in range(_voronoi.voronoi_cells.size()):
+			tectonic_coloring[i] = cluster_colors[clusterization.cell_cluster(i)]
+
+		_debug_add_coloring("tectonic", tectonic_coloring)
+
+
+func _debug_add_coloring(key: StringName, coloring: PackedColorArray) -> void:
+	_debug_voronoi_viz_node.add_coloring(key, coloring)
+	_debug_coloring_ui.add_item(key)
 
 # TODO: Make some other formula
 var _MOUNTAIN_EXTRA_HEIGHT_RANGE := Vector2i(1000, 2000)
 
+
 func _displacement_at_range(value: float, target_range: Vector2i) -> float:
 	return (value - target_range.x) / (target_range.y - target_range.x)
 
-func _get_height_at_point(i: float, j : float) -> int:
+
+func _get_height_at_point(i: float, j: float) -> int:
 	i = _wrap_x(i)
 	j = _wrap_y(j)
 	# Get base height. It will be in range (-1, 1)
 	var sample_value := _terrain_noise_generator.get_noise_2d(i, j)
-	
+
 	var height_meters := NoiseToolsLibrary.sample_simple_range_i(sample_value, _config.height_range)
-	
+
 	# add mountains
-	var mountain_sample_value := _mountain_noise_generator.get_noise_2d(i,j)
+	var mountain_sample_value := _mountain_noise_generator.get_noise_2d(i, j)
 	var mountain_extra_meters := 0 # by default, don't add anything
 	if mountain_sample_value > 0.75:
 		# renormalize to range (-1,1) because that is what _sample_simple_range
 		# expects
-		mountain_sample_value =  -1 + ( mountain_sample_value - 0.75) / (1 - 0.75) * 2
+		mountain_sample_value = -1 + (mountain_sample_value - 0.75) / (1 - 0.75) * 2
 		mountain_sample_value = NoiseToolsLibrary.sample_simple_range_i(mountain_sample_value, _MOUNTAIN_EXTRA_HEIGHT_RANGE)
-		
+
 	var result := int(clamp(height_meters + mountain_extra_meters, _config.height_range.x, _config.height_range.y))
-	
+
 	return result

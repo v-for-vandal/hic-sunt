@@ -44,7 +44,7 @@ func _set_queue(queue: CityProjectsQueue) -> void:
 func _add_project_widget(idx: int) -> void:
 	print("Adding project, self: ", self)
 	var project := _queue.get_project_at(idx)
-	var project_holder = _project_holder_scene.instantiate()
+	var project_holder := _project_holder_scene.instantiate()
 	project_holder.setup(project)
 	$%RootContainer.add_child(project_holder)
 	$%RootContainer.move_child(project_holder, idx)

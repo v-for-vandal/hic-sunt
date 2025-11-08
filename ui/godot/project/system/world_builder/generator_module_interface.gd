@@ -1,6 +1,7 @@
 # We extend Node, not RefCounted, because it makes way easier to debug
 # generators in Godot editor later
 extends Node
+
 # TODO: Make abstract in godot 4.5
 
 ## This is interface for generator module. Generator modules are small building
@@ -20,7 +21,8 @@ class_name WorldGeneratorModuleInterface
 func _init(_global_context: WorldGeneratorGlobalContext) -> void:
 	pass
 
+
 ## First pass.
 func first_pass() -> void:
-		assert(false, "Unimplemented")
-		push_error("Unimplemented")
+	assert(false, "Unimplemented")
+	push_error("Unimplemented")
