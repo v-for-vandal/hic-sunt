@@ -25,6 +25,10 @@ var _debug_voronoi_viz_node: Node2D
 
 var _delaunay: Delaunator
 var _voronoi: Voronoinator
+var _tectonic_clusterization : _CellClusterization
+const inter_tectonic_cluster := 1
+
+var _continents_clusterization : _CellClusterization
 
 var _rng := RandomNumberGenerator.new()
 
@@ -50,6 +54,7 @@ func first_pass() -> void:
 	_create_voronoi()
 
 	_create_tectonic_plates()
+	_create_continents()
 
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
@@ -129,27 +134,12 @@ func _create_tectonic_plates() -> void:
 	assert(_voronoi.voronoi_cells.size() > 0)
 
 	var clusterization := _CellClusterization.new(_voronoi)
+	clusterization.rng = _rng
 
-	const inter_tectonic_cluster := 1
+
 	const tectonic_section_start := 2
-	var next_cluster_id := tectonic_section_start
 
-	# choose 4 different numbers from range
-	for _z in range(MAX_ATTEMPTS): # prevent infinite cycle
-		if clusterization.clusters_count() == 4:
-			break
-
-		var cluster_start := _rng.randi_range(0, _voronoi.voronoi_cells.size() - 1)
-		if clusterization.cell_cluster(cluster_start) != 0:
-			# already taken
-			continue
-		if clusterization.is_neighbour_to_any_cluster(cluster_start):
-			# dont allow tectonic plates to touch each other
-			continue
-
-		# ok, good cluster start
-		clusterization.add_to_cluster(cluster_start, next_cluster_id)
-		next_cluster_id += 1
+	clusterization.seed_n_clusters(4, tectonic_section_start, true)
 
 	# now, start expanding
 	var has_expanded := true
@@ -171,7 +161,8 @@ func _create_tectonic_plates() -> void:
 
 				clusterization.add_to_cluster(neighbour, cluster_id)
 				has_expanded = true
-
+	_tectonic_clusterization = clusterization
+	
 	if _debug_voronoi_viz_node != null:
 		# add coloring for tectonic plates
 		var cluster_colors: Dictionary[int, Color] = {
@@ -189,6 +180,59 @@ func _create_tectonic_plates() -> void:
 
 		_debug_add_coloring("tectonic", tectonic_coloring)
 
+func _create_continents() -> void:
+	var clusterization := _CellClusterization.new(_voronoi)
+	clusterization.rng = _rng
+	
+	var clusters_count := clusterization.seed_n_clusters(10, 1, false)
+	
+	var surface_cells_count := 0
+	var next_cluster_id := 1
+	
+	const  cells_per_iteration := 10
+	
+	while surface_cells_count < 0.3 * _voronoi.voronoi_cells.size():
+		# grow next continent a bit
+		var cluster_id := next_cluster_id
+		# formula is 1 + ( (next_cluster_id + 1 - 1) % clusters_count)
+		next_cluster_id = 1 + ( next_cluster_id % clusters_count)
+		var neighbours := clusterization.cluster_neighbours(cluster_id)
+		
+		var selected_neighbours : Array[int] = []
+
+		for neighbour: int in neighbours:
+				if clusterization.cell_cluster(neighbour) != 0:
+					# already taken, continue
+					continue
+				selected_neighbours.append(neighbour)
+
+		if selected_neighbours.size() > cells_per_iteration:
+			selected_neighbours.shuffle()
+			selected_neighbours.slice(0, cells_per_iteration)
+		
+		for neighbour: int in selected_neighbours:
+			clusterization.add_to_cluster(neighbour, cluster_id)
+			surface_cells_count += 1
+			
+	if _debug_voronoi_viz_node != null:
+		# add coloring for tectonic plates
+		var cluster_colors: Dictionary[int, Color] = {
+			0: Color.BLUE,
+		}
+
+		for cluster_id: int in range(1, 1 + clusterization.clusters_count()):
+			cluster_colors[cluster_id] = Color(randf(), randf(), 0.1)
+
+		var continent_coloring := PackedColorArray()
+		continent_coloring.resize(_voronoi.voronoi_cells.size())
+		for i in range(_voronoi.voronoi_cells.size()):
+			continent_coloring[i] = cluster_colors[clusterization.cell_cluster(i)]
+
+		_debug_add_coloring("continents", continent_coloring)
+		
+		
+
+	
 
 func _debug_add_coloring(key: StringName, coloring: PackedColorArray) -> void:
 	_debug_voronoi_viz_node.add_coloring(key, coloring)
