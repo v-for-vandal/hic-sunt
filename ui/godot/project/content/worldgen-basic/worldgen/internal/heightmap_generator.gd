@@ -4,6 +4,7 @@ extends WorldGeneratorModuleInterface
 const Config = preload("res://content/worldgen-basic/worldgen/internal/heightmap_gen_config.gd")
 const _VoronoizVisualization = preload("res://addons/Delaunator-GDScript/VoronoiVisualization.tscn")
 const _CellClusterization := preload("res://content/worldgen-basic/worldgen/internal/cell_clusterization.gd")
+const _VoronoiDrawer := preload("res://content/worldgen-basic/worldgen/internal/voronoi_drawer.gd")
 
 const MAX_ATTEMPTS := 10000
 
@@ -27,8 +28,11 @@ var _delaunay: Delaunator
 var _voronoi: Voronoinator
 var _tectonic_clusterization : _CellClusterization
 const inter_tectonic_cluster := 1
-
 var _continents_clusterization : _CellClusterization
+
+# Here we store 'colors' that we use to create heightmap. Those are not really
+# colors, just channels where we encode values
+var _heightmap_coloring : PackedColorArray
 
 var _rng := RandomNumberGenerator.new()
 
@@ -56,6 +60,9 @@ func first_pass() -> void:
 	_create_tectonic_plates()
 	_create_continents()
 
+	var map := _create_map()
+	await _render_map(map)
+	
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 
@@ -113,7 +120,7 @@ func _create_voronoi() -> void:
 	_voronoi = Voronoinator.new(_delaunay, Rect2(Vector2(-5, -5), Vector2(110, 110)))
 	if _debug_control.is_debug_enabled():
 		# visualization is computationally expensive, so avoid it when debug
-		# is disabled
+		# is disablres://addons/debug-tree-view/internal/control_interface.gded
 		_debug_voronoi_viz_node = _VoronoizVisualization.instantiate()
 		_debug_voronoi_viz_node.set_voronoi(_voronoi)
 		_debug_voronoi_viz_node.add_random_coloring(&"base", Vector3(-1.0, -1.0, 1.0))
@@ -139,13 +146,13 @@ func _create_tectonic_plates() -> void:
 
 	const tectonic_section_start := 2
 
-	clusterization.seed_n_clusters(4, tectonic_section_start, true)
+	var tectonic_clusters := clusterization.seed_n_clusters(4, tectonic_section_start, true)
 
 	# now, start expanding
 	var has_expanded := true
 	while has_expanded:
 		has_expanded = false
-		for cluster_id: int in range(tectonic_section_start, tectonic_section_start + clusterization.clusters_count()):
+		for cluster_id: int in tectonic_clusters:
 			# expand this cluster
 			var neighbours := clusterization.cluster_neighbours(cluster_id)
 
@@ -184,7 +191,7 @@ func _create_continents() -> void:
 	var clusterization := _CellClusterization.new(_voronoi)
 	clusterization.rng = _rng
 	
-	var clusters_count := clusterization.seed_n_clusters(10, 1, false)
+	var continent_clusters := clusterization.seed_n_clusters(10, 1, false)
 	
 	var surface_cells_count := 0
 	var next_cluster_id := 1
@@ -195,7 +202,7 @@ func _create_continents() -> void:
 		# grow next continent a bit
 		var cluster_id := next_cluster_id
 		# formula is 1 + ( (next_cluster_id + 1 - 1) % clusters_count)
-		next_cluster_id = 1 + ( next_cluster_id % clusters_count)
+		next_cluster_id = 1 + ( next_cluster_id % continent_clusters.size())
 		var neighbours := clusterization.cluster_neighbours(cluster_id)
 		
 		var selected_neighbours : Array[int] = []
@@ -213,7 +220,9 @@ func _create_continents() -> void:
 		for neighbour: int in selected_neighbours:
 			clusterization.add_to_cluster(neighbour, cluster_id)
 			surface_cells_count += 1
-			
+	
+	_continents_clusterization = clusterization
+	
 	if _debug_voronoi_viz_node != null:
 		# add coloring for tectonic plates
 		var cluster_colors: Dictionary[int, Color] = {
@@ -230,7 +239,42 @@ func _create_continents() -> void:
 
 		_debug_add_coloring("continents", continent_coloring)
 		
-		
+func _encode_as_color(cell_index: int) -> Color:
+	var cell_cluster := _continents_clusterization.cell_cluster(cell_index)
+	# TODO: This is debug
+	if cell_cluster == 0:
+		return Color.BLACK
+	else:
+		return Color.YELLOW
+	
+func _create_map() -> _VoronoiDrawer:
+	var colors := PackedColorArray()
+	var size := _voronoi.voronoi_cells.size()
+	colors.resize(size)
+	for i in range(size):
+		colors[i] = _encode_as_color(i)
+	
+	var result := _VoronoiDrawer.new(_voronoi, colors)
+	# TODO: RM
+	#var copy := _VoronoiDrawer.new(_voronoi, colors)
+	#_debug_control.add_2d_node("drawer", copy)
+	return result
+	
+func _render_map(map: _VoronoiDrawer) -> void:
+	var viewport := SubViewport.new()	
+	viewport.disable_3d = true
+	viewport.size = Vector2i(100, 100) # TODO: Make a setting
+	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	viewport.add_child(map)
+	add_child(viewport)
+	
+	await RenderingServer.frame_post_draw
+	await map.finished_drawing
+	
+	var result := viewport.get_texture().get_image()
+	
+	_debug_control.add_image_node("map", result)
+	
 
 	
 

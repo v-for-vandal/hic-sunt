@@ -10,3 +10,6 @@ func _ready() -> void:
 	polygon.polygon = PackedVector2Array([Vector2(0.0, 0.0), Vector2(100.0, 0.0), Vector2(100.0, 100.0), Vector2(0.0, 100.0)])
 	polygon.color = Color.RED
 	control.add_2d_node("polygon", polygon)
+	
+	var image := load("res://addons/debug-tree-view/demo/icon.svg")
+	control.add_image_node("image", image)

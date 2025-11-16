@@ -23,17 +23,19 @@ func _init(voronoi: Voronoinator) -> void:
 	_cell_to_cluster.resize(_voronoi.voronoi_cells.size())
 	_cell_to_cluster.fill(0)
 
-## Seeds `count` new clusters, starting from `start_idx`.
+## Seeds `count` new clusters, starting from `start_idx`. Returns list of
+## created clusters
 ## Optional `forbid_neighbours` will prevent new clusters from spawning
 ## in the perimeter of existing cluster. That is new cluster will not touch
 ## any of the existing clusters (including created by this function itself)
-func seed_n_clusters(count: int, start_idx: int = 1, forbid_neighbours : bool = false) -> int:
+func seed_n_clusters(count: int, start_idx: int = 1, forbid_neighbours : bool = false) -> Array[int]:
 	if start_idx <= 0:
 		push_error("Start idx must be >= 1, but it is %s" % start_idx)
 		start_idx = 1
 		
 	var count_seeded := 0
-	var next_cluster_id = start_idx
+	var next_cluster_id := start_idx
+	var result : Array[int] = []
 	
 	for _z in range(_MAX_ATTEMPTS): # prevent infinite cycle
 		if count_seeded == count :
@@ -51,11 +53,13 @@ func seed_n_clusters(count: int, start_idx: int = 1, forbid_neighbours : bool = 
 		while next_cluster_id in _clusters:
 			next_cluster_id += 1
 			
-		add_to_cluster(cluster_start, next_cluster_id)
+		var this_cluster_id := next_cluster_id
+		add_to_cluster(cluster_start, this_cluster_id)
+		result.append(this_cluster_id)
 		next_cluster_id += 1
 		count_seeded += 1
 		
-	return count_seeded
+	return result
 
 func add_to_cluster(cell_id: int, cluster_id: int) -> void:
 	if cluster_id != 0 and cluster_id not in _clusters:

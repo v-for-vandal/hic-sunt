@@ -4,6 +4,7 @@ var _debug_tree: DebugTree
 var _item: TreeItem
 
 const _DraggableCamera := preload("res://addons/debug-tree-view/internal/draggable_camera.tscn")
+const _ImageControl := preload("res://addons/debug-tree-view/internal/image_control.tscn")
 
 
 func _init(debug_tree: DebugTree, item: TreeItem) -> void:
@@ -59,6 +60,37 @@ func add_text_node(key: String, text: String) -> RefCounted:
 	text_node.add_text(text)
 	var new_item := _add_element(key, text_node)
 
+	return _wrap_in_class(new_item)
+	
+## Adds an image
+## Will place image into scroll container, if needed.
+func add_image_node(key: String, image: Image) -> RefCounted:
+	
+	var display_container := Control.new()
+	display_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	
+	var image_node := TextureRect.new()
+	image_node.stretch_mode = TextureRect.STRETCH_KEEP
+	image_node.texture = ImageTexture.create_from_image(image)
+	image_node.set_anchors_preset(Control.PRESET_CENTER)
+	
+	var control_node := _ImageControl.instantiate()
+	control_node.set_texture(image_node.texture)
+	# I don't understand how anchors/presets work ((
+	#control_node.set_anchors_preset(Control.PRESET_TOP_LEFT, true)
+	control_node.set_size(Vector2(300, 100))
+	control_node.position = Vector2.ZERO
+	
+	var on_set_modulate = func(color: Color):
+		image_node.self_modulate = color
+		
+	control_node.set_modulate.connect(on_set_modulate)
+	
+	display_container.add_child(image_node)
+	display_container.add_child(control_node)
+	
+	
+	var new_item := _add_element(key, display_container)
 	return _wrap_in_class(new_item)
 
 

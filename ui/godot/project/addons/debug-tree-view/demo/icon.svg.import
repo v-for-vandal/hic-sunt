@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://c06uhibq2idmo"
+path="res://.godot/imported/icon.svg-a187482a925972f1fdeb4c62c782915f.image"
+
+[deps]
+
+source_file="res://addons/debug-tree-view/demo/icon.svg"
+dest_files=["res://.godot/imported/icon.svg-a187482a925972f1fdeb4c62c782915f.image"]
+
+[params]
+

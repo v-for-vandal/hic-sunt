@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3 uid="uid://raavy4h3gwaw"]
+
+[ext_resource type="Script" uid="uid://7ylk57ljltkt" path="res://addons/debug-tree-view/internal/image_control.gd" id="1_visme"]
+
+[node name="ImageControl" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1620.0
+offset_bottom = -980.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_visme")
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 2
+
+[node name="SizeLabel" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "Size"
+
+[node name="Size" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "inf x inf"
+
+[node name="SelectChannelLabel" type="Label" parent="GridContainer"]
+layout_mode = 2
+text = "Channel"
+
+[node name="ChannelSelector" type="OptionButton" parent="GridContainer"]
+layout_mode = 2
+selected = 0
+item_count = 4
+popup/item_0/text = "All"
+popup/item_0/id = 0
+popup/item_1/text = "Red"
+popup/item_1/id = 1
+popup/item_2/text = "Green"
+popup/item_2/id = 2
+popup/item_3/text = "Blue"
+popup/item_3/id = 3
+
+[connection signal="item_selected" from="GridContainer/ChannelSelector" to="." method="_on_channel_selector_item_selected"]

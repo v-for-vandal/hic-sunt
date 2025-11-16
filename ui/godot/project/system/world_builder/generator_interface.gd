@@ -10,5 +10,7 @@ class_name WorldGeneratorInterface
 
 func create_world() -> WorldObject:
 	assert(false, "Unimplemented")
+	@warning_ignore("redundant_await")
+	await true
 	push_error("Unimplemented")
 	return null

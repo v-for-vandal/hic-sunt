@@ -17,6 +17,11 @@ func add_2d_node(key: String, node: Node2D, hint: Rect2i = Rect2i(0, 0, 100, 100
 ## Adds text as a node with given key
 func add_text_node(key: String, text: String) -> RefCounted:
 	return null
+	
+## Adds an image
+## Will place image into scroll container, if needed.
+func add_image_node(key: String, image: Image) -> RefCounted:
+	return null
 
 
 ## Creates an hierarchy and returns a handle to created node

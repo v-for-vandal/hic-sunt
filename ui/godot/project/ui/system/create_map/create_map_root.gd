@@ -129,8 +129,10 @@ func _do_generate(_debug_mode: bool) -> WorldObject:
 	var _debug_control := DebugRoot.get_debug_control().add_random_group()
 
 	var generator := _selected_generator_module.create_generator(_selected_config, _debug_control)
+	
+	add_child(generator) # TODO: REmove generator after creation
 
-	var result := generator.create_world()
+	var result := await generator.create_world()
 	return result
 
 
