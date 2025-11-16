@@ -269,8 +269,9 @@ func _render_map(map: _VoronoiDrawer) -> void:
 	viewport.add_child(map)
 	add_child(viewport)
 	
-	await RenderingServer.frame_post_draw
+
 	await map.finished_drawing
+	await RenderingServer.frame_post_draw
 	
 	var result := viewport.get_texture().get_image()
 	
