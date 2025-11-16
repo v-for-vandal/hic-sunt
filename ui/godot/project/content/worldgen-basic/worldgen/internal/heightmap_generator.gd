@@ -265,6 +265,7 @@ func _render_map(map: _VoronoiDrawer) -> void:
 	viewport.disable_3d = true
 	viewport.size = Vector2i(100, 100) # TODO: Make a setting
 	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
 	viewport.add_child(map)
 	add_child(viewport)
 	

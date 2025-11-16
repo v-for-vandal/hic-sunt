@@ -28,24 +28,22 @@ func create_world() -> WorldObject:
 	
 	# Call height generator
 	var heightmap_generator := _config.heightmap_module.create_generator(
-		main_plane, _config.heightmap_config, global_context
+		self, main_plane, _config.heightmap_config, global_context
 	)
 	heightmap_generator.name = "heightmap_generator"
-	add_child(heightmap_generator)
 	
 	await heightmap_generator.first_pass()
 	
 	# Call climate generator
 	var climate_generator := _config.climate_module.create_generator(
-		main_plane, _config.climate_config, global_context
+		self, main_plane, _config.climate_config, global_context
 	)
 	climate_generator.name = "climate_generator"
-	add_child(climate_generator)
 	await climate_generator.first_pass()
 	
 	# Call climate generator
 	var biome_generator := _config.biome_module.create_generator(
-		main_plane, _config.biome_config, global_context
+		self, main_plane, _config.biome_config, global_context
 	)
 	await biome_generator.first_pass()
 	
