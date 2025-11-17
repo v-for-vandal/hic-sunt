@@ -18,6 +18,7 @@ Plane<BaseTypes>::Plane(ControlObjectPtr control_object, StringId plane_id,
     external_region_radius = region_radius + region_radius / 2 + 1;
   }
   external_region_radius_ = external_region_radius;
+  region_radius_ = region_radius;
   // Init regions
   GetSurface().Foreach ([region_radius, control_object(this->control_object_)](
                             QRSCoords, Cell &cell) {

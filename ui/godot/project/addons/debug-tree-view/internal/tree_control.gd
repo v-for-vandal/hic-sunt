@@ -57,10 +57,23 @@ func add_2d_node(key: String, node: Node2D, hint: Rect2i = Rect2i(0, 0, 100, 100
 func add_text_node(key: String, text: String) -> RefCounted:
 	# create text node
 	var text_node := RichTextLabel.new()
-	text_node.add_text(text)
+	if not text.is_empty():
+		text_node.add_text(text)
+		text_node.newline()
 	var new_item := _add_element(key, text_node)
+	_debug_tree._add_text_sink(new_item, text_node)
 
 	return _wrap_in_class(new_item)
+	
+func add_text(text: String) -> void:
+	# if we are text node:
+	var text_node := _debug_tree._get_text_sink(_item)
+	if text_node == null:
+		add_text_node("log", text)
+		return
+	
+	text_node.add_text(text)
+	text_node.newline()
 	
 ## Adds an image
 ## Will place image into scroll container, if needed.

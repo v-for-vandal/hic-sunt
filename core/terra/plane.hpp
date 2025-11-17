@@ -97,6 +97,8 @@ class Plane : public scope::ScopedObject<BaseTypes> {
   float GetDistanceBetweenCells(QRSCoords region1, QRSCoords cell1,
                                 QRSCoords region2, QRSCoords cell2);
 
+  int GetExternalRadius() const { return external_region_radius_; }
+
  private:
   friend void SerializeTo<BaseTypes>(const Plane &source,
                                      proto::terra::Plane &target);
@@ -116,6 +118,7 @@ class Plane : public scope::ScopedObject<BaseTypes> {
   StringId plane_id_;
   Surface surface_;
   int external_region_radius_{};
+  int region_radius_{};
   // some regions are not really part of the surface. Like caves.
   std::vector<Cell> off_surface_;
   std::unordered_map<StringId, RegionPtr> region_index_;

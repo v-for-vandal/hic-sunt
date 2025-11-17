@@ -3,6 +3,7 @@ extends Control
 class_name DebugTree
 
 const _NODE_KEY := &"$node"
+const _TEXT_SINK_KEY := &"$text"
 
 var _current_node: Control = null
 
@@ -87,7 +88,19 @@ func __setup_tree_item(item: TreeItem, key: String, node: Control) -> void:
 	item.set_metadata(0, metadata)
 	item.set_text(0, key)
 
+func _add_text_sink(item: TreeItem, sink: RichTextLabel) -> void:
+	var metadata := _get_tree_item_metadata(item)
+	if _TEXT_SINK_KEY in metadata:
+		push_error("Attempt to change text sink for a node")
+		return
+		
+	metadata[_TEXT_SINK_KEY] = sink
+	
+func _get_text_sink(item: TreeItem) -> RichTextLabel:
+	var metadata := _get_tree_item_metadata(item)
+	return metadata.get(_TEXT_SINK_KEY, null)
 
+	
 func _on_tree_item_selected() -> void:
 	var current_item: TreeItem = %Tree.get_selected()
 	if current_item == null:

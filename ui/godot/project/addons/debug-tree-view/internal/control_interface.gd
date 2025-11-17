@@ -18,6 +18,11 @@ func add_2d_node(key: String, node: Node2D, hint: Rect2i = Rect2i(0, 0, 100, 100
 func add_text_node(key: String, text: String) -> RefCounted:
 	return null
 	
+## Adds text if this node is a text node. If it is not, it will create
+## a text node and later invocations will add text to this node
+func add_text(text: String) -> void:
+	return
+	
 ## Adds an image
 ## Will place image into scroll container, if needed.
 func add_image_node(key: String, image: Image) -> RefCounted:

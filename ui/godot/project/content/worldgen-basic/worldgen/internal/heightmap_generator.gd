@@ -24,6 +24,11 @@ var _debug_control: DebugTree.ControlInterface
 var _debug_coloring_ui: OptionButton
 var _debug_voronoi_viz_node: Node2D
 
+# total size of a generated things (voronoi etc), expressed in 'points'.
+# at the moment, we translate one hex to one point, but this is implementation
+# detail
+var _total_size := Rect2i(0, 0, 0, 0)
+
 var _delaunay: Delaunator
 var _voronoi: Voronoinator
 var _tectonic_clusterization : _CellClusterization
@@ -33,6 +38,7 @@ var _continents_clusterization : _CellClusterization
 # Here we store 'colors' that we use to create heightmap. Those are not really
 # colors, just channels where we encode values
 var _heightmap_coloring : PackedColorArray
+var _heightmap : Image
 
 var _rng := RandomNumberGenerator.new()
 
@@ -45,7 +51,14 @@ func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGl
 	_plane = plane
 	_global_context = global_context
 	_rng.seed = _global_context.seed
-
+	
+	var plane_dimensions : Rect2i = _plane.get_dimensions()
+	var plane_external_radius : int = _plane.get_region_external_radius()
+	var _start := plane_dimensions.position * (2* plane_external_radius) - Vector2i(plane_external_radius, plane_external_radius)
+	var _end := plane_dimensions.end * (2*plane_external_radius)  + Vector2i(plane_external_radius, plane_external_radius)
+	_total_size.position = _start
+	_total_size.end = _end
+	
 	_debug_control = _global_context.debug_control.add_text_node("heightmap", "")
 
 
@@ -54,14 +67,17 @@ func _ready() -> void:
 
 
 func first_pass() -> void:
+	_debug_control.add_text("Seed: %s" % _global_context.seed)
+	_debug_control.add_text("Plane bbox %s, external radius: %s" % [_plane.get_dimensions(), _plane.get_region_external_radius()])
+	_debug_control.add_text("Total heightmap size: %s" % _total_size)
 	# Create voronoi
 	_create_voronoi()
 
 	_create_tectonic_plates()
 	_create_continents()
 
-	var map := _create_map()
-	await _render_map(map)
+
+	_heightmap = await _render_map(_create_map())
 	
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
@@ -71,9 +87,10 @@ func first_pass() -> void:
 
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> void:
 	var radius: int = _global_context.custom[&"region.radius"]
+	var region_external_radius : int = _plane.get_region_external_radius()
 	var region_coords := Vector2i(
-		region_qrs_coords.x * (radius + RADIUS_MARGIN),
-		region_qrs_coords.y * (radius + RADIUS_MARGIN),
+		region_qrs_coords.x * region_external_radius,
+		region_qrs_coords.y * region_external_radius,
 	)
 
 	var region_cell_lambda := func(cell_q: int, cell_r: int) -> void:
@@ -82,8 +99,11 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> vo
 	region.foreach(region_cell_lambda)
 
 
-func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qrs_coords: Vector2i) -> void:
-	var height := _get_height_at_point(region_coords.x + cell_qrs_coords.x, region_coords.y + cell_qrs_coords.y)
+# region - region object
+# region_global_coords - mapping of this region to heightmap and related objects
+# cell_qrs_coords - coordinates of cell within this region
+func _cell_first_pass(region: RegionObject, region_global_coords: Vector2i, cell_qrs_coords: Vector2i) -> void:
+	var height := _get_height_at_point(region_global_coords + cell_qrs_coords)
 	region.get_cell(cell_qrs_coords).get_scope().add_numeric_modifier(Modifiers.GEOGRAPHY_HEIGHT, &"wordlgen.basic", height, 0)
 
 
@@ -97,27 +117,32 @@ func _wrap_y(j: float) -> float:
 
 
 func _create_voronoi() -> void:
-	var max_i := 100
-	var max_j := 100
+	var voronoi_rect := Rect2i(0, 0, 100, 100)
+	var transform := Transform2D.IDENTITY.scaled( Vector2(_total_size.size) / Vector2(voronoi_rect.size))
+	transform.origin = Vector2(_total_size.position)
+	
+	_debug_control.add_text("Voronoi to real space transform is: %s" % transform)
+	_debug_control.add_text("Verify: transform * voronoi_rect = %s" % (transform * Rect2(voronoi_rect)))
+	
 	var k: int = 0
 	var points := PackedVector2Array()
-	points.resize(max_i * max_j)
+	points.resize((voronoi_rect.size.x + 1) * (voronoi_rect.size.y+1))
 
-	for i in range(0, 100):
-		for j in range(0, 100):
+	for i in range(voronoi_rect.position.x, voronoi_rect.end.x + 1):
+		for j in range(voronoi_rect.position.y, voronoi_rect.end.y+1):
 			var point := Vector2(i, j)
 			# apply some randomness
 			point.x += _rng.randfn(0.0, 3.0)
 			point.y += _rng.randfn(0.0, 3.0)
 
 			# don't allow outside of borders
-			point = point.clamp(Vector2(-5, -5), Vector2(max_i + 5, max_j + 5))
+			point = point.clamp(voronoi_rect.position + Vector2i(-5, -5), voronoi_rect.end + Vector2i(5, 5))
 
-			points[k] = point
+			points[k] = transform * point
 			k += 1
 
 	_delaunay = Delaunator.new(points)
-	_voronoi = Voronoinator.new(_delaunay, Rect2(Vector2(-5, -5), Vector2(110, 110)))
+	_voronoi = Voronoinator.new(_delaunay, Rect2(Vector2(_total_size.position + Vector2i(-5, -5)), Vector2(_total_size.end +  Vector2i(5, 5))))
 	if _debug_control.is_debug_enabled():
 		# visualization is computationally expensive, so avoid it when debug
 		# is disablres://addons/debug-tree-view/internal/control_interface.gded
@@ -243,9 +268,11 @@ func _encode_as_color(cell_index: int) -> Color:
 	var cell_cluster := _continents_clusterization.cell_cluster(cell_index)
 	# TODO: This is debug
 	if cell_cluster == 0:
-		return Color.BLACK
+		# when we render, Godot will perform srgb_to_linear conversion
+		# to mak inverse conversion first
+		return Color(-100, 0, 0, 1.0).linear_to_srgb()
 	else:
-		return Color.YELLOW
+		return Color(100.0, 0.0, 0.0, 1.0).linear_to_srgb()
 	
 func _create_map() -> _VoronoiDrawer:
 	var colors := PackedColorArray()
@@ -260,9 +287,11 @@ func _create_map() -> _VoronoiDrawer:
 	#_debug_control.add_2d_node("drawer", copy)
 	return result
 	
-func _render_map(map: _VoronoiDrawer) -> void:
+func _render_map(map: _VoronoiDrawer) -> Image:
 	var viewport := SubViewport.new()	
 	viewport.disable_3d = true
+	viewport.use_hdr_2d = true
+	viewport.transparent_bg = true
 	viewport.size = Vector2i(100, 100) # TODO: Make a setting
 	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
@@ -276,6 +305,8 @@ func _render_map(map: _VoronoiDrawer) -> void:
 	var result := viewport.get_texture().get_image()
 	
 	_debug_control.add_image_node("map", result)
+	
+	return result
 	
 
 	
@@ -292,23 +323,34 @@ func _displacement_at_range(value: float, target_range: Vector2i) -> float:
 	return (value - target_range.x) / (target_range.y - target_range.x)
 
 
-func _get_height_at_point(i: float, j: float) -> int:
-	i = _wrap_x(i)
-	j = _wrap_y(j)
-	# Get base height. It will be in range (-1, 1)
-	var sample_value := _terrain_noise_generator.get_noise_2d(i, j)
-
-	var height_meters := NoiseToolsLibrary.sample_simple_range_i(sample_value, _config.height_range)
-
-	# add mountains
-	var mountain_sample_value := _mountain_noise_generator.get_noise_2d(i, j)
-	var mountain_extra_meters := 0 # by default, don't add anything
-	if mountain_sample_value > 0.75:
-		# renormalize to range (-1,1) because that is what _sample_simple_range
-		# expects
-		mountain_sample_value = -1 + (mountain_sample_value - 0.75) / (1 - 0.75) * 2
-		mountain_sample_value = NoiseToolsLibrary.sample_simple_range_i(mountain_sample_value, _MOUNTAIN_EXTRA_HEIGHT_RANGE)
-
-	var result := int(clamp(height_meters + mountain_extra_meters, _config.height_range.x, _config.height_range.y))
-
-	return result
+func _get_height_at_point(cell_global_coords: Vector2i) -> int:
+	# TODO: Fix , must convert to image space
+	var color := _heightmap.get_pixelv(cell_global_coords)
+	if color.r >= 1:
+		print("Positive height!")
+	if color.r < 0:
+		print("Negative height!")
+	var height := int(color.r)
+	
+	return height
+	# TODO: REMOVE CODE BELOW
+	#i = _wrap_x(i)
+	#j = _wrap_y(j)
+	## Get base height. It will be in range (-1, 1)
+	#var sample_value := _terrain_noise_generator.get_noise_2d(i, j)
+#
+	#var height_meters := NoiseToolsLibrary.sample_simple_range_i(sample_value, _config.height_range)
+#
+	## add mountains
+	#var mountain_sample_value := _mountain_noise_generator.get_noise_2d(i, j)
+	#var mountain_extra_meters := 0 # by default, don't add anything
+	#if mountain_sample_value > 0.75:
+		## renormalize to range (-1,1) because that is what _sample_simple_range
+		## expects
+		#mountain_sample_value = -1 + (mountain_sample_value - 0.75) / (1 - 0.75) * 2
+		#mountain_sample_value = NoiseToolsLibrary.sample_simple_range_i(mountain_sample_value, _MOUNTAIN_EXTRA_HEIGHT_RANGE)
+#
+	#var result := int(clamp(height_meters + mountain_extra_meters, _config.height_range.x, _config.height_range.y))
+#
+	#return result
+	# END OF REMOVE
