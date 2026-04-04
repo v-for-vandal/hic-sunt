@@ -8,11 +8,11 @@ const _TEMPERATURE_FLUCTUATION = 5
 const _PRECIPATION_RANGE = Vector2i(0, 400)
 
 var _config: Config
-var _plane: PlaneObject
+var _plane: WorldPlane
 var _global_context: WorldGeneratorGlobalContext
 
 
-func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
+func _init(plane: WorldPlane, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
 	super(global_context)
 	_config = config
 	_plane = plane
@@ -75,6 +75,8 @@ func _cell_first_pass(region: RegionObject, cell_qr_coords: Vector2i) -> void:
 
 func _get_biome(temperature: int, precipation: int) -> StringName:
 	var point := Vector2i(temperature, precipation)
+	point = point.clamp(Vector2i(_TEMPERATURE_RANGE.x, _PRECIPATION_RANGE.x),
+		Vector2i(_TEMPERATURE_RANGE.y, _PRECIPATION_RANGE.y))
 
 	for biome_map: Dictionary in biome_maps:
 		for rect: Rect2i in biome_map:

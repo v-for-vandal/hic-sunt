@@ -3,8 +3,8 @@ extends GutTest
 class_name GutTestEnviron
 
 var ruleset: RulesetObject
-var world: WorldObject
-var plane: PlaneObject
+var world: World
+var plane: WorldPlane
 var zero_region: RegionObject # world.get_region(Vector2i(0,0)) - shortcut
 
 
@@ -17,8 +17,8 @@ func _load_ruleset() -> RulesetObject:
 	return _ruleset_object
 
 
-func _create_world() -> WorldObject:
-	var world_ := WorldObject.create_world()
+func _create_world() -> World:
+	var world_ := World.new()
 	var plane_ := world_.create_plane("test_plane", Rect2i(Vector2i(0, 0), Vector2i(2, 2)), 10, 12)
 	assert_not_null(plane_)
 	assert_true(plane_.contains(Vector2i(0, 0)))

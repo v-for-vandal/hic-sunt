@@ -3,7 +3,7 @@ extends Node
 
 signal new_turn_started(turn_number: int)
 
-var current_world: WorldObject
+var current_world: World
 # TODO: Make ruleset one for all players
 var current_player_ruleset: RulesetObject
 var _current_player_civ: Civilisation
@@ -25,7 +25,7 @@ func get_current_player_civ() -> Civilisation:
 	return _current_player_civ
 
 
-func get_current_world() -> WorldObject:
+func get_current_world() -> World:
 	return current_world
 
 
@@ -40,9 +40,9 @@ func get_atlas_visualization() -> Dictionary:
 	return get_ruleset().get_atlas_render()
 
 
-func init_game(world_object: WorldObject, ruleset: RulesetObject) -> void:
+func init_game(world: World, ruleset: RulesetObject) -> void:
 	print("Initializing game") # TODO: RM
-	current_world = world_object
+	current_world = world
 	current_player_ruleset = ruleset
 	_current_player_civ = Civilisation.create_civilisation()
 # TODO: we must do something with current_turn and next_id
@@ -81,7 +81,7 @@ func save_game(save_location: DirAccess) -> Error:
 
 	var world_file_path := _world_file_path(save_location)
 	# TODO: Restore
-	var status := current_world.save(ProjectSettings.globalize_path(world_file_path))
+	var status : Error = current_world.save(ProjectSettings.globalize_path(world_file_path))
 	if status != OK:
 		return status
 
@@ -101,7 +101,7 @@ func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
 	current_player_ruleset = ruleset
 	# Create empty world
 	# TODO: Have some method to create empty world
-	var world: WorldObject = WorldObject.new()
+	var world: World = World.new()
 	assert(world != null)
 	var world_file_path := _world_file_path(save_location)
 	var status: Error = world.load(ProjectSettings.globalize_path(world_file_path))

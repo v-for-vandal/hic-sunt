@@ -50,7 +50,7 @@ class WorldGeneratorModuleHandle:
 	## Create generator
 	## Parent is required parameter, because some generators require drawing to textures and so on,
 	## so we enforce it that every module has a parent
-	func create_generator(parent: Node, plane: PlaneObject, config:Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
+	func create_generator(parent: Node, plane: WorldPlane, config:Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
 		assert(_generator_function != null)
 		var result : WorldGeneratorModuleInterface = _generator_function.call(plane, config, global_context)
 		parent.add_child(result)

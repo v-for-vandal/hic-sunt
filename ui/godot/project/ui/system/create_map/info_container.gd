@@ -29,7 +29,7 @@ func set_region(region: RegionObject, region_qr_coords: Variant) -> void:
 	if topn_biomes.size() > 0:
 		data_table.append([&"biome (main)", topn_biomes[0]])
 
-	%CellInfo.set_data(data_table)
+	%RegionInfo.set_data(data_table)
 	_current_region = region
 
 

@@ -88,7 +88,7 @@ func _return_to_main_screen() -> void:
 	#	_loading_screen_instance.queue_free()
 
 
-func new_game(world_object: WorldObject) -> void:
+func new_game(world: World) -> void:
 	#_prepare_loading()
 
 	var ruleset_object := _load_ruleset()
@@ -97,7 +97,7 @@ func new_game(world_object: WorldObject) -> void:
 
 	#assert(world_object != null, "Failed to create world")
 
-	CurrentGame.init_game(world_object, ruleset_object)
+	CurrentGame.init_game(world, ruleset_object)
 
 	_init_world_scene()
 

@@ -119,7 +119,7 @@ func _add_debug_map(map_name: String, map: Image, legend: Dictionary) -> void:
 	}
 
 
-func _do_generate(_debug_mode: bool) -> WorldObject:
+func _do_generate(_debug_mode: bool) -> World:
 	if _current_selected == -1:
 		return null
 
@@ -140,8 +140,8 @@ func _on_generate_button_pressed() -> void:
 	if _processing:
 		return
 	_processing = true
-	var world_object := await _do_generate(true)
-	%WorldSurface.load_plane(world_object.get_plane(&"main"))
+	var world := await _do_generate(true)
+	%WorldSurface.load_plane(world.get_plane(&"main"))
 	_processing = false
 
 
@@ -182,8 +182,8 @@ func _on_start_game_button_pressed() -> void:
 		return
 	_processing = true
 	print("Starting game")
-	var world_object := await _do_generate(false)
-	LoadManager.new_game(world_object)
+	var world := await _do_generate(false)
+	LoadManager.new_game(world)
 	_processing = false
 
 
@@ -198,21 +198,25 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 		event.surface.select(event.qr_coords, true)
 
 	if event is UiEventBus.WorldUIMovementEvent:
-		var plane: PlaneObject = event.surface.get_plane()
-		var region := plane.get_region(event.qr_coords)
+		var plane: WorldPlane = event.surface.get_plane()
+		var region := plane.plane_object.get_region(event.qr_coords)
 		%InfoContainer.set_region(region, event.qr_coords)
 		event.accept()
+		return
 
 	if event is UiEventBus.WorldUIActionEvent:
 		if event.action_type == UiEventBus.ActionType.PRIMARY:
-			var plane: PlaneObject = event.surface.get_plane()
-			var region := plane.get_region(event.qr_coords)
+			var plane: WorldPlane = event.surface.get_plane()
+			var region := plane.plane_object.get_region(event.qr_coords)
 			%RegionSurface.load_region(region)
+		return
 
 	if event is UiEventBus.RegionUIMovementEvent:
 		var region: RegionObject = event.surface.get_region()
 		%InfoContainer.set_cell(event.qr_coords)
 		event.accept()
+		return
 
-	elif event is UiEventBus.CancellationEvent:
+	if event is UiEventBus.CancellationEvent:
 		event.accept()
+		return

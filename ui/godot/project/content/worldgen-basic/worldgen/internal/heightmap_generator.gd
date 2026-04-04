@@ -9,7 +9,7 @@ const _VoronoiDrawer := preload("res://content/worldgen-basic/worldgen/internal/
 const MAX_ATTEMPTS := 10000
 
 var _config: Config
-var _plane: PlaneObject
+var _plane: WorldPlane
 var _global_context: WorldGeneratorGlobalContext
 
 var _terrain_noise_generator: FastNoiseLite = preload(
@@ -27,7 +27,7 @@ var _debug_voronoi_viz_node: Node2D
 # total size of a generated things (voronoi etc), expressed in 'points'.
 # at the moment, we translate one hex to one point, but this is implementation
 # detail
-var _total_size := Rect2i(0, 0, 0, 0)
+var _xy_dimensions := Rect2i(0, 0, 0, 0)
 
 var _delaunay: Delaunator
 var _voronoi: Voronoinator
@@ -44,20 +44,29 @@ var _rng := RandomNumberGenerator.new()
 
 const RADIUS_MARGIN: int = 2
 
+var _cube_to_map : Callable
+var _map_to_cube : Callable
 
-func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
+func _init(plane: WorldPlane, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
 	super(global_context)
 	_config = config
 	_plane = plane
 	_global_context = global_context
 	_rng.seed = _global_context.seed
 	
-	var plane_dimensions : Rect2i = _plane.get_dimensions()
-	var plane_external_radius : int = _plane.get_region_external_radius()
-	var _start := plane_dimensions.position * (2* plane_external_radius) - Vector2i(plane_external_radius, plane_external_radius)
-	var _end := plane_dimensions.end * (2*plane_external_radius)  + Vector2i(plane_external_radius, plane_external_radius)
-	_total_size.position = _start
-	_total_size.end = _end
+	# init conversion methods. This is a temporary measure until we decide how to
+	# draw a world map
+	var conversion_methods := HexagonTileMap.get_conversion_methods_for(
+		TileSet.TileOffsetAxis.TILE_OFFSET_AXIS_HORIZONTAL,
+		TileSet.TileLayout.TILE_LAYOUT_STACKED)
+	_cube_to_map = conversion_methods.cube_to_map
+	_map_to_cube = conversion_methods.map_to_cube
+	
+	# This is size expressed in region cells, not in regions!
+	var plane_dimensions_cells_qr : Rect2i = _plane.get_cells_qr_dimensions()
+	# Translate to XY
+	_xy_dimensions.position = axial_to_map.call(plane_dimensions_cells_qr.position)
+	_xy_dimensions.end = axial_to_map.call(plane_dimensions_cells_qr.end)
 	
 	_debug_control = _global_context.debug_control.add_text_node("heightmap", "")
 
@@ -68,8 +77,11 @@ func _ready() -> void:
 
 func first_pass() -> void:
 	_debug_control.add_text("Seed: %s" % _global_context.seed)
-	_debug_control.add_text("Plane bbox %s, external radius: %s" % [_plane.get_dimensions(), _plane.get_region_external_radius()])
-	_debug_control.add_text("Total heightmap size: %s" % _total_size)
+	_debug_control.add_text("Plane QR bbox (in regions): %s Note: one unit is region" % [_plane.get_qr_dimensions()])
+	_debug_control.add_text("Plane QR bbox (in cells): %s Note: one unit is one region cell" % [_plane.get_cells_qr_dimensions()])
+	_debug_control.add_text("External radius: %s" % [_plane.plane_object.get_region_external_radius()])
+	_debug_control.add_text("Plane XY bbox: %s" % _xy_dimensions)
+	
 	# Create voronoi
 	_create_voronoi()
 
@@ -78,16 +90,17 @@ func first_pass() -> void:
 
 
 	_heightmap = await _render_map(_create_map())
+	_plane.set_substrate(ImageTexture.create_from_image(_heightmap))
 	
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 
-	_plane.foreach_surface(region_lambda)
+	_plane.plane_object.foreach_surface(region_lambda)
 
 
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> void:
 	var radius: int = _global_context.custom[&"region.radius"]
-	var region_external_radius : int = _plane.get_region_external_radius()
+	var region_external_radius : int = _plane.plane_object.get_region_external_radius()
 	var region_coords := Vector2i(
 		region_qrs_coords.x * region_external_radius,
 		region_qrs_coords.y * region_external_radius,
@@ -117,11 +130,12 @@ func _wrap_y(j: float) -> float:
 
 
 func _create_voronoi() -> void:
+	# voronoi rect is fixed and later mapped onto target rect
 	var voronoi_rect := Rect2i(0, 0, 100, 100)
-	var transform := Transform2D.IDENTITY.scaled( Vector2(_total_size.size) / Vector2(voronoi_rect.size))
-	transform.origin = Vector2(_total_size.position)
+	var transform := Transform2D.IDENTITY.scaled( Vector2(_xy_dimensions.size) / Vector2(voronoi_rect.size))
+	transform.origin = Vector2(_xy_dimensions.position)
 	
-	_debug_control.add_text("Voronoi to real space transform is: %s" % transform)
+	_debug_control.add_text("Voronoi to XY space transform is: %s" % transform)
 	_debug_control.add_text("Verify: transform * voronoi_rect = %s" % (transform * Rect2(voronoi_rect)))
 	
 	var k: int = 0
@@ -142,10 +156,10 @@ func _create_voronoi() -> void:
 			k += 1
 
 	_delaunay = Delaunator.new(points)
-	_voronoi = Voronoinator.new(_delaunay, Rect2(Vector2(_total_size.position + Vector2i(-5, -5)), Vector2(_total_size.end +  Vector2i(5, 5))))
+	_voronoi = Voronoinator.new(_delaunay, Rect2(Vector2(_xy_dimensions.position + Vector2i(-5, -5)), Vector2(_xy_dimensions.end +  Vector2i(5, 5))))
 	if _debug_control.is_debug_enabled():
 		# visualization is computationally expensive, so avoid it when debug
-		# is disablres://addons/debug-tree-view/internal/control_interface.gded
+		# is disabled://addons/debug-tree-view/internal/control_interface.gded
 		_debug_voronoi_viz_node = _VoronoizVisualization.instantiate()
 		_debug_voronoi_viz_node.set_voronoi(_voronoi)
 		_debug_voronoi_viz_node.add_random_coloring(&"base", Vector3(-1.0, -1.0, 1.0))
@@ -282,9 +296,6 @@ func _create_map() -> _VoronoiDrawer:
 		colors[i] = _encode_as_color(i)
 	
 	var result := _VoronoiDrawer.new(_voronoi, colors)
-	# TODO: RM
-	#var copy := _VoronoiDrawer.new(_voronoi, colors)
-	#_debug_control.add_2d_node("drawer", copy)
 	return result
 	
 func _render_map(map: _VoronoiDrawer) -> Image:
@@ -292,8 +303,13 @@ func _render_map(map: _VoronoiDrawer) -> Image:
 	viewport.disable_3d = true
 	viewport.use_hdr_2d = true
 	viewport.transparent_bg = true
-	viewport.size = Vector2i(100, 100) # TODO: Make a setting
+	viewport.gui_disable_input = true
+	viewport.size = _xy_dimensions.size
 	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	
+	var transform := Transform2D()
+	transform.origin = -1 * Vector2(_xy_dimensions.position)
+	viewport.set_canvas_transform(transform)
 
 	viewport.add_child(map)
 	add_child(viewport)
@@ -323,34 +339,18 @@ func _displacement_at_range(value: float, target_range: Vector2i) -> float:
 	return (value - target_range.x) / (target_range.y - target_range.x)
 
 
-func _get_height_at_point(cell_global_coords: Vector2i) -> int:
-	# TODO: Fix , must convert to image space
-	var color := _heightmap.get_pixelv(cell_global_coords)
-	if color.r >= 1:
-		print("Positive height!")
-	if color.r < 0:
-		print("Negative height!")
+func _get_height_at_point(cell_global_qr_coords: Vector2i) -> int:
+	var image_coords := axial_to_map(cell_global_qr_coords)
+	var color := _heightmap.get_pixelv(image_coords)
 	var height := int(color.r)
 	
 	return height
-	# TODO: REMOVE CODE BELOW
-	#i = _wrap_x(i)
-	#j = _wrap_y(j)
-	## Get base height. It will be in range (-1, 1)
-	#var sample_value := _terrain_noise_generator.get_noise_2d(i, j)
-#
-	#var height_meters := NoiseToolsLibrary.sample_simple_range_i(sample_value, _config.height_range)
-#
-	## add mountains
-	#var mountain_sample_value := _mountain_noise_generator.get_noise_2d(i, j)
-	#var mountain_extra_meters := 0 # by default, don't add anything
-	#if mountain_sample_value > 0.75:
-		## renormalize to range (-1,1) because that is what _sample_simple_range
-		## expects
-		#mountain_sample_value = -1 + (mountain_sample_value - 0.75) / (1 - 0.75) * 2
-		#mountain_sample_value = NoiseToolsLibrary.sample_simple_range_i(mountain_sample_value, _MOUNTAIN_EXTRA_HEIGHT_RANGE)
-#
-	#var result := int(clamp(height_meters + mountain_extra_meters, _config.height_range.x, _config.height_range.y))
-#
-	#return result
-	# END OF REMOVE
+
+
+func axial_to_map(qr_coords: Vector2i) -> Vector2i:
+	var qrs_coords := Vector3i(qr_coords.x, qr_coords.y, - qr_coords.x - qr_coords.y)
+	return _cube_to_map.call(qrs_coords)
+	
+func map_to_axial(xy_coords: Vector2i) -> Vector2i:
+	var qrs_coords := _map_to_cube.call(xy_coords) as Vector3i
+	return Vector2i(qrs_coords.x, qrs_coords.y)

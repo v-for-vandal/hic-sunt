@@ -9,7 +9,7 @@ func get_module_info() -> Dictionary:
 	return { }
 
 
-func create_climate_generator(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
+func create_climate_generator(plane: WorldPlane, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
 	return _climate_generator.new(plane, config, global_context)
 
 

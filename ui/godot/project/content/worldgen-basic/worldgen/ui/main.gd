@@ -15,5 +15,7 @@ func get_config() -> Variant:
 
 	result.biome_module = $BiomeSelector.get_selected_module()
 	result.biome_config = $BiomeSelector.get_selected_config()
+	
+	result.seed = $SeedGenerator.get_seed()
 
 	return result

@@ -8,7 +8,7 @@ func get_module_info() -> Dictionary:
 	return { }
 
 
-func create_heightmap_generator(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
+func create_heightmap_generator(plane: WorldPlane, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
 	return _heightmap_generator.new(plane, config, global_context)
 
 

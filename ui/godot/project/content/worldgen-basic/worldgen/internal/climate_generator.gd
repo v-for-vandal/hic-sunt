@@ -15,7 +15,7 @@ const _PRECIPATION_RANGE = Vector2i(0, 400)
 const RADIUS_MARGIN: int = 2
 
 var _config: Config
-var _plane: PlaneObject
+var _plane: WorldPlane
 var _global_context: WorldGeneratorGlobalContext
 
 # extracted from _global_context
@@ -27,7 +27,7 @@ var _pole_effect_distance: = 7.0
 var _region_radius: int = 1
 
 
-func _init(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
+func _init(plane: WorldPlane, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
 	super(global_context)
 	_config = config
 	_plane = plane
@@ -42,7 +42,7 @@ func first_pass() -> void:
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 
-	_plane.foreach_surface(region_lambda)
+	_plane.plane_object.foreach_surface(region_lambda)
 
 
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> void:
@@ -74,7 +74,7 @@ func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qr_coo
 
 
 func _distance_from_poles(region_coords: Vector2i, cell_qr_coords: Vector2i) -> float:
-	var distance := _plane.get_distance_between_cells(
+	var distance := _plane.plane_object.get_distance_between_cells(
 		region_coords,
 		cell_qr_coords,
 		_pole_1,

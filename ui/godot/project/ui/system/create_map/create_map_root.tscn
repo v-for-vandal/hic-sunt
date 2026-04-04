@@ -161,19 +161,29 @@ layout_mode = 2
 current_tab = 0
 script = ExtResource("3_r5dag")
 
-[node name="CellInfo" type="Control" parent="HBoxContainer/InfoContainer"]
+[node name="RegionInfo" type="Control" parent="HBoxContainer/InfoContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 2
 script = ExtResource("3_vfc6v")
+headers = Array[String](["name", "value"])
 metadata/_custom_type_script = "uid://dfcsc5fmw03f4"
 metadata/_tab_index = 0
+
+[node name="CellInfo" type="Control" parent="HBoxContainer/InfoContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+focus_mode = 2
+script = ExtResource("3_vfc6v")
+metadata/_custom_type_script = "uid://dfcsc5fmw03f4"
+metadata/_tab_index = 1
 
 [node name="ScopeEditor" parent="HBoxContainer/InfoContainer" instance=ExtResource("7_2ks8r")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-metadata/_tab_index = 1
+metadata/_tab_index = 2
 
 [node name="DebugUiEventBus" type="Node" parent="."]
 unique_name_in_owner = true

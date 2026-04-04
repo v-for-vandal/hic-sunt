@@ -6,7 +6,7 @@ func _ready() -> void:
 	var surface := get_surface()
 	
 	# Get biome of a given cell
-	var plane : PlaneObject = surface.get_plane()
+	var plane : PlaneObject = surface.get_plane().plane_object
 	assert(plane != null)
 	if plane != null:
 		var region := plane.get_region(qr_coords)
@@ -23,7 +23,7 @@ func _update_highlighting(surface: GameTileSurface) -> void:
 	if surface.highlighter == null:
 		$Highlight.visible = false
 		return
-	var plane : PlaneObject = surface.get_plane()
+	var plane : PlaneObject = surface.get_plane().plane_object
 	assert(plane != null)
 	if plane == null:
 		$Highlight.visible = false

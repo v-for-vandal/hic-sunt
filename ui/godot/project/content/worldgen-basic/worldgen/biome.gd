@@ -9,7 +9,7 @@ func get_module_info() -> Dictionary:
 	return { }
 
 
-func create_biome_generator(plane: PlaneObject, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
+func create_biome_generator(plane: WorldPlane, config: Variant, global_context: WorldGeneratorGlobalContext) -> WorldGeneratorModuleInterface:
 	return _biome_generator.new(plane, config, global_context)
 
 

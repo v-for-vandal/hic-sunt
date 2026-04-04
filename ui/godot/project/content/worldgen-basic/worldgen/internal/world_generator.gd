@@ -9,8 +9,8 @@ func _init(config : Config, debug_control: DebugTree.ControlInterface) -> void:
 	_config = config
 	_debug_control = debug_control.add_text_node("worldgen", "")
 
-func create_world() -> WorldObject:
-	var world := WorldObject.new()
+func create_world() -> World:
+	var world := World.new()
 	
 	var global_context := WorldGeneratorGlobalContext.new()
 	global_context.debug_control = _debug_control
@@ -20,7 +20,7 @@ func create_world() -> WorldObject:
 	var world_size := Rect2i(Vector2i(0,0), Vector2i(10, 10))
 	var region_radius : int = 3
 	
-	var main_plane : PlaneObject = world.create_plane(&"main", world_size, region_radius, -1)
+	var main_plane : WorldPlane = world.create_plane(&"main", world_size, region_radius, -1)
 	
 	global_context.custom[&"world.bbox"] = world_size
 	global_context.custom[&"region.radius"] = region_radius

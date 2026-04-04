@@ -8,7 +8,7 @@ extends Node
 ## There are no limitations on internal structures
 class_name WorldGeneratorInterface
 
-func create_world() -> WorldObject:
+func create_world() -> World:
 	assert(false, "Unimplemented")
 	@warning_ignore("redundant_await")
 	await true
