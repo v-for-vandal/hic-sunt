@@ -1,12 +1,12 @@
 class_name GutStringUtils
 
-var _utils = load('res://addons/gut/utils.gd').get_instance()
 # Hash containing all the built in types in Godot.  This provides an English
 # name for the types that corosponds with the type constants defined in the
 # engine.
 var types = {}
 
 func _init_types_dictionary():
+	types[TYPE_NIL] = 'NIL'
 	types[TYPE_AABB] = 'AABB'
 	types[TYPE_ARRAY] = 'ARRAY'
 	types[TYPE_BASIS] = 'BASIS'
@@ -68,11 +68,11 @@ func _get_obj_filename(thing):
 	var filename = null
 
 	if(thing == null or
-		_utils.is_native_class(thing) or
+		GutUtils.is_native_class(thing) or
 		!is_instance_valid(thing) or
 		str(thing) == '<Object#null>' or
 		typeof(thing) != TYPE_OBJECT or
-		_utils.is_double(thing)):
+		GutUtils.is_double(thing)):
 		return
 
 	if(thing.get_script() == null):
@@ -82,7 +82,7 @@ func _get_obj_filename(thing):
 			# If it isn't a packed scene and it doesn't have a script then
 			# we do nothing.  This just reads better.
 			pass
-	elif(!_utils.is_native_class(thing)):
+	elif(!GutUtils.is_native_class(thing)):
 		var dict = inst_to_dict(thing)
 		filename = _get_filename(dict['@path'])
 		if(str(dict['@subpath']) != ''):
@@ -116,14 +116,14 @@ func type2str(thing):
 		# better this way.
 		pass
 	elif(typeof(thing) == TYPE_OBJECT):
-		if(_utils.is_native_class(thing)):
-			str_thing = _utils.get_native_class_name(thing)
-		elif(_utils.is_double(thing)):
+		if(GutUtils.is_native_class(thing)):
+			str_thing = GutUtils.get_native_class_name(thing)
+		elif(GutUtils.is_double(thing)):
 			var double_path = _get_filename(thing.__gutdbl.thepath)
 			if(thing.__gutdbl.subpath != ''):
 				double_path += str('/', thing.__gutdbl.subpath)
-			elif(thing.__gutdbl.from_singleton != ''):
-				double_path = thing.__gutdbl.from_singleton + " Singleton"
+			elif(thing.__gutdbl.singleton_name != ''):
+				double_path = thing.__gutdbl.singleton_name + " Singleton"
 
 			var double_type = "double"
 			if(thing.__gutdbl.is_partial):
@@ -153,25 +153,22 @@ func truncate_string(src, max_size):
 	return to_return
 
 
-func _get_indent_text(times, pad):
-	var to_return = ''
-	for i in range(times):
-		to_return += pad
-
-	return to_return
-
-func indent_text(text, times, pad):
+## Indents multiline text. Indents every line of [param text] with [param times]
+## copies of the String [param pad]. If the string ends with a newline,
+## no indent is added after that newline character and the resulting string
+## will still end on a newline.
+func indent_text(text: String, times: int, pad: String) -> String:
 	if(times == 0):
 		return text
 
-	var to_return = text
-	var ending_newline = ''
+	var to_return := text
+	var ending_newline := ''
 
 	if(text.ends_with("\n")):
 		ending_newline = "\n"
-		to_return = to_return.left(to_return.length() -1)
+		to_return = to_return.left(-1)
 
-	var padding = _get_indent_text(times, pad)
+	var padding := pad.repeat(times)
 	to_return = to_return.replace("\n", "\n" + padding)
 	to_return += ending_newline
 
