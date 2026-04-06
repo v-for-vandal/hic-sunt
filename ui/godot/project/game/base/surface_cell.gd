@@ -28,6 +28,7 @@ func _ready() -> void:
 
 ## This method relies on the fact that parent TileMapLayer
 ## is direct descendant from GameTileSurface
+## See https://docs.godotengine.org/en/stable/classes/class_tilesetscenescollectionsource.html#class-tilesetscenescollectionsource
 func get_surface() -> GameTileSurface:
 	var parent := self.get_parent()
 	assert(parent != null)
@@ -46,6 +47,6 @@ func _get_qr_coordinates() -> Vector2i:
 func _on_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
 	input_event.emit(qr_coords, event)
 	
-func _on_display_settings_changed(surface: GameTileSurface):
+func _on_display_settings_changed():
 	pass
 	

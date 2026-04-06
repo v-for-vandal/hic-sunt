@@ -14,6 +14,7 @@ func _init(debug_tree: DebugTree, item: TreeItem) -> void:
 	_item = item
 
 
+## Returns a new object of type ControlInterface that points to given item.
 func _wrap_in_class(item: TreeItem) -> RefCounted:
 	return get_script().new(_debug_tree, item)
 
@@ -87,6 +88,10 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 	image_node.texture = ImageTexture.create_from_image(image)
 	image_node.set_anchors_preset(Control.PRESET_CENTER)
 	
+	var overlay_node := Control.new()
+	overlay_node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	
+	
 	var control_node := _ImageControl.instantiate()
 	control_node.set_texture(image_node.texture)
 	# I don't understand how anchors/presets work ((
@@ -99,12 +104,22 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 		
 	control_node.set_modulate.connect(on_set_modulate)
 	
+	image_node.add_child(overlay_node)
 	display_container.add_child(image_node)
 	display_container.add_child(control_node)
 	
 	
 	var new_item := _add_element(key, display_container)
 	return _wrap_in_class(new_item)
+	
+func add_to_overlay(node: Control) -> void:
+		# if we are text node:
+	var overlay_node := _debug_tree._get_overlay_sink(_item)
+	if overlay_node == null:
+		push_error("Trying to add to overlay for node that does not support one")
+		return
+	
+	overlay_node.add_child(node)
 
 
 func add_empty_node(key: String) -> RefCounted:

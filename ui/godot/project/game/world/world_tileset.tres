@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://b1kbclauq8xc5"]
+[gd_resource type="TileSet" format=3 uid="uid://b1kbclauq8xc5"]
 
 [ext_resource type="PackedScene" uid="uid://dgodac1qe7g7b" path="res://game/world/world_hexagon_scene.tscn" id="1_10f4u"]
 

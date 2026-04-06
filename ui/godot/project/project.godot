@@ -8,16 +8,20 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Hic Sunt"
 run/main_scene="res://ui/system/main_screen/MainScreen.tscn"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-Console="*res://addons/godot-console/scripts/console.gd"
+Console="*uid://cbbnle22pqs3f"
 GameUiEventBus="*res://game/ui_event_bus.gd"
 WorldBuilderRegistry="*res://system/world_builder/registry.gd"
 GfxRegistry="*res://system/gfx/registry.gd"

@@ -1,3 +1,4 @@
+@abstract
 extends RefCounted
 
 ## You can check if debug is enabled. This is only useful to avoid doing
@@ -27,6 +28,12 @@ func add_text(text: String) -> void:
 ## Will place image into scroll container, if needed.
 func add_image_node(key: String, image: Image) -> RefCounted:
 	return null
+	
+	
+## Add given Control to overlay. Overlays are supported only for some types
+## of nodes.
+@abstract
+func add_to_overlay(node: Control) -> void;
 
 
 ## Creates an hierarchy and returns a handle to created node

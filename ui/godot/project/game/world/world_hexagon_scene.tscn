@@ -1,24 +1,40 @@
-[gd_scene load_steps=4 format=3 uid="uid://dgodac1qe7g7b"]
+[gd_scene format=3 uid="uid://dgodac1qe7g7b"]
 
 [ext_resource type="Script" uid="uid://dc0und7strnfa" path="res://game/world/world_hexagon_scene.gd" id="1_fk17k"]
 [ext_resource type="Texture2D" uid="uid://dut60birk0aeg" path="res://resources/green512x512.png" id="2_55cmn"]
 [ext_resource type="PackedScene" uid="uid://qqworkfnfqd2" path="res://game/base/hexagon_highlight.tscn" id="3_d04b4"]
 
-[node name="WorldHexagonScene" type="Node2D"]
+[node name="WorldHexagonScene" type="Node2D" unique_id=524936802]
 script = ExtResource("1_fk17k")
 
-[node name="Biome" type="Polygon2D" parent="."]
+[node name="Biome" type="Polygon2D" parent="." unique_id=1747595206]
 visible = false
 texture = ExtResource("2_55cmn")
 polygon = PackedVector2Array(-55.426, -32, 0, -64, 55.426, -32, 55.426, 32, 0, 64, -55.426, 32)
 uv = PackedVector2Array(0.922251, 378.138, 286.02, 513.184, 513.24, 379.001, 504.666, 116.62, 215.281, 5.15301, -1.22134, 138.056)
 
-[node name="Highlight" parent="." instance=ExtResource("3_d04b4")]
+[node name="Highlight" parent="." unique_id=1200849010 instance=ExtResource("3_d04b4")]
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." unique_id=986781892]
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=1304154482]
 polygon = PackedVector2Array(-55.426, -32, 0, -64, 55.426, -32, 55.426, 32, 0, 64, -55.426, 32)
+
+[node name="ScopeVarDisplay" type="Label" parent="." unique_id=2122740509]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [connection signal="input_event" from="Area2D" to="." method="_on_input_event"]
 [connection signal="mouse_entered" from="Area2D" to="." method="_on_mouse_entered"]

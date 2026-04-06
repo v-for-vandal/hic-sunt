@@ -19,10 +19,19 @@ func _ready() -> void:
 			var texture := GfxRegistry.get_biome_texture(biome)
 			$Biome.texture = texture
 			
-func _update_highlighting(surface: GameTileSurface) -> void:
+	# connect to debugging nodes
+	if DebugRoot.is_debug_enabled():
+		DebugRoot.get_debug_display_options().changed.connect(self.on_debug_display_settings_changed)
+			
+func _update_highlighting() -> void:
+	var surface := self.get_surface()
+	if surface == null:
+		push_error("cell does not belong to any surface")
+		return
 	if surface.highlighter == null:
 		$Highlight.visible = false
 		return
+		
 	var plane : PlaneObject = surface.get_plane().plane_object
 	assert(plane != null)
 	if plane == null:
@@ -41,6 +50,31 @@ func _update_highlighting(surface: GameTileSurface) -> void:
 		
 	$Highlight.modulate = surface.highlighter.get_color(input)
 	$Highlight.visible = true
+	
+func _update_debug_display_variable_or_modifier(options: DebugDisplayOptions) -> void:
+	var target_variable := options.target_variable_modifier_on_cell
+	if target_variable.is_empty() or not options.display_selected_variable_modifier_on_cell:
+		$ScopeVarDisplay.visible = false
+		return
+		
+	
+		
+	var surface := self.get_surface()
+	if surface == null:
+		push_error("cell does not belong to any surface")
+		return
+		
+	var plane : PlaneObject = surface.get_plane().plane_object
+	assert(plane != null)
+	if plane == null:
+		$ScopeVarDisplay.visible = false
+		return
+		
+	var region := plane.get_region(qr_coords)
+	var value := region.get_scope().get_numeric_value(target_variable)
+	
+	$ScopeVarDisplay.text = "%d" % value
+	$ScopeVarDisplay.visible = true
 
 func _on_mouse_entered() -> void:
 	pass
@@ -48,5 +82,12 @@ func _on_mouse_entered() -> void:
 func _on_mouse_exited() -> void:
 	pass # Replace with function body.
 
-func _on_display_settings_changed(surface: GameTileSurface) -> void:
-	_update_highlighting(surface)
+func _on_display_settings_changed() -> void:
+	_update_highlighting()
+
+func on_debug_display_settings_changed(options: DebugDisplayOptions) -> void:
+	_update_debug_display_variable_or_modifier(options)
+	
+	
+
+	

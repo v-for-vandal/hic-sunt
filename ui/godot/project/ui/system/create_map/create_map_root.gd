@@ -161,11 +161,11 @@ func _on_highlight_select_item_selected(index: int) -> void:
 
 
 func _on_foreground_select_item_selected(index: int) -> void:
-	var name: String = $%ForegroundSelect.get_item_text(index)
+	var map_name: String = $%ForegroundSelect.get_item_text(index)
 	if index == 0:
-		name = ""
+		map_name = ""
 
-	_on_map_selected(name, $%DebugForegroundView)
+	_on_map_selected(map_name, $%DebugForegroundView)
 
 
 func _on_back_button_pressed() -> void:

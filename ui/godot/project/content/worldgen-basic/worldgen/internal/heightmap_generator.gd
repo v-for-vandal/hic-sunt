@@ -39,6 +39,7 @@ var _continents_clusterization : _CellClusterization
 # colors, just channels where we encode values
 var _heightmap_coloring : PackedColorArray
 var _heightmap : Image
+var _heightmap_debug_node : DebugTree.ControlInterface
 
 var _rng := RandomNumberGenerator.new()
 
@@ -91,6 +92,8 @@ func first_pass() -> void:
 
 	_heightmap = await _render_map(_create_map())
 	_plane.set_substrate(ImageTexture.create_from_image(_heightmap))
+	
+	_heightmap_debug_node = _debug_control.add_image_node("region_map", _heightmap)
 	
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))

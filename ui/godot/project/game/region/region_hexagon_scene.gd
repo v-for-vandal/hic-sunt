@@ -14,10 +14,11 @@ func _ready() -> void:
 		# Get texture for this biome
 		var texture := GfxRegistry.get_biome_texture(biome)
 		$Biome.texture = texture
-	_update_highlighting(surface)
+	_update_highlighting()
 
 		
-func _update_highlighting(surface: GameTileSurface) -> void:
+func _update_highlighting() -> void:
+	var surface: GameTileSurface = get_surface()
 	if surface.highlighter == null:
 		$Highlight.visible = false
 		return
@@ -51,5 +52,5 @@ func _on_mouse_entered() -> void:
 func _on_mouse_exited() -> void:
 	pass # Replace with function body.
 
-func _on_display_settings_changed(surface: GameTileSurface):
-	_update_highlighting(surface)
+func _on_display_settings_changed():
+	_update_highlighting()

@@ -31,7 +31,7 @@ func load_plane(plane : WorldPlane) -> void:
 	# dimensions are in (q,r,s) system with s omited
 	# tilemap is in (x,y) system
 	var qr_dimensions : Rect2i = _plane.get_qr_dimensions()
-	print("world dimensions: ", qr_dimensions)
+	debug_control.add_text("world dimensions: %s"  % qr_dimensions)
 	
 	var update_cell_lambda := func(region_q: int, region_r: int, region: RegionObject)-> void:
 		update_cell(Vector2i(region_q, region_r), region)
@@ -46,11 +46,11 @@ func load_plane(plane : WorldPlane) -> void:
 	var used_space := Vector2( used_rect.size.x * tile_size.x, used_rect.size.y * tile_size.y)
 	var used_origin : Vector2 = -0.5 * Vector2(tile_size)
 	
-	print("Tilemap rect: %s" % Rect2(used_origin, used_space))
+	debug_control.add_text("Tilemap rect: %s" % Rect2(used_origin, used_space))
 	$substrate.position = used_origin
 	$substrate.scale = used_space / plane.get_substrate().get_size()
 	
-	print("Tilemap scale: %s" % $substrate.scale)
+	debug_control.add_text("Tilemap scale: %s" % $substrate.scale)
 
 func update_cell(qr_coords: Vector2i, region: RegionObject) -> void:
 	# convert to xy dimensions

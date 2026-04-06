@@ -4,6 +4,7 @@ class_name DebugTree
 
 const _NODE_KEY := &"$node"
 const _TEXT_SINK_KEY := &"$text"
+const _OVERLAY_SINK_KEY := &"$overlay"
 
 var _current_node: Control = null
 
@@ -99,6 +100,18 @@ func _add_text_sink(item: TreeItem, sink: RichTextLabel) -> void:
 func _get_text_sink(item: TreeItem) -> RichTextLabel:
 	var metadata := _get_tree_item_metadata(item)
 	return metadata.get(_TEXT_SINK_KEY, null)
+	
+func _add_overlay_sink(item: TreeItem, sink: Control) -> void:
+	var metadata := _get_tree_item_metadata(item)
+	if _OVERLAY_SINK_KEY in metadata:
+		push_error("Attempt to change overlay sink for a node")
+		return
+		
+	metadata[_OVERLAY_SINK_KEY] = sink
+	
+func _get_overlay_sink(item: TreeItem) -> Control:
+	var metadata := _get_tree_item_metadata(item)
+	return metadata.get(_OVERLAY_SINK_KEY, null)
 
 	
 func _on_tree_item_selected() -> void:

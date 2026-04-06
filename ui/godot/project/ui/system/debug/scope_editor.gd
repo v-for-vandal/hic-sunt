@@ -23,6 +23,9 @@ func _ready() -> void:
 	self._add_modifier("test_modifier3", {ADD_KEY: -0.4, MULT_KEY : -0.2 }, scope2)
 	self._add_modifier("test_modifier4", {ADD_KEY: 1.2, MULT_KEY: 1.4}, scope2)
 	
+	tree.item_selected.connect(_set_debug_display)
+	tree.nothing_selected.connect(_reset_debug_display)
+	
 	
 func set_scope(scope: ScopeObject) -> void:
 	var data : Dictionary = scope.explain_all()
@@ -55,3 +58,12 @@ func _add_modifier(modifier: String, modifier_data: Dictionary, parent: TreeItem
 		moditem.set_text(2, str(modifier_data[MULT_KEY]))
 	if LEVEL_KEY in modifier_data:
 		moditem.set_text(2, str(modifier_data[LEVEL_KEY]))
+		
+func _reset_debug_display():
+	DebugRoot.get_debug_display_options().target_variable_modifier_on_cell = String()
+	
+func _set_debug_display():
+	var target_item : TreeItem = %Tree.get_selected()
+	if target_item == null:
+		_reset_debug_display()
+		

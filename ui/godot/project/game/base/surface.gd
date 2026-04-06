@@ -1,3 +1,4 @@
+@abstract
 extends Node2D
 
 class_name GameTileSurface
@@ -9,17 +10,22 @@ enum SurfaceType { UNDEFINED, WORLD_SURFACE, REGION_SURFACE}
 
 @export var event_bus : UiEventBus
 
+## Use this variable to get to the DebugTree node that matches this surface
+var debug_control : DebugTree.ControlInterface
+	
+
+## What to highlight
 var highlighter: HighlighterInterface:
 	get:
 		return highlighter
 	set(value):
 		highlighter = value
-		_display_settings_changed.emit(self)
-		
+		_display_settings_changed.emit()
+
 
 # emited when some settings affecting how cells should be displayed are
 # changed. This is internal signal, used by scenes in tilemap
-signal _display_settings_changed(surface: GameTileSurface)
+signal _display_settings_changed
 
 var _select_layer : TileMapLayer
 
@@ -28,6 +34,9 @@ var _last_tile_qr := Vector2i(-1000000, -1000000)
 
 var _cube_to_map : Callable
 var _map_to_cube : Callable
+
+func _init() -> void:
+	debug_control = DebugRoot.get_debug_control().add_text_node("Surface %d" % get_instance_id(), "")
 
 func _ready()->void:
 	_select_layer = $select
@@ -41,10 +50,8 @@ func _ready()->void:
 	_map_to_cube = conversion_methods.map_to_cube
 		
 
-
-func _contains(_tile_qr: Vector2i) -> bool:
-	printerr("Function must be overriden in child class")
-	return false
+@abstract
+func _contains(_tile_qr: Vector2i) -> bool;
 
 func _on_input_event_from_cell(tile_qr: Vector2i, event: InputEvent) -> void:
 	if _contains(tile_qr):
