@@ -1,10 +1,13 @@
 [wrap-file]
 directory = godot-cpp-godot-4.4.1-stable
 source_url = https://github.com/godotengine/godot-cpp/archive/refs/tags/godot-4.4.1-stable.tar.gz
-source_filename = godot-4.4.1-stable.tar.gz
+source_filename = godot-cpp-4.4.1.tar.gz
 source_hash = 7fccd0ec9299dced91c2772c58b84d35d5b1e544fd7a2bcfd2b0bb02e407aa0c
-patch_directory=godot-cpp
-
+patch_filename = godot-cpp_4.4.1-2_patch.zip
+patch_url = https://wrapdb.mesonbuild.com/v2/godot-cpp_4.4.1-2/get_patch
+patch_hash = 37393aaa9cc0b44b1df22e4e5496488e292b7fd0bd96f740703a7e539e37d9fb
+source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/godot-cpp_4.4.1-2/godot-cpp-4.4.1.tar.gz
+wrapdb_version = 4.4.1-2
 
 [provide]
-godot_cpp = godot_cpp_dep
+dependency_names = godot-cpp
