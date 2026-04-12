@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dut60birk0aeg"
-path="res://.godot/imported/green512x512.png-356f51232b1346b246f13d1d9d6ee954.ctex"
+uid="uid://dh7tiau8w50q"
+path="res://.godot/imported/todo-yellow.png-e70e1e2e7aacbc2833e6604ef28d02ba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/green512x512.png"
-dest_files=["res://.godot/imported/green512x512.png-356f51232b1346b246f13d1d9d6ee954.ctex"]
+source_file="res://addons/plenticons/icons/64x-hidpi/symbols/todo-yellow.png"
+dest_files=["res://.godot/imported/todo-yellow.png-e70e1e2e7aacbc2833e6604ef28d02ba.ctex"]
 
 [params]
 

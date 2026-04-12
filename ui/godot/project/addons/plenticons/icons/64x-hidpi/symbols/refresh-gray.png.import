@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dut60birk0aeg"
-path="res://.godot/imported/green512x512.png-356f51232b1346b246f13d1d9d6ee954.ctex"
+uid="uid://0j4jefcxtgch"
+path="res://.godot/imported/refresh-gray.png-b3b2d08ca69a6867d9b81aabfd356dbd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/green512x512.png"
-dest_files=["res://.godot/imported/green512x512.png-356f51232b1346b246f13d1d9d6ee954.ctex"]
+source_file="res://addons/plenticons/icons/64x-hidpi/symbols/refresh-gray.png"
+dest_files=["res://.godot/imported/refresh-gray.png-b3b2d08ca69a6867d9b81aabfd356dbd.ctex"]
 
 [params]
 

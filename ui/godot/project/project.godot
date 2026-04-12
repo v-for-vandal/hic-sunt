@@ -21,7 +21,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Console="*uid://cbbnle22pqs3f"
+Console="*uid://b3pl16ey42fku"
 GameUiEventBus="*res://game/ui_event_bus.gd"
 WorldBuilderRegistry="*res://system/world_builder/registry.gd"
 GfxRegistry="*res://system/gfx/registry.gd"

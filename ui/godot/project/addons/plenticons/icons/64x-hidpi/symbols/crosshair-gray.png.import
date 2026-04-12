@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dut60birk0aeg"
-path="res://.godot/imported/green512x512.png-356f51232b1346b246f13d1d9d6ee954.ctex"
+uid="uid://dnl3dwfw6244d"
+path="res://.godot/imported/crosshair-gray.png-2db7b7c7d6106ff0d6221f0aab189dbd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/green512x512.png"
-dest_files=["res://.godot/imported/green512x512.png-356f51232b1346b246f13d1d9d6ee954.ctex"]
+source_file="res://addons/plenticons/icons/64x-hidpi/symbols/crosshair-gray.png"
+dest_files=["res://.godot/imported/crosshair-gray.png-2db7b7c7d6106ff0d6221f0aab189dbd.ctex"]
 
 [params]
 
