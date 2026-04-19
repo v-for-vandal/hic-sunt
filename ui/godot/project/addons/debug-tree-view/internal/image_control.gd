@@ -1,9 +1,9 @@
-extends Control
+extends GridContainer
 
 signal set_modulate(color: Color)
 
 func set_texture(texture: Texture2D ) -> void:
-	$GridContainer/Size.text = "%d x %d" % [texture.get_width(), texture.get_height()]
+	$Size.text = "%d x %d" % [texture.get_width(), texture.get_height()]
 
 func _on_channel_selector_item_selected(index: int) -> void:
 	if index == 0:

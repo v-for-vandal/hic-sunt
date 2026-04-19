@@ -5,6 +5,7 @@ var _item: TreeItem
 
 const _DraggableCamera := preload("res://addons/debug-tree-view/internal/draggable_camera.tscn")
 const _ImageControl := preload("res://addons/debug-tree-view/internal/image_control.tscn")
+const _ImageHolder := preload("res://addons/debug-tree-view/internal/image_holder.tscn")
 
 
 func _init(debug_tree: DebugTree, item: TreeItem) -> void:
@@ -83,21 +84,20 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 	var display_container := Control.new()
 	display_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	
-	var image_node := TextureRect.new()
+	var image_node := _ImageHolder.instantiate()
 	image_node.stretch_mode = TextureRect.STRETCH_KEEP
 	image_node.texture = ImageTexture.create_from_image(image)
-	image_node.set_anchors_preset(Control.PRESET_CENTER)
 	
 	var overlay_node := Control.new()
+	overlay_node.mouse_filter = Control.MOUSE_FILTER_PASS
 	overlay_node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	
 	
 	var control_node := _ImageControl.instantiate()
 	control_node.set_texture(image_node.texture)
 	# I don't understand how anchors/presets work ((
 	#control_node.set_anchors_preset(Control.PRESET_TOP_LEFT, true)
-	control_node.set_size(Vector2(300, 100))
-	control_node.position = Vector2.ZERO
+	#control_node.set_size(Vector2(300, 100))
+	#control_node.position = Vector2.ZERO
 	
 	var on_set_modulate = func(color: Color):
 		image_node.self_modulate = color
@@ -110,6 +110,10 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 	
 	
 	var new_item := _add_element(key, display_container)
+	
+	# recenter image after adding it to tree
+	image_node.position = display_container.get_viewport_rect().size / 2
+		
 	return _wrap_in_class(new_item)
 	
 func add_to_overlay(node: Control) -> void:

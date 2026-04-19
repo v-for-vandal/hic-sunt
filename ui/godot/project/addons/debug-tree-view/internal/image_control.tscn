@@ -2,39 +2,27 @@
 
 [ext_resource type="Script" uid="uid://7ylk57ljltkt" path="res://addons/debug-tree-view/internal/image_control.gd" id="1_visme"]
 
-[node name="ImageControl" type="Control" unique_id=644520616]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -1620.0
-offset_bottom = -980.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="ImageControl" type="GridContainer" unique_id=1208194051]
+offset_right = 148.0
+offset_bottom = 58.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+columns = 2
 script = ExtResource("1_visme")
 
-[node name="GridContainer" type="GridContainer" parent="." unique_id=222458625]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-columns = 2
-
-[node name="SizeLabel" type="Label" parent="GridContainer" unique_id=374721422]
+[node name="SizeLabel" type="Label" parent="." unique_id=374721422]
 layout_mode = 2
 text = "Size"
 
-[node name="Size" type="Label" parent="GridContainer" unique_id=83698950]
+[node name="Size" type="Label" parent="." unique_id=83698950]
 layout_mode = 2
 text = "inf x inf"
 
-[node name="SelectChannelLabel" type="Label" parent="GridContainer" unique_id=1381926763]
+[node name="SelectChannelLabel" type="Label" parent="." unique_id=1381926763]
 layout_mode = 2
 text = "Channel"
 
-[node name="ChannelSelector" type="OptionButton" parent="GridContainer" unique_id=80144202]
+[node name="ChannelSelector" type="OptionButton" parent="." unique_id=80144202]
 layout_mode = 2
 selected = 0
 item_count = 4
@@ -47,4 +35,4 @@ popup/item_2/id = 2
 popup/item_3/text = "Blue"
 popup/item_3/id = 3
 
-[connection signal="item_selected" from="GridContainer/ChannelSelector" to="." method="_on_channel_selector_item_selected"]
+[connection signal="item_selected" from="ChannelSelector" to="." method="_on_channel_selector_item_selected"]

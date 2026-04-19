@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://cb7x5en48uq3"]
+[gd_scene format=3 uid="uid://cb7x5en48uq3"]
 
 [ext_resource type="Script" uid="uid://b37nt4hafdb8e" path="res://addons/debug-tree-view/debug_tree.gd" id="1_52in2"]
 
-[node name="DebugTree" type="Control"]
+[node name="DebugTree" type="Control" unique_id=1657438702]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_52in2")
 
-[node name="VSplitContainer" type="HSplitContainer" parent="."]
+[node name="VSplitContainer" type="HSplitContainer" parent="." unique_id=282276640]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,14 +19,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Tree" type="Tree" parent="VSplitContainer"]
+[node name="Tree" type="Tree" parent="VSplitContainer" unique_id=775386591]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 hide_root = true
 
-[node name="ViewContainer" type="PanelContainer" parent="VSplitContainer"]
+[node name="ViewContainer" type="PanelContainer" parent="VSplitContainer" unique_id=1030577182]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 
 [connection signal="item_selected" from="VSplitContainer/Tree" to="." method="_on_tree_item_selected"]
