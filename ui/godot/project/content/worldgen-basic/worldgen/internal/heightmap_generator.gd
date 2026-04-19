@@ -39,7 +39,10 @@ var _continents_clusterization : _CellClusterization
 # colors, just channels where we encode values
 var _heightmap_coloring : PackedColorArray
 var _heightmap : Image
+var _heightmap_transformation : Transform2D
 var _heightmap_debug_node : DebugTree.ControlInterface
+
+var _debug_used_rect : Rect2i = Rect2i(Vector2i.ZERO, Vector2i.ONE)
 
 var _rng := RandomNumberGenerator.new()
 
@@ -88,38 +91,88 @@ func first_pass() -> void:
 
 	_create_tectonic_plates()
 	_create_continents()
-
-
+	
 	_heightmap = await _render_map(_create_map())
+	
+	_create_heightmap_transformation()
+
+
 	_plane.set_substrate(ImageTexture.create_from_image(_heightmap))
 	
 	_heightmap_debug_node = _debug_control.add_image_node("region_map", _heightmap)
+
 	
 	var region_lambda := func(region_q: int, region_r: int, region: RegionObject) -> void:
 		_region_first_pass(region, Vector2i(region_q, region_r))
 
 	_plane.plane_object.foreach_surface(region_lambda)
+	
+	_debug_add_used_heighmap_part()
 
 
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> void:
 	var radius: int = _global_context.custom[&"region.radius"]
 	var region_external_radius : int = _plane.plane_object.get_region_external_radius()
-	var region_coords := Vector2i(
-		region_qrs_coords.x * region_external_radius,
-		region_qrs_coords.y * region_external_radius,
-	)
+	# position of the region center in global cell coordinate system
+	var region_center_cell_coords = _plane.convert_to_cells_qr(region_qrs_coords)
+
+	
+	# first, lets calculate approximate region height. We are not going to bother with
+	# exact math, like trying to avoid cells from other regions. Just quick and dirty
+	
+	var cell_heights : Array[int] = []
+	
+	# for debugging :(
+	var region_debug_rect := Rect2i( _heightmap_transformation * Vector2(region_center_cell_coords), Vector2i.ONE)
+	for x in range(- region_external_radius, region_external_radius, 3):
+		for y in range(- region_external_radius,  region_external_radius, 3):
+			var height := _get_height_at_point(region_center_cell_coords + Vector2i(x,y))
+			cell_heights.append(height)
+			
+			# debug
+			var coords := Vector2i(_heightmap_transformation * Vector2(region_center_cell_coords + Vector2i(x,y)))
+			region_debug_rect = region_debug_rect.expand(coords)
+		
+	# sort all heights
+	var region_height := 0
+	cell_heights.sort()
+	# get 75 percentile
+	var idx75 := clampi(int(cell_heights.size() * 0.75), 0, cell_heights.size())
+	if cell_heights.size() > 0:
+		region_height = cell_heights[idx75]
+		region.get_scope().add_numeric_modifier(Modifiers.GEOGRAPHY_HEIGHT,  &"wordlgen.basic", region_height, 0)
 
 	var region_cell_lambda := func(cell_q: int, cell_r: int) -> void:
-		_cell_first_pass(region, region_coords, Vector2i(cell_q, cell_r))
+		_cell_first_pass(region, region_center_cell_coords, Vector2i(cell_q, cell_r), region_height )
 
 	region.foreach(region_cell_lambda)
+	
+	# add as overlay
+	if region_qrs_coords.x % 10 == 0 and region_qrs_coords.y % 10 == 0:
+		var display_rect := Rect2i(
+			region_center_cell_coords - Vector2i(region_external_radius, region_external_radius),
+			region_center_cell_coords + Vector2i(region_external_radius, region_external_radius)
+		)
+		# Something is very wrong with this transformation :(
+		display_rect = Rect2i(_heightmap_transformation * Rect2(display_rect))
+		
+		_heightmap_debug_node.add_to_overlay(DebugTree.create_rect_overlay(
+			#display_rect,
+			region_debug_rect,
+			Color.ORANGE,
+			region.get_id()
+		))
+
 
 
 # region - region object
 # region_global_coords - mapping of this region to heightmap and related objects
 # cell_qrs_coords - coordinates of cell within this region
-func _cell_first_pass(region: RegionObject, region_global_coords: Vector2i, cell_qrs_coords: Vector2i) -> void:
+# region_height - height of the region. 
+func _cell_first_pass(region: RegionObject, region_global_coords: Vector2i, cell_qrs_coords: Vector2i, region_height: int) -> void:
 	var height := _get_height_at_point(region_global_coords + cell_qrs_coords)
+	# we want our height relative to region height
+	height -= region_height
 	region.get_cell(cell_qrs_coords).get_scope().add_numeric_modifier(Modifiers.GEOGRAPHY_HEIGHT, &"wordlgen.basic", height, 0)
 
 
@@ -329,10 +382,32 @@ func _render_map(map: _VoronoiDrawer) -> Image:
 	
 
 	
+	
+func _create_heightmap_transformation() -> void:
+	assert (_heightmap != null, "heightmap is not initialized")
+	var target_rect := Rect2(Vector2.ZERO, Vector2(_heightmap.get_size()))
+	var source_rect := Rect2(_plane.get_cells_qr_dimensions())
+	
+	var scale := target_rect.size / source_rect.size
+	
+	_heightmap_transformation = Transform2D()
+	_heightmap_transformation = _heightmap_transformation.translated(-source_rect.position)
+	_heightmap_transformation = _heightmap_transformation.scaled(scale)
+	_heightmap_transformation = _heightmap_transformation.translated(target_rect.position)
+	
 
 func _debug_add_coloring(key: StringName, coloring: PackedColorArray) -> void:
 	_debug_voronoi_viz_node.add_coloring(key, coloring)
 	_debug_coloring_ui.add_item(key)
+	
+func _debug_add_used_heighmap_part() -> void:
+	assert(_heightmap_debug_node != null)
+	
+	# Something is very wrong with this conversion
+	#var source_rect := _plane.get_cells_qr_dimensions()
+	#var target_rect := _heightmap_transformation * Rect2(source_rect)
+	
+	_heightmap_debug_node.add_to_overlay(DebugTree.create_rect_overlay(Rect2i(_debug_used_rect), Color.ORANGE, "used_part"))
 
 # TODO: Make some other formula
 var _MOUNTAIN_EXTRA_HEIGHT_RANGE := Vector2i(1000, 2000)
@@ -343,7 +418,9 @@ func _displacement_at_range(value: float, target_range: Vector2i) -> float:
 
 
 func _get_height_at_point(cell_global_qr_coords: Vector2i) -> int:
-	var image_coords := axial_to_map(cell_global_qr_coords)
+	# var image_coords := axial_to_map(cell_global_qr_coords)
+	var image_coords := _heightmap_transformation * Vector2(cell_global_qr_coords)
+	_debug_used_rect = _debug_used_rect.expand(image_coords)
 	var color := _heightmap.get_pixelv(image_coords)
 	var height := int(color.r)
 	

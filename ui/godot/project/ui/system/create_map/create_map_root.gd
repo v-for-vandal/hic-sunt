@@ -194,28 +194,30 @@ func _on_select_generator_button_item_selected(index: int) -> void:
 func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 	if event is UiEventBus.UIMovementEvent:
 		if event.prev_qr_coords != event.qr_coords:
-			event.surface.clear_select(event.prev_qr_coords)
-		event.surface.select(event.qr_coords, true)
-
-	if event is UiEventBus.WorldUIMovementEvent:
-		var plane: WorldPlane = event.surface.get_plane()
-		var region := plane.plane_object.get_region(event.qr_coords)
-		%InfoContainer.set_region(region, event.qr_coords)
-		event.accept()
-		return
-
-	if event is UiEventBus.WorldUIActionEvent:
+			event.surface.clear_highlight(event.prev_qr_coords)
+		event.surface.highlight(event.qr_coords, true)
+		
+	if event is UiEventBus.UIActionEvent:
 		if event.action_type == UiEventBus.ActionType.PRIMARY:
-			var plane: WorldPlane = event.surface.get_plane()
-			var region := plane.plane_object.get_region(event.qr_coords)
-			%RegionSurface.load_region(region)
-		return
-
-	if event is UiEventBus.RegionUIMovementEvent:
-		var region: RegionObject = event.surface.get_region()
-		%InfoContainer.set_cell(event.qr_coords)
-		event.accept()
-		return
+			if event.surface.is_selected(event.qr_coords):
+				# in world ui, load region
+				if event.surface.surface_type == GameTileSurface.SurfaceType.WORLD_SURFACE:
+					var plane: WorldPlane = event.surface.get_plane()
+					var region := plane.plane_object.get_region(event.qr_coords)
+					%RegionSurface.load_region(region)
+			else:
+				event.surface.clear_all_select()
+				event.surface.select(event.qr_coords, true)
+				# load info
+				if event.surface.surface_type == GameTileSurface.SurfaceType.WORLD_SURFACE:
+					var plane: WorldPlane = event.surface.get_plane()
+					var region := plane.plane_object.get_region(event.qr_coords)
+					%InfoContainer.set_region(region, event.qr_coords)
+				elif event.surface.surface_type == GameTileSurface.SurfaceType.REGION_SURFACE:
+					var region: RegionObject = event.surface.get_region()
+					%InfoContainer.set_cell(event.qr_coords)
+			event.accept()
+			return
 
 	if event is UiEventBus.CancellationEvent:
 		event.accept()

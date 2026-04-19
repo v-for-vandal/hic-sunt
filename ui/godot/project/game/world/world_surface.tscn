@@ -17,5 +17,13 @@ use_parent_material = true
 tile_set = ExtResource("3_y53jn")
 navigation_enabled = false
 
+[node name="highlight" type="TileMapLayer" parent="." unique_id=1290691535]
+z_index = 1
+use_parent_material = true
+tile_set = ExtResource("3_y53jn")
+navigation_enabled = false
+
 [node name="substrate" type="Sprite2D" parent="." unique_id=1273103512]
+visible = false
+z_index = -1
 centered = false

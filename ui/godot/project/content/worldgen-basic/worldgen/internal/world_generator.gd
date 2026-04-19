@@ -17,7 +17,7 @@ func create_world() -> World:
 	
 	# add plane
 	# For now, size is fixed
-	var world_size := Rect2i(Vector2i(0,0), Vector2i(10, 10))
+	var world_size := Rect2i(Vector2i(0,0), Vector2i(30, 50))
 	var region_radius : int = 3
 	
 	var main_plane : WorldPlane = world.create_plane(&"main", world_size, region_radius, -1)

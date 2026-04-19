@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bup1yx750kq0"]
+[gd_scene format=3 uid="uid://bup1yx750kq0"]
 
 [ext_resource type="Script" uid="uid://brn6sri8iccam" path="res://ui/system/main_screen/MainScreen.gd" id="1_mdqee"]
 
-[node name="MainScreen" type="Control"]
+[node name="MainScreen" type="Control" unique_id=1907368272]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_mdqee")
 
-[node name="MainMenuRoot" type="PanelContainer" parent="."]
+[node name="MainMenuRoot" type="PanelContainer" parent="." unique_id=740360769]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -20,21 +20,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="MainMenuRoot"]
+[node name="CenterContainer" type="CenterContainer" parent="MainMenuRoot" unique_id=1364295915]
 layout_mode = 2
 
-[node name="MainMenu" type="VBoxContainer" parent="MainMenuRoot/CenterContainer"]
+[node name="MainMenu" type="VBoxContainer" parent="MainMenuRoot/CenterContainer" unique_id=924184365]
 layout_mode = 2
 
-[node name="ContinueButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu"]
+[node name="ContinueButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu" unique_id=1495175195]
 layout_mode = 2
 text = "Continue"
 
-[node name="NewGameButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu"]
+[node name="NewGameButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu" unique_id=328593545]
 layout_mode = 2
 text = "New Game"
 
-[node name="LoadGameButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu"]
+[node name="LoadGameButton" type="Button" parent="MainMenuRoot/CenterContainer/MainMenu" unique_id=1911710831]
 layout_mode = 2
 text = "Load Game"
 

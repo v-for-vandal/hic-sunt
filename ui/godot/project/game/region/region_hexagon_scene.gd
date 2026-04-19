@@ -15,6 +15,10 @@ func _ready() -> void:
 		var texture := GfxRegistry.get_biome_texture(biome)
 		$Biome.texture = texture
 	_update_highlighting()
+	
+	# connect to debugging nodes
+	if DebugRoot.is_debug_enabled():
+		DebugRoot.get_debug_display_options().changed.connect(self.on_debug_display_settings_changed)
 
 		
 func _update_highlighting() -> void:
@@ -42,7 +46,40 @@ func _update_highlighting() -> void:
 	$Highlight.visible = true
 		
 	
-	
+func _update_debug_display_variable_or_modifier(options: DebugDisplayOptions) -> void:
+	if options.target_variable_modifier_on_cell == null or not options.display_selected_variable_modifier_on_cell:
+		$ScopeVarDisplay.visible = false
+		return
+		
+	var target_variable := options.target_variable_modifier_on_cell.variable
+	if target_variable.is_empty():
+		$ScopeVarDisplay.visible = false
+		return
+
+	var surface := self.get_surface()
+	if surface == null:
+		push_error("cell does not belong to any surface")
+		return
+		
+	var region : RegionObject = surface.get_region()
+	assert(region != null)
+	if region == null:
+		$ScopeVarDisplay.visible = false
+		return
+		
+	var cell := region.get_cell(qr_coords)
+	if cell == null:
+		$ScopeVarDisplay.visible = false
+		return
+		
+	if region.get_scope().is_string_variable(target_variable):
+		var value := cell.get_scope().get_string_value(target_variable)
+		$ScopeVarDisplay.text = "%s" % value
+	else:
+		var value := cell.get_scope().get_numeric_value(target_variable)
+		$ScopeVarDisplay.text = "%d" % value
+		
+	$ScopeVarDisplay.visible = true
 
 
 func _on_mouse_entered() -> void:
@@ -54,3 +91,6 @@ func _on_mouse_exited() -> void:
 
 func _on_display_settings_changed():
 	_update_highlighting()
+	
+func on_debug_display_settings_changed(options: DebugDisplayOptions) -> void:
+	_update_debug_display_variable_or_modifier(options)

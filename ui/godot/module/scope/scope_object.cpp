@@ -22,6 +22,9 @@ void ScopeObject::_bind_methods() {
       D_METHOD("add_string_modifier", "variable", "key", "value", "level"),
       &ScopeObject::add_string_modifier);
   ClassDB::bind_method(D_METHOD("explain_all"), &ScopeObject::explain_all);
+  ClassDB::bind_method(D_METHOD("is_string_variable"), &ScopeObject::is_string_variable);
+  ClassDB::bind_static_method("ScopeObject", D_METHOD("create_scope"),
+      &ScopeObject::create_scope);
 }
 
 float ScopeObject::get_numeric_value(const StringName& variable) {
@@ -48,6 +51,12 @@ bool ScopeObject::add_string_modifier(const StringName& variable,
   ERR_FAIL_NULL_SCOPE(false);
 
   return scope_->AddStringModifier(variable, key, value, level);
+}
+
+bool ScopeObject::is_string_variable(const StringName& variable) const {
+  ERR_FAIL_NULL_SCOPE(false);
+
+  return scope_->IsStringVariable(variable);
 }
 
 Dictionary ScopeObject::explain_all() {
@@ -82,5 +91,13 @@ Dictionary ScopeObject::explain_all() {
       hs::utils::Overloaded{add_numeric_element_fn, add_string_element_fn});
   return result;
 }
+
+Ref<ScopeObject> ScopeObject::create_scope() {
+    auto scope_ptr = ScopePtr{}; // non-null ptr will create new object
+    Ref<ScopeObject> result(memnew(ScopeObject(scope_ptr)));
+    ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create scope object");
+    return result;
+}
+
 
 }  // namespace hs::godot

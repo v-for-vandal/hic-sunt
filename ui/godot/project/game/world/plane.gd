@@ -35,6 +35,7 @@ func get_qr_dimensions() -> Rect2i:
 func get_cells_qr_dimensions() -> Rect2i:
 	var plane_external_radius : int = _plane_object.get_region_external_radius()
 	var _plane_dimensions_qr = get_qr_dimensions()
+	# 2 * plane_external_radius because it is radius, not diameter
 	var _start_qr : Vector2i = _plane_dimensions_qr.position * (2* plane_external_radius) - Vector2i(plane_external_radius, plane_external_radius)
 	var _end_qr : Vector2i = _plane_dimensions_qr.end * (2*plane_external_radius)  + Vector2i(plane_external_radius, plane_external_radius)
 	var result := Rect2i()
@@ -42,3 +43,9 @@ func get_cells_qr_dimensions() -> Rect2i:
 	result.end = _end_qr
 	
 	return result
+	
+## Convert region-space coordinates to 'global cell coordinate system'. Both are QRS system, region
+## is considered having radius 'get_region_external_radius()'
+func convert_to_cells_qr(position: Vector2i) -> Vector2i:
+	var plane_external_radius : int = _plane_object.get_region_external_radius()
+	return position * (2 * plane_external_radius)
