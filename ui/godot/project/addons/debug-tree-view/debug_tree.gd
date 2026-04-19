@@ -21,8 +21,22 @@ func _ready() -> void:
 	__setup_tree_item(root, "<invisible>", null) # root is invisible anyway
 
 
+## Returns root for this debug tree. This handler is used to populate tree with elements
 func get_debug_control() -> ControlInterface:
 	return TreeControl.new(self, %Tree.get_root())
+	
+
+## This function cretaes simple rectangular element to be used as an overlay.
+static func create_rect_overlay(zone : Rect2i, color : Color, name: String) -> Control:
+	var display_rect_node := ReferenceRect.new()
+	display_rect_node.position = zone.position
+	display_rect_node.size = zone.size
+	display_rect_node.border_color = color
+	display_rect_node.editor_only = false
+	display_rect_node.name = name
+	display_rect_node.focus_mode = Control.FOCUS_NONE
+	display_rect_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return display_rect_node
 
 
 static func _normalize_key(key: String) -> String:

@@ -6,6 +6,7 @@ var _item: TreeItem
 const _DraggableCamera := preload("res://addons/debug-tree-view/internal/draggable_camera.tscn")
 const _ImageControl := preload("res://addons/debug-tree-view/internal/image_control.tscn")
 const _ImageHolder := preload("res://addons/debug-tree-view/internal/image_holder.tscn")
+const _OverlayHolder := preload("res://addons/debug-tree-view/internal/overlay_holder.tscn")
 
 
 func _init(debug_tree: DebugTree, item: TreeItem) -> void:
@@ -88,12 +89,13 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 	image_node.stretch_mode = TextureRect.STRETCH_KEEP
 	image_node.texture = ImageTexture.create_from_image(image)
 	
-	var overlay_node := Control.new()
-	overlay_node.mouse_filter = Control.MOUSE_FILTER_PASS
+	var overlay_node := _OverlayHolder.instantiate()
+	overlay_node.name = "OverlayHolder"
 	overlay_node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	
 	var control_node := _ImageControl.instantiate()
 	control_node.set_texture(image_node.texture)
+	control_node.set_overlay_holder(overlay_node)
 	# I don't understand how anchors/presets work ((
 	#control_node.set_anchors_preset(Control.PRESET_TOP_LEFT, true)
 	#control_node.set_size(Vector2(300, 100))
@@ -103,6 +105,7 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 		image_node.self_modulate = color
 		
 	control_node.set_modulate.connect(on_set_modulate)
+	control_node.overlay_selected.connect(overlay_node.show_overlay)
 	
 	image_node.add_child(overlay_node)
 	display_container.add_child(image_node)
@@ -110,6 +113,7 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 	
 	
 	var new_item := _add_element(key, display_container)
+	_debug_tree._add_overlay_sink(new_item, overlay_node)
 	
 	# recenter image after adding it to tree
 	image_node.position = display_container.get_viewport_rect().size / 2
@@ -123,6 +127,8 @@ func add_to_overlay(node: Control) -> void:
 		push_error("Trying to add to overlay for node that does not support one")
 		return
 	
+	# overlays start invisible by default
+	node.visible = false
 	overlay_node.add_child(node)
 
 
