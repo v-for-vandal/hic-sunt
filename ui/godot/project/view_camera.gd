@@ -59,8 +59,6 @@ func _input(event: InputEvent) -> void:
 
 
 	if change_zoom:
-		print("new zoom is: %s" % new_zoom)
-
 		if _zoom_tween:
 			_zoom_tween.kill()
 

@@ -23,6 +23,7 @@ func make_biome_rect(temp_start: int, temp_end: int, percipation_start: int, per
 	return Rect2i(temp_start, percipation_start, (temp_end - temp_start), (percipation_end - percipation_start))
 
 # TODO: Move to proto
+# temp_start, temp_end, percipation_start, percipation_end
 var biome_maps: Array[Dictionary] = [
 	{
 		make_biome_rect(_TEMPERATURE_RANGE.x, -10, 0, _PRECIPATION_RANGE.y + 1): "core.biome.snow",

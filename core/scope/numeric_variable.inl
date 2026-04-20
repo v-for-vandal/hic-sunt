@@ -24,16 +24,11 @@ template <typename BaseTypes>
 bool NumericVariable<BaseTypes>::AddModifiers(const StringId &key,
                        NumericValue add, NumericValue mult)
 {
-    //ERR_FAIL_COND_V_MSG(BaseTypes::IsNullToken(key), false, "Empty modifier key is not allowed");
     if(BaseTypes::IsNullToken(key)) {
       spdlog::error("Empty modifier key is not allowed");
       return false;
     }
-    if (add == 0 && mult == 0) {
-        modifiers_.erase(key);
-    } else {
-        modifiers_[key] = Modifier{.add=add, .mult=mult};
-    }
+    modifiers_[key] = Modifier{.add=add, .mult=mult};
 
     return true;
 }

@@ -7,6 +7,8 @@ var _temperature_curve: Curve = preload("res://content/worldgen-basic/worldgen/i
 var _temperature_noise: FastNoiseLite = preload("res://content/worldgen-basic/worldgen/internal/temperature_noise_fluct.tres")
 var _precipitation_noise: FastNoiseLite = preload("res://content/worldgen-basic/worldgen/internal/precipitation_noise.tres")
 
+# as baseline, we only generate values between -20 and 30. Everything higher comes from fluctuations and so on
+const _TEMPERATURE_BASELINE_RANGE = Vector2i(-20, 30) # celsius
 const _TEMPERATURE_RANGE = Vector2i(-20, 40) # celsius
 const _TEMPERATURE_FLUCTUATION = 5
 
@@ -18,24 +20,11 @@ var _config: Config
 var _plane: WorldPlane
 var _global_context: WorldGeneratorGlobalContext
 
-# extracted from _global_context
-# This is actually incorrect math, but at the moment we don't care
-var _pole_1 := Vector2i(0, 0)
-# North/Source pole effect gradually decreases over this number of cells
-var _pole_effect_distance: = 7.0
-# This is total region radius, with margin
-var _region_radius: int = 1
-
-
 func _init(plane: WorldPlane, config: Variant, global_context: WorldGeneratorGlobalContext) -> void:
 	super(global_context)
 	_config = config
 	_plane = plane
 	_global_context = global_context
-
-	_region_radius = _global_context.custom[&"region.radius"] + RADIUS_MARGIN
-	# that is definetly wrong, but at the moment it will suffice
-	var world_bbox: Rect2i = _global_context.custom[&"world.bbox"]
 
 
 func first_pass() -> void:
@@ -46,11 +35,10 @@ func first_pass() -> void:
 
 
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> void:
-	var radius: int = _global_context.custom[&"region.radius"]
 
 	var precipitation := _get_precipation_at_point(region_qrs_coords, Vector2i.ZERO)
 
-	_set_baseline_temperature(region, region_qrs_coords)
+	var _region_temperature := _set_baseline_temperature(region, region_qrs_coords)
 	region.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_PRECIPITATION, &"wordlgen.basic", precipitation, 0.0)
 
 	var region_cell_lambda := func(cell_q: int, cell_r: int) -> void:
@@ -68,73 +56,76 @@ func _cell_first_pass(region: RegionObject, region_coords: Vector2i, cell_qr_coo
 	cell.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"worldgen.lapse_rate", temperature_modifier, 0.0)
 
 	# add some random fluctuation
-	var total_coords := region_coords * _region_radius + cell_qr_coords
+	var total_coords := _plane.convert_to_cells_qr(region_coords) + cell_qr_coords
 	var temp_fluctuation: float = _temperature_noise.get_noise_2d(total_coords.x, total_coords.y) * _TEMPERATURE_FLUCTUATION
 	cell.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"wordgeо.random_fluctuation", temp_fluctuation, 0.0)
 
 
-func _distance_from_poles(region_coords: Vector2i, cell_qr_coords: Vector2i) -> float:
-	var distance := _plane.plane_object.get_distance_between_cells(
-		region_coords,
-		cell_qr_coords,
-		_pole_1,
-		Vector2i(0, 0),
-	)
-	return distance
+# Returns value in [0, 1] range on how far from poles this point is. 1.0 means as far as posible (equator)
+func _distance_from_poles(total_cell_coords: Vector2i) -> float:
+	# for now, poles are fixed as the top and the bottom lines of the map
+	var plane_rect := _plane.get_cells_qr_dimensions()
+	var north_distance := clampi(total_cell_coords.y - plane_rect.position.y, 0, plane_rect.size.y)
+	var south_distance := clampi(plane_rect.end.y - total_cell_coords.y, 0, plane_rect.size.y)
+	var distance := mini(north_distance, south_distance)
+	# multiply by 2 because distance/plane_rect.size.y has maximum 0.5
+	return float(distance) / plane_rect.size.y * 2.0
 
 
-func _set_baseline_temperature(region: RegionObject, region_coords: Vector2i) -> void:
-	var distance_from_poles := _distance_from_poles(region_coords, Vector2i.ZERO)
-	var j_percent := distance_from_poles / _pole_effect_distance
+
+# sets region base temperature and returns its value
+func _set_baseline_temperature(region: RegionObject, region_coords: Vector2i) -> float:
+	var distance_from_poles := _distance_from_poles(_plane.convert_to_cells_qr(region_coords))
+	var j_percent := distance_from_poles
 	j_percent = clampf(j_percent, 0.0, 1.0)
 	var point_on_curve: float = _temperature_curve.sample(j_percent)
 	# sample_simple_range_i expects value between -1.0, 1.0
 	assert(point_on_curve >= -1.0 && point_on_curve <= 1.0)
-	var temperature: int = NoiseToolsLibrary.sample_simple_range_i(point_on_curve, _TEMPERATURE_RANGE)
+	var temperature: int = NoiseToolsLibrary.sample_simple_range_i(point_on_curve, _TEMPERATURE_BASELINE_RANGE)
 	region.get_scope().add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, &"worldgen.basic.dist_to_poles", temperature, 0.0)
 	# region.get_scope().add_numeric_modifier(&"debug.dist_to_poles_percent", &"worldgen.basic", j_percent, 0.0)
 	# region.get_scope().add_numeric_modifier(&"debug.temp_point_on_curve", &"worldgen.basic", point_on_curve, 0.0)
 	# region.get_scope().add_numeric_modifier(&"debug.distance_to_pole", &"worldgen.basic", distance_from_poles, 0.0)
-
-
-func _get_temperature_at_point(region_coords: Vector2i, cell_qr_coords: Vector2i) -> int:
-	var total_coords := region_coords * _region_radius + cell_qr_coords
-
-	# base temperature = how close is point to the north/south poles
-	var distance_from_poles := _distance_from_poles(region_coords, cell_qr_coords)
-	var j_percent := distance_from_poles / _pole_effect_distance
-	j_percent = clampf(j_percent, 0.0, 1.0)
-	var point_on_curve: float = _temperature_curve.sample(j_percent)
-	# sample_simple_range_i expects value between -1.0, 1.0
-	assert(point_on_curve >= -1.0 && point_on_curve <= 1.0)
-	var temperature: int = NoiseToolsLibrary.sample_simple_range_i(point_on_curve, _TEMPERATURE_RANGE)
-
-	# add fluctuation from the map
-	var temp_fluctuation: int = int(_temperature_noise.get_noise_2d(total_coords.x, total_coords.y) * _TEMPERATURE_FLUCTUATION)
-	temperature += temp_fluctuation
-
-	temperature = int(clamp(temperature, _TEMPERATURE_RANGE.x, _TEMPERATURE_RANGE.y))
 	return temperature
 
-	# Create temperature map and emits it for debugging
-	#func _create_debug_temperature_map() -> void:
-	#if not debug_mode:
-	#return
-	#var size = _generation_map_size.size
-	#var temperature_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
-	#for i in range(0, size.x):
-	#for j in range(0, size.y):
-	#var temp := _get_temperature_at_point(i,j)
-	#var color = _DEBUG_GENERAL_GRADIENT.sample(
-	#_displacement_at_range(temp, _TEMPERATURE_RANGE)
-	#)
-	#temperature_image.set_pixel(i, j, color)
-	#
-	#_emit_debug_map("temperature", temperature_image, {})
+#func _get_temperature_at_point(region_coords: Vector2i, cell_qr_coords: Vector2i) -> int:
+	#var total_coords := _plane.convert_to_cells_qr(region_coords) + cell_qr_coords
+#
+	## base temperature = how close is point to the north/south poles
+	#var distance_from_poles := _distance_from_poles(total_coords)
+	#var j_percent := distance_from_poles / _pole_effect_distance
+	#j_percent = clampf(j_percent, 0.0, 1.0)
+	#var point_on_curve: float = _temperature_curve.sample(j_percent)
+	## sample_simple_range_i expects value between -1.0, 1.0
+	#assert(point_on_curve >= -1.0 && point_on_curve <= 1.0)
+	#var temperature: int = NoiseToolsLibrary.sample_simple_range_i(point_on_curve, _TEMPERATURE_RANGE)
+#
+	## add fluctuation from the map
+	#var temp_fluctuation: int = int(_temperature_noise.get_noise_2d(total_coords.x, total_coords.y) * _TEMPERATURE_FLUCTUATION)
+	#temperature += temp_fluctuation
+#
+	#temperature = int(clamp(temperature, _TEMPERATURE_RANGE.x, _TEMPERATURE_RANGE.y))
+	#return temperature
+#
+	## Create temperature map and emits it for debugging
+	##func _create_debug_temperature_map() -> void:
+	##if not debug_mode:
+	##return
+	##var size = _generation_map_size.size
+	##var temperature_image = Image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+	##for i in range(0, size.x):
+	##for j in range(0, size.y):
+	##var temp := _get_temperature_at_point(i,j)
+	##var color = _DEBUG_GENERAL_GRADIENT.sample(
+	##_displacement_at_range(temp, _TEMPERATURE_RANGE)
+	##)
+	##temperature_image.set_pixel(i, j, color)
+	##
+	##_emit_debug_map("temperature", temperature_image, {})
 
 
 func _get_precipation_at_point(region_coords: Vector2i, cell_qr_coords: Vector2i) -> int:
-	var total_coords := region_coords * _region_radius + cell_qr_coords
+	var total_coords := _plane.convert_to_cells_qr(region_coords) + cell_qr_coords
 	# Get base height. It will be in range (-1, 1)
 	var precipation_float := _precipitation_noise.get_noise_2d(total_coords.x, total_coords.y)
 

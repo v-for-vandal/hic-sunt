@@ -7,7 +7,7 @@ class ClusterData:
 	var neighbours: Dictionary[int, int]
 
 ## Random number generator used, mostly, for seeding. This is public variable,
-## you can replace it with your own
+## you can replace generator with your own
 var rng := RandomNumberGenerator.new()
 
 var _voronoi: Voronoinator
@@ -18,6 +18,8 @@ var _clusters: Dictionary[int, ClusterData]
 const _MAX_ATTEMPTS = 10000
 
 
+## Creates clusterization
+## voronoi - cells to clusterize
 func _init(voronoi: Voronoinator) -> void:
 	_voronoi = voronoi
 	_cell_to_cluster.resize(_voronoi.voronoi_cells.size())
@@ -67,8 +69,9 @@ func add_to_cluster(cell_id: int, cluster_id: int) -> void:
 
 	var cluster_data := _clusters[cluster_id]
 	# for now, forbid changing cluster of a cell
-	if _cell_to_cluster[cell_id] != 0:
-		push_error("Moving cell between clusters is forbidden (for now0)")
+	var current_cell_cluster := _cell_to_cluster[cell_id]
+	if current_cell_cluster != 0 and current_cell_cluster != cluster_id:
+		push_error("Moving cell between clusters is forbidden %d -> %d" % [current_cell_cluster, cluster_id])
 		return
 
 	_cell_to_cluster[cell_id] = cluster_id
@@ -77,6 +80,9 @@ func add_to_cluster(cell_id: int, cluster_id: int) -> void:
 	for n in neighbours:
 		if _cell_to_cluster[n] != cluster_id:
 			cluster_data.neighbours[n] = cluster_data.neighbours.get_or_add(n, 0) + 1
+			
+	# Remove self from neighbors of self-cluster.
+	cluster_data.neighbours.erase(cell_id)
 
 
 ## Checks that this node is neighbour to any cluster currently present.
@@ -92,14 +98,34 @@ func is_neighbour_to_any_cluster(cell_id: int, except: Array[int] = []) -> bool:
 	return false
 
 
+## Returns cluster for this cell_id or 0 if it is not in cluster
 func cell_cluster(cell_id: int) -> int:
 	return _cell_to_cluster[cell_id]
 
+## Returns true if this cell is in any cluster, false otherwise
+func is_cell_in_any_cluster(cell_id: int) -> bool:
+	return cell_cluster(cell_id) != 0
 
+## Number of clusters. Please note that
+## 1. cluster ids start with 1 (not 0)
+## 2. cluster ids don't have to start at 1 and may have gaps. E.g. [2, 5, 12]
+## Ergo, you can't use clusters_count() for iteration
 func clusters_count() -> int:
 	return _clusters.size()
+	
+## Get ids of all clusters in clusterization
+func get_cluster_ids() -> Array[int]:
+	return _clusters.keys()
+	
+## Returns true if such cluster exists
+## Always return true for cluster_id == 0
+func has_cluster_with_id(cluster_id: int) -> bool:
+	if cluster_id == 0:
+		return true
+	return _clusters.has(cluster_id)
 
 
+## Returns all neighbours for given cluster
 func cluster_neighbours(cluster_id: int) -> Array[int]:
 	if cluster_id not in _clusters:
 		push_error("Unknown cluster %d" % cluster_id)

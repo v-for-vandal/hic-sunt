@@ -12,12 +12,12 @@ var _config: Config
 var _plane: WorldPlane
 var _global_context: WorldGeneratorGlobalContext
 
-var _terrain_noise_generator: FastNoiseLite = preload(
-	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_base.tres"
-).duplicate()
-var _mountain_noise_generator: FastNoiseLite = preload(
-	"res://content/worldgen-basic/worldgen/internal/heightmap_noise_mountain.tres"
-).duplicate()
+#var _terrain_noise_generator: FastNoiseLite = preload(
+	#"res://content/worldgen-basic/worldgen/internal/heightmap_noise_base.tres"
+#).duplicate()
+#var _mountain_noise_generator: FastNoiseLite = preload(
+	#"res://content/worldgen-basic/worldgen/internal/heightmap_noise_mountain.tres"
+#).duplicate()
 
 var _debug_control: DebugTree.ControlInterface
 
@@ -32,12 +32,10 @@ var _xy_dimensions := Rect2i(0, 0, 0, 0)
 var _delaunay: Delaunator
 var _voronoi: Voronoinator
 var _tectonic_clusterization : _CellClusterization
-const inter_tectonic_cluster := 1
+const INTER_TECTONIC_CLUSTER := 1
 var _continents_clusterization : _CellClusterization
+var _distance_to_shore_clusterization : _CellClusterization
 
-# Here we store 'colors' that we use to create heightmap. Those are not really
-# colors, just channels where we encode values
-var _heightmap_coloring : PackedColorArray
 var _heightmap : Image
 var _heightmap_transformation : Transform2D
 var _heightmap_debug_node : DebugTree.ControlInterface
@@ -91,6 +89,7 @@ func first_pass() -> void:
 
 	_create_tectonic_plates()
 	_create_continents()
+	_calculate_distance_to_shore()
 	
 	_heightmap = await _render_map(_create_map())
 	
@@ -111,10 +110,9 @@ func first_pass() -> void:
 
 
 func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> void:
-	var radius: int = _global_context.custom[&"region.radius"]
 	var region_external_radius : int = _plane.plane_object.get_region_external_radius()
 	# position of the region center in global cell coordinate system
-	var region_center_cell_coords = _plane.convert_to_cells_qr(region_qrs_coords)
+	var region_center_cell_coords := _plane.convert_to_cells_qr(region_qrs_coords)
 
 	
 	# first, lets calculate approximate region height. We are not going to bother with
@@ -255,9 +253,9 @@ func _create_tectonic_plates() -> void:
 				if clusterization.cell_cluster(neighbour) != 0:
 					# already taken, continue
 					continue
-				if clusterization.is_neighbour_to_any_cluster(neighbour, [cluster_id, inter_tectonic_cluster]):
+				if clusterization.is_neighbour_to_any_cluster(neighbour, [cluster_id, INTER_TECTONIC_CLUSTER]):
 					# it has other neighbours. In this case, mark is as inter-tectonic
-					clusterization.add_to_cluster(neighbour, inter_tectonic_cluster)
+					clusterization.add_to_cluster(neighbour, INTER_TECTONIC_CLUSTER)
 					has_expanded = true # not strictly true, but helps with algorithm
 					continue
 
@@ -268,7 +266,7 @@ func _create_tectonic_plates() -> void:
 	if _debug_voronoi_viz_node != null:
 		# add coloring for tectonic plates
 		var cluster_colors: Dictionary[int, Color] = {
-			inter_tectonic_cluster: Color("#fe663e"),
+			INTER_TECTONIC_CLUSTER: Color("#fe663e"),
 			0: Color("#ff3df3"),
 		}
 
@@ -315,8 +313,8 @@ func _create_continents() -> void:
 		for neighbour: int in selected_neighbours:
 			clusterization.add_to_cluster(neighbour, cluster_id)
 			surface_cells_count += 1
-	
 	_continents_clusterization = clusterization
+			
 	
 	if _debug_voronoi_viz_node != null:
 		# add coloring for tectonic plates
@@ -334,15 +332,101 @@ func _create_continents() -> void:
 
 		_debug_add_coloring("continents", continent_coloring)
 		
+func _calculate_distance_to_shore() -> void:
+	# Build distance-to-sea-shore. Idea is this: create a new clusterization with
+	# one cluster. In that cluster we will put all neighbours of a all continents.
+	# Then we will do BFS to iterate one layer by one layer. This cluster will grow both into the continents
+	# and into the sea, one layer at a time. At each layer we will put iteration number into cell metadata
+	# and that iteration number is essentially distance from the sealine.
+	const START_DISTANCE_CLUSTER := 1
+	assert(_continents_clusterization != null)
+	var clusterization := _CellClusterization.new(_voronoi)
+	for continent_cluster_id in _continents_clusterization.get_cluster_ids():
+		var continent_neighbours := _continents_clusterization.cluster_neighbours(continent_cluster_id)
+		for neighbour in continent_neighbours:
+			clusterization.add_to_cluster(neighbour, START_DISTANCE_CLUSTER)
+			
+	# Because we have only covered sea cells at the moment, we need to add shore cells to this cluster
+	# as well
+	var neighbours := clusterization.cluster_neighbours(START_DISTANCE_CLUSTER)
+	for neighbour in neighbours:
+		# if continent
+		if _continents_clusterization.cell_cluster(neighbour) != 0:
+			clusterization.add_to_cluster(neighbour, START_DISTANCE_CLUSTER)
+			
+	# Now, we have proper start point.
+	var next_distance := START_DISTANCE_CLUSTER + 1
+	var next_cluster_cells := clusterization.cluster_neighbours(START_DISTANCE_CLUSTER)
+	while(next_cluster_cells.size() > 0):
+		for cell_id in next_cluster_cells:
+			if not clusterization.is_cell_in_any_cluster(cell_id):
+				clusterization.add_to_cluster(cell_id, next_distance)
+		
+		if clusterization.has_cluster_with_id(next_distance):
+			next_cluster_cells = clusterization.cluster_neighbours(next_distance)
+		else:
+			next_cluster_cells = []
+		next_distance += 1
+		
+	_distance_to_shore_clusterization = clusterization
+		
+	if _debug_voronoi_viz_node != null:
+		# add coloring for distance-to-shore plates
+		var cluster_colors: Dictionary[int, Color] = {
+			0: Color.BLUE,
+		}
+
+		for cluster_id: int in range(1, 1 + clusterization.clusters_count()):
+			cluster_colors[cluster_id] = Color(randf(), randf(), 0.1)
+
+		var distance_coloring := PackedColorArray()
+		distance_coloring.resize(_voronoi.voronoi_cells.size())
+		for i in range(_voronoi.voronoi_cells.size()):
+			distance_coloring[i] = cluster_colors[clusterization.cell_cluster(i)]
+
+		_debug_add_coloring("distance", distance_coloring)
+	
 func _encode_as_color(cell_index: int) -> Color:
-	var cell_cluster := _continents_clusterization.cell_cluster(cell_index)
-	# TODO: This is debug
-	if cell_cluster == 0:
-		# when we render, Godot will perform srgb_to_linear conversion
-		# to mak inverse conversion first
-		return Color(-100, 0, 0, 1.0).linear_to_srgb()
+	var cell_continent := _continents_clusterization.cell_cluster(cell_index)
+	var cell_tectonic := _tectonic_clusterization.cell_cluster(cell_index)
+	var distance_to_shore := _distance_to_shore_clusterization.cell_cluster(cell_index)
+	
+	var height_min := 0
+	var height_max := 1
+	var height_95_min := 0.5
+	var height_95_max := 0.5
+	# base range, without mountains, is different for land and for sea. For land it goes
+	# between 10 and 1000 and the min-max goes hight the further we are from sea
+	if cell_continent != 0:
+		# land
+		height_min = 10
+		height_max = 1000
+		height_95_max = clampf(distance_to_shore * 100.0, height_min, height_max * 0.75)
+		height_95_min = clampf(distance_to_shore * 75, height_min, height_max * 0.6)
 	else:
-		return Color(100.0, 0.0, 0.0, 1.0).linear_to_srgb()
+		# ocean
+		height_min = -4000
+		height_max =  -10
+		height_95_min = clampf(distance_to_shore * -500, height_min, height_max)
+		height_95_max = clampf(distance_to_shore * -300, height_min, height_max)
+		
+		
+	
+	# base height
+	var height_mean := (height_95_min + height_95_max) / 2.0
+	# 2 sigmas in every direction is 95%
+	var height_std := (height_95_max - height_95_min) / 4.0
+	
+	var height := clampf( _rng.randfn(height_mean, height_std), height_min, height_max)
+
+
+	# add mountains in tectonic places
+	if cell_tectonic == INTER_TECTONIC_CLUSTER:
+		height += _rng.randfn(2000, 1000)
+
+	# when we render, Godot will perform srgb_to_linear conversion
+	# So we make inverse conversion first
+	return Color(height, 0.0, 0.0, 1.0).linear_to_srgb()
 	
 func _create_map() -> _VoronoiDrawer:
 	var colors := PackedColorArray()
@@ -408,10 +492,6 @@ func _debug_add_used_heighmap_part() -> void:
 	#var target_rect := _heightmap_transformation * Rect2(source_rect)
 	
 	_heightmap_debug_node.add_to_overlay(DebugTree.create_rect_overlay(Rect2i(_debug_used_rect), Color.ORANGE, "used_part"))
-
-# TODO: Make some other formula
-var _MOUNTAIN_EXTRA_HEIGHT_RANGE := Vector2i(1000, 2000)
-
 
 func _displacement_at_range(value: float, target_range: Vector2i) -> float:
 	return (value - target_range.x) / (target_range.y - target_range.x)

@@ -77,7 +77,7 @@ func _update_debug_display_variable_or_modifier(options: DebugDisplayOptions) ->
 		$ScopeVarDisplay.text = "%s" % value
 	else:
 		var value := cell.get_scope().get_numeric_value(target_variable)
-		$ScopeVarDisplay.text = "%d" % value
+		$ScopeVarDisplay.text = "%f" % value
 		
 	$ScopeVarDisplay.visible = true
 
