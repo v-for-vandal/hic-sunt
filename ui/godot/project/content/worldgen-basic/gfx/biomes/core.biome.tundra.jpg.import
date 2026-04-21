@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://ces6eh4oiodvf"
+path="res://.godot/imported/core.biome.tundra.jpg-b97383527a5228b78b16d94f236ef241.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.tundra.jpg"
+dest_files=["res://.godot/imported/core.biome.tundra.jpg-b97383527a5228b78b16d94f236ef241.image"]
+
+[params]
+

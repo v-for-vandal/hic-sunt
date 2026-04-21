@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="NumericVariableHighlighter" load_steps=3 format=3 uid="uid://d3g1s5l35tt1u"]
+[gd_resource type="Resource" script_class="NumericVariableHighlighter" format=3 uid="uid://d3g1s5l35tt1u"]
 
 [ext_resource type="Script" uid="uid://rshygb47jjs5" path="res://game/highlighters/numeric_variable_highlighter.gd" id="1_6lfpj"]
 

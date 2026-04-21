@@ -26,7 +26,11 @@ class ScopeObject : public RefCounted {
   bool add_string_modifier(const StringName& variable, const StringName& key,
                            const StringName& value, float level);
 
+  static Ref<ScopeObject> create_scope();
+
   Dictionary explain_all();
+
+  bool is_string_variable(const StringName& variable) const;
 
  private:
   ScopePtr scope_;

@@ -81,6 +81,23 @@ auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> Scope::String
 }
 
 template <typename BaseTypes>
+bool Scope<BaseTypes>::IsStringVariable(const StringId& variable) const {
+
+  // TODO: We should have a global registry with variable definitions. But
+  // later.
+
+  if (string_variables_.contains(variable)) {
+    return true;
+  }
+
+  if( parent_) {
+    return parent_->IsStringVariable(variable);
+  }
+
+  return false;
+}
+
+template <typename BaseTypes>
 bool Scope<BaseTypes>::AddNumericModifier(const StringId &variable, const StringId &key,
                        NumericValue add, NumericValue mult)
 {

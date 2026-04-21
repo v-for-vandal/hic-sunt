@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://c15hvynxgon5g"]
+[gd_resource type="TileSet" format=3 uid="uid://c15hvynxgon5g"]
 
 [ext_resource type="PackedScene" uid="uid://cbbh0dgbrdbqv" path="res://test/playground_1/hexagon_tile_scene.tscn" id="1_rwc8d"]
 

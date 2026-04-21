@@ -17,6 +17,8 @@ void PlaneObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("contains", "coords"), &PlaneObject::contains);
   ClassDB::bind_method(D_METHOD("get_region_info", "coords"),
                        &PlaneObject::get_region_info);
+  ClassDB::bind_method(D_METHOD("get_region_external_radius"),
+                       &PlaneObject::get_region_external_radius);
   ClassDB::bind_method(D_METHOD("get_distance_between_cells", "region1",
                                 "cell1", "region2", "cell2"),
                        &PlaneObject::get_distance_between_cells);
@@ -89,6 +91,10 @@ Dictionary PlaneObject::get_region_info(Vector2i coords) const {
 
   auto& region = data_->GetSurface().GetCell(qrs_coords).GetRegion();
   return RegionObject::make_region_info(region);
+}
+
+int PlaneObject::get_region_external_radius() const {
+  return data_->GetExternalRadius();
 }
 
 float PlaneObject::get_distance_between_cells(Vector2i region1, Vector2i cell1,

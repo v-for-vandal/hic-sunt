@@ -1,18 +1,29 @@
-[gd_scene load_steps=4 format=3 uid="uid://dhdak5msql21g"]
+[gd_scene format=3 uid="uid://dhdak5msql21g"]
 
 [ext_resource type="Script" uid="uid://cv7ec3tvxs77o" path="res://game/world/WorldSurface.gd" id="1_j50n3"]
 [ext_resource type="TileSet" uid="uid://b1kbclauq8xc5" path="res://game/world/world_tileset.tres" id="2_sttcl"]
 [ext_resource type="TileSet" uid="uid://ifgtbjk2got" path="res://resources/world/v5_simple.tres" id="3_y53jn"]
 
-[node name="WorldSurface" type="Node2D"]
+[node name="WorldSurface" type="Node2D" unique_id=947603951]
 script = ExtResource("1_j50n3")
 surface_type = 1
 
-[node name="biomes" type="TileMapLayer" parent="."]
+[node name="biomes" type="TileMapLayer" parent="." unique_id=1652361197]
 tile_set = ExtResource("2_sttcl")
 
-[node name="select" type="TileMapLayer" parent="."]
+[node name="select" type="TileMapLayer" parent="." unique_id=694798351]
 z_index = 1
 use_parent_material = true
 tile_set = ExtResource("3_y53jn")
 navigation_enabled = false
+
+[node name="highlight" type="TileMapLayer" parent="." unique_id=1290691535]
+z_index = 1
+use_parent_material = true
+tile_set = ExtResource("3_y53jn")
+navigation_enabled = false
+
+[node name="substrate" type="Sprite2D" parent="." unique_id=1273103512]
+visible = false
+z_index = -1
+centered = false

@@ -73,6 +73,8 @@ class Scope {
   void ExplainStringVariable(const StringId& variable, auto&& collect_fn);
   void ExplainAllVariables(auto&& collect_fn);
 
+  bool IsStringVariable(const StringId& variable) const;
+
  private:
   void FillNumericModifiers(const StringId& variable, NumericValue& add,
                             NumericValue& mult) const;

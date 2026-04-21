@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://wjrvrwc8iqjy"]
+
+[ext_resource type="Script" uid="uid://xg6i6q6amfpu" path="res://addons/debug-tree-view/internal/draggable_camera.gd" id="1_gxl7x"]
+
+[node name="DraggableCamera" type="Camera2D"]
+script = ExtResource("1_gxl7x")

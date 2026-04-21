@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://5tpirj38ytea"
+path="res://.godot/imported/core.biome.temperate_forest.jpg-f71a958ec438f88ed048283fa1e480b4.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.temperate_forest.jpg"
+dest_files=["res://.godot/imported/core.biome.temperate_forest.jpg-f71a958ec438f88ed048283fa1e480b4.image"]
+
+[params]
+
