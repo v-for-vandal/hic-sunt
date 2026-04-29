@@ -13,6 +13,7 @@ namespace hs {
         // variables errors
         ERR_EMPTY_MODIFIER_KEY,
         ERR_NO_SUCH_VARIABLE,
+        ERR_INCORRECT_VARIABLE_TYPE
     };
 
     class ErrorCategory final : public std::error_category {

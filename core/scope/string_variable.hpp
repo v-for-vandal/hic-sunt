@@ -21,13 +21,14 @@ class StringVariable : public VariableBase<BaseTypes> {
   using String = typename BaseTypes::String;
   using StringId = typename BaseTypes::StringId;
   using NumericValue = typename BaseTypes::NumericValue;
+  using Base = VariableBase<BaseTypes>;
 
   /*! \brief Sets modifier with given key to given value.
    *
    * Parameter \p level will determine what is the final result of the variable
    */
   std::expected<void, ErrorCode> SetModifier(const StringId& key, const StringId& val,
-                    NumericValue level);
+                    NumericValue level, size_t modification_time);
 
   // Method takes current level as input, and if this variable has
   // value with higher level, it will overwrite both value and level

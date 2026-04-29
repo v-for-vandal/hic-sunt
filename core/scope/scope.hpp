@@ -38,7 +38,7 @@ class Scope {
   using NumericVariable = scope::NumericVariable<BaseTypes>;
   using StringVariable = scope::StringVariable<BaseTypes>;
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
-  using VariableDefinitionsPtr = hs::ruleset::VariableDefinitions<BaseTypes>;
+  using VariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
    *
@@ -65,9 +65,9 @@ class Scope {
 
   // const VariableDefinitions *Definitions() const;
 
-  NumericValue GetNumericValue(const StringId& variable);
+  std::expected<NumericValue, ErrorCode> GetNumericValue(const StringId& variable);
 
-  StringId GetStringValue(const StringId& variable);
+  std::expected<StringId, ErrorCode> GetStringValue(const StringId& variable);
 
   /*! \brief Sets modifier for given variable to given value(s)
    *

@@ -21,6 +21,7 @@ class NumericVariable : public VariableBase<BaseTypes>{
  public:
   using StringId = typename BaseTypes::StringId;
   using NumericValue = typename BaseTypes::NumericValue;
+  using Base = VariableBase<BaseTypes>;
 
   /** \brief Creates or replaces modifier with given key with new values.
    *

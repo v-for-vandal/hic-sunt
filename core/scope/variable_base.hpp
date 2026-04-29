@@ -2,6 +2,7 @@
 
 #include <core/types/error_code.hpp>
 #include <core/types/std_base_types.hpp>
+#include "spdlog/spdlog.h"
 
 namespace hs::scope {
 

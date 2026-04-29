@@ -51,31 +51,38 @@ void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> Scope::NumericValue
+auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expected<Scope::NumericValue, ErrorCode>
 {
-    /*
-  const NumericVariableDefinition vardef = definitions_->FindNumericVariable(
+    if (!IsNumericVariable(variable)) {
+        spdlog::error("Variable {} is not of type numeric", variable);
+        return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    }
+
+  const auto& vardef = GetVariableDefinitions()->FindNumericVariable(
       variable);
-      */
 
   NumericValue add{0};
   NumericValue mult{0};
 
   FillNumericModifiers(variable, add, mult);
 
-
   mult = 1 + mult;
   mult = std::max<NumericValue>(mult, 0);
 
   auto value = add * mult;
 
-  //value = std::clamp(value, vardef->minimum, vardef->maximum);
+  value = std::clamp(value, vardef.minimum, vardef.maximum);
 
   return value;
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> Scope::StringId {
+auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> std::expected<Scope::StringId, ErrorCode> {
+    if (!IsStringVariable(variable)) {
+        spdlog::error("Variable {} is not of type string", variable);
+        return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    }
+
     NumericValue level{0};
     StringId result;
 

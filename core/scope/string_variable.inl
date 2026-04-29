@@ -9,7 +9,7 @@ namespace hs::scope {
 
 template <typename BaseTypes>
 std::expected<void, ErrorCode> StringVariable<BaseTypes>::SetModifier(const StringId& key, const StringId& val,
-    NumericValue level)
+    NumericValue level, size_t modification_time)
 {
     if(BaseTypes::IsNullToken(key)) {
       spdlog::error("Empty modifier key is not allowed");
@@ -17,6 +17,7 @@ std::expected<void, ErrorCode> StringVariable<BaseTypes>::SetModifier(const Stri
     }
 
     modifiers_[key] = Modifier{.value=val, .level=level};
+    Base::UpdateModificationTime(modification_time);
     return {};
 }
 

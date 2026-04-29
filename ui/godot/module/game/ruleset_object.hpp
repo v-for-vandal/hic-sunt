@@ -39,6 +39,7 @@ class RulesetObject : public RefCounted {
   Array get_biomes() const;
   Array get_all_resources() const;
   Array get_projects() const;
+  TypedArray<StringName> get_all_effects() const;
   static Dictionary convert_biome_type(
       const hs::proto::ruleset::Biome& biome_type);
   static Dictionary convert_render(

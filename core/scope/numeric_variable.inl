@@ -33,7 +33,7 @@ std::expected<void, ErrorCode> NumericVariable<BaseTypes>::SetModifier(const Str
     }
     modifiers_[key] = Modifier{.add=add, .mult=mult};
 
-    UpdateModificationTime(modification_time);
+    Base::UpdateModificationTime(modification_time);
 
     return {};
 }
@@ -49,7 +49,7 @@ std::expected<void, ErrorCode> NumericVariable<BaseTypes>::ChangeModifier(const 
     modifiers_[key].add += add;
     modifiers_[key].mult += mult;
 
-    UpdateModificationTime(modification_time);
+    Base::UpdateModificationTime(modification_time);
 
     return {};
 }

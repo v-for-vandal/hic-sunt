@@ -7,7 +7,6 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/error_message.hpp>
 #include <filesystem>
-#include <string_view>
 
 namespace hs::ruleset {
 

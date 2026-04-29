@@ -14,17 +14,17 @@ bool RuleSet<BaseTypes>::Load(const std::filesystem::path &path,
   // Building hashes
   for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
     const auto &improvement = improvements_.improvements(idx);
-    improvements_by_type_.try_emplace(improvement.id(), idx);
+    improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
   }
 
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto &job = jobs_.jobs(idx);
-    jobs_by_type_.try_emplace(job.id(), idx);
+    jobs_by_type_.try_emplace(BaseTypes::StringIdFromStdString(job.id()), idx);
   }
 
   for (int idx = 0; idx < projects_.projects_size(); ++idx) {
     const auto &project = projects_.projects(idx);
-    projects_by_type_.try_emplace(project.id(), idx);
+    projects_by_type_.try_emplace(BaseTypes::StringIdFromStdString(project.id()), idx);
   }
 
   for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();
@@ -42,17 +42,18 @@ bool RuleSet<BaseTypes>::Load(const std::filesystem::path &path,
         const auto& numeric = definition.numeric();
         NumericVariableDefinition<BaseTypes> numeric_definition;
         if (numeric.has_minimum()) {
-            numeric_definition.minimum = numeric().minimum();
+            numeric_definition.minimum = numeric.minimum();
         }
         if (numeric.has_maximum()) {
-            numeric_definition.maximum = definition.maximum();
+            numeric_definition.maximum = numeric.maximum();
         }
         parsed_variable_definitions_.AddNumericDefinition(definition.id(),
                                                         numeric_definition);
     } else if (definition.has_string()) {
+        const auto& string_ = definition.string();
         StringVariableDefinition<BaseTypes> string_definition;
-        if (const std::string& default = definition.string().default(); default) {
-            string_definition.default = default;
+        if (const std::string& default_ = string_.default(); default_) {
+            string_definition.default_value = default_;
         }
         parsed_variable_definitions_.AddStringDefinition(definition.id(),
                                                          string_definition);

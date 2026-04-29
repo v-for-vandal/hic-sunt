@@ -2,10 +2,9 @@ syntax = "proto3";
 
 package hs.proto.ruleset;
 
-import "ruleset/placement_rules.proto";
-import "ruleset/jobs.proto";
-import "ruleset/effect.proto";
 import "l10n/localized_name.proto";
+import "ruleset/effect.proto";
+import "ruleset/placement_rules.proto";
 
 message ResourceBill {
   map<string, int32> amounts = 1;
@@ -34,6 +33,3 @@ message RegionImprovement {
 message RegionImprovements {
   repeated RegionImprovement improvements = 1;
 }
-
-
-

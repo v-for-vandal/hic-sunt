@@ -5,13 +5,13 @@ package hs.proto.ruleset.effect;
 import "l10n/localized_name.proto";
 
 message Code {
-    oneOf code {
-        string lua = 1;
-    }
+  oneof code {
+    string lua = 1;
+  }
 }
 
 message Selector {
-    int placeholder = 1;
+  int32 placeholder = 1;
 }
 
 // Effect is executed for every entity that matches the selector.
@@ -19,21 +19,20 @@ message Selector {
 // Scheduling affects how effects are executed.
 message Effect {
   enum TargetType {
-    UNSPECIFIED = 0,
-    IMPROVEMENT = 1,
-    REGION = 2,
-    PLANE = 3,
-    WORLD = 4,
-    UNIT = 5,
-    ARMY = 6,
-    CITY = 7,
+    UNSPECIFIED = 0;
+    IMPROVEMENT = 1;
+    REGION = 2;
+    PLANE = 3;
+    WORLD = 4;
+    UNIT = 5;
+    ARMY = 6;
+    CITY = 7;
   }
 
   enum Schedule {
-    MANUAL = 0,
-    EVERY_TURN = 1,
+    MANUAL = 0;
+    EVERY_TURN = 1;
   }
-
 
   string id = 1;
   l10n.LocalizedName name = 2;
@@ -48,10 +47,9 @@ message Effect {
   Schedule schedule = 6;
 
   // Code to execute
-  EffectCode code = 5;
+  Code code = 5;
 }
 
 message Effects {
-    repeated Effect effects = 1;
+  repeated Effect effects = 1;
 }
-

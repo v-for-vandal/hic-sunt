@@ -10,6 +10,8 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_biomes"), &RulesetObject::get_biomes);
   ClassDB::bind_method(D_METHOD("get_all_resources"),
                        &RulesetObject::get_all_resources);
+  ClassDB::bind_method(D_METHOD("get_all_effects"),
+                       &RulesetObject::get_all_effects);
   ClassDB::bind_method(D_METHOD("get_atlas_render"),
                        &RulesetObject::get_atlas_render);
   ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"),
@@ -32,6 +34,19 @@ Array RulesetObject::get_biomes() const {
   }
 
   return result;
+}
+
+TypedArray<StringName> RulesetObject::get_all_effects() const {
+    TypedArray<StringName> result;
+    const auto& all_effects = ruleset_.GetAllEffects();
+    // reserve is not supported ???
+    //result.reserve(all_effects.size());
+
+    for(const auto& effect: all_effects) {
+        result.append(StringName(effect.id().c_str()));
+    }
+
+    return result;
 }
 
 Dictionary RulesetObject::convert_biome_type(
