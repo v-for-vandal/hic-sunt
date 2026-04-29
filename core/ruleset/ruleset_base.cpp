@@ -4,6 +4,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 #include <ruleset/region_improvements.pb.h>
+#include <ruleset/variables.pb.h>
 #include <spdlog/spdlog.h>
 
 #include <fstream>
@@ -17,7 +18,6 @@ bool ReadFromFile(const std::filesystem::path &path, auto &proto_object,
   {
     std::ifstream f(path);
     if (!f.is_open()) {
-      // for now, just throw an exception
       errors.AddError(
           utils::ErrorMessage{fmt::format("Can't open file {}", path.c_str())});
       return false;
@@ -70,6 +70,21 @@ bool RuleSetBase::Load(const std::filesystem::path &path,
     return false;
   }
 
+  SPDLOG_INFO("Parsing variable definitions file");
+  success = ReadFromFile(path / variable_definitions_file, variable_definitions_,
+                         errors);
+  if (!success) {
+    return false;
+  }
+
+  SPDLOG_INFO("Parsing static effects file");
+  proto::ruleset::effect::Effects static_effects;
+  success = ReadFromFile(path / static_effects_file , static_effects, errors);
+  if (!success) {
+    return false;
+  }
+  effects_.append_range(static_effects);
+
   return true;
 }
 
@@ -80,6 +95,7 @@ void RuleSetBase::Clear() {
   rendering_.Clear();
   jobs_.Clear();
   projects_.Clear();
+  variable_definitions_.Clear();
 }
 
 }  // namespace hs::ruleset

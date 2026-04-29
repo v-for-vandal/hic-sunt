@@ -1,6 +1,10 @@
 #pragma once
 
+#include "core/types/error_code.hpp"
+#include "scope.hpp"
+
 #include <core/utils/serialize.hpp>
+#include "numeric_variable.hpp"
 
 namespace hs::scope {
 
@@ -83,34 +87,69 @@ auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> Scope::String
 template <typename BaseTypes>
 bool Scope<BaseTypes>::IsStringVariable(const StringId& variable) const {
 
-  // TODO: We should have a global registry with variable definitions. But
-  // later.
-
-  if (string_variables_.contains(variable)) {
-    return true;
-  }
-
-  if( parent_) {
-    return parent_->IsStringVariable(variable);
-  }
-
-  return false;
+    return GetVariableDefinitions().IsStringVariable(variable);
 }
 
 template <typename BaseTypes>
-bool Scope<BaseTypes>::AddNumericModifier(const StringId &variable, const StringId &key,
-                       NumericValue add, NumericValue mult)
-{
-    numeric_variables_[variable].AddModifiers(key, add, mult);
-    return true;
+bool Scope<BaseTypes>::IsNumericVariable(const StringId& variable) const {
+
+    return GetVariableDefinitions().IsNumericVariable(variable);
 }
 
 template <typename BaseTypes>
-bool Scope<BaseTypes>::AddStringModifier(const StringId &variable, const StringId &key,
-                       const StringId& value, NumericValue level)
+std::expected<void, ErrorCode> Scope<BaseTypes>::SetNumericModifier(const StringId &variable, const StringId &key,
+                       NumericValue add, NumericValue mult, size_t modificationTime)
 {
-    string_variables_[variable].AddModifiers(key, value, level);
-    return true;
+    return numeric_variables_[variable].SetModifier(key, add, mult, modificationTime);
+}
+
+template <typename BaseTypes>
+std::expected<void, ErrorCode> Scope<BaseTypes>::ChangeNumericModifier(const StringId &variable, const StringId &key,
+                       NumericValue add, NumericValue mult, size_t modificationTime)
+{
+    return numeric_variables_[variable].ChangeModifier(key, add, mult, modificationTime);
+}
+
+template <typename BaseTypes>
+std::expected<void, ErrorCode> Scope<BaseTypes>::SetStringModifier(const StringId &variable, const StringId &key,
+                       const StringId& value, NumericValue level, size_t modificationTime)
+{
+    return string_variables_[variable].SetModifier(key, value, level, modificationTime);
+}
+
+template <typename BaseTypes>
+std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(const StringId& variable) const  {
+   if (auto fit = numeric_variables_.find(variable); fit != numeric_variables_.end()) {
+       return fit->second.GetModificationTime();
+   }
+
+   if (auto fit = string_variables_.find(variable); fit != string_variables_.end()) {
+       return fit->second.GetModificationTime();
+   }
+
+   if (parent_ != nullptr) {
+       return parent_->GetModificationTime(variable);
+   }
+
+   // parent is null, we are top level
+   const auto& definitions = GetVariableDefinitions();
+   if (!definitions_.IsVariable(variable)) {
+       return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+   }
+
+   return 0;
+}
+
+template <typename BaseTypes>
+auto Scope<BaseTypes>::GetVariableDefinitions() const ->const VariableDefinitionsPtr&
+{
+    if (definitions_.IsEmpty()) {
+        if (parent_) {
+            definitions_ = parent_->GetVariableDefinitions();
+        }
+    }
+
+    return definitions_;
 }
 
 template <typename BaseTypes>

@@ -3,7 +3,11 @@
 #include <absl/container/flat_hash_map.h>
 #include <scope/scope.pb.h>
 
+#include <core/types/error_code.hpp>
 #include <core/types/std_base_types.hpp>
+#include <expected>
+
+#include "variable_base.hpp"
 
 namespace hs::scope {
 
@@ -13,12 +17,34 @@ namespace hs::scope {
  * parent scope and so on.
  */
 template <typename BaseTypes = StdBaseTypes>
-class NumericVariable {
+class NumericVariable : public VariableBase<BaseTypes>{
  public:
   using StringId = typename BaseTypes::StringId;
   using NumericValue = typename BaseTypes::NumericValue;
 
-  bool AddModifiers(const StringId& key, NumericValue add, NumericValue mult);
+  /** \brief Creates or replaces modifier with given key with new values.
+   *
+   * If no such modifier exists, new one will be created
+   * if \p modification_time is not 0, then variable modification time will be updated. This
+   * will be later used for cache invalidation and to recalculate effects and modifiers.
+   * If \p modification_time is less than current modification time, it will be ignored and log
+   * message will be written.
+   */
+  std::expected<void, ErrorCode> SetModifier(const StringId& key, NumericValue add, NumericValue mult,
+      size_t modification_time);
+
+  /** \brief Changes value of given modifier.
+   *
+   * Provided values \p add and \p mult will be **added** to currently present value.
+   * If no such modifier exists, new one will be created, initialized with zeroes
+   * and change will be applied to it.
+   * if \p modification_time is not 0, then variable modification time will be updated. This
+   * will be later used for cache invalidation and to recalculate effects and modifiers
+   * If \p modification_time is less than current modification time, it will be ignored and log
+   * message will be written.
+   */
+  std::expected<void, ErrorCode> ChangeModifier(const StringId& key, NumericValue add, NumericValue mult,
+      size_t modification_time);
 
   /** \brief Get total addictive and multiplicative modifiers for this
    *  variable. It only works within this scope.
@@ -32,8 +58,8 @@ class NumericVariable {
 
  private:
   struct Modifier {
-    NumericValue add;
-    NumericValue mult;
+    NumericValue add{0};
+    NumericValue mult{0};
   };
 
   absl::flat_hash_map<StringId, Modifier> modifiers_;

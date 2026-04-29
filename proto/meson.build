@@ -29,6 +29,8 @@ hs_proto_schemas = [
   'ruleset/resources.proto',
   'ruleset/jobs.proto',
   'ruleset/projects.proto',
+  'ruleset/effect.proto',
+  'ruleset/variables.proto',
   'render/atlas.proto',
   'render/render.proto',
   'scope/scope.proto',

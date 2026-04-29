@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package hs.proto.ruleset.effect;
+
+import "l10n/localized_name.proto";
+
+message Code {
+    oneOf code {
+        string lua = 1;
+    }
+}
+
+message Selector {
+    int placeholder = 1;
+}
+
+// Effect is executed for every entity that matches the selector.
+// Effect requires declaring its target and set of required input variables
+// Scheduling affects how effects are executed.
+message Effect {
+  enum TargetType {
+    UNSPECIFIED = 0,
+    IMPROVEMENT = 1,
+    REGION = 2,
+    PLANE = 3,
+    WORLD = 4,
+    UNIT = 5,
+    ARMY = 6,
+    CITY = 7,
+  }
+
+  enum Schedule {
+    MANUAL = 0,
+    EVERY_TURN = 1,
+  }
+
+
+  string id = 1;
+  l10n.LocalizedName name = 2;
+
+  // for now, target is one of available enumerations.
+  TargetType target = 3;
+
+  // This field limits what targets to execute this effect on
+  Selector selector = 4;
+
+  // When this effect is executed
+  Schedule schedule = 6;
+
+  // Code to execute
+  EffectCode code = 5;
+}
+
+message Effects {
+    repeated Effect effects = 1;
+}
+

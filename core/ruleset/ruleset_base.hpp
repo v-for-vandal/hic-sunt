@@ -5,14 +5,15 @@
 #include <render/render.pb.h>
 #include <ruleset/biome.pb.h>
 #include <ruleset/jobs.pb.h>
+#include <ruleset/effect.pb.h>
 #include <ruleset/projects.pb.h>
 #include <ruleset/region_improvements.pb.h>
 #include <ruleset/resources.pb.h>
+#include <ruleset/variables.pb.h>
 
 #include <core/utils/error_message.hpp>
 #include <core/utils/string_token.hpp>
 #include <filesystem>
-#include <string_view>
 
 namespace hs::ruleset {
 
@@ -35,6 +36,10 @@ class RuleSetBase {
 
   auto &GetProjects() const { return projects_; }
 
+  auto &GetAllEffects() const { return effects_; }
+
+  auto &GetVariableDefinitions() const { return variable_definitions_; }
+
  protected:
   proto::ruleset::RegionImprovements improvements_;
   proto::ruleset::Biomes biomes_;
@@ -42,6 +47,8 @@ class RuleSetBase {
   proto::ruleset::Jobs jobs_;
   proto::ruleset::Projects projects_;
   proto::render::Rendering rendering_;
+  proto::ruleset::Variables variable_definitions_;
+  std::vector<proto::ruleset::effect::Effect> effects_;
 
   static inline std::filesystem::path improvements_file{
       "region_improvements.txt"};
@@ -50,6 +57,9 @@ class RuleSetBase {
   static inline std::filesystem::path rendering_file{"rendering.txt"};
   static inline std::filesystem::path jobs_file{"jobs.txt"};
   static inline std::filesystem::path projects_file{"projects.txt"};
+  static inline std::filesystem::path static_effects_file{"static_effects.txt"};
+  static inline std::filesystem::path variable_definitions_file{
+      "variable_definitions.txt"};
 };
 
 }  // namespace hs::ruleset

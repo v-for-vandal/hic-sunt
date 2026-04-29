@@ -12,6 +12,9 @@ class StdBaseTypes {
   using String = std::string;
   using NumericValue = double;
 
+  template<typename T>
+  using SharedPtr = std::shared_ptr<T>;
+
   static StringId StringIdFromStdString(const std::string &data) noexcept {
     return data;
   }

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hs.proto.ruleset;
+
+message NumericVariable {
+  optional double minimum = 2;
+  optional double maximum = 3;
+}
+
+message BooleanVariable {}
+
+message StringVariable {
+  string default = 1;
+}
+
+message Variable {
+    string id = 1;
+    oneOf variable {
+        NumericVariable numeric = 3;
+        StringVariable string = 4;
+        BooleanVariable boolean = 5;
+    }
+}
+
+
+message Variables {
+  repeated Variable variables = 1;
+}

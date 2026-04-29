@@ -15,7 +15,7 @@ template <typename BaseTypes = StdBaseTypes>
 class RuleSet : public RuleSetBase {
  public:
   using ErrorsCollection = utils::ErrorsCollection;
-  using StringId = StdBaseTypes::StringId;
+  using StringId = typename BaseTypes::StringId;
   void Clear();
   // Adds data to ruleset
   bool Load(const std::filesystem::path &path, ErrorsCollection &errors);
@@ -28,12 +28,16 @@ class RuleSet : public RuleSetBase {
   const proto::ruleset::Project *FindProjectByType(
       const StringId &project_type_id) const;
 
+  const VariableDefinitions<BaseTypes> &GetVariableDefinitions() const {
+    return parsed_variable_definitions_;
+  }
+
  private:
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
 
-  VariableDefinitions<BaseTypes> variable_definitions_;
+  VariableDefinitions<BaseTypes> parsed_variable_definitions_;
 };
 
 }  // namespace hs::ruleset

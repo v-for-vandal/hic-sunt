@@ -1,6 +1,9 @@
 #pragma once
 
+#include "numeric_variable.hpp"
+
 #include <spdlog/spdlog.h>
+#include <expected>
 
 namespace hs::scope {
 
@@ -21,16 +24,34 @@ void NumericVariable<BaseTypes>::ExplainModifiers(auto&& output_fn) const {
 }
 
 template <typename BaseTypes>
-bool NumericVariable<BaseTypes>::AddModifiers(const StringId &key,
-                       NumericValue add, NumericValue mult)
+std::expected<void, ErrorCode> NumericVariable<BaseTypes>::SetModifier(const StringId &key,
+                       NumericValue add, NumericValue mult, size_t modification_time)
 {
     if(BaseTypes::IsNullToken(key)) {
       spdlog::error("Empty modifier key is not allowed");
-      return false;
+      return std::unexpected(ErrorCode::ERR_EMPTY_MODIFIER_KEY);
     }
     modifiers_[key] = Modifier{.add=add, .mult=mult};
 
-    return true;
+    UpdateModificationTime(modification_time);
+
+    return {};
+}
+
+template <typename BaseTypes>
+std::expected<void, ErrorCode> NumericVariable<BaseTypes>::ChangeModifier(const StringId &key,
+                       NumericValue add, NumericValue mult, size_t modification_time)
+{
+    if(BaseTypes::IsNullToken(key)) {
+      spdlog::error("Empty modifier key is not allowed");
+      return std::unexpected(ErrorCode::ERR_EMPTY_MODIFIER_KEY);
+    }
+    modifiers_[key].add += add;
+    modifiers_[key].mult += mult;
+
+    UpdateModificationTime(modification_time);
+
+    return {};
 }
 
 }

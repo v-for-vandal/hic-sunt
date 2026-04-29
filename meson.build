@@ -25,6 +25,7 @@ flatbuffer_dep = dependency('flatbuffers', static: true)
 #abseil = dependency('abseil-cpp', modules:['absl_flat_hash_set'])
 abseil = dependency('absl_flat_hash_set')
 
+lua = dependency('lua')
 
 gtest_dep = dependency('gtest')
 
