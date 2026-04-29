@@ -29,42 +29,41 @@ bool RuleSet<BaseTypes>::Load(const std::filesystem::path &path,
 
   for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();
        ++idx) {
-    const auto &definition =
-        RuleSetBase::GetVariableDefinitions().variables(idx);
-    /*
-    oneOf variable {
-        NumericVariable numeric = 3;
-        StringVariable string = 4;
-        BooleanVariable boolean = 5;
-    }
-    */
+    const auto &definition = RuleSetBase::GetVariableDefinitions().variables(idx);
+
     if (definition.has_numeric()) {
-        const auto& numeric = definition.numeric();
-        NumericVariableDefinition<BaseTypes> numeric_definition;
-        if (numeric.has_minimum()) {
-            numeric_definition.minimum = numeric.minimum();
-        }
-        if (numeric.has_maximum()) {
-            numeric_definition.maximum = numeric.maximum();
-        }
-        parsed_variable_definitions_.AddNumericDefinition(definition.id(),
-                                                        numeric_definition);
+      const auto &numeric = definition.numeric();
+      NumericVariableDefinition<BaseTypes> numeric_definition;
+      if (numeric.has_minimum()) {
+        numeric_definition.minimum = numeric.minimum();
+      }
+      if (numeric.has_maximum()) {
+        numeric_definition.maximum = numeric.maximum();
+      }
+      parsed_variable_definitions_.AddNumericDefinition(
+          BaseTypes::StringIdFromStdString(definition.id()),
+          numeric_definition);
     } else if (definition.has_string()) {
-        const auto& string_ = definition.string();
-        StringVariableDefinition<BaseTypes> string_definition;
-        if (const std::string& default_ = string_.default(); default_) {
-            string_definition.default_value = default_;
-        }
-        parsed_variable_definitions_.AddStringDefinition(definition.id(),
-                                                         string_definition);
+      const auto &string_ = definition.string();
+      StringVariableDefinition<BaseTypes> string_definition;
+      if (!string_.default_().empty()) {
+        string_definition.default_value =
+            BaseTypes::StringIdFromStdString(string_.default_());
+      }
+      parsed_variable_definitions_.AddStringDefinition(
+          BaseTypes::StringIdFromStdString(definition.id()),
+          string_definition);
     } else if (definition.has_boolean()) {
-        NumericVariableDefinition<BaseTypes> numeric_definition;
-        numeric_definition.minimum = 0;
-        numeric_definition.maximum = 1;
-        parsed_variable_definitions_.AddNumericDefinition(definition.id(),
-                                                        numeric_definition);
+      NumericVariableDefinition<BaseTypes> numeric_definition;
+      numeric_definition.minimum = 0;
+      numeric_definition.maximum = 1;
+      parsed_variable_definitions_.AddNumericDefinition(
+          BaseTypes::StringIdFromStdString(definition.id()),
+          numeric_definition);
     } else {
-        SPDLOG_ERROR("Variable {} has undefined type. It is neither numeric, nor string, nor bool", definition.id());
+      SPDLOG_ERROR(
+          "Variable {} has undefined type. It is neither numeric, nor string, nor bool",
+          definition.id());
     }
   }
 

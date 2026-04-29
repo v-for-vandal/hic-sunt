@@ -89,6 +89,19 @@ class Scope {
                          const StringId& value, NumericValue level,
                          size_t modificationTime = 0);
 
+  // Legacy compatibility wrappers
+  bool AddNumericModifier(const StringId& variable, const StringId& key,
+                          NumericValue add, NumericValue mult,
+                          size_t modificationTime = 0) {
+    return SetNumericModifier(variable, key, add, mult, modificationTime).has_value();
+  }
+
+  bool AddStringModifier(const StringId& variable, const StringId& key,
+                         const StringId& value, NumericValue level,
+                         size_t modificationTime = 0) {
+    return SetStringModifier(variable, key, value, level, modificationTime).has_value();
+  }
+
   // Returns abstract token that represents when this variable was last modified
   std::expected<size_t, ErrorCode> GetModificationTime(const StringId& variable) const;
 

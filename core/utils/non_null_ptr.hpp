@@ -56,6 +56,8 @@ class NonNullSharedPtr {
   bool operator==(nullptr_t) const noexcept { return value == nullptr; }
   bool operator!=(nullptr_t) const noexcept { return value != nullptr; }
 
+  bool IsEmpty() const noexcept { return value == nullptr; }
+
   void reset() { value = std::make_shared<T>(); }
 };
 

@@ -186,8 +186,10 @@ auto Region<BaseTypes>::GetTopNStringValues(
   std::vector<std::pair<size_t, StringId>> topN;
 
   GetSurface().Foreach([&count, variable](auto, auto& cell) {
-    StringId value = cell.GetScope()->GetStringValue(variable);
-    count[value]++;
+    auto value = cell.GetScope()->GetStringValue(variable);
+    if (value) {
+      count[*value]++;
+    }
   });
 
   topN.reserve(count.size());
@@ -213,8 +215,10 @@ auto Region<BaseTypes>::GetNumericValueAggregates(
   utils::PercentileBuilder<NumericValue> builder;
 
   GetSurface().Foreach([&builder, variable](auto, auto& cell) {
-    NumericValue value = cell.GetScope()->GetNumericValue(variable);
-    builder.Account(value);
+    auto value = cell.GetScope()->GetNumericValue(variable);
+    if (value) {
+      builder.Account(*value);
+    }
   });
 
   return builder.GetAggregationInfo();

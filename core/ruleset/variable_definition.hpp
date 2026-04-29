@@ -33,7 +33,7 @@ class VariableDefinitions {
   using StringId = typename BaseTypes::StringId;
 
   bool IsEmpty() const noexcept {
-    return !string_definitions_.empty() || !numeric_definitions_.empty();
+    return string_definitions_.empty() && numeric_definitions_.empty();
   }
 
   void Clear() {

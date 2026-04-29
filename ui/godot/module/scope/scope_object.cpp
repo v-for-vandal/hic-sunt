@@ -29,12 +29,24 @@ void ScopeObject::_bind_methods() {
 
 float ScopeObject::get_numeric_value(const StringName& variable) {
   ERR_FAIL_NULL_SCOPE(0.0);
-  return scope_->GetNumericValue(variable);
+
+  auto value = scope_->GetNumericValue(variable);
+  if (!value) {
+    return 0.0;
+  }
+
+  return *value;
 }
 
 StringName ScopeObject::get_string_value(const StringName& variable) {
   ERR_FAIL_NULL_SCOPE(StringName{});
-  return scope_->GetStringValue(variable);
+
+  auto value = scope_->GetStringValue(variable);
+  if (!value) {
+    return StringName{};
+  }
+
+  return *value;
 }
 
 bool ScopeObject::add_numeric_modifier(const StringName& variable,
@@ -42,7 +54,7 @@ bool ScopeObject::add_numeric_modifier(const StringName& variable,
                                        float mult) {
   ERR_FAIL_NULL_SCOPE(false);
 
-  return scope_->AddNumericModifier(variable, key, add, mult);
+  return static_cast<bool>(scope_->SetNumericModifier(variable, key, add, mult));
 }
 
 bool ScopeObject::add_string_modifier(const StringName& variable,
@@ -50,7 +62,8 @@ bool ScopeObject::add_string_modifier(const StringName& variable,
                                       const StringName& value, float level) {
   ERR_FAIL_NULL_SCOPE(false);
 
-  return scope_->AddStringModifier(variable, key, value, level);
+  return static_cast<bool>(
+      scope_->SetStringModifier(variable, key, value, level));
 }
 
 bool ScopeObject::is_string_variable(const StringName& variable) const {

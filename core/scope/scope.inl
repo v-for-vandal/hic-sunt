@@ -94,13 +94,13 @@ auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> std::expected
 template <typename BaseTypes>
 bool Scope<BaseTypes>::IsStringVariable(const StringId& variable) const {
 
-    return GetVariableDefinitions().IsStringVariable(variable);
+    return GetVariableDefinitions()->IsStringVariable(variable);
 }
 
 template <typename BaseTypes>
 bool Scope<BaseTypes>::IsNumericVariable(const StringId& variable) const {
 
-    return GetVariableDefinitions().IsNumericVariable(variable);
+    return GetVariableDefinitions()->IsNumericVariable(variable);
 }
 
 template <typename BaseTypes>
@@ -123,6 +123,8 @@ std::expected<void, ErrorCode> Scope<BaseTypes>::SetStringModifier(const StringI
 {
     return string_variables_[variable].SetModifier(key, value, level, modificationTime);
 }
+
+
 
 template <typename BaseTypes>
 std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(const StringId& variable) const  {
@@ -150,7 +152,7 @@ std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(const Str
 template <typename BaseTypes>
 auto Scope<BaseTypes>::GetVariableDefinitions() const ->const VariableDefinitionsPtr&
 {
-    if (definitions_.IsEmpty()) {
+    if (definitions_->IsEmpty()) {
         if (parent_) {
             definitions_ = parent_->GetVariableDefinitions();
         }

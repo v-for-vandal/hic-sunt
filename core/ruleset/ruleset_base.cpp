@@ -3,6 +3,7 @@
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
+#include <ruleset/effect.pb.h>
 #include <ruleset/region_improvements.pb.h>
 #include <ruleset/variables.pb.h>
 #include <spdlog/spdlog.h>
@@ -83,7 +84,11 @@ bool RuleSetBase::Load(const std::filesystem::path &path,
   if (!success) {
     return false;
   }
-  effects_.append_range(static_effects);
+  effects_.clear();
+  effects_.reserve(static_effects.effects_size());
+  for (const auto &effect : static_effects.effects()) {
+    effects_.push_back(effect);
+  }
 
   return true;
 }
