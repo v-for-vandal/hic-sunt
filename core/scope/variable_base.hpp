@@ -16,7 +16,7 @@ class VariableBase {
         void UpdateModificationTime(size_t modification_time)
         {
         if (modification_time != 0) {
-            if (modification_time > modification_time_) {
+            if (modification_time >= modification_time_) {
                 modification_time_ = modification_time;
             } else {
                 spdlog::warn("Attempt to decrease modification time from {} to {}",

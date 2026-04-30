@@ -61,7 +61,7 @@ class Scope {
 
   // You can and should do it only on one root scope. All other scopes will fetch
   // it automatically
-  void SetVariableDefinitions(const VariableDefinitionsPtr& defitinitons);
+  void SetVariableDefinitions(const VariableDefinitionsPtr& definitions);
 
   // const VariableDefinitions *Definitions() const;
 

@@ -2,9 +2,9 @@
 
 #include "core/types/error_code.hpp"
 #include "scope.hpp"
+#include "spdlog/spdlog.h"
 
 #include <core/utils/serialize.hpp>
-#include "numeric_variable.hpp"
 
 namespace hs::scope {
 
@@ -18,6 +18,15 @@ Scope<BaseTypes>::Scope(
     id_ = BaseTypes::StringIdFromStdString(
       fmt::format("{:x}", address_as_uint));
   }
+}
+
+template <typename BaseTypes>
+void Scope<BaseTypes>::SetVariableDefinitions(const VariableDefinitionsPtr& definitions)
+{
+    if(parent_ != nullptr) {
+        spdlog::warn("Setting definitiosn on non-root scope. Please don't do that.");
+    }
+   definitions_ = definitions;
 }
 
 template <typename BaseTypes>
@@ -142,7 +151,7 @@ std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(const Str
 
    // parent is null, we are top level
    const auto& definitions = GetVariableDefinitions();
-   if (!definitions_.IsVariable(variable)) {
+   if (!definitions->IsVariable(variable)) {
        return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
    }
 
