@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package hs.proto.types;
+
+enum ScopeType {
+  UNSPECIFIED = 0;
+  WORLD = 1;
+  PLANE = 2;
+  REGION = 4;
+  CELL = 4;
+  PLAYER = 6;
+  CITY = 7;
+  IMPROVEMENT = 8;
+  IMPROVEMENT_TYPE = 11;
+  ARMY = 9;
+  UNIT = 10;
+  UNIT_TYPE = 12;
+}

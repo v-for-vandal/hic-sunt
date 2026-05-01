@@ -3,6 +3,7 @@ syntax = "proto3";
 package hs.proto.ruleset.effect;
 
 import "l10n/localized_name.proto";
+import "types/scope_type.proto";
 
 message Code {
   oneof code {
@@ -18,16 +19,6 @@ message Selector {
 // Effect requires declaring its target and set of required input variables
 // Scheduling affects how effects are executed.
 message Effect {
-  enum TargetType {
-    UNSPECIFIED = 0;
-    IMPROVEMENT = 1;
-    REGION = 2;
-    PLANE = 3;
-    WORLD = 4;
-    UNIT = 5;
-    ARMY = 6;
-    CITY = 7;
-  }
 
   enum Schedule {
     MANUAL = 0;
@@ -37,8 +28,8 @@ message Effect {
   string id = 1;
   l10n.LocalizedName name = 2;
 
-  // for now, target is one of available enumerations.
-  TargetType target = 3;
+  // Scope type that this effect can be used on.
+  types.ScopeType target = 3;
 
   // This field limits what targets to execute this effect on
   Selector selector = 4;

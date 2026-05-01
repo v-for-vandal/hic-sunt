@@ -1,5 +1,6 @@
 core_ruleset_lib = static_library('core_ruleset_lib',
   sources: [
+  'effect.cpp',
   'ruleset.cpp',
   'ruleset_base.cpp',
   fbs_generated,
@@ -8,4 +9,3 @@ core_ruleset_lib = static_library('core_ruleset_lib',
   dependencies : common_deps,
   link_with: [utils_lib],
   include_directories: root_include)
-

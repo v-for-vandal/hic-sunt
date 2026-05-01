@@ -5,6 +5,7 @@ subdir('ruleset')
 subdir('region')
 subdir('scope')
 subdir('terra')
+subdir('session')
 subdir('system')
 
 core_lib = static_library('core_lib',
@@ -17,7 +18,7 @@ core_lib = static_library('core_lib',
     core_region_lib,
     core_scope_lib,
     core_system_lib,
+    core_session_lib,
     core_types_lib,
     ]
   )
-

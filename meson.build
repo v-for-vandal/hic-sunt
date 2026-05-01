@@ -1,4 +1,4 @@
-project('hic-sunt', 'cpp', version: '0.0.1',
+project('hic-sunt', 'cpp', 'c', version: '0.0.1',
   default_options : [
     'cpp_std=c++23',
     'warning_level=3',
@@ -25,9 +25,16 @@ flatbuffer_dep = dependency('flatbuffers', static: true)
 #abseil = dependency('abseil-cpp', modules:['absl_flat_hash_set'])
 abseil = dependency('absl_flat_hash_set')
 
-lua = dependency('lua')
+lua_dep = dependency('lua')
 
 gtest_dep = dependency('gtest')
+
+# Move to sol2 wrap after merging it into upstream
+# Expose standard dependency. Library is header-only
+sol2_dep = declare_dependency(
+  include_directories: include_directories('submodules/sol2/include'),
+)
+
 
 # TODO: Fix - our build type is neither debug nor release :(
 #if get_option('buildtype') == 'release'
