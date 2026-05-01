@@ -7,7 +7,7 @@ enum ScopeType {
   WORLD = 1;
   PLANE = 2;
   REGION = 4;
-  CELL = 4;
+  CELL = 5;
   PLAYER = 6;
   CITY = 7;
   IMPROVEMENT = 8;

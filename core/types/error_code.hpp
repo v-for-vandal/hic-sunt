@@ -13,22 +13,22 @@ namespace hs {
         // variables errors
         ERR_EMPTY_MODIFIER_KEY,
         ERR_NO_SUCH_VARIABLE,
-        ERR_INCORRECT_VARIABLE_TYPE
+        ERR_INCORRECT_VARIABLE_TYPE,
+
+        // effect errors
+        ERR_INVALID_EFFECT_VARIABLE_REFERENCE
     };
 
     class ErrorCategory final : public std::error_category {
      public:
-        const char* name() const noexcept override {
-            return "hic-sunt";
-        }
+        const char* name() const noexcept override;
 
         std::string message(int ev) const override;
+
+        ~ErrorCategory() noexcept override {}
     };
 
-    inline const std::error_category& error_category() noexcept {
-        static const ErrorCategory category;
-        return category;
-    }
+    const std::error_category& error_category() noexcept;
 
     inline std::error_code make_error_code(ErrorCode error) noexcept {
         return {static_cast<int>(error), error_category()};

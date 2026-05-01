@@ -35,6 +35,7 @@ hs_proto_schemas = [
   'render/render.proto',
   'scope/scope.proto',
   'types/control_object.proto',
+  'types/scope_type.proto',
   ]
 
 hs_proto_generated = proto_gen.process(

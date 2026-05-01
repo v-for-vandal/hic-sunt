@@ -2,6 +2,10 @@
 
 namespace hs {
 
+const char* ErrorCategory::name() const noexcept {
+    return "hic-sunt";
+}
+
 std::string ErrorCategory::message(int ev) const {
     switch (static_cast<ErrorCode>(ev)) {
         case NO_ERROR:
@@ -13,6 +17,11 @@ std::string ErrorCategory::message(int ev) const {
         default:
             return "unknown hs error";
     }
+}
+
+const std::error_category& error_category() noexcept {
+    static const ErrorCategory category;
+    return category;
 }
 
 }
