@@ -37,8 +37,11 @@ message Effect {
   // When this effect is executed
   Schedule schedule = 6;
 
+  // Predicate to check if effect should be executed
+  Code possible = 5;
+
   // Code to execute
-  Code code = 5;
+  Code effect = 7;
 }
 
 message Effects {

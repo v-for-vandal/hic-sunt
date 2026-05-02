@@ -16,7 +16,9 @@ namespace hs {
         ERR_INCORRECT_VARIABLE_TYPE,
 
         // effect errors
-        ERR_INVALID_EFFECT_VARIABLE_REFERENCE
+        ERR_INVALID_EFFECT_VARIABLE_REFERENCE,
+        ERR_EFFECT_LUA_RUNTIME_ERROR,
+        ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED
     };
 
     class ErrorCategory final : public std::error_category {

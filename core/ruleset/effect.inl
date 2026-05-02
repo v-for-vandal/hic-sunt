@@ -121,13 +121,20 @@ template <typename BaseTypes>
 EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
     : data_(std::move(data)),
       id_(BaseTypes::StringIdFromStdString(data_.id())) {
-  auto processed = PreprocessCode(data_);
-  if (!processed) {
-    throw std::system_error(make_error_code(processed.error()));
+  auto possible_processed = PreprocessCode(data_.possible());
+  if (!possible_processed) {
+    throw std::system_error(make_error_code(possible_processed.error()));
   }
 
-  code_ = std::move(processed->first);
-  dependencies_ = std::move(processed->second);
+  auto effect_processed = PreprocessCode(data_.effect());
+  if (!effect_processed) {
+    throw std::system_error(make_error_code(effect_processed.error()));
+  }
+
+  possible_code_ = std::move(possible_processed->first);
+  effect_code_ = std::move(effect_processed->first);
+  AppendDependencies(dependencies_, possible_processed->second);
+  AppendDependencies(dependencies_, effect_processed->second);
 }
 
 template <typename BaseTypes>
@@ -136,11 +143,18 @@ auto EffectDefinition<BaseTypes>::GetId() const noexcept -> const StringId& {
 }
 
 template <typename BaseTypes>
-auto EffectDefinition<BaseTypes>::PreprocessCode(const ProtoEffect& data)
+void EffectDefinition<BaseTypes>::AppendDependencies(
+    std::vector<StringId>& target, const std::vector<StringId>& source) {
+  target.insert(target.end(), source.begin(), source.end());
+}
+
+template <typename BaseTypes>
+auto EffectDefinition<BaseTypes>::PreprocessCode(
+    const proto::ruleset::effect::Code& code)
     -> std::expected<std::pair<std::string, std::vector<StringId>>, ErrorCode> {
   std::string source;
-  if (data.code().has_lua()) {
-    source = data.code().lua();
+  if (code.has_lua()) {
+    source = code.lua();
   }
 
   std::string result;
@@ -186,8 +200,7 @@ auto EffectDefinition<BaseTypes>::PreprocessCode(const ProtoEffect& data)
       result += '"';
       result += *parsed_argument;
       result += '"';
-      dependencies.push_back(
-          BaseTypes::StringIdFromStdString(*parsed_argument));
+      dependencies.push_back(BaseTypes::StringIdFromStdString(*parsed_argument));
       pos = argument_end + 1;
       continue;
     }

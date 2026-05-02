@@ -2,6 +2,7 @@ core_session_lib = static_library(
     'core_session_lib',
     sources: [
         'effect_instance.cpp',
+        'lua_scope_change_set.cpp',
         hs_proto_generated_headers,
     ],
     dependencies: [common_deps, sol2_dep, lua_dep],

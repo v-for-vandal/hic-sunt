@@ -21,7 +21,8 @@ class EffectDefinition {
   explicit EffectDefinition(ProtoEffect data);
 
   const StringId& GetId() const noexcept;
-  const std::string& GetCode() const noexcept { return code_; }
+  const std::string& GetEffectCode() const noexcept { return effect_code_; }
+  const std::string& GetPossibleCode() const noexcept { return possible_code_; }
   const ProtoEffect& GetData() const noexcept { return data_; }
   const std::vector<StringId>& GetDependencies() const noexcept {
     return dependencies_;
@@ -29,11 +30,15 @@ class EffectDefinition {
 
  private:
   static std::expected<std::pair<std::string, std::vector<StringId>>, ErrorCode>
-  PreprocessCode(const ProtoEffect& data);
+  PreprocessCode(const proto::ruleset::effect::Code& code);
+
+  static void AppendDependencies(std::vector<StringId>& target,
+                                 const std::vector<StringId>& source);
 
   ProtoEffect data_;
   StringId id_{};
-  std::string code_;
+  std::string effect_code_;
+  std::string possible_code_;
   std::vector<StringId> dependencies_;
 };
 
