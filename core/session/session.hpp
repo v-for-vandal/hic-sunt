@@ -1,42 +1,61 @@
 #pragma once
 
+#include <absl/container/flat_hash_map.h>
+
 #include <core/ruleset/ruleset.hpp>
+#include <core/scope/scope.hpp>
 #include <core/terra/world.hpp>
+#include <core/types/error_code.hpp>
+#include <core/types/scope_type.hpp>
+#include <expected>
 #include <filesystem>
 #include <memory>
-#include <expected>
+#include <vector>
 
-namespace hs::system {
+namespace hs::session {
 
-template <typename BaseTypes = StdBaseTypes, typename WorldPtr, typename RuleSetPtr>
+template <typename BaseTypes = StdBaseTypes,
+          typename WorldPtr = std::shared_ptr<terra::World<BaseTypes>>,
+          typename RuleSetPtr =
+              std::shared_ptr<ruleset::RuleSet<BaseTypes>>>
 class Session {
-public:
-    using StringId = typename BaseTypes::StringId;
-    Session();
+ public:
+  using Scope = scope::Scope<BaseTypes>;
+  using ScopePtr = scope::ScopePtr<BaseTypes>;
+  using StringId = typename BaseTypes::StringId;
+  using ScopeType = types::ScopeType;
 
-    std::expected<void, ErrorCode> SetRuleSet(RuleSetPtr ptr);
+  Session() = default;
 
-    std::expected<void, ErrorCode> SetWorld(WorldPtr ptr);
+  std::expected<void, ErrorCode> SetRuleSet(RuleSetPtr ptr);
 
-    // Advance next turn will move timeline to next turn and execute all
-    // required scripts, functions and so on.
-    void AdvanceNextTurn();
+  std::expected<void, ErrorCode> SetWorld(WorldPtr ptr);
 
-    // This function will change internal turn counter without any logic. Its
-    // primary use is to set current turn when loading game. Changing turn
-    // to earlier value is forbidden because it messes up caches.
-    void SetCurrentTurn(size_t value) { current_turn_ = value; }
+  std::expected<void, ErrorCode> AddScope(const ScopePtr& scope);
 
-    // Return current turn
-    size_t GetCurrentTurn() const { return current_turn_; }
+  // Advance next turn will move timeline to next turn and execute all
+  // required scripts, functions and so on.
+  void AdvanceNextTurn();
 
-private:
-    RuleSetPtr ruleset_;
-    WorldPtr world_;
-    std::size_t current_turn_{0};
+  // This function will change internal turn counter without any logic. Its
+  // primary use is to set current turn when loading game. Changing turn
+  // to earlier value is forbidden because it messes up caches.
+  void SetCurrentTurn(size_t value) { current_turn_ = value; }
 
+  // Return current turn
+  size_t GetCurrentTurn() const { return current_turn_; }
+
+  const auto& GetScopesById() const noexcept { return scopes_by_id_; }
+  const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
+
+ private:
+  RuleSetPtr ruleset_;
+  WorldPtr world_;
+  std::size_t current_turn_{0};
+  absl::flat_hash_map<StringId, ScopePtr> scopes_by_id_;
+  absl::flat_hash_map<ScopeType, std::vector<ScopePtr>> scopes_by_type_;
 };
 
-}  // namespace hs::system
+}  // namespace hs::session
 
 #include "session.inl"

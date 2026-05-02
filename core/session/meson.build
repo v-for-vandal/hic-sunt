@@ -3,6 +3,7 @@ core_session_lib = static_library(
     sources: [
         'effect_instance.cpp',
         'lua_scope_change_set.cpp',
+        'session.cpp',
         hs_proto_generated_headers,
     ],
     dependencies: [common_deps, sol2_dep, lua_dep],
@@ -15,6 +16,7 @@ core_session_tests = executable(
     sources: [
         'test_main.cpp',
         'effect_instance_test.cpp',
+        'session_test.cpp',
         hs_proto_generated_headers,
     ],
     dependencies: [common_deps, gtest_dep, sol2_dep, lua_dep],

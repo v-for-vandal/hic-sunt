@@ -15,6 +15,12 @@ namespace hs {
         ERR_NO_SUCH_VARIABLE,
         ERR_INCORRECT_VARIABLE_TYPE,
 
+        // session errors
+        ERR_SCOPE_ALREADY_EXISTS,
+        ERR_SCOPE_TYPE_UNSPECIFIED,
+        ERR_WORLD_ALREADY_SET,
+        ERR_INVALID_RULESET,
+
         // effect errors
         ERR_INVALID_EFFECT_VARIABLE_REFERENCE,
         ERR_EFFECT_LUA_RUNTIME_ERROR,

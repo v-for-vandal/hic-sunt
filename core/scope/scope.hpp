@@ -58,6 +58,11 @@ class Scope {
   Scope(Scope&&) = default;
   Scope& operator=(Scope&&) = default;
 
+  /// Unique id for this scope object
+  StringId GetId() const noexcept { return id_; }
+  /// Type of this scope
+  ScopeType GetType() const noexcept { return scope_type_; }
+
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
   void SetParent(const std::shared_ptr<Scope>& parent) { parent_ = parent; }
 

@@ -51,6 +51,7 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   PlanePtr GetPlane(const StringId &id) const;
   PlanePtr AddPlane(const StringId &id, QRSBox box, int region_radius,
                     int region_external_radius);
+  auto& GetPlanes() noexcept { return planes_; }
 
   RegionPtr GetRegionById(const StringId &region_id) const noexcept;
   bool HasRegion(const StringId &region_id) const noexcept;
