@@ -12,6 +12,11 @@ add_project_arguments([
   '-Wno-gcc-compat',
   ], language: 'cpp', )
 
+# We need this one for sol2, because we compile Lua as C++ module
+add_project_arguments([
+  '-DSOL_USING_CXX_LUA',
+  ], language: 'cpp', )
+
 fs = import('fs')
 
 fmt_dep = dependency('fmt', version: '>=9.1')
