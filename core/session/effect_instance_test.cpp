@@ -94,6 +94,34 @@ TEST(StdEffectInstance, ExecuteAppliesChangesToTargetChangeSet) {
   auto string_value = scope->GetStringValue("string_var");
   ASSERT_TRUE(string_value.has_value());
   EXPECT_EQ(*string_value, "value");
+
+  struct StringExplanation {
+    std::string scope_id;
+    std::string variable;
+    std::string modifier;
+    std::string value;
+    double level;
+  };
+
+  std::vector<StringExplanation> explanations;
+  scope->ExplainStringVariable(
+      "string_var",
+      [&explanations](const auto& scope_id, const auto& variable,
+                      const auto& modifier, const auto& value, auto level) {
+        explanations.push_back(StringExplanation{
+            .scope_id = scope_id,
+            .variable = variable,
+            .modifier = modifier,
+            .value = value,
+            .level = level,
+        });
+      });
+
+  ASSERT_EQ(explanations.size(), 1u);
+  EXPECT_EQ(explanations[0].variable, "string_var");
+  EXPECT_EQ(explanations[0].modifier, "effect.id");
+  EXPECT_EQ(explanations[0].value, "value");
+  EXPECT_EQ(explanations[0].level, 3.0);
 }
 
 TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
@@ -112,6 +140,34 @@ TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
   auto numeric_value = scope->GetNumericValue("numeric_var");
   ASSERT_TRUE(numeric_value.has_value());
   EXPECT_EQ(*numeric_value, 2.0);
+
+  struct NumericExplanation {
+    std::string scope_id;
+    std::string variable;
+    std::string modifier;
+    double add;
+    double mult;
+  };
+
+  std::vector<NumericExplanation> explanations;
+  scope->ExplainNumericVariable(
+      "numeric_var",
+      [&explanations](const auto& scope_id, const auto& variable,
+                      const auto& modifier, auto add, auto mult) {
+        explanations.push_back(NumericExplanation{
+            .scope_id = scope_id,
+            .variable = variable,
+            .modifier = modifier,
+            .add = add,
+            .mult = mult,
+        });
+      });
+
+  ASSERT_EQ(explanations.size(), 1u);
+  EXPECT_EQ(explanations[0].variable, "numeric_var");
+  EXPECT_EQ(explanations[0].modifier, "effect.id");
+  EXPECT_EQ(explanations[0].add, 2.0);
+  EXPECT_EQ(explanations[0].mult, 0.0);
 }
 
 TEST(StdEffectInstance, ExecuteReturnsRuntimeErrorForLuaFailure) {
