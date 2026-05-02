@@ -1,3 +1,7 @@
+#pragma once
+
+#include "cell.hpp"
+
 #include <google/protobuf/util/message_differencer.h>
 
 #include <core/utils/serialize.hpp>
@@ -23,66 +27,11 @@ bool Cell<BaseTypes>::operator==(const Cell<BaseTypes> &other) const {
   return true;
 }
 
-/*
-template <typename BaseTypes>
-double Cell<BaseTypes>::GetDataNumeric(StringId key) const noexcept {
-  auto fit = user_data_numeric_.find(key);
-
-  if (fit != user_data_numeric_.end()) {
-    return 0.0;
-  }
-
-  return fit->second;
-}
-
-template <typename BaseTypes>
-double Cell<BaseTypes>::SetDataNumeric(StringId key, double value) {
-  auto &elem = user_data_numeric_[key];
-  double res = elem;
-  elem = value;
-
-  return res;
-}
-
-template <typename BaseTypes>
-bool Cell<BaseTypes>::HasDataNumeric(StringId key) const noexcept {
-  return user_data_numeric_.contains(key);
-}
-
-template <typename BaseTypes>
-auto Cell<BaseTypes>::GetDataString(StringId key) const noexcept
-    -> const String & {
-  auto fit = user_data_string_.find(key);
-
-  if (fit != user_data_string_.end()) {
-    static String empty_result;
-    return empty_result;
-  }
-
-  return fit->second;
-}
-
-template <typename BaseTypes>
-auto Cell<BaseTypes>::SetDataString(StringId key,
-                                    String value) -> const String & {
-  auto &elem = user_data_string_[key];
-  elem = std::move(value);
-
-  return elem;
-}
-
-template <typename BaseTypes>
-bool Cell<BaseTypes>::HasDataString(StringId key) const noexcept {
-  return user_data_string_.contains(key);
-}
-*/
-
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes> &source, proto::region::Cell &to) {
   to.Clear();
   to.set_biome(BaseTypes::ToProtoString(source.GetBiome()));
   to.add_features(BaseTypes::ToProtoString(source.GetFeature()));
-  //to.set_height(source.GetHeight());
   auto improvement_ptr = to.mutable_improvements()->Add();
   *improvement_ptr = source.GetImprovement();
 

@@ -13,6 +13,7 @@
 #include <core/types/control_object.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
+#include "core/types/scope_type.hpp"
 
 namespace hs::terra {
 
@@ -30,8 +31,9 @@ Plane<BaseTypes> ParseFrom(const proto::terra::Plane &world,
 
 // Plane is essentially one playable map that consists of multiple regions
 template <typename BaseTypes = StdBaseTypes>
-class Plane : public scope::ScopedObject<BaseTypes> {
+class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_PLANE> {
  public:
+  using Base = scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_PLANE>;
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;

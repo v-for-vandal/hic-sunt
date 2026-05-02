@@ -10,6 +10,28 @@ namespace hs::region {
 using namespace ::hs::geometry::literals;
 
 using StdRegion = Region<StdBaseTypes>;
+using StdScope = scope::Scope<StdBaseTypes>;
+using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
+using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
+using StdVariableDefinitionsPtr =
+    hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
+
+StdVariableDefinitionsPtr MakeVariableDefinitions() {
+  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+  mutable_definitions->AddNumericDefinition("numeric_var", {});
+  mutable_definitions->AddStringDefinition("string_var", {});
+
+  StdVariableDefinitionsPtr result;
+  return StdVariableDefinitionsPtr(
+      std::static_pointer_cast<const StdVariableDefinitions>(
+          mutable_definitions));
+}
+
+StdScopePtr MakeScopeWithDefinitions() {
+  StdScopePtr scope("test_scope");
+  scope->SetVariableDefinitions(MakeVariableDefinitions());
+  return scope;
+}
 
 TEST(StdRegion, Serialize) {
   StdRegion ref_region("test", 15);
@@ -58,11 +80,13 @@ TEST(StdRegion, Equality) {
 }
 
 TEST(StdRegion, Scope) {
+    auto parent_scope = MakeScopeWithDefinitions();
   StdRegion ref_region("test", 2);
   ASSERT_NE(ref_region.GetScope(), nullptr);
+  ref_region.GetScope()->SetParent(parent_scope);
 
-  ref_region.GetScope()->AddNumericModifier("some_var", "some_key", 1.0, 2.0);
-  auto result = ref_region.GetScope()->GetNumericValue("some_var");
+  ref_region.GetScope()->AddNumericModifier("numeric_var", "some_key", 1.0, 2.0);
+  auto result = ref_region.GetScope()->GetNumericValue("numeric_var");
   EXPECT_EQ(result, 3.0);  // add=1.0 * mult=(1+2.0)
 }
 
@@ -76,10 +100,12 @@ TEST(StdRegion, CellScopeParent) {
 }
 
 TEST(StdRegion, TopNStringValues) {
+ auto parent_scope = MakeScopeWithDefinitions();
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
+  region.GetScope()->SetParent(parent_scope);
 
-  const char* var_name = "string_variable";
+  const char* var_name = "string_var";
 
   const std::string FIRST{"first"};
   const std::string SECOND{"second"};

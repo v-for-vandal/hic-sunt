@@ -13,6 +13,7 @@
 #include <core/utils/serialize.hpp>
 #include <string>
 #include <string_view>
+#include "core/types/scope_type.hpp"
 
 namespace hs::region {
 template <typename BaseTypes>
@@ -28,42 +29,20 @@ Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
 
 /// One cell in region map
 template <typename BaseTypes = StdBaseTypes>
-class Cell : public scope::ScopedObject<BaseTypes> {
+class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_CELL> {
  public:
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
 
+  Cell() = default;
+
   StringId GetBiome() const { return biome_; }
   StringId GetFeature() const { return feature_; }
-  /* TODO: Remove
-   * it was replaced with variable in Scope
-   */
-
-  // This is abstract storage for data. It never throws. If key is absent,
-  // default value is returned.
-  /* TODO: REMOVE
-  double GetDataNumeric(StringId key) const noexcept;
-  double SetDataNumeric(StringId key, double value);
-  bool HasDataNumeric(StringId key) const noexcept;
-  // Same, but for string. Strings are owned (and copied) internally
-  const String &GetDataString(StringId key) const noexcept;
-  const String &SetDataString(StringId key, String value);
-  bool HasDataString(StringId key) const noexcept;
-  */
 
   bool HasImprovement() const { return !improvement_.type().empty(); }
   const proto::region::Improvement &GetImprovement() const {
     return improvement_;
   }
-
-  /* TODO: REMOVE
-   * replaced with vairable in Scope
-  double GetHeight() const noexcept {
-    return height_;
-  }
-  double GetTemperature() const noexcept { return temperature_; }
-  double GetPrecipitation() const noexcept { return precipitation_; }
-  */
 
   bool operator==(const Cell &) const;
 

@@ -8,6 +8,7 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
 #include "core/ruleset/variable_definition.hpp"
+#include "core/types/scope_type.hpp"
 // #include <core/scope/variable_definition.hpp>
 
 namespace hs::scope {
@@ -38,6 +39,7 @@ class Scope {
   using NumericVariable = scope::NumericVariable<BaseTypes>;
   using StringVariable = scope::StringVariable<BaseTypes>;
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
+  using ScopeType = types::ScopeType;
   using VariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
@@ -47,7 +49,7 @@ class Scope {
    *         by other scopes
    */
   // Scope(StringId id, const VariableDefinitionsPtr& definitions);
-  Scope(StringId id);
+  Scope(StringId id, ScopeType scope_type = ScopeType::SCOPE_TYPE_UNSPECIFIED);
   Scope() : Scope(StringId{}) {}
   // Delete copying for now, we can do it, but we must propertly re-initialized
   // id because id must be unique
@@ -123,6 +125,8 @@ class Scope {
 
  private:
   StringId id_;
+
+  types::ScopeType scope_type_{types::ScopeType::SCOPE_TYPE_UNSPECIFIED};
 
   // We have only one parent and for every type of scope type of parent is
   // fixed. E.g. parent of region is always world

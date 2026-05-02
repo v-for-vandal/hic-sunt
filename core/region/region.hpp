@@ -26,8 +26,9 @@ Region<BaseTypes> ParseFrom(const proto::region::Region &from,
                             serialize::To<Region<BaseTypes>>);
 
 template <typename BaseTypes = StdBaseTypes>
-class Region : public scope::ScopedObject<BaseTypes> {
+class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_REGION> {
  public:
+  using Base = scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_REGION>;
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;

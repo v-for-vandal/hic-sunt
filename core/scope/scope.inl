@@ -10,8 +10,10 @@ namespace hs::scope {
 
 template <typename BaseTypes>
 Scope<BaseTypes>::Scope(
-  StringId id):
-    id_(id)
+  StringId id,
+  types::ScopeType scope_type):
+    id_(id),
+    scope_type_(scope_type)
 {
   if( BaseTypes::IsNullToken(id_)) {
     const uint64_t address_as_uint = reinterpret_cast<uint64_t>(this);

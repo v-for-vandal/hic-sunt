@@ -1,5 +1,9 @@
 #pragma once
+
+#include "region.hpp"
+
 #include <spdlog/spdlog.h>
+#include "core/types/scope_type.hpp"
 
 namespace hs::region {
 
@@ -7,7 +11,7 @@ template <typename BaseTypes> Region<BaseTypes>::Region() : Region("", 1) {}
 
 template <typename BaseTypes>
 Region<BaseTypes>::Region(const StringId &region_id, int radius)
-    : scope::ScopedObject<BaseTypes>(region_id),
+    : Base(region_id),
     id_(region_id),
     surface_(geometry::HexagonSurface(radius)) {
   InitNonpersistent();

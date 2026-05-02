@@ -29,8 +29,9 @@ World<BaseTypes> ParseFrom(const proto::terra::World &world,
 
 // World is a collection of planes
 template <typename BaseTypes = StdBaseTypes>
-class World : public scope::ScopedObject<BaseTypes> {
+class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_WORLD> {
  public:
+  using Base = scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_WORLD>;
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
@@ -41,7 +42,7 @@ class World : public scope::ScopedObject<BaseTypes> {
   using StringId = BaseTypes::StringId;
   using String = BaseTypes::String;
 
-  World() : scope::ScopedObject<BaseTypes>("world.root") {}
+  World() : Base("world.root") {}
   World(const World &) = delete;
   World(World &&) = default;
   World &operator=(const World &) = delete;
