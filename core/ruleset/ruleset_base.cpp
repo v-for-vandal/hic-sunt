@@ -32,10 +32,10 @@ bool ReadFromFile(const std::filesystem::path& path, Proto& proto_object) {
   return true;
 }
 
-std::vector<std::filesystem::path> CollectRuleFiles(
-    const std::vector<std::filesystem::path>& roots,
-    const std::filesystem::path& subdirectory) {
+std::vector<std::filesystem::path> FilterValidRuleRoots(
+    const std::vector<std::filesystem::path>& roots) {
   std::vector<std::filesystem::path> result;
+  result.reserve(roots.size());
 
   for (const auto& root : roots) {
     if (!std::filesystem::exists(root) || !std::filesystem::is_directory(root)) {
@@ -43,7 +43,18 @@ std::vector<std::filesystem::path> CollectRuleFiles(
                    root.string());
       continue;
     }
+    result.push_back(root);
+  }
 
+  return result;
+}
+
+std::vector<std::filesystem::path> CollectRuleFiles(
+    const std::vector<std::filesystem::path>& roots,
+    const std::filesystem::path& subdirectory) {
+  std::vector<std::filesystem::path> result;
+
+  for (const auto& root : roots) {
     const auto rules_root = root / subdirectory;
     if (!std::filesystem::exists(rules_root) ||
         !std::filesystem::is_directory(rules_root)) {
@@ -220,14 +231,16 @@ bool RuleSetBase::Load(const std::vector<std::filesystem::path>& paths,
                        ErrorsCollection& /*errors*/) {
   Clear();
 
-  const auto improvement_files = CollectRuleFiles(paths, improvements_dir);
-  const auto biome_files = CollectRuleFiles(paths, biomes_dir);
-  const auto resource_files = CollectRuleFiles(paths, resources_dir);
-  const auto job_files = CollectRuleFiles(paths, jobs_dir);
-  const auto rendering_files = CollectRuleFiles(paths, rendering_dir);
-  const auto project_files = CollectRuleFiles(paths, projects_dir);
-  const auto variable_files = CollectRuleFiles(paths, variable_definitions_dir);
-  const auto effect_files = CollectRuleFiles(paths, effects_dir);
+  const auto valid_paths = FilterValidRuleRoots(paths);
+
+  const auto improvement_files = CollectRuleFiles(valid_paths, improvements_dir);
+  const auto biome_files = CollectRuleFiles(valid_paths, biomes_dir);
+  const auto resource_files = CollectRuleFiles(valid_paths, resources_dir);
+  const auto job_files = CollectRuleFiles(valid_paths, jobs_dir);
+  const auto rendering_files = CollectRuleFiles(valid_paths, rendering_dir);
+  const auto project_files = CollectRuleFiles(valid_paths, projects_dir);
+  const auto variable_files = CollectRuleFiles(valid_paths, variable_definitions_dir);
+  const auto effect_files = CollectRuleFiles(valid_paths, effects_dir);
 
   LoadOrderedFilesInto(improvements_, improvement_files);
   LoadOrderedFilesInto(biomes_, biome_files);
