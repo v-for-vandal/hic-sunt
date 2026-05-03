@@ -38,7 +38,7 @@ void System::SaveWorld(const terra::World& target, std::string_view filename) {
 std::optional<ruleset::RuleSet> System::LoadRuleSet(const std::filesystem::path& path,
   ErrorsCollection& errors) {
   ruleset::RuleSet result;
-  const bool success = result.Load(path, errors);
+  const bool success = result.Load({path}, errors);
   if(!success) {
     return std::nullopt;
   } else {

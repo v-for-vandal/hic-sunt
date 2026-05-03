@@ -17,7 +17,8 @@ class RuleSet : public RuleSetBase {
   using StringId = typename BaseTypes::StringId;
   void Clear();
   // Adds data to ruleset
-  bool Load(const std::filesystem::path &path, ErrorsCollection &errors);
+  bool Load(const std::vector<std::filesystem::path>& paths,
+            ErrorsCollection& errors);
 
   const proto::ruleset::RegionImprovement *FindRegionImprovementByType(
       const StringId &improvement_type_id) const;

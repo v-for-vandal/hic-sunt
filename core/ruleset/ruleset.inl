@@ -4,10 +4,10 @@
 namespace hs::ruleset {
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::Load(const std::filesystem::path &path,
+bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
                               ErrorsCollection &errors) {
 
-  if (!RuleSetBase::Load(path, errors)) {
+  if (!RuleSetBase::Load(paths, errors)) {
     return false;
   }
 

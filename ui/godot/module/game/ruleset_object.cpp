@@ -208,7 +208,9 @@ Dictionary RulesetObject::load(String folder_path) {
 
   hs::utils::ErrorsCollection errors;
   RuleSet ruleset;
-  bool success = ruleset.Load(folder_path.utf8().get_data(), errors);
+  bool success =
+      ruleset.Load({std::filesystem::path(folder_path.utf8().get_data())},
+                   errors);
 
   Array errors_godot;
   for (auto& error_msg : errors.errors) {

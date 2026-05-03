@@ -14,6 +14,7 @@ core_ruleset_tests = executable('unit_tests',
   sources: [
     'test_main.cpp',
     'effect_test.cpp',
+    'ruleset_load_test.cpp',
     hs_proto_generated_headers,
     ],
   dependencies : common_deps + gtest_dep,
