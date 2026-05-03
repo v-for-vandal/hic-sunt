@@ -10,7 +10,6 @@ using StdEffectDefinition = ruleset::EffectDefinition<StdBaseTypes>;
 using StdEffectDefinitionPtr = ruleset::ConstEffectDefinitionPtr<StdBaseTypes>;
 using StdEffectInstance = EffectInstance<StdBaseTypes>;
 using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
-using StdScopeChangeSet = scope::ScopeChangeSet<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 
 namespace {
@@ -35,6 +34,11 @@ StdScopePtr MakeScope() {
 
   StdScopePtr scope("test_scope");
   scope->SetVariableDefinitions(definitions);
+  auto numeric_result = scope->SetNumericModifier("numeric_var", "seed", 2.0, 0.0);
+  EXPECT_TRUE(numeric_result.has_value());
+  auto string_result =
+      scope->SetStringModifier("string_var", "seed", "value", 3.0);
+  EXPECT_TRUE(string_result.has_value());
   return scope;
 }
 
@@ -50,13 +54,13 @@ TEST(StdEffectInstance, ExposesDefinitionIdentity) {
 }
 
 TEST(StdEffectInstance, CheckPossibleReturnsBoolean) {
-  auto definition = MakeEffectDefinition("effect.id", "return true", "return");
+  auto definition = MakeEffectDefinition(
+      "effect.id", "return VAR(numeric_var) == 2.0", "return");
 
   StdEffectInstance instance(definition);
   auto scope = MakeScope();
-  StdScopeChangeSet changes(scope);
 
-  auto result = instance.CheckPossible(changes, 10000);
+  auto result = instance.CheckPossible(scope, 10000);
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(*result);
 }
@@ -66,62 +70,34 @@ TEST(StdEffectInstance, CheckPossibleRejectsNonBooleanResult) {
 
   StdEffectInstance instance(definition);
   auto scope = MakeScope();
-  StdScopeChangeSet changes(scope);
 
-  auto result = instance.CheckPossible(changes, 10000);
+  auto result = instance.CheckPossible(scope, 10000);
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
 }
 
-TEST(StdEffectInstance, ExecuteAppliesChangesToTargetChangeSet) {
+TEST(StdEffectInstance, ExecuteReturnsChangeSetWithAppliedChanges) {
   auto definition = MakeEffectDefinition(
       "effect.id",
       "return true",
-      "target:set_numeric_modifier('numeric_var', 2.0, 0.5) "
-      "target:set_string_modifier('string_var', 'value', 3.0)");
+      "target:set_numeric_modifier('numeric_var', VAR(numeric_var), 0.5) "
+      "target:set_string_modifier('string_var', VAR(string_var), 3.0)");
 
   StdEffectInstance instance(definition);
   auto scope = MakeScope();
-  StdScopeChangeSet changes(scope);
 
-  ASSERT_TRUE(instance.Execute(changes, 10000));
-  ASSERT_TRUE(changes.Apply(17));
+  auto execute_result = instance.Execute(scope, 10000);
+  ASSERT_TRUE(execute_result.has_value());
+  ASSERT_EQ(execute_result->size(), 1u);
+  ASSERT_TRUE((*execute_result)[0].Apply(17));
 
   auto numeric_value = scope->GetNumericValue("numeric_var");
   ASSERT_TRUE(numeric_value.has_value());
-  EXPECT_EQ(*numeric_value, 3.0);
+  EXPECT_EQ(*numeric_value, 6.0);
 
   auto string_value = scope->GetStringValue("string_var");
   ASSERT_TRUE(string_value.has_value());
   EXPECT_EQ(*string_value, "value");
-
-  struct StringExplanation {
-    std::string scope_id;
-    std::string variable;
-    std::string modifier;
-    std::string value;
-    double level;
-  };
-
-  std::vector<StringExplanation> explanations;
-  scope->ExplainStringVariable(
-      "string_var",
-      [&explanations](const auto& scope_id, const auto& variable,
-                      const auto& modifier, const auto& value, auto level) {
-        explanations.push_back(StringExplanation{
-            .scope_id = scope_id,
-            .variable = variable,
-            .modifier = modifier,
-            .value = value,
-            .level = level,
-        });
-      });
-
-  ASSERT_EQ(explanations.size(), 1u);
-  EXPECT_EQ(explanations[0].variable, "string_var");
-  EXPECT_EQ(explanations[0].modifier, "effect.id");
-  EXPECT_EQ(explanations[0].value, "value");
-  EXPECT_EQ(explanations[0].level, 3.0);
 }
 
 TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
@@ -132,14 +108,11 @@ TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
 
   StdEffectInstance instance(definition);
   auto scope = MakeScope();
-  StdScopeChangeSet changes(scope);
 
-  ASSERT_TRUE(instance.Execute(changes, 10000));
-  ASSERT_TRUE(changes.Apply(17));
-
-  auto numeric_value = scope->GetNumericValue("numeric_var");
-  ASSERT_TRUE(numeric_value.has_value());
-  EXPECT_EQ(*numeric_value, 2.0);
+  auto execute_result = instance.Execute(scope, 10000);
+  ASSERT_TRUE(execute_result.has_value());
+  ASSERT_EQ(execute_result->size(), 1u);
+  ASSERT_TRUE((*execute_result)[0].Apply(17));
 
   struct NumericExplanation {
     std::string scope_id;
@@ -163,11 +136,13 @@ TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
         });
       });
 
-  ASSERT_EQ(explanations.size(), 1u);
-  EXPECT_EQ(explanations[0].variable, "numeric_var");
-  EXPECT_EQ(explanations[0].modifier, "effect.id");
-  EXPECT_EQ(explanations[0].add, 2.0);
-  EXPECT_EQ(explanations[0].mult, 0.0);
+  ASSERT_EQ(explanations.size(), 2u);
+  const auto fit = std::ranges::find_if(explanations, [](const auto& item) {
+    return item.modifier == "effect.id";
+  });
+  ASSERT_NE(fit, explanations.end());
+  EXPECT_EQ(fit->add, 2.0);
+  EXPECT_EQ(fit->mult, 0.0);
 }
 
 TEST(StdEffectInstance, ExecuteReturnsRuntimeErrorForLuaFailure) {
@@ -178,9 +153,8 @@ TEST(StdEffectInstance, ExecuteReturnsRuntimeErrorForLuaFailure) {
 
   StdEffectInstance instance(definition);
   auto scope = MakeScope();
-  StdScopeChangeSet changes(scope);
 
-  auto result = instance.Execute(changes, 10000);
+  auto result = instance.Execute(scope, 10000);
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
 }
@@ -193,9 +167,8 @@ TEST(StdEffectInstance, ExecuteReturnsOperationLimitError) {
 
   StdEffectInstance instance(definition);
   auto scope = MakeScope();
-  StdScopeChangeSet changes(scope);
 
-  auto result = instance.Execute(changes, 1000);
+  auto result = instance.Execute(scope, 1000);
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED);
 }

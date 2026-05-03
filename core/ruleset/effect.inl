@@ -121,20 +121,23 @@ template <typename BaseTypes>
 EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
     : data_(std::move(data)),
       id_(BaseTypes::StringIdFromStdString(data_.id())) {
-  auto possible_processed = PreprocessCode(data_.possible());
+  size_t next_var_index = 0;
+  auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
   if (!possible_processed) {
     throw std::system_error(make_error_code(possible_processed.error()));
   }
 
-  auto effect_processed = PreprocessCode(data_.effect());
+  auto effect_processed = PreprocessCode(data_.effect(), next_var_index);
   if (!effect_processed) {
     throw std::system_error(make_error_code(effect_processed.error()));
   }
 
-  possible_code_ = std::move(possible_processed->first);
-  effect_code_ = std::move(effect_processed->first);
-  AppendDependencies(dependencies_, possible_processed->second);
-  AppendDependencies(dependencies_, effect_processed->second);
+  possible_code_ = std::move(possible_processed->code);
+  effect_code_ = std::move(effect_processed->code);
+  AppendDependencies(dependencies_, possible_processed->dependencies);
+  AppendDependencies(dependencies_, effect_processed->dependencies);
+  AppendLuaVariables(lua_variables_, possible_processed->lua_variables);
+  AppendLuaVariables(lua_variables_, effect_processed->lua_variables);
 }
 
 template <typename BaseTypes>
@@ -144,37 +147,42 @@ void EffectDefinition<BaseTypes>::AppendDependencies(
 }
 
 template <typename BaseTypes>
+void EffectDefinition<BaseTypes>::AppendLuaVariables(
+    std::vector<LuaVariable>& target, const std::vector<LuaVariable>& source) {
+  target.insert(target.end(), source.begin(), source.end());
+}
+
+template <typename BaseTypes>
 auto EffectDefinition<BaseTypes>::PreprocessCode(
-    const proto::ruleset::effect::Code& code)
-    -> std::expected<std::pair<std::string, std::vector<StringId>>, ErrorCode> {
+    const proto::ruleset::effect::Code& code, size_t& next_var_index)
+    -> std::expected<PreprocessedCode, ErrorCode> {
   std::string source;
   if (code.has_lua()) {
     source = code.lua();
   }
 
-  std::string result;
-  std::vector<StringId> dependencies;
-  result.reserve(source.size());
+  PreprocessedCode result;
+  result.code.reserve(source.size());
 
   size_t pos = 0;
   while (pos < source.size()) {
     if (details::StartsWithAt(source, pos, "--[[")) {
       const size_t end = details::FindBlockCommentEnd(source, pos);
-      result.append(source, pos, end - pos);
+      result.code.append(source, pos, end - pos);
       pos = end;
       continue;
     }
 
     if (details::StartsWithAt(source, pos, "--")) {
       const size_t end = details::FindLineCommentEnd(source, pos);
-      result.append(source, pos, end - pos);
+      result.code.append(source, pos, end - pos);
       pos = end;
       continue;
     }
 
     if (source[pos] == '\'' || source[pos] == '"') {
       const size_t end = details::FindStringEnd(source, pos, source[pos]);
-      result.append(source, pos, end - pos);
+      result.code.append(source, pos, end - pos);
       pos = end;
       continue;
     }
@@ -192,19 +200,22 @@ auto EffectDefinition<BaseTypes>::PreprocessCode(
         return std::unexpected(parsed_argument.error());
       }
 
-      result += '"';
-      result += *parsed_argument;
-      result += '"';
-      dependencies.push_back(BaseTypes::StringIdFromStdString(*parsed_argument));
+      const std::string lua_name = "__var_" + std::to_string(next_var_index++);
+      result.code += lua_name;
+      result.dependencies.push_back(BaseTypes::StringIdFromStdString(*parsed_argument));
+      result.lua_variables.push_back(LuaVariable{
+          .lua_name = lua_name,
+          .variable_id = BaseTypes::StringIdFromStdString(*parsed_argument),
+      });
       pos = argument_end + 1;
       continue;
     }
 
-    result += source[pos];
+    result.code += source[pos];
     ++pos;
   }
 
-  return std::make_pair(std::move(result), std::move(dependencies));
+  return result;
 }
 
 }  // namespace hs::ruleset

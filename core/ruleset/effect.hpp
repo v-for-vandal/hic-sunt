@@ -18,6 +18,11 @@ class EffectDefinition {
   using StringId = typename BaseTypes::StringId;
   using ProtoEffect = proto::ruleset::effect::Effect;
 
+  struct LuaVariable {
+    std::string lua_name;
+    StringId variable_id;
+  };
+
   EffectDefinition() = default;
   explicit EffectDefinition(ProtoEffect data);
 
@@ -29,19 +34,31 @@ class EffectDefinition {
   const std::vector<StringId>& GetDependencies() const noexcept {
     return dependencies_;
   }
+  const std::vector<LuaVariable>& GetLuaVariables() const noexcept {
+    return lua_variables_;
+  }
 
  private:
-  static std::expected<std::pair<std::string, std::vector<StringId>>, ErrorCode>
-  PreprocessCode(const proto::ruleset::effect::Code& code);
+  struct PreprocessedCode {
+    std::string code;
+    std::vector<StringId> dependencies;
+    std::vector<LuaVariable> lua_variables;
+  };
+
+  static std::expected<PreprocessedCode, ErrorCode> PreprocessCode(
+      const proto::ruleset::effect::Code& code, size_t& next_var_index);
 
   static void AppendDependencies(std::vector<StringId>& target,
                                  const std::vector<StringId>& source);
+  static void AppendLuaVariables(std::vector<LuaVariable>& target,
+                                 const std::vector<LuaVariable>& source);
 
   ProtoEffect data_;
   StringId id_{};
   std::string effect_code_;
   std::string possible_code_;
   std::vector<StringId> dependencies_;
+  std::vector<LuaVariable> lua_variables_;
 };
 
 template <typename BaseTypes>

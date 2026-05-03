@@ -77,16 +77,39 @@ void EffectInstance<BaseTypes>::BindScopeChangeSet() {
 }
 
 template <typename BaseTypes>
-template <typename Result>
+std::expected<void, ErrorCode> EffectInstance<BaseTypes>::BindVariables(
+    const ScopePtr& scope) {
+  for (const auto& lua_var : definition_->GetLuaVariables()) {
+    if (scope->IsNumericVariable(lua_var.variable_id)) {
+      auto value = scope->GetNumericValue(lua_var.variable_id);
+      if (!value) {
+        return std::unexpected(value.error());
+      }
+      lua_[lua_var.lua_name] = *value;
+    } else if (scope->IsStringVariable(lua_var.variable_id)) {
+      auto value = scope->GetStringValue(lua_var.variable_id);
+      if (!value) {
+        return std::unexpected(value.error());
+      }
+      lua_[lua_var.lua_name] = *value;
+    } else {
+      return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+    }
+  }
+
+  return {};
+}
+
+template <typename BaseTypes>
+template <typename Result, typename... Args>
 std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
-    sol::protected_function& func, LuaScopeChangeSet& target,
-    int max_operations) {
+    sol::protected_function& func, int max_operations, Args&&... args) {
   if (max_operations > 0) {
     lua_sethook(lua_.lua_state(), &EffectInstance::LuaHook, LUA_MASKCOUNT,
                 max_operations);
   }
 
-  sol::protected_function_result result = func(std::ref(target));
+  sol::protected_function_result result = func(std::forward<Args>(args)...);
   lua_sethook(lua_.lua_state(), nullptr, 0, 0);
 
   if (!result.valid()) {
@@ -103,7 +126,7 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
     return {};
   } else {
     auto opt_val = result.get<sol::optional<Result>>();
-    if(!opt_val) {
+    if (!opt_val) {
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
     return *opt_val;
@@ -112,16 +135,37 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
 
 template <typename BaseTypes>
 std::expected<bool, ErrorCode> EffectInstance<BaseTypes>::CheckPossible(
-    ScopeChangeSet& target, int max_operations) {
-  LuaScopeChangeSet wrapped_target(target, GetId());
-  return CallWithLimit<bool>(possible_function_, wrapped_target, max_operations);
+    const ScopePtr& scope, int max_operations) {
+  auto bind_result = BindVariables(scope);
+  if (!bind_result) {
+    return std::unexpected(bind_result.error());
+  }
+
+  ScopeChangeSet changes(scope);
+  LuaScopeChangeSet target(changes, GetId());
+  return CallWithLimit<bool>(possible_function_, max_operations,
+                             std::ref(target));
 }
 
 template <typename BaseTypes>
-std::expected<void, ErrorCode> EffectInstance<BaseTypes>::Execute(
-    ScopeChangeSet& target, int max_operations) {
-  LuaScopeChangeSet wrapped_target(target, GetId());
-  return CallWithLimit<void>(effect_function_, wrapped_target, max_operations);
+std::expected<std::vector<typename EffectInstance<BaseTypes>::ScopeChangeSet>, ErrorCode>
+EffectInstance<BaseTypes>::Execute(const ScopePtr& scope, int max_operations) {
+  auto bind_result = BindVariables(scope);
+  if (!bind_result) {
+    return std::unexpected(bind_result.error());
+  }
+
+  std::vector<ScopeChangeSet> result_changes;
+  result_changes.emplace_back(scope);
+  LuaScopeChangeSet target(result_changes.back(), GetId());
+
+  auto exec_result =
+      CallWithLimit<void>(effect_function_, max_operations, std::ref(target));
+  if (!exec_result) {
+    return std::unexpected(exec_result.error());
+  }
+
+  return result_changes;
 }
 
 }  // namespace hs::session
