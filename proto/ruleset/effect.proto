@@ -29,7 +29,7 @@ message Effect {
   l10n.LocalizedName name = 2;
 
   // Scope type that this effect can be used on.
-  types.ScopeType target = 3;
+  types.ScopeType scope_type = 3;
 
   // This field limits what targets to execute this effect on
   Selector selector = 4;

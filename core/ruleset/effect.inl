@@ -138,11 +138,6 @@ EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
 }
 
 template <typename BaseTypes>
-auto EffectDefinition<BaseTypes>::GetId() const noexcept -> const StringId& {
-  return id_;
-}
-
-template <typename BaseTypes>
 void EffectDefinition<BaseTypes>::AppendDependencies(
     std::vector<StringId>& target, const std::vector<StringId>& source) {
   target.insert(target.end(), source.begin(), source.end());

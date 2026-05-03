@@ -18,6 +18,8 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRule
         }
 
         ruleset_ = std::move(ruleset);
+        effects_.clear();
+        // TODO: Load effects from RuleSet
         return {};
     }
 

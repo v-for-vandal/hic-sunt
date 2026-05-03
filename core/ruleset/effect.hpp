@@ -4,6 +4,7 @@
 
 #include <core/types/error_code.hpp>
 #include <core/types/std_base_types.hpp>
+#include <core/types/scope_type.hpp>
 #include <core/utils/non_null_ptr.hpp>
 #include <expected>
 #include <string>
@@ -20,7 +21,8 @@ class EffectDefinition {
   EffectDefinition() = default;
   explicit EffectDefinition(ProtoEffect data);
 
-  const StringId& GetId() const noexcept;
+  const StringId& GetId() const noexcept { return id_; }
+  types::ScopeType GetScopeType() const noexcept { return data_.scope_type(); }
   const std::string& GetEffectCode() const noexcept { return effect_code_; }
   const std::string& GetPossibleCode() const noexcept { return possible_code_; }
   const ProtoEffect& GetData() const noexcept { return data_; }

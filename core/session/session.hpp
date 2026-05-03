@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <memory>
 #include <vector>
+#include "effect_instance.hpp"
 
 namespace hs::session {
 
@@ -47,6 +48,7 @@ class Session {
 
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
+  const auto& GetEffects() const noexcept { return effects_; }
 
  private:
   RuleSetPtr ruleset_;
@@ -54,6 +56,7 @@ class Session {
   std::size_t current_turn_{0};
   absl::flat_hash_map<StringId, ScopePtr> scopes_by_id_;
   absl::flat_hash_map<ScopeType, std::vector<ScopePtr>> scopes_by_type_;
+  std::vector<std::shared_ptr<EffectInstance<BaseTypes>>> effects_;
 };
 
 }  // namespace hs::session
