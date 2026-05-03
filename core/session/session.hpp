@@ -48,7 +48,6 @@ class Session {
 
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
-  const auto& GetEffects() const noexcept { return effects_; }
 
  private:
   RuleSetPtr ruleset_;

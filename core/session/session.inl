@@ -10,18 +10,23 @@ namespace hs::session {
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRuleSet(
     RuleSetPtr ruleset) {
-        // TODO: When setting ruleset, we must remove all effects that were created
-        // by scripts that are not in new ruleset
-        if(ruleset == nullptr) {
-            spdlog::error("Trying to set ruleset to nullptr");
-            return std::unexpected(ERR_INVALID_RULESET);
-        }
+  if (ruleset == nullptr) {
+    spdlog::error("Trying to set ruleset to nullptr");
+    return std::unexpected(ErrorCode::ERR_RULESET_MUST_BE_SET_FIRST);
+  }
 
-        ruleset_ = std::move(ruleset);
-        effects_.clear();
-        // TODO: Load effects from RuleSet
-        return {};
-    }
+  ruleset_ = std::move(ruleset);
+  effects_.clear();
+  effects_.reserve(ruleset_->GetAllEffectDefinitions().size());
+
+  for (const auto& effect_definition : ruleset_->GetAllEffectDefinitions()) {
+    auto effect_instance =
+        std::make_shared<EffectInstance<BaseTypes>>(effect_definition);
+    effects_.push_back(std::move(effect_instance));
+  }
+
+  return {};
+}
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorld(

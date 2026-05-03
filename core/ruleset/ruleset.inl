@@ -27,6 +27,14 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
     projects_by_type_.try_emplace(BaseTypes::StringIdFromStdString(project.id()), idx);
   }
 
+  effect_definitions_.clear();
+  effect_definitions_.reserve(GetAllEffects().size());
+  for (const auto& effect_proto : GetAllEffects()) {
+    auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
+    effect_definitions_.push_back(
+        std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
+  }
+
   for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();
        ++idx) {
     const auto &definition = RuleSetBase::GetVariableDefinitions().variables(idx);
@@ -76,6 +84,7 @@ template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
   jobs_by_type_.clear();
   projects_by_type_.clear();
   parsed_variable_definitions_.Clear();
+  effect_definitions_.clear();
 }
 
 template <typename BaseTypes>

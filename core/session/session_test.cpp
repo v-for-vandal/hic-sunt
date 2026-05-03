@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <fstream>
+
 #include <core/geometry/box.hpp>
 #include <core/geometry/coord_system.hpp>
 #include <core/terra/world.hpp>
@@ -120,6 +122,27 @@ TEST(StdSession, SetWorldCanOnlyBeCalledOnce) {
   auto result = session.SetWorld(second_world);
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_WORLD_ALREADY_SET);
+}
+
+TEST(StdSession, SetRuleSetBuildsEffectInstances) {
+  using StdRuleSet = ruleset::RuleSet<StdBaseTypes>;
+
+  const auto root = std::filesystem::temp_directory_path() /
+                    std::filesystem::path("hic_sunt_session_ruleset_test");
+  std::filesystem::remove_all(root);
+  std::filesystem::create_directories(root / "effects");
+  {
+    std::ofstream out(root / "effects" / "effect.txt");
+    out << "effects { id: \"effect.id\" possible { lua: \"return true\" } effect { lua: \"return\" } }\n";
+  }
+
+  auto ruleset = std::make_shared<StdRuleSet>();
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset->Load({root}, errors));
+
+  StdSession session;
+  auto result = session.SetRuleSet(ruleset);
+  ASSERT_TRUE(result.has_value());
 }
 
 }  // namespace hs::session

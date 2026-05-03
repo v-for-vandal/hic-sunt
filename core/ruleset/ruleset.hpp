@@ -2,6 +2,7 @@
 
 #include <absl/container/flat_hash_map.h>
 
+#include <core/ruleset/effect.hpp>
 #include <core/ruleset/ruleset_base.hpp>
 #include <core/ruleset/variable_definition.hpp>
 #include <core/types/std_base_types.hpp>
@@ -32,12 +33,17 @@ class RuleSet : public RuleSetBase {
     return parsed_variable_definitions_;
   }
 
+  const auto& GetAllEffectDefinitions() const noexcept {
+    return effect_definitions_;
+  }
+
  private:
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
 
   VariableDefinitions<BaseTypes> parsed_variable_definitions_;
+  std::vector<ConstEffectDefinitionPtr<BaseTypes>> effect_definitions_;
 };
 
 }  // namespace hs::ruleset
