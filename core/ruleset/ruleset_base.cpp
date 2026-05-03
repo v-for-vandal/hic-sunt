@@ -32,91 +32,185 @@ bool ReadFromFile(const std::filesystem::path& path, Proto& proto_object) {
   return true;
 }
 
-template <typename Proto>
 std::vector<std::filesystem::path> CollectRuleFiles(
-    const std::filesystem::path& root) {
+    const std::vector<std::filesystem::path>& roots,
+    const std::filesystem::path& subdirectory) {
   std::vector<std::filesystem::path> result;
-  if (!std::filesystem::exists(root) || !std::filesystem::is_directory(root)) {
-    return result;
-  }
 
-  for (const auto& entry : std::filesystem::recursive_directory_iterator(root)) {
-    if (!entry.is_regular_file()) {
+  for (const auto& root : roots) {
+    if (!std::filesystem::exists(root) || !std::filesystem::is_directory(root)) {
+      spdlog::warn("Ruleset path {} is not a directory and will be ignored",
+                   root.string());
       continue;
     }
-    if (entry.path().extension() != ".txt") {
+
+    const auto rules_root = root / subdirectory;
+    if (!std::filesystem::exists(rules_root) ||
+        !std::filesystem::is_directory(rules_root)) {
       continue;
     }
-    result.push_back(entry.path());
+
+    std::vector<std::filesystem::path> local_files;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(rules_root)) {
+      if (!entry.is_regular_file()) {
+        continue;
+      }
+      if (entry.path().extension() != ".txt") {
+        continue;
+      }
+      local_files.push_back(entry.path());
+    }
+
+    std::sort(local_files.begin(), local_files.end());
+    result.insert(result.end(), local_files.begin(), local_files.end());
   }
 
-  std::sort(result.begin(), result.end());
   return result;
 }
 
-void MergeInto(proto::ruleset::RegionImprovements& target,
-               const proto::ruleset::RegionImprovements& source) {
-  target.mutable_improvements()->MergeFrom(source.improvements());
+template <typename Element>
+int FindById(const auto& repeated_field, const std::string& id) {
+  for (int idx = 0; idx < repeated_field.size(); ++idx) {
+    if (repeated_field.Get(idx).id() == id) {
+      return idx;
+    }
+  }
+  return -1;
 }
 
-void MergeInto(proto::ruleset::Biomes& target,
-               const proto::ruleset::Biomes& source) {
-  target.mutable_biomes()->MergeFrom(source.biomes());
-  target.mutable_biome_features()->MergeFrom(source.biome_features());
-}
-
-void MergeInto(proto::ruleset::Resources& target,
-               const proto::ruleset::Resources& source) {
-  target.mutable_resources()->MergeFrom(source.resources());
-}
-
-void MergeInto(proto::ruleset::Jobs& target,
-               const proto::ruleset::Jobs& source) {
-  target.mutable_jobs()->MergeFrom(source.jobs());
-}
-
-void MergeInto(proto::ruleset::Projects& target,
-               const proto::ruleset::Projects& source) {
-  target.mutable_projects()->MergeFrom(source.projects());
-}
-
-void MergeInto(proto::render::Rendering& target,
-               const proto::render::Rendering& source) {
-  target.mutable_atlas_rendering()->MergeFrom(source.atlas_rendering());
-}
-
-void MergeInto(proto::ruleset::Variables& target,
-               const proto::ruleset::Variables& source) {
-  target.mutable_variables()->MergeFrom(source.variables());
-}
-
-void MergeInto(std::vector<proto::ruleset::effect::Effect>& target,
-               const proto::ruleset::effect::Effects& source) {
-  target.reserve(target.size() + source.effects_size());
-  for (const auto& effect : source.effects()) {
-    target.push_back(effect);
+template <typename RepeatedField, typename Element>
+void UpsertRepeatedField(RepeatedField* target, const Element& source,
+                         const std::filesystem::path& file_path,
+                         const char* object_type_name) {
+  const int existing_idx = FindById<Element>(*target, source.id());
+  if (existing_idx >= 0) {
+    spdlog::info("Overriding {} {} from file {}", object_type_name, source.id(),
+                 file_path.string());
+    (*target)[existing_idx] = source;
+  } else {
+    *target->Add() = source;
   }
 }
 
-template <typename Proto>
-void LoadDirectoryInto(const std::filesystem::path& directory, Proto& target) {
-  for (const auto& file : CollectRuleFiles<Proto>(directory)) {
-    Proto parsed;
-    if (!ReadFromFile(file, parsed)) {
-      continue;
-    }
-    MergeInto(target, parsed);
+void ApplyFile(proto::ruleset::RegionImprovements& target,
+               const std::filesystem::path& file_path) {
+  proto::ruleset::RegionImprovements parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& improvement : parsed.improvements()) {
+    UpsertRepeatedField(target.mutable_improvements(), improvement, file_path,
+                        "region improvement");
   }
 }
 
-void LoadDirectoryInto(const std::filesystem::path& directory,
-                       std::vector<proto::ruleset::effect::Effect>& target) {
-  for (const auto& file : CollectRuleFiles<proto::ruleset::effect::Effects>(directory)) {
-    proto::ruleset::effect::Effects parsed;
-    if (!ReadFromFile(file, parsed)) {
-      continue;
+void ApplyFile(proto::ruleset::Biomes& target,
+               const std::filesystem::path& file_path) {
+  proto::ruleset::Biomes parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& biome : parsed.biomes()) {
+    UpsertRepeatedField(target.mutable_biomes(), biome, file_path, "biome");
+  }
+  for (const auto& biome_feature : parsed.biome_features()) {
+    UpsertRepeatedField(target.mutable_biome_features(), biome_feature,
+                        file_path, "biome feature");
+  }
+}
+
+void ApplyFile(proto::ruleset::Resources& target,
+               const std::filesystem::path& file_path) {
+  proto::ruleset::Resources parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& resource : parsed.resources()) {
+    UpsertRepeatedField(target.mutable_resources(), resource, file_path,
+                        "resource");
+  }
+}
+
+void ApplyFile(proto::ruleset::Jobs& target,
+               const std::filesystem::path& file_path) {
+  proto::ruleset::Jobs parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& job : parsed.jobs()) {
+    UpsertRepeatedField(target.mutable_jobs(), job, file_path, "job");
+  }
+}
+
+void ApplyFile(proto::ruleset::Projects& target,
+               const std::filesystem::path& file_path) {
+  proto::ruleset::Projects parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& project : parsed.projects()) {
+    UpsertRepeatedField(target.mutable_projects(), project, file_path,
+                        "project");
+  }
+}
+
+void ApplyFile(proto::render::Rendering& target,
+               const std::filesystem::path& file_path) {
+  proto::render::Rendering parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& atlas_rendering : parsed.atlas_rendering()) {
+    UpsertRepeatedField(target.mutable_atlas_rendering(), atlas_rendering,
+                        file_path, "atlas rendering");
+  }
+}
+
+void ApplyFile(proto::ruleset::Variables& target,
+               const std::filesystem::path& file_path) {
+  proto::ruleset::Variables parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& variable : parsed.variables()) {
+    UpsertRepeatedField(target.mutable_variables(), variable, file_path,
+                        "variable");
+  }
+}
+
+void ApplyFile(std::vector<proto::ruleset::effect::Effect>& target,
+               const std::filesystem::path& file_path) {
+  proto::ruleset::effect::Effects parsed;
+  if (!ReadFromFile(file_path, parsed)) {
+    return;
+  }
+
+  for (const auto& effect : parsed.effects()) {
+    const auto fit = std::ranges::find_if(target, [&effect](const auto& existing) {
+      return existing.id() == effect.id();
+    });
+    if (fit != target.end()) {
+      spdlog::info("Overriding effect {} from file {}", effect.id(),
+                   file_path.string());
+      *fit = effect;
+    } else {
+      target.push_back(effect);
     }
-    MergeInto(target, parsed);
+  }
+}
+
+template <typename Target>
+void LoadOrderedFilesInto(Target& target,
+                         const std::vector<std::filesystem::path>& files) {
+  for (const auto& file : files) {
+    ApplyFile(target, file);
   }
 }
 
@@ -126,22 +220,23 @@ bool RuleSetBase::Load(const std::vector<std::filesystem::path>& paths,
                        ErrorsCollection& /*errors*/) {
   Clear();
 
-  for (const auto& path : paths) {
-    if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path)) {
-      spdlog::warn("Ruleset path {} is not a directory and will be ignored",
-                   path.string());
-      continue;
-    }
+  const auto improvement_files = CollectRuleFiles(paths, improvements_dir);
+  const auto biome_files = CollectRuleFiles(paths, biomes_dir);
+  const auto resource_files = CollectRuleFiles(paths, resources_dir);
+  const auto job_files = CollectRuleFiles(paths, jobs_dir);
+  const auto rendering_files = CollectRuleFiles(paths, rendering_dir);
+  const auto project_files = CollectRuleFiles(paths, projects_dir);
+  const auto variable_files = CollectRuleFiles(paths, variable_definitions_dir);
+  const auto effect_files = CollectRuleFiles(paths, effects_dir);
 
-    LoadDirectoryInto(path / improvements_dir, improvements_);
-    LoadDirectoryInto(path / biomes_dir, biomes_);
-    LoadDirectoryInto(path / resources_dir, resources_);
-    LoadDirectoryInto(path / jobs_dir, jobs_);
-    LoadDirectoryInto(path / rendering_dir, rendering_);
-    LoadDirectoryInto(path / projects_dir, projects_);
-    LoadDirectoryInto(path / variable_definitions_dir, variable_definitions_);
-    LoadDirectoryInto(path / effects_dir, effects_);
-  }
+  LoadOrderedFilesInto(improvements_, improvement_files);
+  LoadOrderedFilesInto(biomes_, biome_files);
+  LoadOrderedFilesInto(resources_, resource_files);
+  LoadOrderedFilesInto(jobs_, job_files);
+  LoadOrderedFilesInto(rendering_, rendering_files);
+  LoadOrderedFilesInto(projects_, project_files);
+  LoadOrderedFilesInto(variable_definitions_, variable_files);
+  LoadOrderedFilesInto(effects_, effect_files);
 
   return true;
 }

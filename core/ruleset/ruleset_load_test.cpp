@@ -64,6 +64,23 @@ TEST(StdRuleSet, LoadRespectsOrderedDirectories) {
   EXPECT_EQ(ruleset.GetJobs().jobs(1).id(), "job.second");
 }
 
+TEST(StdRuleSet, LaterFilesOverrideObjectsWithSameId) {
+  const auto first = MakeTempDir("override_first");
+  const auto second = MakeTempDir("override_second");
+  WriteTextFile(first / "projects" / "a.txt",
+                "projects { id: \"project.one\" script: \"res://first.gd\" }\n");
+  WriteTextFile(second / "projects" / "b.txt",
+                "projects { id: \"project.one\" script: \"res://second.gd\" }\n");
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({first, second}, errors));
+
+  ASSERT_EQ(ruleset.GetProjects().projects_size(), 1);
+  EXPECT_EQ(ruleset.GetProjects().projects(0).id(), "project.one");
+  EXPECT_EQ(ruleset.GetProjects().projects(0).script(), "res://second.gd");
+}
+
 TEST(StdRuleSet, LoadIgnoresNonDirectoryPaths) {
   const auto root = MakeTempDir("ignore_non_directory");
   const auto file_path = root / "not_a_directory.txt";
