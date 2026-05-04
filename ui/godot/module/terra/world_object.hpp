@@ -38,6 +38,8 @@ class WorldObject : public RefCounted {
   static Dictionary create_error(const char* error);
   static Dictionary create_success();
   static Ref<WorldObject> create_world();
+
+  const World& GetWorld() const noexcept { return data_; }
 };
 
 }  // namespace hs::godot

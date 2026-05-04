@@ -11,7 +11,9 @@
 namespace hs::session {
 
 template <typename BaseTypes>
-void EffectExecutor<BaseTypes>::Execute(Session& session, size_t current_time) {
+template <typename WorldPtr, typename RuleSetPtr>
+void EffectExecutor<BaseTypes>::Execute(
+    Session<BaseTypes, WorldPtr, RuleSetPtr>& session, size_t current_time) {
   struct PendingExecution {
     std::shared_ptr<EffectInstance> effect;
     ScopePtr scope;

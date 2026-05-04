@@ -11,7 +11,7 @@ namespace hs::session {
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRuleSet(
     RuleSetPtr ruleset) {
-  if (ruleset == nullptr) {
+  if (!ruleset) {
     spdlog::error("Trying to set ruleset to nullptr");
     return std::unexpected(ErrorCode::ERR_RULESET_MUST_BE_SET_FIRST);
   }
@@ -32,7 +32,7 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRule
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorld(
     WorldPtr ptr) {
-  if (world_ != nullptr) {
+  if (world_) {
     spdlog::error("Can not set world more than once");
     return std::unexpected(ErrorCode::ERR_WORLD_ALREADY_SET);
   }
@@ -79,12 +79,12 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorl
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
-  if (ruleset_ == nullptr) {
+  if (!ruleset_) {
     spdlog::error("Ruleset is not set");
     return;
   }
 
-  if (world_ == nullptr) {
+  if (!world_) {
     spdlog::error("World is not set");
     return;
   }

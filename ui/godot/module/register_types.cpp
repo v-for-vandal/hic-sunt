@@ -8,6 +8,7 @@
 #include <ui/godot/module/region/cell_object.hpp>
 #include <ui/godot/module/region/region_object.hpp>
 #include <ui/godot/module/scope/scope_object.hpp>
+#include <ui/godot/module/session/session_object.hpp>
 #include <ui/godot/module/system/spdlog_sink.hpp>
 #include <ui/godot/module/system/surface_event.hpp>
 #include <ui/godot/module/system/system.hpp>
@@ -35,6 +36,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<RulesetObject>();
     ClassDB::register_class<CellObject>();
     ClassDB::register_class<ScopeObject>();
+    ClassDB::register_class<SessionObject>();
   }
 }
 
