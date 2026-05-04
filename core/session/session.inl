@@ -3,6 +3,7 @@
 #include "core/types/error_code.hpp"
 #include "session.hpp"
 
+#include <core/session/effect_executor.hpp>
 #include <spdlog/spdlog.h>
 
 namespace hs::session {
@@ -74,6 +75,23 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorl
 
   world_ = std::move(ptr);
   return {};
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
+  if (ruleset_ == nullptr) {
+    spdlog::error("Ruleset is not set");
+    return;
+  }
+
+  if (world_ == nullptr) {
+    spdlog::error("World is not set");
+    return;
+  }
+
+  ++current_turn_;
+  EffectExecutor<BaseTypes> executor;
+  executor.Execute(*this, current_turn_);
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>

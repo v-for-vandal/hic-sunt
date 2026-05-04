@@ -3,6 +3,10 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <memory>
+
+#include <ruleset/effect.pb.h>
+#include <core/ruleset/variable_definition.hpp>
 
 #include <core/geometry/box.hpp>
 #include <core/geometry/coord_system.hpp>
@@ -15,12 +19,39 @@ using StdScope = scope::Scope<StdBaseTypes>;
 using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 using StdWorld = terra::World<StdBaseTypes>;
 using StdWorldPtr = std::shared_ptr<StdWorld>;
+using StdEffectDefinition = ruleset::EffectDefinition<StdBaseTypes>;
+using StdEffectDefinitionPtr = ruleset::ConstEffectDefinitionPtr<StdBaseTypes>;
+using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using ScopeType = types::ScopeType;
 
 namespace {
 
 StdScopePtr MakeScope(const std::string& id, ScopeType type) {
   return StdScopePtr(id, type);
+}
+
+StdScopePtr MakeEffectScope(const std::string& id, ScopeType type) {
+  auto definitions = std::make_shared<StdVariableDefinitions>();
+  definitions->AddNumericDefinition("numeric_var", {});
+
+  StdScopePtr scope(id, type);
+  scope->SetVariableDefinitions(definitions);
+  EXPECT_TRUE(scope->SetNumericModifier("numeric_var", "seed", 2.0, 0.0));
+  return scope;
+}
+
+StdEffectDefinitionPtr MakeEffectDefinition(std::string id, ScopeType scope_type,
+                                            std::string possible,
+                                            std::string effect_code) {
+  proto::ruleset::effect::Effect effect;
+  effect.set_id(std::move(id));
+  effect.set_scope_type(scope_type);
+  effect.mutable_possible()->set_lua(std::move(possible));
+  effect.mutable_effect()->set_lua(std::move(effect_code));
+
+  auto definition = std::make_shared<StdEffectDefinition>(std::move(effect));
+  return StdEffectDefinitionPtr(
+      std::static_pointer_cast<const StdEffectDefinition>(definition));
 }
 
 StdWorldPtr MakeWorld() {
@@ -122,6 +153,34 @@ TEST(StdSession, SetWorldCanOnlyBeCalledOnce) {
   auto result = session.SetWorld(second_world);
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_WORLD_ALREADY_SET);
+}
+
+TEST(StdSession, AdvanceNextTurnIncrementsTurnAndExecutesEffects) {
+  using StdRuleSet = ruleset::RuleSet<StdBaseTypes>;
+
+  StdSession session;
+  auto world = MakeWorld();
+  ASSERT_TRUE(session.SetWorld(world));
+  ASSERT_TRUE(session.SetRuleSet(std::make_shared<StdRuleSet>()));
+
+  auto scope = MakeEffectScope("scope.id", ScopeType::SCOPE_TYPE_REGION);
+  ASSERT_TRUE(session.AddScope(scope));
+
+  auto definition = MakeEffectDefinition(
+      "effect.id", ScopeType::SCOPE_TYPE_REGION,
+      "return VAR(numeric_var) >= 0",
+      "target:set_numeric_modifier('numeric_var', 4.0, 0.0)");
+  session.GetEffects().push_back(
+      std::make_shared<EffectInstance<StdBaseTypes>>(definition));
+
+  ASSERT_TRUE(scope->SetNumericModifier("numeric_var", "seed", 3.0, 0.0, 1));
+
+  session.AdvanceNextTurn();
+
+  EXPECT_EQ(session.GetCurrentTurn(), 1u);
+  auto numeric_value = scope->GetNumericValue("numeric_var");
+  ASSERT_TRUE(numeric_value.has_value());
+  EXPECT_EQ(*numeric_value, 7.0);
 }
 
 TEST(StdSession, SetRuleSetBuildsEffectInstances) {
