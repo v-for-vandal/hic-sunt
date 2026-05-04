@@ -38,6 +38,8 @@ class EffectDefinition {
     return lua_variables_;
   }
 
+  int GetMaxOperations() const noexcept;
+
  private:
   struct PreprocessedCode {
     std::string code;

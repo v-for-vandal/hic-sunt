@@ -45,7 +45,7 @@ void EffectExecutor<BaseTypes>::Execute(Session& session, size_t current_time) {
         continue;
       }
 
-      auto possible_result = effect->CheckPossible(scope, 10000);
+      auto possible_result = effect->CheckPossible(scope);
       if (!possible_result) {
         spdlog::warn(
             "Failed to check possible for effect {} on scope {}: {}",
@@ -68,7 +68,7 @@ void EffectExecutor<BaseTypes>::Execute(Session& session, size_t current_time) {
 
   for (const auto& pending_execution : pending_executions) {
     auto execute_result = pending_execution.effect->Execute(
-        pending_execution.scope, 10000);
+        pending_execution.scope);
     if (!execute_result) {
       throw std::system_error(make_error_code(execute_result.error()));
     }

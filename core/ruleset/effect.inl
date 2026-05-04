@@ -117,6 +117,13 @@ inline size_t FindBlockCommentEnd(const std::string& source, size_t pos) {
 
 }  // namespace details
 
+
+template <typename BaseTypes>
+int EffectDefinition<BaseTypes>::GetMaxOperations() const noexcept {
+    // Later, we can add it to proto object. For now, constant will suffice
+    return 10000;
+}
+
 template <typename BaseTypes>
 EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
     : data_(std::move(data)),

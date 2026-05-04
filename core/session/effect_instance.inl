@@ -104,7 +104,8 @@ std::expected<void, ErrorCode> EffectInstance<BaseTypes>::BindVariables(
 template <typename BaseTypes>
 template <typename Result, typename... Args>
 std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
-    sol::protected_function& func, int max_operations, Args&&... args) {
+    sol::protected_function& func, std::optional<int> max_operations_in, Args&&... args) {
+  const int max_operations = max_operations_in.value_or(definition_->GetMaxOperations());
   if (max_operations > 0) {
     lua_sethook(lua_.lua_state(), &EffectInstance::LuaHook, LUA_MASKCOUNT,
                 max_operations);
@@ -136,7 +137,7 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
 
 template <typename BaseTypes>
 std::expected<bool, ErrorCode> EffectInstance<BaseTypes>::CheckPossible(
-    const ScopePtr& scope, int max_operations) {
+    const ScopePtr& scope, std::optional<int> max_operations) {
   auto bind_result = BindVariables(scope);
   if (!bind_result) {
     return std::unexpected(bind_result.error());
@@ -150,7 +151,7 @@ std::expected<bool, ErrorCode> EffectInstance<BaseTypes>::CheckPossible(
 
 template <typename BaseTypes>
 std::expected<std::vector<typename EffectInstance<BaseTypes>::ScopeChangeSet>, ErrorCode>
-EffectInstance<BaseTypes>::Execute(const ScopePtr& scope, int max_operations) {
+EffectInstance<BaseTypes>::Execute(const ScopePtr& scope, std::optional<int> max_operations) {
   auto bind_result = BindVariables(scope);
   if (!bind_result) {
     return std::unexpected(bind_result.error());

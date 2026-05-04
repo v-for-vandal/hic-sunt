@@ -30,9 +30,9 @@ class EffectInstance {
   const StringId& GetId() const { return definition_->GetId(); }
 
   std::expected<bool, ErrorCode> CheckPossible(const ScopePtr& scope,
-                                               int max_operations);
+                                               std::optional<int> max_operations = std::nullopt);
   std::expected<std::vector<ScopeChangeSet>, ErrorCode> Execute(
-      const ScopePtr& scope, int max_operations);
+      const ScopePtr& scope, std::optional<int> max_operations = std::nullopt);
 
  private:
   static void LuaHook(lua_State* lua_state, lua_Debug* debug_info);
@@ -44,7 +44,7 @@ class EffectInstance {
 
   template <typename Result, typename... Args>
   std::expected<Result, ErrorCode> CallWithLimit(sol::protected_function& func,
-                                                 int max_operations,
+                                                 std::optional<int> max_operations,
                                                  Args&&... args);
 
   EffectDefinitionPtr definition_;
