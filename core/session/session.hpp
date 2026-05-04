@@ -15,6 +15,9 @@
 
 namespace hs::session {
 
+template <typename BaseTypes>
+class EffectExecutor;
+
 template <typename BaseTypes = StdBaseTypes,
           typename WorldPtr = std::shared_ptr<terra::World<BaseTypes>>,
           typename RuleSetPtr =
@@ -48,8 +51,12 @@ class Session {
 
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
+  auto& GetEffects() noexcept { return effects_; }
+  const auto& GetEffects() const noexcept { return effects_; }
 
  private:
+  friend class EffectExecutor<BaseTypes>;
+
   RuleSetPtr ruleset_;
   WorldPtr world_;
   std::size_t current_turn_{0};

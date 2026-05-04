@@ -35,6 +35,7 @@ void EffectInstance<BaseTypes>::InitializeLuaState() {
 template <typename BaseTypes>
 std::expected<void, ErrorCode> EffectInstance<BaseTypes>::LoadFunctions() {
   {
+      // TODO: pass __var_X as function arguments and not as global bound variables
     const std::string source =
         "function __hic_sunt_possible(target)\n" +
         definition_->GetPossibleCode() + "\nend";
