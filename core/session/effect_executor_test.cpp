@@ -9,6 +9,9 @@
 
 #include <core/ruleset/variable_definition.hpp>
 
+#include <core/scope/scope_ut.hpp>
+#include <core/ruleset/ruleset_ut.hpp>
+
 namespace hs::session {
 
 using StdSession = Session<StdBaseTypes>;
@@ -19,42 +22,12 @@ using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using ScopeType = types::ScopeType;
 
-namespace {
-
-StdEffectDefinitionPtr MakeEffectDefinition(std::string id, ScopeType scope_type,
-                                            std::string possible,
-                                            std::string effect_code) {
-  proto::ruleset::effect::Effect effect;
-  effect.set_id(std::move(id));
-  effect.set_scope_type(scope_type);
-  effect.mutable_possible()->set_lua(std::move(possible));
-  effect.mutable_effect()->set_lua(std::move(effect_code));
-
-  auto definition = std::make_shared<StdEffectDefinition>(std::move(effect));
-  return StdEffectDefinitionPtr(
-      std::static_pointer_cast<const StdEffectDefinition>(definition));
-}
-
-StdScopePtr MakeScope(const std::string& id, ScopeType type) {
-  auto definitions = std::make_shared<StdVariableDefinitions>();
-  definitions->AddNumericDefinition("numeric_var", {});
-  definitions->AddStringDefinition("string_var", {});
-
-  StdScopePtr scope(id, type);
-  scope->SetVariableDefinitions(definitions);
-  EXPECT_TRUE(scope->SetNumericModifier("numeric_var", "seed", 2.0, 0.0));
-  EXPECT_TRUE(scope->SetStringModifier("string_var", "seed", "value", 1.0));
-  return scope;
-}
-
-}  // namespace
-
 TEST(StdEffectExecutor, ExecutesQueuedEffectsAndAppliesChanges) {
   StdSession session;
-  auto scope = MakeScope("scope.id", ScopeType::SCOPE_TYPE_REGION);
+  auto scope = hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION);
   ASSERT_TRUE(session.AddScope(scope));
 
-  auto definition = MakeEffectDefinition(
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
       "effect.id", ScopeType::SCOPE_TYPE_REGION,
       "return VAR(numeric_var) >= 0",
       "target:set_numeric_modifier('numeric_var', 4.0, 0.0)");
@@ -72,10 +45,10 @@ TEST(StdEffectExecutor, ExecutesQueuedEffectsAndAppliesChanges) {
 
 TEST(StdEffectExecutor, SkipsEffectWhenDependenciesAreOlderThanCurrentTime) {
   StdSession session;
-  auto scope = MakeScope("scope.id", ScopeType::SCOPE_TYPE_REGION);
+  auto scope = hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION);
   ASSERT_TRUE(session.AddScope(scope));
 
-  auto definition = MakeEffectDefinition(
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
       "effect.id", ScopeType::SCOPE_TYPE_REGION,
       "return VAR(numeric_var) >= 0",
       "target:set_numeric_modifier('numeric_var', 4.0, 0.0)");
@@ -93,10 +66,10 @@ TEST(StdEffectExecutor, SkipsEffectWhenDependenciesAreOlderThanCurrentTime) {
 
 TEST(StdEffectExecutor, SkipsEffectWhenPossibleReturnsFalse) {
   StdSession session;
-  auto scope = MakeScope("scope.id", ScopeType::SCOPE_TYPE_REGION);
+  auto scope = hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION);
   ASSERT_TRUE(session.AddScope(scope));
 
-  auto definition = MakeEffectDefinition(
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
       "effect.id", ScopeType::SCOPE_TYPE_REGION,
       "return false",
       "target:set_numeric_modifier('numeric_var', 4.0, 0.0)");

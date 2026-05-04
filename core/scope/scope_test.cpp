@@ -4,6 +4,7 @@
 
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
+#include <core/scope/scope_ut.hpp>
 
 namespace hs::scope {
 
@@ -13,23 +14,6 @@ using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using StdVariableDefinitionsPtr =
     hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
 
-StdVariableDefinitionsPtr MakeVariableDefinitions() {
-  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
-  mutable_definitions->AddNumericDefinition("numeric_var", {});
-  mutable_definitions->AddStringDefinition("string_var", {});
-
-  StdVariableDefinitionsPtr result;
-  return StdVariableDefinitionsPtr(
-      std::static_pointer_cast<const StdVariableDefinitions>(
-          mutable_definitions));
-}
-
-StdScopePtr MakeScopeWithDefinitions() {
-  StdScopePtr scope("test_scope");
-  scope->SetVariableDefinitions(MakeVariableDefinitions());
-  return scope;
-}
-
 
 TEST(StdScope, Create) {
   StdScope stack_scope;
@@ -38,7 +22,7 @@ TEST(StdScope, Create) {
 }
 
 TEST(StdScope, NumericVariable) {
-  auto scope = MakeScopeWithDefinitions();
+  auto scope = test::MakeSimpleScope();
 
   EXPECT_TRUE(scope->SetNumericModifier("numeric_var", "some_key", 1.0, 2.0, 0));
   auto result = scope->GetNumericValue("numeric_var");
@@ -47,7 +31,7 @@ TEST(StdScope, NumericVariable) {
 }
 
 TEST(StdScope, InheritanceParent) {
-  StdScopePtr parent_scope = MakeScopeWithDefinitions();
+  StdScopePtr parent_scope = test::MakeSimpleScope();
   StdScopePtr scope("test");
 
   scope->SetParent(parent_scope);

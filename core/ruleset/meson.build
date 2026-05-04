@@ -10,6 +10,16 @@ core_ruleset_lib = static_library('core_ruleset_lib',
   link_with: [utils_lib, core_types_lib],
   include_directories: root_include)
 
+core_ruleset_ut_lib = static_library('core_ruleset_ut_lib',
+    sources: [
+        'ruleset_ut.cpp',
+        hs_proto_generated_headers,
+    ],
+    dependencies: common_deps,
+    link_with: [core_ruleset_lib],
+    include_directories: root_include
+    )
+
 core_ruleset_tests = executable('unit_tests',
   sources: [
     'test_main.cpp',
@@ -18,7 +28,7 @@ core_ruleset_tests = executable('unit_tests',
     hs_proto_generated_headers,
     ],
   dependencies : common_deps + gtest_dep,
-  link_with: [core_ruleset_lib, hs_proto_lib],
+  link_with: [core_ruleset_ut_lib, hs_proto_lib],
   include_directories: root_include,
   )
 

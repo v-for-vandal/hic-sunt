@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include <core/scope/scope_ut.hpp>
 #include <core/ruleset/variable_definition.hpp>
 #include <core/types/std_base_types.hpp>
 
@@ -14,28 +15,8 @@ using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using StdVariableDefinitionsPtr =
     hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
 
-namespace {
-
-StdVariableDefinitionsPtr MakeVariableDefinitions() {
-  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
-  mutable_definitions->AddNumericDefinition("numeric_var", {});
-  mutable_definitions->AddStringDefinition("string_var", {});
-
-  return StdVariableDefinitionsPtr(
-      std::static_pointer_cast<const StdVariableDefinitions>(
-          mutable_definitions));
-}
-
-StdScopePtr MakeScopeWithDefinitions() {
-  StdScopePtr scope("test_scope");
-  scope->SetVariableDefinitions(MakeVariableDefinitions());
-  return scope;
-}
-
-}  // namespace
-
 TEST(StdScopeChangeSet, EmptyAndClear) {
-  auto scope = MakeScopeWithDefinitions();
+  auto scope = test::MakeSimpleScope();
   StdScopeChangeSet changes(scope);
 
   EXPECT_TRUE(changes.Empty());
@@ -48,7 +29,7 @@ TEST(StdScopeChangeSet, EmptyAndClear) {
 }
 
 TEST(StdScopeChangeSet, RejectsEmptyModifierKey) {
-  auto scope = MakeScopeWithDefinitions();
+  auto scope = test::MakeSimpleScope();
   StdScopeChangeSet changes(scope);
 
   auto result = changes.SetNumericModifier("numeric_var", "", 1.0, 2.0);
@@ -57,7 +38,7 @@ TEST(StdScopeChangeSet, RejectsEmptyModifierKey) {
 }
 
 TEST(StdScopeChangeSet, RejectsIncorrectNumericVariableType) {
-  auto scope = MakeScopeWithDefinitions();
+  auto scope = test::MakeSimpleScope();
   StdScopeChangeSet changes(scope);
 
   auto result = changes.SetNumericModifier("string_var", "key", 1.0, 2.0);
@@ -66,7 +47,7 @@ TEST(StdScopeChangeSet, RejectsIncorrectNumericVariableType) {
 }
 
 TEST(StdScopeChangeSet, RejectsIncorrectStringVariableType) {
-  auto scope = MakeScopeWithDefinitions();
+  auto scope = test::MakeSimpleScope();
   StdScopeChangeSet changes(scope);
 
   auto result = changes.SetStringModifier("numeric_var", "key", "value", 1.0);
@@ -75,7 +56,7 @@ TEST(StdScopeChangeSet, RejectsIncorrectStringVariableType) {
 }
 
 TEST(StdScopeChangeSet, AppliesNumericOperationsInInsertionOrder) {
-  auto scope = MakeScopeWithDefinitions();
+  auto scope = test::MakeSimpleScope();
   StdScopeChangeSet changes(scope);
 
   ASSERT_TRUE(changes.SetNumericModifier("numeric_var", "key", 10.0, 0.0));
@@ -95,7 +76,7 @@ TEST(StdScopeChangeSet, AppliesNumericOperationsInInsertionOrder) {
 }
 
 TEST(StdScopeChangeSet, AppliesStringOperations) {
-  auto scope = MakeScopeWithDefinitions();
+  auto scope = test::MakeSimpleScope();
   StdScopeChangeSet changes(scope);
 
   ASSERT_TRUE(changes.SetStringModifier("string_var", "low", "first", 1.0));
