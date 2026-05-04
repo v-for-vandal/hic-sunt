@@ -43,7 +43,7 @@ class RuleSetBase {
   proto::ruleset::Variables variable_definitions_;
   std::vector<proto::ruleset::effect::Effect> effects_;
 
-  static inline std::filesystem::path improvements_dir{"region_improvements"};
+  static inline std::filesystem::path improvements_dir{"improvements"};
   static inline std::filesystem::path biomes_dir{"biomes"};
   static inline std::filesystem::path resources_dir{"resources"};
   static inline std::filesystem::path rendering_dir{"rendering"};

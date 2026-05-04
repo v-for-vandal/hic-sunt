@@ -9,11 +9,6 @@ const _create_map_scene := preload("res://ui/system/create_map/create_map_root.t
 const EPHIMERAL_MARKER := &'hicsunt_ephimeral'
 
 
-# TODO: RM method
-func _init() -> void:
-	pass
-
-
 func _ready() -> void:
 	# hide everything
 	for child in get_children():
