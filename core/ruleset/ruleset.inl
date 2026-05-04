@@ -1,27 +1,78 @@
+#include "ruleset.hpp"
+
+#include "spdlog/spdlog.h"
 namespace hs::ruleset {
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::Load(const std::filesystem::path &path,
+bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
                               ErrorsCollection &errors) {
 
-  if (!RuleSetBase::Load(path, errors)) {
+  if (!RuleSetBase::Load(paths, errors)) {
     return false;
   }
 
   // Building hashes
   for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
     const auto &improvement = improvements_.improvements(idx);
-    improvements_by_type_.try_emplace(improvement.id(), idx);
+    improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
   }
 
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto &job = jobs_.jobs(idx);
-    jobs_by_type_.try_emplace(job.id(), idx);
+    jobs_by_type_.try_emplace(BaseTypes::StringIdFromStdString(job.id()), idx);
   }
 
   for (int idx = 0; idx < projects_.projects_size(); ++idx) {
     const auto &project = projects_.projects(idx);
-    projects_by_type_.try_emplace(project.id(), idx);
+    projects_by_type_.try_emplace(BaseTypes::StringIdFromStdString(project.id()), idx);
+  }
+
+  effect_definitions_.clear();
+  effect_definitions_.reserve(GetAllEffects().size());
+  for (const auto& effect_proto : GetAllEffects()) {
+    auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
+    effect_definitions_.push_back(
+        std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
+  }
+
+  for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();
+       ++idx) {
+    const auto &definition = RuleSetBase::GetVariableDefinitions().variables(idx);
+
+    if (definition.has_numeric()) {
+      const auto &numeric = definition.numeric();
+      NumericVariableDefinition<BaseTypes> numeric_definition;
+      if (numeric.has_minimum()) {
+        numeric_definition.minimum = numeric.minimum();
+      }
+      if (numeric.has_maximum()) {
+        numeric_definition.maximum = numeric.maximum();
+      }
+      parsed_variable_definitions_.AddNumericDefinition(
+          BaseTypes::StringIdFromStdString(definition.id()),
+          numeric_definition);
+    } else if (definition.has_string()) {
+      const auto &string_ = definition.string();
+      StringVariableDefinition<BaseTypes> string_definition;
+      if (!string_.default_().empty()) {
+        string_definition.default_value =
+            BaseTypes::StringIdFromStdString(string_.default_());
+      }
+      parsed_variable_definitions_.AddStringDefinition(
+          BaseTypes::StringIdFromStdString(definition.id()),
+          string_definition);
+    } else if (definition.has_boolean()) {
+      NumericVariableDefinition<BaseTypes> numeric_definition;
+      numeric_definition.minimum = 0;
+      numeric_definition.maximum = 1;
+      parsed_variable_definitions_.AddNumericDefinition(
+          BaseTypes::StringIdFromStdString(definition.id()),
+          numeric_definition);
+    } else {
+      SPDLOG_ERROR(
+          "Variable {} has undefined type. It is neither numeric, nor string, nor bool",
+          definition.id());
+    }
   }
 
   return true;
@@ -32,6 +83,8 @@ template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
   improvements_by_type_.clear();
   jobs_by_type_.clear();
   projects_by_type_.clear();
+  parsed_variable_definitions_.Clear();
+  effect_definitions_.clear();
 }
 
 template <typename BaseTypes>

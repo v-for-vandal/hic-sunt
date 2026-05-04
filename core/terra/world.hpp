@@ -29,8 +29,9 @@ World<BaseTypes> ParseFrom(const proto::terra::World &world,
 
 // World is a collection of planes
 template <typename BaseTypes = StdBaseTypes>
-class World : public scope::ScopedObject<BaseTypes> {
+class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_WORLD> {
  public:
+  using Base = scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_WORLD>;
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSSize = geometry::DeltaCoords<geometry::QRSCoordinateSystem>;
@@ -41,7 +42,7 @@ class World : public scope::ScopedObject<BaseTypes> {
   using StringId = BaseTypes::StringId;
   using String = BaseTypes::String;
 
-  World() : scope::ScopedObject<BaseTypes>("world.root") {}
+  World() : Base("world.root") {}
   World(const World &) = delete;
   World(World &&) = default;
   World &operator=(const World &) = delete;
@@ -50,6 +51,7 @@ class World : public scope::ScopedObject<BaseTypes> {
   PlanePtr GetPlane(const StringId &id) const;
   PlanePtr AddPlane(const StringId &id, QRSBox box, int region_radius,
                     int region_external_radius);
+  auto& GetPlanes() noexcept { return planes_; }
 
   RegionPtr GetRegionById(const StringId &region_id) const noexcept;
   bool HasRegion(const StringId &region_id) const noexcept;

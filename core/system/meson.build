@@ -1,10 +1,11 @@
 core_system_lib = static_library('core_system_lib',
   sources: [
   'system.cpp',
+  #'sesson.cpp',
   fbs_generated,
   hs_proto_generated_headers,
   ],
-  dependencies : common_deps,
+  dependencies : [common_deps, sol2_dep, lua_dep],
   link_with: [utils_lib, core_terra_lib, core_ruleset_lib],
   include_directories: root_include)
 
@@ -17,5 +18,3 @@ core_system_lib = static_library('core_system_lib',
 #  )
 #
 #test('core.system', core_system_tests, env: environment(test_env))
-
-

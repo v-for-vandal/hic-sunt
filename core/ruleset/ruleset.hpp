@@ -2,12 +2,12 @@
 
 #include <absl/container/flat_hash_map.h>
 
+#include <core/ruleset/effect.hpp>
 #include <core/ruleset/ruleset_base.hpp>
 #include <core/ruleset/variable_definition.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/error_message.hpp>
 #include <filesystem>
-#include <string_view>
 
 namespace hs::ruleset {
 
@@ -15,10 +15,11 @@ template <typename BaseTypes = StdBaseTypes>
 class RuleSet : public RuleSetBase {
  public:
   using ErrorsCollection = utils::ErrorsCollection;
-  using StringId = StdBaseTypes::StringId;
+  using StringId = typename BaseTypes::StringId;
   void Clear();
   // Adds data to ruleset
-  bool Load(const std::filesystem::path &path, ErrorsCollection &errors);
+  bool Load(const std::vector<std::filesystem::path>& paths,
+            ErrorsCollection& errors);
 
   const proto::ruleset::RegionImprovement *FindRegionImprovementByType(
       const StringId &improvement_type_id) const;
@@ -28,12 +29,21 @@ class RuleSet : public RuleSetBase {
   const proto::ruleset::Project *FindProjectByType(
       const StringId &project_type_id) const;
 
+  const VariableDefinitions<BaseTypes> &GetVariableDefinitions() const {
+    return parsed_variable_definitions_;
+  }
+
+  const auto& GetAllEffectDefinitions() const noexcept {
+    return effect_definitions_;
+  }
+
  private:
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
 
-  VariableDefinitions<BaseTypes> variable_definitions_;
+  VariableDefinitions<BaseTypes> parsed_variable_definitions_;
+  std::vector<ConstEffectDefinitionPtr<BaseTypes>> effect_definitions_;
 };
 
 }  // namespace hs::ruleset

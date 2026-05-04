@@ -37,6 +37,7 @@ build*/*
 # subprojects
 subprojects/*/*
 subprojects/godot-cpp-4.2
+subprojects/.wraplock
 
 # temp files
 *.png~

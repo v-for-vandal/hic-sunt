@@ -346,7 +346,8 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
 
     // Get its type
     const hs::proto::ruleset::RegionImprovement* improvement_ruleset =
-        ruleset.FindRegionImprovementByType(improvement.type());
+        ruleset.FindRegionImprovementByType(
+            GodotBaseTypes::StringIdFromStdString(improvement.type()));
 
     if (improvement_ruleset == nullptr) {
       spdlog::error("Can\'t get ruleset info for improvement {}",

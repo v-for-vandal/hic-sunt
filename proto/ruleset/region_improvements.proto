@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package hs.proto.ruleset;
 
-import "ruleset/placement_rules.proto";
-import "ruleset/jobs.proto";
 import "l10n/localized_name.proto";
+import "ruleset/effect.proto";
+import "ruleset/placement_rules.proto";
 
 message ResourceBill {
   map<string, int32> amounts = 1;
@@ -23,11 +23,13 @@ message RegionImprovement {
   ResourceBill cost = 6;
 
   map<string, int32> jobs = 7;
+
+  // this effect is inline. It will always be active only for this building
+  // - we will always set target as 'improvement' and put this improvement
+  // type into selectors.
+  effect.Effect effect = 8;
 }
 
 message RegionImprovements {
   repeated RegionImprovement improvements = 1;
 }
-
-
-

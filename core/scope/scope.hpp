@@ -7,6 +7,8 @@
 #include <core/scope/string_variable.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
+#include "core/ruleset/variable_definition.hpp"
+#include "core/types/scope_type.hpp"
 // #include <core/scope/variable_definition.hpp>
 
 namespace hs::scope {
@@ -37,6 +39,8 @@ class Scope {
   using NumericVariable = scope::NumericVariable<BaseTypes>;
   using StringVariable = scope::StringVariable<BaseTypes>;
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
+  using ScopeType = types::ScopeType;
+  using VariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
    *
@@ -45,7 +49,7 @@ class Scope {
    *         by other scopes
    */
   // Scope(StringId id, const VariableDefinitionsPtr& definitions);
-  Scope(StringId id);
+  Scope(StringId id, ScopeType scope_type = ScopeType::SCOPE_TYPE_UNSPECIFIED);
   Scope() : Scope(StringId{}) {}
   // Delete copying for now, we can do it, but we must propertly re-initialized
   // id because id must be unique
@@ -54,26 +58,66 @@ class Scope {
   Scope(Scope&&) = default;
   Scope& operator=(Scope&&) = default;
 
+  /// Unique id for this scope object
+  StringId GetId() const noexcept { return id_; }
+  /// Type of this scope
+  ScopeType GetType() const noexcept { return scope_type_; }
+
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
   void SetParent(const std::shared_ptr<Scope>& parent) { parent_ = parent; }
 
+  // You can and should do it only on one root scope. All other scopes will fetch
+  // it automatically
+  void SetVariableDefinitions(const VariableDefinitionsPtr& definitions);
+
   // const VariableDefinitions *Definitions() const;
 
-  NumericValue GetNumericValue(const StringId& variable);
+  std::expected<NumericValue, ErrorCode> GetNumericValue(const StringId& variable);
 
-  StringId GetStringValue(const StringId& variable);
+  std::expected<StringId, ErrorCode> GetStringValue(const StringId& variable);
 
+  /*! \brief Sets modifier for given variable to given value(s)
+   *
+   * If modifier does not exist, it will be created
+   */
+  std::expected<void, ErrorCode> SetNumericModifier(const StringId& variable, const StringId& key,
+                          NumericValue add, NumericValue mult,
+                          size_t modificationTime = 0);
+
+  /*! \brief Adjusts modifier for given variable by given difference.
+   *
+   * If modifier does not exist, it will be created
+   */
+  std::expected<void, ErrorCode> ChangeNumericModifier(const StringId& variable, const StringId& key,
+                          NumericValue add, NumericValue mult,
+                          size_t modificationTime = 0);
+
+  std::expected<void, ErrorCode> SetStringModifier(const StringId& variable, const StringId& key,
+                         const StringId& value, NumericValue level,
+                         size_t modificationTime = 0);
+
+  // Legacy compatibility wrappers
   bool AddNumericModifier(const StringId& variable, const StringId& key,
-                          NumericValue add, NumericValue mult);
+                          NumericValue add, NumericValue mult,
+                          size_t modificationTime = 0) {
+    return SetNumericModifier(variable, key, add, mult, modificationTime).has_value();
+  }
 
   bool AddStringModifier(const StringId& variable, const StringId& key,
-                         const StringId& value, NumericValue level);
+                         const StringId& value, NumericValue level,
+                         size_t modificationTime = 0) {
+    return SetStringModifier(variable, key, value, level, modificationTime).has_value();
+  }
+
+  // Returns abstract token that represents when this variable was last modified
+  std::expected<size_t, ErrorCode> GetModificationTime(const StringId& variable) const;
 
   void ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
   void ExplainStringVariable(const StringId& variable, auto&& collect_fn);
   void ExplainAllVariables(auto&& collect_fn);
 
   bool IsStringVariable(const StringId& variable) const;
+  bool IsNumericVariable(const StringId& variable) const;
 
  private:
   void FillNumericModifiers(const StringId& variable, NumericValue& add,
@@ -82,8 +126,12 @@ class Scope {
   void FillStringModifiers(const StringId& variable, StringId& value,
                            NumericValue& level);
 
+  const VariableDefinitionsPtr& GetVariableDefinitions() const;
+
  private:
   StringId id_;
+
+  types::ScopeType scope_type_{types::ScopeType::SCOPE_TYPE_UNSPECIFIED};
 
   // We have only one parent and for every type of scope type of parent is
   // fixed. E.g. parent of region is always world
@@ -97,7 +145,8 @@ class Scope {
   absl::flat_hash_map<StringId, NumericVariable> numeric_variables_;
   absl::flat_hash_map<StringId, StringVariable> string_variables_;
 
-  // VariableDefinitionsPtr definitions_{};
+  // Access it via special method that will pull it from parent
+  mutable VariableDefinitionsPtr definitions_{};
 
   // Note: it may be beneficial to replace it with prefix tree?
 

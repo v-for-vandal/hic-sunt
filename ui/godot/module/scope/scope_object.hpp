@@ -32,6 +32,8 @@ class ScopeObject : public RefCounted {
 
   bool is_string_variable(const StringName& variable) const;
 
+  const ScopePtr& GetScopePtr() const noexcept { return scope_; }
+
  private:
   ScopePtr scope_;
 };
