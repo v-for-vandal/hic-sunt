@@ -49,6 +49,8 @@ func _load_ruleset() -> RulesetObject:
 
 
 func _clear_scene_if_present(node_name: String) -> void:
+	if not get_tree().root.has_node(node_name):
+		return
 	var scene := get_tree().root.get_node(node_name)
 	if scene != null:
 		get_tree().root.remove_child(scene)
@@ -64,7 +66,7 @@ func _init_world_scene() -> void:
 	# We can call methods of this node only AFTER we have added it to the
 	# tree. Because it finishes its initialization in _ready callback
 	get_tree().root.add_child(world_scene)
-	world_scene.load_world(CurrentGame.current_world)
+	world_scene.load_world(CurrentGame.current_game.world)
 
 	get_tree().current_scene = world_scene
 
@@ -88,16 +90,13 @@ func _return_to_main_screen() -> void:
 	#	_loading_screen_instance.queue_free()
 
 
-func new_game(world: World) -> void:
-	#_prepare_loading()
-
-	var ruleset_object := _load_ruleset()
+func new_game(world: World, ruleset: RulesetObject) -> void:
 
 	#var world_object : WorldObject = CentralSystem.create_world(Vector2i(10, 5), 7, ruleset_object)
 
 	#assert(world_object != null, "Failed to create world")
 
-	CurrentGame.init_game(world, ruleset_object)
+	CurrentGame.init_game(world, ruleset)
 
 	_init_world_scene()
 

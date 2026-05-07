@@ -3,15 +3,15 @@ extends Control
 signal generate_requested(world_size: WBConstants.WorldSize, region_size: int)
 signal transition_back()
 
+
 var _processing := false
 var _generators: Dictionary[int, WorldBuilderRegistry.WorldGeneratorHandle]
 var _ui_elements: Dictionary[int, Control]
 var _current_selected: int = -1
+var _world: World
+var _ruleset: RulesetObject
 
 var no_options_msg_control: Control
-
-var _generated_world: World
-var _ruleset : RulesetObject
 
 
 func _init() -> void:
@@ -19,9 +19,23 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	_prepare_generators()
+	_prepare_highlighters()
 
-	_ruleset = CentralSystem.load_ruleset()
+	$DebugUiEventBus.set_main_interaction(self)
+
+	var ruleset := CentralSystem.load_ruleset()
+
+	var terrain_mapping := ruleset.get_atlas_render()
+
+	%WorldSurface.terrain_mapping = terrain_mapping
+	%RegionSurface.visualization_data = terrain_mapping
+	
+func set_world(world: World) -> void:
+	_world = world
+	
+func set_ruleset(ruleset: RulesetObject) -> void:
+	_ruleset = ruleset
+
 
 func _prepare_generators() -> void:
 	# get all possible values for selected category
@@ -42,6 +56,23 @@ func _prepare_generators() -> void:
 		%SelectGeneratorButton.select(0)
 		# just in case signal is not working yet
 		_on_select_button_item_selected(0)
+
+
+func _prepare_cellinfo() -> void:
+	%CellInfo.set_headers(["data", "value"])
+
+
+func _prepare_highlighters() -> void:
+	_add_highlighter(null, &"None")
+	_add_highlighter(preload("res://resources/highlighters/temperature_highlighter.tres"), &"Temperature")
+	_add_highlighter(preload("res://resources/highlighters/precipitation_highlighter.tres"), &"Precipitation")
+	_add_highlighter(preload("res://resources/highlighters/height_highlighter.tres"), &"Height")
+
+
+func _add_highlighter(highlighter: HighlighterInterface, label: StringName) -> void:
+	var idx: int = %HighlightSelect.item_count
+	%HighlightSelect.add_item(label, idx)
+	%HighlightSelect.set_item_metadata(idx, highlighter)
 
 
 func _create_ui_if_absent(index: int) -> void:
@@ -74,8 +105,7 @@ func _on_select_button_item_selected(index: int) -> void:
 
 
 func clear() -> void:
-	_generated_world = null
-	pass
+	_maps.clear()
 
 
 func _do_generate(_debug_mode: bool) -> World:
@@ -99,8 +129,15 @@ func _on_generate_button_pressed() -> void:
 	if _processing:
 		return
 	_processing = true
-	_generated_world = await _do_generate(true)
+	var world := await _do_generate(true)
+	%WorldSurface.load_plane(world.get_plane(&"main"))
 	_processing = false
+
+
+func _on_highlight_select_item_selected(index: int) -> void:
+	var highlighter := %HighlightSelect.get_item_metadata(index) as HighlighterInterface
+	%RegionSurface.highlighter = highlighter
+	%WorldSurface.highlighter = highlighter
 
 
 func _on_back_button_pressed() -> void:
@@ -117,9 +154,8 @@ func _on_start_game_button_pressed() -> void:
 		return
 	_processing = true
 	print("Starting game")
-	if not _generated_world:
-		_generated_world = await _do_generate(false)
-	LoadManager.new_game(_generated_world, _ruleset)
+	var world := await _do_generate(false)
+	LoadManager.new_game(world)
 	_processing = false
 
 

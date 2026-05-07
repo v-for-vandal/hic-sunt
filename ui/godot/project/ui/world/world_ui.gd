@@ -10,8 +10,8 @@ var _current_select_callback: Variant
 var _is_in_select_mode := false
 
 func _ready() -> void:
-	CurrentGame.new_turn_started.connect(_on_new_turn_started)
-	_on_new_turn_started(CurrentGame.get_current_turn())
+	CurrentGame.current_game.new_turn_started.connect(_on_new_turn_started)
+	_on_new_turn_started(CurrentGame.current_game.get_current_turn())
 	pass
 
 func _gui_input(event : InputEvent) -> void:

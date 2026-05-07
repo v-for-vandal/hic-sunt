@@ -6,17 +6,19 @@
 namespace hs::godot {
 
 void SessionObject::_bind_methods() {
-  ClassDB::bind_method(D_METHOD("set_rule_set", "ruleset"),
-                       &SessionObject::set_rule_set);
+  ClassDB::bind_method(D_METHOD("set_ruleset", "ruleset"),
+                       &SessionObject::set_ruleset);
   ClassDB::bind_method(D_METHOD("set_world", "world"),
                        &SessionObject::set_world);
   ClassDB::bind_method(D_METHOD("add_scope", "scope"),
                        &SessionObject::add_scope);
   ClassDB::bind_method(D_METHOD("advance_next_turn"),
                        &SessionObject::advance_next_turn);
+  ClassDB::bind_method(D_METHOD("set_current_turn"),
+                         &SessionObject::set_current_turn);
 }
 
-bool SessionObject::set_rule_set(const Ref<RulesetObject>& ruleset) {
+bool SessionObject::set_ruleset(const Ref<RulesetObject>& ruleset) {
   ERR_FAIL_NULL_V_MSG(ruleset.ptr(), false, "null-containing ruleset object");
 
   auto result = data_.SetRuleSet(RuleSetPtrAdapter(ruleset));
@@ -45,6 +47,10 @@ bool SessionObject::add_scope(const Ref<ScopeObject>& scope) {
   ERR_FAIL_COND_V_MSG(!result.has_value(), false,
                       "Failed to add scope to session");
   return true;
+}
+
+void SessionObject::set_current_turn(int turn) {
+    data_.SetCurrentTurn(turn);
 }
 
 void SessionObject::advance_next_turn() { data_.AdvanceNextTurn(); }

@@ -61,7 +61,7 @@ func _on_city_button_pressed() -> void:
 	if CurrentGame.get_current_player_civ().can_create_city(_region.get_region_id()):
 		CurrentGame.get_current_player_civ().create_city(_region.get_region_id())
 	#var city_build_interaction = SelectAndBuildInteraction.new()
-	#GameUiEventBus.set_main_interaction(city_build_interaction)
+	#CurrentGame.event_bus.set_main_interaction(city_build_interaction)
 
 
 
@@ -71,7 +71,7 @@ func _on_build_improvement(improvement_id: String) -> void:
 	var new_build_interaction := SelectAndBuildInteraction.new()
 	new_build_interaction.improvement_id = improvement_id
 	_interaction = new_build_interaction
-	GameUiEventBus.set_main_interaction(new_build_interaction)
+	CurrentGame.event_bus.set_main_interaction(new_build_interaction)
 	
 # This function is called by parent class when something inside region has changed
 func _on_region_changed(_area: Rect2i, flags: int) -> void:

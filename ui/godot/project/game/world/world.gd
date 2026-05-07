@@ -32,6 +32,9 @@ func get_plane(plane_id: StringName) -> WorldPlane:
 		push_error("You have requested plane {} that exists in underlying WorldObject, but not in our class. This is a logic error and it shoud not have happend" % plane_id)
 		
 	return null
+	
+func get_planes() -> Array[StringName]:
+	return _planes.keys()
 
 ## Saves world to given location
 func save(path: String) -> Error:

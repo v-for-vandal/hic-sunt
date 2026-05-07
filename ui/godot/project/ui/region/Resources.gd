@@ -65,4 +65,3 @@ func _connect_region_object(region_object: RegionObject) -> void:
 	
 func _disconnect_region_object(region_object: RegionObject) -> void:
 	_region_object.region_changed.disconnect(_on_region_changed)
-

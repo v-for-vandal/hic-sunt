@@ -1,21 +1,21 @@
-[gd_scene load_steps=5 format=3 uid="uid://dxuoujwpadbf1"]
+[gd_scene format=3 uid="uid://dxuoujwpadbf1"]
 
 [ext_resource type="Script" uid="uid://c5lulo6uixan2" path="res://game/world/world_map.gd" id="1_v7u0n"]
 [ext_resource type="PackedScene" uid="uid://xbdd74ccg32f" path="res://ui/world/world_ui.tscn" id="2_2e47t"]
 [ext_resource type="PackedScene" uid="uid://dhdak5msql21g" path="res://game/world/world_surface.tscn" id="2_5ftlr"]
 [ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="4_qv3c5"]
 
-[node name="WorldMap" type="Node2D"]
+[node name="WorldMap" type="Node2D" unique_id=1340879649]
 script = ExtResource("1_v7u0n")
 
-[node name="WorldSurface" parent="." instance=ExtResource("2_5ftlr")]
+[node name="WorldSurface" parent="." unique_id=428113629 instance=ExtResource("2_5ftlr")]
 
-[node name="WorldViewCamera" parent="." instance=ExtResource("4_qv3c5")]
+[node name="WorldViewCamera" parent="." unique_id=421963590 instance=ExtResource("4_qv3c5")]
 zoom = Vector2(0.5, 0.5)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=394149293]
 
-[node name="WorldUI" parent="CanvasLayer" instance=ExtResource("2_2e47t")]
+[node name="WorldUI" parent="CanvasLayer" unique_id=1232884010 instance=ExtResource("2_2e47t")]
 mouse_filter = 1
 
 [connection signal="next_turn_requested" from="CanvasLayer/WorldUI" to="." method="_on_world_ui_next_turn_requested"]

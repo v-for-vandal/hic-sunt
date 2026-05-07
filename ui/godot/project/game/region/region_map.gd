@@ -41,7 +41,7 @@ func _on_region_ui_close_requested() -> void:
 	exit_reqion_request.emit()
 	
 func on_ui_event(event : Variant) -> void:
-	if event is GameUiEventBus.CancellationEvent:
+	if event is UiEventBus.CancellationEvent:
 		event.accept()
 		exit_reqion_request.emit()
 		return

@@ -1,13 +1,6 @@
 [gd_scene format=3 uid="uid://bxo1rll4achyc"]
 
 [ext_resource type="Script" uid="uid://cm5v1rniietax" path="res://ui/system/create_map/create_map_root.gd" id="1_pk3cd"]
-[ext_resource type="PackedScene" uid="uid://dhdak5msql21g" path="res://game/world/world_surface.tscn" id="2_fko4t"]
-[ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="3_c46by"]
-[ext_resource type="Script" uid="uid://g2jd3p01rmtt" path="res://ui/system/create_map/info_container.gd" id="3_r5dag"]
-[ext_resource type="Script" uid="uid://dfcsc5fmw03f4" path="res://addons/dynamic_table/dynamic_table.gd" id="3_vfc6v"]
-[ext_resource type="PackedScene" uid="uid://clsw3n3vibrhp" path="res://game/region/region_surface.tscn" id="3_yu3tf"]
-[ext_resource type="Script" uid="uid://dte46f0jc5d54" path="res://game/ui_event_bus.gd" id="4_bg8nu"]
-[ext_resource type="PackedScene" uid="uid://cb5s3dxd63nmp" path="res://ui/system/debug/ScopeEditor.tscn" id="7_2ks8r"]
 
 [node name="CreateMapRoot" type="PanelContainer" unique_id=1366645610]
 anchors_preset = 15
@@ -51,39 +44,6 @@ size_flags_horizontal = 3
 text = "No options"
 horizontal_alignment = 1
 
-[node name="DebugLabel" type="Label" parent="HBoxContainer/Controls" unique_id=1524137343]
-layout_mode = 2
-text = "Debug
-"
-horizontal_alignment = 1
-
-[node name="DebugContainer" type="PanelContainer" parent="HBoxContainer/Controls" unique_id=594149490]
-layout_mode = 2
-
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/Controls/DebugContainer" unique_id=83076102]
-layout_mode = 2
-columns = 2
-
-[node name="HighlightLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer" unique_id=1695850661]
-layout_mode = 2
-text = "Highlight"
-
-[node name="HighlightSelect" type="OptionButton" parent="HBoxContainer/Controls/DebugContainer/GridContainer" unique_id=663587399]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="ForegroundLabel" type="Label" parent="HBoxContainer/Controls/DebugContainer/GridContainer" unique_id=755078660]
-layout_mode = 2
-text = "Foreground"
-
-[node name="ForegroundSelect" type="OptionButton" parent="HBoxContainer/Controls/DebugContainer/GridContainer" unique_id=226489039]
-unique_name_in_owner = true
-layout_mode = 2
-selected = 0
-item_count = 1
-popup/item_0/text = "None"
-popup/item_0/id = 0
-
 [node name="BackButton" type="Button" parent="HBoxContainer/Controls" unique_id=622092616]
 layout_mode = 2
 text = "Back"
@@ -105,94 +65,7 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Start"
 
-[node name="TabContainer" type="TabContainer" parent="HBoxContainer" unique_id=1849948228]
-layout_mode = 2
-size_flags_horizontal = 3
-current_tab = 0
-
-[node name="DebugView" type="TabContainer" parent="HBoxContainer/TabContainer" unique_id=436748228]
-layout_mode = 2
-size_flags_horizontal = 3
-current_tab = 0
-metadata/_tab_index = 0
-
-[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/TabContainer/DebugView" unique_id=163429999]
-layout_mode = 2
-metadata/_tab_index = 0
-
-[node name="Generated world" type="SubViewportContainer" parent="HBoxContainer/TabContainer" unique_id=1861687080]
-visible = false
-layout_mode = 2
-stretch = true
-metadata/_tab_index = 1
-
-[node name="SubViewport" type="SubViewport" parent="HBoxContainer/TabContainer/Generated world" unique_id=897854701]
-handle_input_locally = false
-physics_object_picking = true
-size = Vector2i(2, 2)
-render_target_update_mode = 0
-
-[node name="WorldSurface" parent="HBoxContainer/TabContainer/Generated world/SubViewport" unique_id=645612030 node_paths=PackedStringArray("event_bus") instance=ExtResource("2_fko4t")]
-unique_name_in_owner = true
-event_bus = NodePath("../../../../../DebugUiEventBus")
-
-[node name="ViewCamera" parent="HBoxContainer/TabContainer/Generated world/SubViewport" unique_id=1977128513 instance=ExtResource("3_c46by")]
-
-[node name="Region" type="SubViewportContainer" parent="HBoxContainer/TabContainer" unique_id=1007563077]
-visible = false
-layout_mode = 2
-metadata/_tab_index = 2
-
-[node name="SubViewport" type="SubViewport" parent="HBoxContainer/TabContainer/Region" unique_id=1277422298]
-handle_input_locally = false
-physics_object_picking = true
-render_target_update_mode = 0
-
-[node name="RegionSurface" parent="HBoxContainer/TabContainer/Region/SubViewport" unique_id=818189996 node_paths=PackedStringArray("event_bus") instance=ExtResource("3_yu3tf")]
-unique_name_in_owner = true
-event_bus = NodePath("../../../../../DebugUiEventBus")
-
-[node name="ViewCamera" parent="HBoxContainer/TabContainer/Region/SubViewport" unique_id=1696086656 instance=ExtResource("3_c46by")]
-
-[node name="InfoContainer" type="TabContainer" parent="HBoxContainer" unique_id=1203869441]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 0)
-layout_mode = 2
-current_tab = 0
-script = ExtResource("3_r5dag")
-
-[node name="RegionInfo" type="Control" parent="HBoxContainer/InfoContainer" unique_id=444204946]
-unique_name_in_owner = true
-layout_mode = 2
-focus_mode = 2
-script = ExtResource("3_vfc6v")
-headers = Array[String](["name", "value"])
-metadata/_custom_type_script = "uid://dfcsc5fmw03f4"
-metadata/_tab_index = 0
-
-[node name="CellInfo" type="Control" parent="HBoxContainer/InfoContainer" unique_id=441963220]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-focus_mode = 2
-script = ExtResource("3_vfc6v")
-metadata/_custom_type_script = "uid://dfcsc5fmw03f4"
-metadata/_tab_index = 1
-
-[node name="ScopeEditor" parent="HBoxContainer/InfoContainer" unique_id=1052681476 instance=ExtResource("7_2ks8r")]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-metadata/_tab_index = 2
-
-[node name="DebugUiEventBus" type="Node" parent="." unique_id=592871283]
-unique_name_in_owner = true
-script = ExtResource("4_bg8nu")
-metadata/_custom_type_script = "uid://dte46f0jc5d54"
-
 [connection signal="item_selected" from="HBoxContainer/Controls/GeneratorSelectorSection/SelectGeneratorButton" to="." method="_on_select_generator_button_item_selected"]
 [connection signal="pressed" from="HBoxContainer/Controls/GeneratorSelectorSection/GenerateButton" to="." method="_on_generate_button_pressed"]
-[connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/HighlightSelect" to="." method="_on_highlight_select_item_selected"]
-[connection signal="item_selected" from="HBoxContainer/Controls/DebugContainer/GridContainer/ForegroundSelect" to="." method="_on_foreground_select_item_selected"]
 [connection signal="pressed" from="HBoxContainer/Controls/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/Controls/StartGameButton" to="." method="_on_start_game_button_pressed"]

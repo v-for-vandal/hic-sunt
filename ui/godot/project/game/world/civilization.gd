@@ -51,8 +51,7 @@ func next_turn() -> void:
 	for city_id : String in _cities_by_id:
 		_cities_by_id[city_id].next_turn()
 	
-static func create_civilisation() -> Civilisation:
-	var civ_id : int = CurrentGame.get_new_id()
+static func create_civilisation(civ_id: int) -> Civilisation:
 	var result := Civilisation.new()
 	result._id = civ_id
 	

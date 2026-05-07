@@ -99,7 +99,7 @@ func _on_move_down_requested(index: int) -> void:
 	_queue.swap(index, index+1)
 	
 func _clear() -> void:
-	var children = $%RootContainer.get_children()
+	var children := $%RootContainer.get_children()
 	for child in children:
 		$%RootContainer.remove_child(child)
 		child.queue_free()

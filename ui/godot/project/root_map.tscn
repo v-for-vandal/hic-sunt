@@ -1,37 +1,30 @@
-[gd_scene load_steps=7 format=3 uid="uid://7ikhs8bt68gy"]
+[gd_scene format=3 uid="uid://7ikhs8bt68gy"]
 
 [ext_resource type="Script" uid="uid://b0pemsm5wx2tm" path="res://root_map.gd" id="1_yul2b"]
 [ext_resource type="PackedScene" uid="uid://dyp7yp0fqe876" path="res://game/region/region_map.tscn" id="2_cosq6"]
 [ext_resource type="PackedScene" uid="uid://dxuoujwpadbf1" path="res://game/world/world_map.tscn" id="3_0mdmy"]
-[ext_resource type="Script" uid="uid://cwvtdstovofh2" path="res://addons/godot-console/scripts/console_container.gd" id="4_tawhk"]
+[ext_resource type="Script" uid="uid://bttcgvhs133yy" path="res://addons/godot-console/scripts/console_container.gd" id="4_tawhk"]
 [ext_resource type="Script" uid="uid://yg6oalpuarsg" path="res://ui/system/ConsoleHandler.gd" id="4_urerv"]
-[ext_resource type="TileSet" uid="uid://pcraxaogcyn7" path="res://resources/world/v4_terrain.tres" id="6_f563n"]
 
-[node name="RootMap" type="Node2D"]
+[node name="RootMap" type="Node2D" unique_id=246326241]
 script = ExtResource("1_yul2b")
 
-[node name="RegionMap" parent="." instance=ExtResource("2_cosq6")]
+[node name="RegionMap" parent="." unique_id=1199127084 instance=ExtResource("2_cosq6")]
 
-[node name="WorldMap" parent="." instance=ExtResource("3_0mdmy")]
+[node name="WorldMap" parent="." unique_id=1591406200 instance=ExtResource("3_0mdmy")]
 
-[node name="ConsoleHandler" type="Node" parent="."]
+[node name="ConsoleHandler" type="Node" parent="." unique_id=585728651]
 script = ExtResource("4_urerv")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="ConsoleHandler"]
+[node name="CanvasLayer" type="CanvasLayer" parent="ConsoleHandler" unique_id=1639764866]
 
-[node name="DevConsole" type="VBoxContainer" parent="ConsoleHandler/CanvasLayer"]
+[node name="DevConsole" type="VBoxContainer" parent="ConsoleHandler/CanvasLayer" unique_id=482995309]
 unique_name_in_owner = true
 visible = false
 offset_top = 35.0
 offset_right = 871.0
 offset_bottom = 588.0
 script = ExtResource("4_tawhk")
-
-[node name="TileMapLayer" type="TileMapLayer" parent="."]
-tile_set = ExtResource("6_f563n")
-
-[node name="TileMapLayer2" type="TileMapLayer" parent="."]
-tile_set = ExtResource("6_f563n")
 
 [connection signal="exit_reqion_request" from="RegionMap" to="." method="_on_region_map_exit_reqion_request"]
 [connection signal="show_region_request" from="WorldMap" to="." method="_on_world_map_show_region_request"]

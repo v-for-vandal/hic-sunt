@@ -9,9 +9,9 @@ func _init(improvement_id: String) -> void:
 	self._improvement_id = improvement_id
 
 
-func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
-	if event is GameUiEventBus.RegionUIActionEvent:
-		if event.action_type == GameUiEventBus.ActionType.PRIMARY:
+func on_ui_event(event: UiEventBus.UIEvent) -> void:
+	if event is UiEventBus.RegionUIActionEvent:
+		if event.action_type == UiEventBus.ActionType.PRIMARY:
 			# TODO: Check that we can build here
 			var can_build := true
 
@@ -21,7 +21,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 			event.accept()
 			return
 
-	elif event is GameUiEventBus.RegionUIMovementEvent:
+	elif event is UiEventBus.RegionUIMovementEvent:
 		if event.prev_qr_coords != event.qr_coords:
 			event.surface.clear_highlight(event.prev_qr_coords)
 		event.surface.highlight(event.qr_coords, true)
@@ -29,7 +29,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 		event.accept()
 		return
 
-	elif event is GameUiEventBus.CancellationEvent:
+	elif event is UiEventBus.CancellationEvent:
 		print("Cancelling building")
 		cancel()
 		event.accept()
@@ -37,7 +37,7 @@ func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
 
 func cancel() -> void:
 	# stop receiving other events
-	GameUiEventBus.remove_main_interaction(self)
+	CurrentGame.event_bus.remove_main_interaction(self)
 	# cleanup
 	cleanup()
 
@@ -48,7 +48,7 @@ func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 	print("Building ", _improvement_id, " at ", region.get_region_id())
 
 	# stop receiving other events
-	GameUiEventBus.remove_main_interaction(self)
+	CurrentGame.event_bus.remove_main_interaction(self)
 	# send city command to build improvement
 	var city_id: String = region.get_city_id()
 	if city_id.is_empty():

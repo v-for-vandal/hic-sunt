@@ -57,6 +57,7 @@ func _ready()->void:
 func _contains(_tile_qr: Vector2i) -> bool;
 
 func _on_input_event_from_cell(tile_qr: Vector2i, event: InputEvent) -> void:
+	assert(event_bus != null)
 	if _contains(tile_qr):
 		if tile_qr != _last_tile_qr:
 			var ui_event := _create_movement_event()
@@ -69,7 +70,7 @@ func _on_input_event_from_cell(tile_qr: Vector2i, event: InputEvent) -> void:
 				var ui_event := _create_action_event()
 				ui_event.qr_coords = tile_qr
 				ui_event.surface = self
-				ui_event.action_type = GameUiEventBus.mouse_button_to_action_type(event.button_index)
+				ui_event.action_type = CurrentGame.event_bus.mouse_button_to_action_type(event.button_index)
 				event_bus.emit_event(ui_event)
 		
 		_last_tile_qr = tile_qr

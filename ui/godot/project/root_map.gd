@@ -9,8 +9,8 @@ extends Node2D
 func _ready() -> void:
 	assert(_world_map != null, "Child failed to initialize")
 	assert(_region_map != null, "Child failed to initialize")
-	GameUiEventBus.set_world_interaction(_world_map)
-	GameUiEventBus.set_region_interaction(_region_map)
+	CurrentGame.event_bus.set_world_interaction(_world_map)
+	CurrentGame.event_bus.set_region_interaction(_region_map)
 	# world is empty at the moment, but lets set up everything properly
 	_switch_to_world()
 	
@@ -37,14 +37,15 @@ func _ready() -> void:
 	
 
 
-func load_world(world_object : WorldObject) -> void:
+func load_world(world : World) -> void:
 	#assert(_loaded, "You can't call methods on root-map before it is fully loaded")
-	assert(world_object != null)
+	assert(world != null)
 	# TODO: Don't set up terrain mapping, instead use it as global class
-	var terrain_mapping : Dictionary = CurrentGame.get_atlas_visualization()
-	_world_map.set_terrain_visualization(terrain_mapping)
-	_region_map.set_visualization(terrain_mapping)
-	_world_map.load_world(world_object)
+	# TODO: RM terrain mapping
+	# var terrain_mapping : Dictionary = CurrentGame.get_atlas_visualization()
+	# _world_map.set_terrain_visualization(terrain_mapping)
+	# _region_map.set_visualization(terrain_mapping)
+	_world_map.load_world(world)
 	_switch_to_world()
 
 
@@ -88,7 +89,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action("ui_cancel"):
 		if event.is_action_released("ui_cancel"):
 			#print("sending cancellation event")
-			GameUiEventBus.emit_cancellation()
+			CurrentGame.event_bus.emit_cancellation()
 		get_viewport().set_input_as_handled()
 		
 		

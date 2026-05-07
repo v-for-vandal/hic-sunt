@@ -1,25 +1,32 @@
 extends Node
 
+var _world : World
 var _world_object: WorldObject
+var _current_plane: WorldPlane
 
 
-signal show_region_request(world_object: WorldObject,  qr_position: Vector2i)
+signal show_region_request(plane: WorldPlane,  qr_position: Vector2i)
 
 func _ready() -> void:
-	$WorldViewCamera.cell_size = $WorldSurface.tile_set.tile_size.x
+	pass
 
-func load_world(world_object : WorldObject) -> void:
-	_world_object = world_object
-	$WorldSurface.load_world(world_object)
+func load_world(world : World) -> void:
+	_world = world
+	var planes := world.get_planes()
+	if planes.size() > 0:
+		_current_plane = world.get_plane(planes[0])
+		$WorldSurface.load_plane(_current_plane)
+	else:
+		push_error('Can not load world without any planes')
 
 func set_terrain_visualization(vis_table: Dictionary) -> void:
 	$WorldSurface.terrain_mapping = vis_table
 	
-func on_ui_event(event: GameUiEventBus.UIEvent) -> bool:
-	var as_world_event := event as GameUiEventBus.WorldUIActionEvent
+func on_ui_event(event: UiEventBus.UIEvent) -> bool:
+	var as_world_event := event as UiEventBus.WorldUIActionEvent
 	if as_world_event != null:
-		if as_world_event.action_type == GameUiEventBus.ActionType.PRIMARY:
-			show_region_request.emit(_world_object, event.qr_coords)
+		if as_world_event.action_type == UiEventBus.ActionType.PRIMARY:
+			show_region_request.emit(_world.world_object, event.qr_coords)
 			return true
 			
 	return false
