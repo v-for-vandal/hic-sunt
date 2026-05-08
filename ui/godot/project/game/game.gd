@@ -8,6 +8,7 @@ signal new_turn_started(turn_number: int)
 var _world: World
 var _ruleset: RulesetObject
 var _session : SessionObject
+var _debug_control : DebugTree.ControlInterface
 
 var world: World:
 	get:
@@ -36,6 +37,9 @@ func _init(world_: World, ruleset_: RulesetObject) -> void:
 	_current_player_civ = Civilisation.create_civilisation(get_new_id())
 # TODO: we must do something with current_turn and next_id
 
+func _ready() -> void:
+	_debug_control = DebugRoot.get_debug_control().add_random_group("Game-")
+
 func get_current_player_civ() -> Civilisation:
 	return _current_player_civ
 
@@ -51,6 +55,7 @@ func get_current_turn() -> int:
 
 # TODO: REname it as end_turn
 func next_turn() -> void:
+	_debug_control.add_text("Advancing from %d to %d" % [_current_turn, _current_turn + 1])
 	_session.advance_next_turn()
 	_current_player_civ.next_turn()
 	_current_turn += 1

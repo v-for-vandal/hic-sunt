@@ -64,7 +64,7 @@ func add_text_node(key: String, text: String) -> RefCounted:
 		text_node.add_text(text)
 		text_node.newline()
 	var new_item := _add_element(key, text_node)
-	_debug_tree._add_text_sink(new_item, text_node)
+	_debug_tree._add_text_sink(_item, text_node)
 
 	return _wrap_in_class(new_item)
 	
@@ -155,10 +155,10 @@ func add_group(path: String) -> RefCounted:
 
 
 ## Create a new empty node with random name
-func add_random_group() -> RefCounted:
-	var key: String = "%X" % randi()
+func add_random_group(prefix: String = "") -> RefCounted:
+	var key: String = "%s%X" % [prefix, randi()]
 	var element := _debug_tree._get_element(_item, key)
 	while element != null:
-		key = "%X" % randi()
+		key = "%s%X" % [prefix, randi()]
 
 	return _wrap_in_class(_add_element(key, null))

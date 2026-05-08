@@ -49,6 +49,6 @@ func add_group(path: String) -> RefCounted:
 
 
 ## Create a new empty node with random name
-func add_random_group() -> RefCounted:
+func add_random_group(prefix : String = '') -> RefCounted:
 	assert(false, "Unimplemented")
 	return RefCounted.new()
