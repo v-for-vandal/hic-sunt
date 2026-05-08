@@ -9,6 +9,9 @@ signal show_region_request(plane: WorldPlane,  qr_position: Vector2i)
 
 func _ready() -> void:
 	pass
+	
+func set_event_bus(event_bus: UiEventBus) -> void:
+	$WorldSurface.event_bus = event_bus
 
 func load_world(world : World) -> void:
 	_world = world

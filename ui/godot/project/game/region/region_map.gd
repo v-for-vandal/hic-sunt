@@ -7,6 +7,9 @@ var _region_object: RegionObject
 func _ready() -> void:
 	pass
 
+func set_event_bus(event_bus: UiEventBus) -> void:
+	$RegionSurface.event_bus = event_bus
+	
 func load_region(region_object : RegionObject) -> void:
 	assert(region_object != null, "Can't load null region")
 	if _region_object != null and region_object.get_region_id() == _region_object.get_region_id():
@@ -46,10 +49,10 @@ func on_ui_event(event : Variant) -> void:
 		exit_reqion_request.emit()
 		return
 
-func _connect_region_object(_region_object: RegionObject) -> void:
+func _connect_region_object(_region_object_: RegionObject) -> void:
 	# This class doesn't require any connections
 	pass
 	
-func _disconnect_region_object(_region_object: RegionObject) -> void:
+func _disconnect_region_object(_region_object_: RegionObject) -> void:
 	# keep it in sync with method _connect_region_object
 	pass

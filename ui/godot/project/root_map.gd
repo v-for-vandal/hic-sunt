@@ -9,6 +9,8 @@ extends Node2D
 func _ready() -> void:
 	assert(_world_map != null, "Child failed to initialize")
 	assert(_region_map != null, "Child failed to initialize")
+	_region_map.set_event_bus(CurrentGame.event_bus)
+	_world_map.set_event_bus(CurrentGame.event_bus)
 	CurrentGame.event_bus.set_world_interaction(_world_map)
 	CurrentGame.event_bus.set_region_interaction(_region_map)
 	# world is empty at the moment, but lets set up everything properly

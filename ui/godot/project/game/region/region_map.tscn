@@ -1,22 +1,22 @@
-[gd_scene load_steps=5 format=3 uid="uid://dyp7yp0fqe876"]
+[gd_scene format=3 uid="uid://dyp7yp0fqe876"]
 
 [ext_resource type="Script" uid="uid://cnxbiq5omyuqk" path="res://game/region/region_map.gd" id="1_5bqhm"]
 [ext_resource type="PackedScene" uid="uid://clsw3n3vibrhp" path="res://game/region/region_surface.tscn" id="2_ti8ru"]
 [ext_resource type="PackedScene" uid="uid://brhsewnl00nkp" path="res://ui/region/region_ui.tscn" id="3_ltroy"]
 [ext_resource type="PackedScene" uid="uid://be5v7dxkwurjp" path="res://view_camera.tscn" id="4_tsfj2"]
 
-[node name="RegionMap" type="Node2D"]
+[node name="RegionMap" type="Node2D" unique_id=208394068]
 script = ExtResource("1_5bqhm")
 
-[node name="RegionSurface" parent="." instance=ExtResource("2_ti8ru")]
+[node name="RegionSurface" parent="." unique_id=1394004108 instance=ExtResource("2_ti8ru")]
 
-[node name="RegionViewCamera" parent="." instance=ExtResource("4_tsfj2")]
+[node name="RegionViewCamera" parent="." unique_id=1773213883 instance=ExtResource("4_tsfj2")]
 position = Vector2(480, 269)
 zoom = Vector2(0.4, 0.4)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=874529269]
 
-[node name="RegionUI" parent="CanvasLayer" groups=["ui:region"] instance=ExtResource("3_ltroy")]
+[node name="RegionUI" parent="CanvasLayer" unique_id=744727721 groups=["ui:region"] instance=ExtResource("3_ltroy")]
 mouse_filter = 1
 
 [connection signal="close_requested" from="CanvasLayer/RegionUI" to="." method="_on_region_ui_close_requested"]
