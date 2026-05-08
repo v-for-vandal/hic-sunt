@@ -5,6 +5,26 @@
 
 namespace hs::godot {
 
+namespace {
+
+Dictionary MakeEffectExecutionStatisticsDictionary(
+    const hs::session::EffectExecutionStatistics<GodotBaseTypes>& statistics) {
+  Dictionary result;
+
+  for (const auto& [effect_id, entry] : statistics.GetEntries()) {
+    Dictionary item;
+    item["execution_count"] = static_cast<int64_t>(entry.execution_count);
+    item["total_duration_ns"] = static_cast<int64_t>(entry.total_duration_ns);
+    item["total_changes"] = static_cast<int64_t>(entry.total_changes);
+    item["failure_count"] = static_cast<int64_t>(entry.failure_count);
+    result[effect_id] = item;
+  }
+
+  return result;
+}
+
+}  // namespace
+
 void SessionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_ruleset", "ruleset"),
                        &SessionObject::set_ruleset);
@@ -15,7 +35,11 @@ void SessionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("advance_next_turn"),
                        &SessionObject::advance_next_turn);
   ClassDB::bind_method(D_METHOD("set_current_turn"),
-                         &SessionObject::set_current_turn);
+                       &SessionObject::set_current_turn);
+  ClassDB::bind_method(D_METHOD("get_last_effect_execution_statistics"),
+                       &SessionObject::get_last_effect_execution_statistics);
+  ClassDB::bind_method(D_METHOD("get_total_effect_execution_statistics"),
+                       &SessionObject::get_total_effect_execution_statistics);
 }
 
 bool SessionObject::set_ruleset(const Ref<RulesetObject>& ruleset) {
@@ -54,5 +78,15 @@ void SessionObject::set_current_turn(int turn) {
 }
 
 void SessionObject::advance_next_turn() { data_.AdvanceNextTurn(); }
+
+Dictionary SessionObject::get_last_effect_execution_statistics() const {
+  return MakeEffectExecutionStatisticsDictionary(
+      data_.GetLastEffectExecutionStatistics());
+}
+
+Dictionary SessionObject::get_total_effect_execution_statistics() const {
+  return MakeEffectExecutionStatisticsDictionary(
+      data_.GetTotalEffectExecutionStatistics());
+}
 
 }  // namespace hs::godot

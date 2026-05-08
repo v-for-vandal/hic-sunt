@@ -18,6 +18,9 @@ namespace hs::session {
 template <typename BaseTypes>
 class EffectExecutor;
 
+template <typename BaseTypes>
+class EffectExecutionStatistics;
+
 template <typename BaseTypes = StdBaseTypes,
           typename WorldPtr = std::shared_ptr<terra::World<BaseTypes>>,
           typename RuleSetPtr =
@@ -53,6 +56,12 @@ class Session {
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
   auto& GetEffects() noexcept { return effects_; }
   const auto& GetEffects() const noexcept { return effects_; }
+  const auto& GetLastEffectExecutionStatistics() const noexcept {
+    return last_effect_execution_statistics_;
+  }
+  const auto& GetTotalEffectExecutionStatistics() const noexcept {
+    return total_effect_execution_statistics_;
+  }
 
  private:
   friend class EffectExecutor<BaseTypes>;
@@ -63,6 +72,8 @@ class Session {
   absl::flat_hash_map<StringId, ScopePtr> scopes_by_id_;
   absl::flat_hash_map<ScopeType, std::vector<ScopePtr>> scopes_by_type_;
   std::vector<std::shared_ptr<EffectInstance<BaseTypes>>> effects_;
+  EffectExecutionStatistics<BaseTypes> last_effect_execution_statistics_;
+  EffectExecutionStatistics<BaseTypes> total_effect_execution_statistics_;
 };
 
 }  // namespace hs::session

@@ -91,7 +91,8 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
 
   ++current_turn_;
   EffectExecutor<BaseTypes> executor;
-  executor.Execute(*this, current_turn_);
+  last_effect_execution_statistics_ = executor.Execute(*this, current_turn_);
+  total_effect_execution_statistics_.MergeFrom(last_effect_execution_statistics_);
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
