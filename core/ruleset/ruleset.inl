@@ -48,9 +48,13 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
       if (numeric.has_maximum()) {
         numeric_definition.maximum = numeric.maximum();
       }
-      parsed_variable_definitions_.AddNumericDefinition(
+      auto add_result = parsed_variable_definitions_.AddNumericDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
+      if (!add_result) {
+        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        return false;
+      }
     } else if (definition.has_string()) {
       const auto &string_ = definition.string();
       StringVariableDefinition<BaseTypes> string_definition;
@@ -58,16 +62,24 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
         string_definition.default_value =
             BaseTypes::StringIdFromStdString(string_.default_());
       }
-      parsed_variable_definitions_.AddStringDefinition(
+      auto add_result = parsed_variable_definitions_.AddStringDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           string_definition);
+      if (!add_result) {
+        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        return false;
+      }
     } else if (definition.has_boolean()) {
       NumericVariableDefinition<BaseTypes> numeric_definition;
       numeric_definition.minimum = 0;
       numeric_definition.maximum = 1;
-      parsed_variable_definitions_.AddNumericDefinition(
+      auto add_result = parsed_variable_definitions_.AddNumericDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
+      if (!add_result) {
+        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        return false;
+      }
     } else {
       SPDLOG_ERROR(
           "Variable {} has undefined type. It is neither numeric, nor string, nor bool",

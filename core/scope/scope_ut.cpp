@@ -7,8 +7,8 @@ namespace hs::scope::test {
     namespace {
         StdVariableDefinitionsPtr MakeVariableDefinitions() {
         auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
-        mutable_definitions->AddNumericDefinition("numeric_var", {});
-        mutable_definitions->AddStringDefinition("string_var", {});
+        EXPECT_TRUE(mutable_definitions->AddNumericDefinition("numeric_var", {}));
+        EXPECT_TRUE(mutable_definitions->AddStringDefinition("string_var", {}));
 
         StdVariableDefinitionsPtr result;
         return StdVariableDefinitionsPtr(

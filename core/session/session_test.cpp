@@ -32,7 +32,7 @@ StdScopePtr MakeScope(const std::string& id, ScopeType type) {
 
 StdScopePtr MakeEffectScope(const std::string& id, ScopeType type) {
   auto definitions = std::make_shared<StdVariableDefinitions>();
-  definitions->AddNumericDefinition("numeric_var", {});
+  EXPECT_TRUE(definitions->AddNumericDefinition("numeric_var", {}));
 
   StdScopePtr scope(id, type);
   scope->SetVariableDefinitions(definitions);

@@ -3,8 +3,10 @@
 #include <absl/container/flat_hash_map.h>
 #include <spdlog/spdlog.h>
 
+#include <core/types/error_code.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
+#include <expected>
 #include <limits>
 #include <utility>
 
@@ -32,6 +34,12 @@ class VariableDefinitions {
  public:
   using StringId = typename BaseTypes::StringId;
 
+  enum class VariableType {
+    kMissing,
+    kNumeric,
+    kString,
+  };
+
   bool IsEmpty() const noexcept {
     return string_definitions_.empty() && numeric_definitions_.empty();
   }
@@ -41,14 +49,24 @@ class VariableDefinitions {
     string_definitions_.clear();
   }
 
-  void AddNumericDefinition(const StringId& id,
-                            NumericVariableDefinition<BaseTypes> definition) {
+  std::expected<void, ErrorCode> AddNumericDefinition(
+      const StringId& id, NumericVariableDefinition<BaseTypes> definition) {
+    if (const auto var_type = GetVariableType(id); var_type != VariableType::kNumeric && var_type != VariableType::kMissing) {
+      return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    }
+
     numeric_definitions_[id] = std::move(definition);
+    return {};
   }
 
-  void AddStringDefinition(const StringId& id,
-                           StringVariableDefinition<BaseTypes> definition) {
+  std::expected<void, ErrorCode> AddStringDefinition(
+      const StringId& id, StringVariableDefinition<BaseTypes> definition) {
+    if (const auto var_type = GetVariableType(id); var_type != VariableType::kString && var_type != VariableType::kMissing ) {
+      return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    }
+
     string_definitions_[id] = std::move(definition);
+    return {};
   }
 
   bool IsNumericVariable(const StringId& id) const noexcept {
@@ -60,7 +78,17 @@ class VariableDefinitions {
   }
 
   bool IsVariable(const StringId& id) const noexcept {
-      return IsStringVariable(id) || IsNumericVariable(id);
+    return GetVariableType(id) != VariableType::kMissing;
+  }
+
+  VariableType GetVariableType(const StringId& id) const noexcept {
+    if (numeric_definitions_.contains(id)) {
+      return VariableType::kNumeric;
+    }
+    if (string_definitions_.contains(id)) {
+      return VariableType::kString;
+    }
+    return VariableType::kMissing;
   }
 
   // Finds and returns definition for variable with given id
