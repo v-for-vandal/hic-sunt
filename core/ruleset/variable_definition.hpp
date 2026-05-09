@@ -106,6 +106,14 @@ class VariableDefinitions {
     return fit->second;
   }
 
+  const auto& GetNumericDefinitions() const noexcept {
+    return numeric_definitions_;
+  }
+
+  const auto& GetStringDefinitions() const noexcept {
+    return string_definitions_;
+  }
+
   StringVariableDefinition<BaseTypes> FindStringVariable(
       const StringId& id) const {
     static StringVariableDefinition<BaseTypes> ADHOC_VAR_DEF{};

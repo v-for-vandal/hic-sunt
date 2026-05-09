@@ -59,12 +59,15 @@ func add_2d_node(key: String, node: Node2D, hint: Rect2i = Rect2i(0, 0, 100, 100
 
 func add_text_node(key: String, text: String) -> RefCounted:
 	# create text node
-	var text_node := RichTextLabel.new()
+	var text_receiver := RichTextLabel.new()
+	text_receiver.bbcode_enabled = true
 	if not text.is_empty():
-		text_node.add_text(text)
-		text_node.newline()
-	var new_item := _add_element(key, text_node)
-	_debug_tree._add_text_sink(_item, text_node)
+		text_receiver.add_text(text)
+		text_receiver.newline()
+	var new_item := _add_element(key, text_receiver)
+	# new_item is our text node. We set text_receiver as a sink
+	# so all calls to add_text will write there
+	_debug_tree._add_text_sink(new_item, text_receiver)
 
 	return _wrap_in_class(new_item)
 	
@@ -72,7 +75,11 @@ func add_text(text: String) -> void:
 	# if we are text node:
 	var text_node := _debug_tree._get_text_sink(_item)
 	if text_node == null:
-		add_text_node("log", text)
+		# We need to create text node, but we also need to map it as our text sink.
+		var logs_node := add_text_node("log", text)
+		text_node = _debug_tree._get_text_sink(logs_node._item)
+		_debug_tree._add_text_sink(_item, text_node)
+		
 		return
 	
 	text_node.add_text(text)

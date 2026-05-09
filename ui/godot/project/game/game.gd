@@ -34,11 +34,21 @@ func _init(world_: World, ruleset_: RulesetObject) -> void:
 	_session.set_ruleset(ruleset_)
 	_world = world_
 	_ruleset = ruleset_
+	assert(_world)
+	assert(_ruleset)
 	_current_player_civ = Civilisation.create_civilisation(get_new_id())
 # TODO: we must do something with current_turn and next_id
 
 func _ready() -> void:
 	_debug_control = DebugRoot.get_debug_control().add_random_group("Game-")
+	# add all ruleset variables
+	var variables_d_c := _debug_control.add_text_node("variables", "")
+	var var_defines : Dictionary = _ruleset.get_variable_definitions()
+	for varname: StringName in var_defines:
+		var vardata : Dictionary = var_defines[varname]
+		var var_type : StringName = vardata[&"type"];
+		variables_d_c.add_text("%-80s| %-10s" % [varname, var_type])
+	
 
 func get_current_player_civ() -> Civilisation:
 	return _current_player_civ

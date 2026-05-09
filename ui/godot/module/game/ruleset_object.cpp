@@ -10,6 +10,8 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_biomes"), &RulesetObject::get_biomes);
   ClassDB::bind_method(D_METHOD("get_all_resources"),
                        &RulesetObject::get_all_resources);
+  ClassDB::bind_method(D_METHOD("get_variable_definitions"),
+                       &RulesetObject::get_variable_definitions);
   ClassDB::bind_method(D_METHOD("get_all_effects"),
                        &RulesetObject::get_all_effects);
   ClassDB::bind_method(D_METHOD("get_atlas_render"),
@@ -47,6 +49,27 @@ TypedArray<StringName> RulesetObject::get_all_effects() const {
     }
 
     return result;
+}
+
+Dictionary RulesetObject::get_variable_definitions() const {
+  Dictionary result;
+
+  for (const auto& [id, definition] : ruleset_.GetVariableDefinitions().GetNumericDefinitions()) {
+    Dictionary item;
+    item[kTypeKey] = kNumericType;
+    item[kMinimumKey] = definition.minimum;
+    item[kMaximumKey] = definition.maximum;
+    result[id] = item;
+  }
+
+  for (const auto& [id, _] : ruleset_.GetVariableDefinitions().GetStringDefinitions()) {
+    Dictionary item;
+    item[kIdKey] = id;
+    item[kTypeKey] = kStringType;
+    result[id] = item;
+  }
+
+  return result;
 }
 
 Dictionary RulesetObject::convert_biome_type(
@@ -196,7 +219,7 @@ Array RulesetObject::get_all_resources() const {
 
   for (const auto& res : resources.resources()) {
     Dictionary resource_info;
-    resource_info["id"] = res.id().c_str();
+    resource_info[kIdKey] = res.id().c_str();
     result.append(std::move(resource_info));
   }
 
