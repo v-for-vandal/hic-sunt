@@ -29,7 +29,7 @@ class RuleSet : public RuleSetBase {
   const proto::ruleset::Project *FindProjectByType(
       const StringId &project_type_id) const;
 
-  const VariableDefinitions<BaseTypes> &GetVariableDefinitions() const {
+  const VariableDefinitionsPtr<BaseTypes> &GetVariableDefinitions() const {
     return parsed_variable_definitions_;
   }
 
@@ -42,7 +42,7 @@ class RuleSet : public RuleSetBase {
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
 
-  VariableDefinitions<BaseTypes> parsed_variable_definitions_;
+  VariableDefinitionsPtr<BaseTypes> parsed_variable_definitions_;
   std::vector<ConstEffectDefinitionPtr<BaseTypes>> effect_definitions_;
 };
 

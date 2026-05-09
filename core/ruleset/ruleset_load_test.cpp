@@ -106,8 +106,8 @@ TEST(StdRuleSet, LoadIgnoresUnreadableOrInvalidFiles) {
   utils::ErrorsCollection errors;
   ASSERT_TRUE(ruleset.Load({root}, errors));
 
-  EXPECT_TRUE(ruleset.GetVariableDefinitions().IsStringVariable("var.one"));
-  EXPECT_FALSE(ruleset.GetVariableDefinitions().IsNumericVariable("var.one"));
+  EXPECT_TRUE(ruleset.GetVariableDefinitions()->IsStringVariable("var.one"));
+  EXPECT_FALSE(ruleset.GetVariableDefinitions()->IsNumericVariable("var.one"));
 }
 
 }  // namespace hs::ruleset

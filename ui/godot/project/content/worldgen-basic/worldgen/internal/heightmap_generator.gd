@@ -145,21 +145,21 @@ func _region_first_pass(region: RegionObject, region_qrs_coords: Vector2i) -> vo
 
 	region.foreach(region_cell_lambda)
 	
-	# add as overlay
-	if region_qrs_coords.x % 10 == 0 and region_qrs_coords.y % 10 == 0:
-		var display_rect := Rect2i(
-			region_center_cell_coords - Vector2i(region_external_radius, region_external_radius),
-			region_center_cell_coords + Vector2i(region_external_radius, region_external_radius)
-		)
-		# Something is very wrong with this transformation :(
-		display_rect = Rect2i(_heightmap_transformation * Rect2(display_rect))
-		
-		_heightmap_debug_node.add_to_overlay(DebugTree.create_rect_overlay(
-			#display_rect,
-			region_debug_rect,
-			Color.ORANGE,
-			region.get_id()
-		))
+	# add some regions as overlay, for debugging
+	#if region_qrs_coords.x % 10 == 0 and region_qrs_coords.y % 10 == 0:
+		#var display_rect := Rect2i(
+			#region_center_cell_coords - Vector2i(region_external_radius, region_external_radius),
+			#region_center_cell_coords + Vector2i(region_external_radius, region_external_radius)
+		#)
+		## Something is very wrong with this transformation :(
+		#display_rect = Rect2i(_heightmap_transformation * Rect2(display_rect))
+		#
+		#_heightmap_debug_node.add_to_overlay(DebugTree.create_rect_overlay(
+			##display_rect,
+			#region_debug_rect,
+			#Color.ORANGE,
+			#region.get_id()
+		#))
 
 
 

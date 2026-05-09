@@ -4,6 +4,7 @@
 
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
+#include <core/scope/scope_ut.hpp>
 
 namespace hs::region {
 
@@ -15,23 +16,6 @@ using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using StdVariableDefinitionsPtr =
     hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
-
-StdVariableDefinitionsPtr MakeVariableDefinitions() {
-  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
-  EXPECT_TRUE(mutable_definitions->AddNumericDefinition("numeric_var", {}));
-  EXPECT_TRUE(mutable_definitions->AddStringDefinition("string_var", {}));
-
-  StdVariableDefinitionsPtr result;
-  return StdVariableDefinitionsPtr(
-      std::static_pointer_cast<const StdVariableDefinitions>(
-          mutable_definitions));
-}
-
-StdScopePtr MakeScopeWithDefinitions() {
-  StdScopePtr scope("test_scope");
-  scope->SetVariableDefinitions(MakeVariableDefinitions());
-  return scope;
-}
 
 TEST(StdRegion, Serialize) {
   StdRegion ref_region("test", 15);
@@ -80,7 +64,7 @@ TEST(StdRegion, Equality) {
 }
 
 TEST(StdRegion, Scope) {
-    auto parent_scope = MakeScopeWithDefinitions();
+    auto parent_scope = scope::test::MakeSimpleScope();
   StdRegion ref_region("test", 2);
   ASSERT_NE(ref_region.GetScope(), nullptr);
   ref_region.GetScope()->SetParent(parent_scope);
@@ -100,7 +84,7 @@ TEST(StdRegion, CellScopeParent) {
 }
 
 TEST(StdRegion, TopNStringValues) {
- auto parent_scope = MakeScopeWithDefinitions();
+ auto parent_scope = scope::test::MakeSimpleScope();
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
   region.GetScope()->SetParent(parent_scope);

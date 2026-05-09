@@ -93,14 +93,12 @@ class VariableDefinitions {
 
   // Finds and returns definition for variable with given id
   // Returns copy to prevent abuse.
-  NumericVariableDefinition<BaseTypes> FindNumericVariable(
-      const StringId& id) const {
-    static NumericVariableDefinition<BaseTypes> ADHOC_VAR_DEF{};
-
+  std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode>
+  FindNumericVariable(const StringId& id) const {
     const auto fit = numeric_definitions_.find(id);
     if (fit == numeric_definitions_.end()) {
       spdlog::error("Variable {} is unknown or is not numeric", id);
-      return ADHOC_VAR_DEF;
+      return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
     }
 
     return fit->second;
@@ -114,14 +112,12 @@ class VariableDefinitions {
     return string_definitions_;
   }
 
-  StringVariableDefinition<BaseTypes> FindStringVariable(
-      const StringId& id) const {
-    static StringVariableDefinition<BaseTypes> ADHOC_VAR_DEF{};
-
+  std::expected<StringVariableDefinition<BaseTypes>, ErrorCode>
+  FindStringVariable(const StringId& id) const {
     const auto fit = string_definitions_.find(id);
     if (fit == string_definitions_.end()) {
       spdlog::error("Variable {} is unknown or is not string", id);
-      return ADHOC_VAR_DEF;
+      return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
     }
 
     return fit->second;
@@ -136,6 +132,9 @@ class VariableDefinitions {
 
 template <typename BaseTypes>
 using VariableDefinitionsPtr =
-    utils::NonNullSharedPtr<const VariableDefinitions<BaseTypes>>;
+    utils::NonNullSharedPtr<VariableDefinitions<BaseTypes>>;
+template <typename BaseTypes>
+using VariableDefinitionsConstPtr =
+        utils::NonNullSharedPtr<const VariableDefinitions<BaseTypes>>;
 
 }  // namespace hs::ruleset

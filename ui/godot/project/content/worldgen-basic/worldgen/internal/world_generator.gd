@@ -9,8 +9,12 @@ func _init(config : Config, debug_control: DebugTree.ControlInterface) -> void:
 	_config = config
 	_debug_control = debug_control.add_text_node("worldgen", "")
 
-func create_world() -> World:
+func create_world(ruleset: RulesetObject) -> World:
 	var world := World.new()
+	# We need session to bind together World and Ruleset
+	var session := SessionObject.new()
+	session.set_world(world.world_object)
+	session.set_ruleset(ruleset)
 	
 	var global_context := WorldGeneratorGlobalContext.new()
 	global_context.debug_control = _debug_control

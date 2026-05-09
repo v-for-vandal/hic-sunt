@@ -46,8 +46,21 @@ TEST(StdVariableDefinitions, AllowsRedefinitionWithSameType) {
   ASSERT_TRUE(result.has_value());
 
   auto found = definitions.FindNumericVariable("numeric_var");
-  EXPECT_EQ(found.minimum, 10);
-  EXPECT_EQ(found.maximum, 20);
+  ASSERT_TRUE(found.has_value());
+  EXPECT_EQ(found->minimum, 10);
+  EXPECT_EQ(found->maximum, 20);
+}
+
+TEST(StdVariableDefinitions, MissingLookupsReturnUnexpected) {
+  StdVariableDefinitions definitions;
+
+  auto numeric = definitions.FindNumericVariable("missing_numeric");
+  ASSERT_FALSE(numeric.has_value());
+  EXPECT_EQ(numeric.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+
+  auto string_ = definitions.FindStringVariable("missing_string");
+  ASSERT_FALSE(string_.has_value());
+  EXPECT_EQ(string_.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
 }  // namespace hs::ruleset

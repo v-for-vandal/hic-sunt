@@ -54,7 +54,7 @@ TypedArray<StringName> RulesetObject::get_all_effects() const {
 Dictionary RulesetObject::get_variable_definitions() const {
   Dictionary result;
 
-  for (const auto& [id, definition] : ruleset_.GetVariableDefinitions().GetNumericDefinitions()) {
+  for (const auto& [id, definition] : ruleset_.GetVariableDefinitions()->GetNumericDefinitions()) {
     Dictionary item;
     item[kTypeKey] = kNumericType;
     item[kMinimumKey] = definition.minimum;
@@ -62,7 +62,7 @@ Dictionary RulesetObject::get_variable_definitions() const {
     result[id] = item;
   }
 
-  for (const auto& [id, _] : ruleset_.GetVariableDefinitions().GetStringDefinitions()) {
+  for (const auto& [id, _] : ruleset_.GetVariableDefinitions()->GetStringDefinitions()) {
     Dictionary item;
     item[kIdKey] = id;
     item[kTypeKey] = kStringType;

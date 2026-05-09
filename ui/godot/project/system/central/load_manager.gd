@@ -92,10 +92,6 @@ func _return_to_main_screen() -> void:
 
 func new_game(world: World, ruleset: RulesetObject) -> void:
 
-	#var world_object : WorldObject = CentralSystem.create_world(Vector2i(10, 5), 7, ruleset_object)
-
-	#assert(world_object != null, "Failed to create world")
-
 	CurrentGame.init_game(world, ruleset)
 
 	_init_world_scene()

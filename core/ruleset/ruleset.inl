@@ -48,7 +48,7 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
       if (numeric.has_maximum()) {
         numeric_definition.maximum = numeric.maximum();
       }
-      auto add_result = parsed_variable_definitions_.AddNumericDefinition(
+      auto add_result = parsed_variable_definitions_->AddNumericDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
       if (!add_result) {
@@ -62,7 +62,7 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
         string_definition.default_value =
             BaseTypes::StringIdFromStdString(string_.default_());
       }
-      auto add_result = parsed_variable_definitions_.AddStringDefinition(
+      auto add_result = parsed_variable_definitions_->AddStringDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           string_definition);
       if (!add_result) {
@@ -73,7 +73,7 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
       NumericVariableDefinition<BaseTypes> numeric_definition;
       numeric_definition.minimum = 0;
       numeric_definition.maximum = 1;
-      auto add_result = parsed_variable_definitions_.AddNumericDefinition(
+      auto add_result = parsed_variable_definitions_->AddNumericDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
       if (!add_result) {
@@ -95,7 +95,7 @@ template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
   improvements_by_type_.clear();
   jobs_by_type_.clear();
   projects_by_type_.clear();
-  parsed_variable_definitions_.Clear();
+  parsed_variable_definitions_->Clear();
   effect_definitions_.clear();
 }
 

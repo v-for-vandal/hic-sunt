@@ -10,6 +10,8 @@ namespace hs::scope::test {
     using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
     using StdVariableDefinitionsPtr =
         hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
+    using StdVariableDefinitionsConstPtr =
+        hs::ruleset::VariableDefinitionsConstPtr<StdBaseTypes>;
 
     /*! This function returns a simple scope with two definitions - numeric_var and
      * string_var. You should use it as root scope, so that those definitions were

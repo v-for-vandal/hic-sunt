@@ -15,7 +15,7 @@ core_ruleset_ut_lib = static_library('core_ruleset_ut_lib',
         'ruleset_ut.cpp',
         hs_proto_generated_headers,
     ],
-    dependencies: common_deps,
+    dependencies: common_deps + gtest_dep,
     link_with: [core_ruleset_lib],
     include_directories: root_include
     )

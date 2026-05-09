@@ -16,10 +16,8 @@ core_region_tests = executable('unit_tests',
     hs_proto_generated_headers
     ],
   dependencies : common_deps + gtest_dep,
-  link_with: [core_geometry_lib, core_region_lib, hs_proto_lib],
+  link_with: [core_geometry_lib, core_region_lib, hs_proto_lib, core_scope_ut_lib],
   include_directories: root_include,
   )
 
 test('core.region', core_region_tests, env: environment(test_env))
-
-

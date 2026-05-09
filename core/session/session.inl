@@ -26,6 +26,8 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRule
     effects_.push_back(std::move(effect_instance));
   }
 
+  Prepare();
+
   return {};
 }
 
@@ -74,7 +76,31 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorl
   }
 
   world_ = std::move(ptr);
+
+  Prepare();
+
   return {};
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+void Session<BaseTypes, WorldPtr, RuleSetPtr>::Prepare() {
+    if(world_ == nullptr) {
+        return;
+    }
+    if (ruleset_ == nullptr) {
+        return;
+    }
+    // Clear cache in all scopes
+    for(auto& [_, scope] : scopes_by_id_) {
+        scope->ClearCache();
+    }
+
+    // TODO: Clear all modifiers that match effects not found in ruleset
+    // But don't forget about manually set modifiers at world creation - those should
+    // not be cleared
+
+    // Reinitialize variable definitions at root scope
+    world_->GetScope()->SetVariableDefinitions(ruleset_->GetVariableDefinitions());
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>

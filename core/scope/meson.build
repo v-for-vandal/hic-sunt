@@ -20,7 +20,7 @@ core_scope_ut_lib = static_library(
         hs_proto_generated_headers,
     ],
     dependencies: common_deps + gtest_dep,
-    link_with: [core_scope_lib],
+    link_with: [core_scope_lib, core_ruleset_ut_lib],
     include_directories: root_include,
 )
 

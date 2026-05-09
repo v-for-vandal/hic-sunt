@@ -2,24 +2,13 @@
 
 #include <gtest/gtest.h>
 
+#include <core/ruleset/ruleset_ut.hpp>
+
 namespace hs::scope::test {
-
-    namespace {
-        StdVariableDefinitionsPtr MakeVariableDefinitions() {
-        auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
-        EXPECT_TRUE(mutable_definitions->AddNumericDefinition("numeric_var", {}));
-        EXPECT_TRUE(mutable_definitions->AddStringDefinition("string_var", {}));
-
-        StdVariableDefinitionsPtr result;
-        return StdVariableDefinitionsPtr(
-            std::static_pointer_cast<const StdVariableDefinitions>(
-                mutable_definitions));
-        }
-    }
 
     StdScopePtr MakeSimpleScope(ScopeType scope_type) {
       StdScopePtr scope("test_scope", scope_type);
-      scope->SetVariableDefinitions(MakeVariableDefinitions());
+      scope->SetVariableDefinitions(hs::ruleset::test::MakeSimpleVariableDefinitions());
       return scope;
     }
 

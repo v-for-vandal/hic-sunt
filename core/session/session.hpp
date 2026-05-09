@@ -64,6 +64,8 @@ class Session {
   }
 
  private:
+  void Prepare();
+ private:
   friend class EffectExecutor<BaseTypes>;
 
   RuleSetPtr ruleset_;

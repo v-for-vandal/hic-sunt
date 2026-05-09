@@ -23,12 +23,12 @@ Scope<BaseTypes>::Scope(
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::SetVariableDefinitions(const VariableDefinitionsPtr& definitions)
+void Scope<BaseTypes>::SetVariableDefinitions(const VariableDefinitionsConstPtr& definitions)
 {
-    if(parent_ != nullptr) {
-        spdlog::warn("Setting definitiosn on non-root scope. Please don't do that.");
+    if (scope_type_ != types::ScopeType::SCOPE_TYPE_WORLD) {
+        spdlog::warn("Setting definitiosn on non-root scope is not recommended");
     }
-   definitions_ = definitions;
+   cached_definitions_ = definitions;
 }
 
 template <typename BaseTypes>
@@ -69,8 +69,10 @@ auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expecte
         return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
     }
 
-  const auto& vardef = GetVariableDefinitions()->FindNumericVariable(
-      variable);
+  auto vardef = GetVariableDefinitions()->FindNumericVariable(variable);
+  if (!vardef) {
+    return std::unexpected(vardef.error());
+  }
 
   NumericValue add{0};
   NumericValue mult{0};
@@ -82,7 +84,7 @@ auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expecte
 
   auto value = add * mult;
 
-  value = std::clamp(value, vardef.minimum, vardef.maximum);
+  value = std::clamp(value, vardef->minimum, vardef->maximum);
 
   return value;
 }
@@ -161,15 +163,16 @@ std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(const Str
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::GetVariableDefinitions() const ->const VariableDefinitionsPtr&
+auto Scope<BaseTypes>::GetVariableDefinitions() const ->const VariableDefinitionsConstPtr&
 {
-    if (definitions_->IsEmpty()) {
+
+    if (cached_definitions_->IsEmpty()) {
         if (parent_) {
-            definitions_ = parent_->GetVariableDefinitions();
+            cached_definitions_ = parent_->GetVariableDefinitions();
         }
     }
 
-    return definitions_;
+    return cached_definitions_;
 }
 
 template <typename BaseTypes>
@@ -224,6 +227,11 @@ void Scope<BaseTypes>::ExplainAllVariables(auto&& collect_fn) {
       parent_->ExplainAllVariables(collect_fn);
   }
 
+}
+
+template <typename BaseTypes>
+void Scope<BaseTypes>::ClearCache() {
+    cached_definitions_.reset();
 }
 
 template <typename BaseTypes>
