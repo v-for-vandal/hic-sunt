@@ -1,12 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://xbdd74ccg32f"]
+[gd_scene format=3 uid="uid://xbdd74ccg32f"]
 
 [ext_resource type="PackedScene" uid="uid://ccnpnxy6gvlwm" path="res://ui/system/options_dialog.tscn" id="1_8kfrc"]
 [ext_resource type="Script" uid="uid://b5lasabfxiwgp" path="res://ui/world/world_ui.gd" id="1_xc8cv"]
 [ext_resource type="Script" uid="uid://bps81is67jlqo" path="res://ui/world/InfoTabContainer.gd" id="3_fovtq"]
 [ext_resource type="Script" uid="uid://cupjn1uapiruw" path="res://ui/world/CellInfo.gd" id="4_ye4d0"]
 [ext_resource type="PackedScene" uid="uid://bxc5r6hxq4tjo" path="res://ui/system/save_dialog.tscn" id="5_c3bvn"]
+[ext_resource type="PackedScene" uid="uid://cjkx708uja6xu" path="res://ui/system/outliner.tscn" id="6_un7b3"]
 
-[node name="WorldUI" type="Control"]
+[node name="WorldUI" type="Control" unique_id=718872273]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,32 +17,32 @@ grow_vertical = 2
 script = ExtResource("1_xc8cv")
 save_dialog_scene = ExtResource("5_c3bvn")
 
-[node name="TopPanel" type="HBoxContainer" parent="."]
+[node name="TopPanel" type="HBoxContainer" parent="." unique_id=2106994647]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
 
-[node name="OptionsButton" type="Button" parent="TopPanel"]
+[node name="OptionsButton" type="Button" parent="TopPanel" unique_id=1283382752]
 layout_mode = 2
 toggle_mode = true
 text = "Options"
 
-[node name="InfoButton" type="Button" parent="TopPanel"]
+[node name="InfoButton" type="Button" parent="TopPanel" unique_id=1440257408]
 layout_mode = 2
 toggle_mode = true
 text = "Info"
 
-[node name="NextTurnButton" type="Button" parent="TopPanel"]
+[node name="NextTurnButton" type="Button" parent="TopPanel" unique_id=1501743160]
 layout_mode = 2
 text = "Next turn"
 
-[node name="TurnNumber" type="Label" parent="TopPanel"]
+[node name="TurnNumber" type="Label" parent="TopPanel" unique_id=2117493146]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Turn: 0"
 
-[node name="OptionsDialog" parent="." instance=ExtResource("1_8kfrc")]
+[node name="OptionsDialog" parent="." unique_id=894132398 instance=ExtResource("1_8kfrc")]
 visible = false
 layout_mode = 1
 anchor_left = 0.435
@@ -53,7 +54,7 @@ offset_top = 31.752
 offset_right = -48.384
 offset_bottom = -46.656
 
-[node name="InfoTabContainer" type="TabContainer" parent="."]
+[node name="InfoTabContainer" type="TabContainer" parent="." unique_id=685462645]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -66,11 +67,19 @@ grow_vertical = 2
 current_tab = 0
 script = ExtResource("3_fovtq")
 
-[node name="CellInfo" type="GridContainer" parent="InfoTabContainer"]
+[node name="CellInfo" type="GridContainer" parent="InfoTabContainer" unique_id=1002786635]
 layout_mode = 2
 columns = 2
 script = ExtResource("4_ye4d0")
 metadata/_tab_index = 0
+
+[node name="Outliner" parent="." unique_id=836447073 instance=ExtResource("6_un7b3")]
+custom_minimum_size = Vector2(100, 600)
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+offset_left = -192.0
+grow_horizontal = 0
 
 [connection signal="world_cell_selected" from="." to="InfoTabContainer/CellInfo" method="_on_world_cell_selected"]
 [connection signal="toggled" from="TopPanel/OptionsButton" to="." method="_on_options_button_toggled"]
