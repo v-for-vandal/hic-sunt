@@ -36,6 +36,29 @@ TEST(StdEffectInstance, CheckPossibleReturnsBoolean) {
   EXPECT_TRUE(*result);
 }
 
+TEST(StdEffectInstance, CheckPossibleReturnsTrueWhenPossibleCodeIsEmpty) {
+  auto definition = hs::ruleset::test::MakeEffectDefinition("effect.id", "", "return");
+
+  StdEffectInstance instance(definition);
+  auto scope = hs::scope::test::MakeSeededScope();
+
+  auto result = instance.CheckPossible(scope, 10000);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(*result);
+}
+
+TEST(StdEffectInstance, CheckPossibleReturnsTrueWhenPossibleCodeIsEmptyAndScopeHasNoDependencies) {
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
+      "effect.id", "", "target:set_numeric_modifier('numeric_var', 1.0, 0.0)");
+
+  StdEffectInstance instance(definition);
+  auto scope = hs::scope::test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_REGION);
+
+  auto result = instance.CheckPossible(scope, 10000);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(*result);
+}
+
 TEST(StdEffectInstance, CheckPossibleRejectsNonBooleanResult) {
   auto definition = hs::ruleset::test::MakeEffectDefinition("effect.id", "return 1", "return");
 

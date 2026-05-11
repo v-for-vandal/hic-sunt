@@ -226,14 +226,18 @@ Array RulesetObject::get_all_resources() const {
   return result;
 }
 
-Dictionary RulesetObject::load(String folder_path) {
+Dictionary RulesetObject::load(TypedArray<String> folders) {
   Dictionary result;
 
   hs::utils::ErrorsCollection errors;
   RuleSet ruleset;
+  std::vector<std::filesystem::path> paths;
+  paths.reserve(folders.size());
+  for (int i = 0; i < folders.size(); ++i) {
+      paths.push_back(std::filesystem::path(static_cast<String>(folders[i]).utf8().get_data()));
+  }
   bool success =
-      ruleset.Load({std::filesystem::path(folder_path.utf8().get_data())},
-                   errors);
+      ruleset.Load(paths, errors);
 
   Array errors_godot;
   for (auto& error_msg : errors.errors) {

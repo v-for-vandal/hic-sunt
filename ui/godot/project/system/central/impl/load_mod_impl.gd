@@ -41,7 +41,6 @@ func load_mod(folder: String) -> ConfigFile:
 	if not load_mod_content(modconfig):
 		return null
 
-	print("success")
 	return modconfig
 
 
@@ -128,9 +127,9 @@ func load_mod_content(modconfig: ConfigFile) -> bool:
 	return true
 
 
-func load_mods_from_folder(folder: String) -> Array:
+func load_mods_from_folder(folder: String) -> Dictionary[String, ConfigFile]:
 	var dir := DirAccess.open(folder)
-	var result := []
+	var result : Dictionary[String, ConfigFile]= {}
 
 	if not dir:
 		return result
@@ -148,6 +147,6 @@ func load_mods_from_folder(folder: String) -> Array:
 		if modconfig == null:
 			continue
 
-		result.append(modconfig)
+		result[full_mod_path] = modconfig
 
 	return result

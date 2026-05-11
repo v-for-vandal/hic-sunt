@@ -57,7 +57,7 @@ class RulesetObject : public RefCounted {
       const hs::proto::ruleset::RegionImprovement& improvement_type);
   static Dictionary convert_job(const hs::proto::ruleset::Job& job);
   static Dictionary convert_project(const hs::proto::ruleset::Project& project);
-  static Dictionary load(String folder_path);
+  static Dictionary load(TypedArray<String> folder_path);
 };
 
 }  // namespace hs::godot

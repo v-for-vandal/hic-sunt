@@ -123,7 +123,7 @@ func _on_start_game_button_pressed() -> void:
 	_processing = false
 
 
-func _on_select_generator_button_item_selected(index: int) -> void:
+func _on_select_generator_button_item_selected(_index: int) -> void:
 	pass # Replace with function body.
 
 

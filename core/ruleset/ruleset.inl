@@ -1,3 +1,4 @@
+#include <system_error>
 #include "ruleset.hpp"
 
 #include "spdlog/spdlog.h"
@@ -30,9 +31,14 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
   effect_definitions_.clear();
   effect_definitions_.reserve(GetAllEffects().size());
   for (const auto& effect_proto : GetAllEffects()) {
+      try {
     auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
     effect_definitions_.push_back(
         std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
+      } catch (const std::system_error& e) {
+          errors.errors.push_back({fmt::format("Failed to load effect {}, error: {}",
+              effect_proto.id(), e.what())});
+      }
   }
 
   for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();

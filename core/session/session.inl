@@ -4,6 +4,7 @@
 #include "session.hpp"
 
 #include <core/session/effect_executor.hpp>
+#include <system_error>
 #include <spdlog/spdlog.h>
 
 namespace hs::session {
@@ -21,9 +22,13 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRule
   effects_.reserve(ruleset_->GetAllEffectDefinitions().size());
 
   for (const auto& effect_definition : ruleset_->GetAllEffectDefinitions()) {
+      try {
     auto effect_instance =
         std::make_shared<EffectInstance<BaseTypes>>(effect_definition);
     effects_.push_back(std::move(effect_instance));
+      } catch ( const std::system_error& e) {
+          spdlog::warn("Failed to instantiate effect {} reason: {}", effect_definition->GetId(), e.what());
+      }
   }
 
   Prepare();

@@ -138,6 +138,10 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
 template <typename BaseTypes>
 std::expected<bool, ErrorCode> EffectInstance<BaseTypes>::CheckPossible(
     const ScopePtr& scope, std::optional<int> max_operations) {
+  if (definition_->GetPossibleCode().empty()) {
+    return true;
+  }
+
   auto bind_result = BindVariables(scope);
   if (!bind_result) {
     return std::unexpected(bind_result.error());
