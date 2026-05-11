@@ -119,6 +119,12 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
   EffectExecutor<BaseTypes> executor;
   last_effect_execution_statistics_ = executor.Execute(*this, current_turn_);
   total_effect_execution_statistics_.MergeFrom(last_effect_execution_statistics_);
+
+  // Now, change core.turn variable
+  auto result = world_->GetScope()->SetNumericModifier(kCoreTurn, kCoreTurn, current_turn_, 0, current_turn_);
+  if (!result) {
+      spdlog::error("Error when updating {}: {}", kCoreTurn, result.error());
+  }
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>

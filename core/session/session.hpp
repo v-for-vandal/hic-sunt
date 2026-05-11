@@ -76,6 +76,10 @@ class Session {
   std::vector<std::shared_ptr<EffectInstance<BaseTypes>>> effects_;
   EffectExecutionStatistics<BaseTypes> last_effect_execution_statistics_;
   EffectExecutionStatistics<BaseTypes> total_effect_execution_statistics_;
+
+  // static StringId aren't possible because godot::StringName requires godot runtime
+  // being active.
+  StringId kCoreTurn{"core.turn"};
 };
 
 }  // namespace hs::session

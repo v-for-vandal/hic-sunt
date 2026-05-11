@@ -169,3 +169,18 @@ func add_random_group(prefix: String = "") -> RefCounted:
 		key = "%s%X" % [prefix, randi()]
 
 	return _wrap_in_class(_add_element(key, null))
+	
+func find_node(path: String) -> RefCounted:
+	var components := path.split('/', false)
+	if components.is_empty():
+		return self
+	var item := _item
+	for component in components:
+		var child_item := _debug_tree._get_element(item, component)
+		if child_item == null: # no such item
+			return null
+
+		assert(child_item != null)
+		item = child_item
+
+	return _wrap_in_class(item)

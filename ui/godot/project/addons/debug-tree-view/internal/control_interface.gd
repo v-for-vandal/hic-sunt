@@ -52,3 +52,7 @@ func add_group(path: String) -> RefCounted:
 func add_random_group(prefix : String = '') -> RefCounted:
 	assert(false, "Unimplemented")
 	return RefCounted.new()
+	
+## Finds a node by given path (relative to this item)
+## Returns null if no such node exists
+@abstract func find_node(path: String) -> RefCounted;

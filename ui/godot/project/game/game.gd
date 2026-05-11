@@ -18,6 +18,13 @@ var ruleset: RulesetObject:
 	get:
 		return _ruleset
 
+var debug_control: DebugTree.ControlInterface:
+	get:
+		return _debug_control
+		
+var session: SessionObject:
+	get:
+		return _session
 
 # TODO: Move to World
 var _current_player_civ: Civilisation
