@@ -41,6 +41,8 @@ std::expected<void, ErrorCode> EffectInstance<BaseTypes>::LoadFunctions() {
         definition_->GetPossibleCode() + "\nend";
     sol::load_result loaded = lua_.load(source);
     if (!loaded.valid()) {
+        auto error = loaded.get<sol::error>();
+        spdlog::warn("Failed to load lua script with error: {}", error.what());
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
     sol::protected_function_result result = loaded();
