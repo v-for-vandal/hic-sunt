@@ -8,6 +8,7 @@
 #include <core/utils/non_null_ptr.hpp>
 #include <expected>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace hs::ruleset {
@@ -26,6 +27,11 @@ class EffectDefinition {
   EffectDefinition() = default;
   explicit EffectDefinition(ProtoEffect data);
 
+  static constexpr std::string_view kPossibleFunctionName =
+      "__hic_sunt_possible";
+  static constexpr std::string_view kEffectFunctionName =
+      "__hic_sunt_effect";
+
   const StringId& GetId() const noexcept { return id_; }
   types::ScopeType GetScopeType() const noexcept { return data_.scope_type(); }
   const std::string& GetEffectCode() const noexcept { return effect_code_; }
@@ -38,6 +44,9 @@ class EffectDefinition {
     return lua_variables_;
   }
 
+  bool IsBroken() const noexcept { return is_broken_; }
+  const auto& GetLuaErrors() const noexcept { return lua_errors_; }
+
   int GetMaxOperations() const noexcept;
 
  private:
@@ -49,6 +58,11 @@ class EffectDefinition {
 
   static std::expected<PreprocessedCode, ErrorCode> PreprocessCode(
       const proto::ruleset::effect::Code& code, size_t& next_var_index);
+  static std::string WrapCodeInFunction(std::string_view function_name,
+                                        const std::string& code);
+  static std::vector<std::string> ValidateLuaCode(
+      const StringId& effect_id, std::string_view chunk_name,
+      const std::string& wrapped_code);
 
   static void AppendDependencies(std::vector<StringId>& target,
                                  const std::vector<StringId>& source);
@@ -61,6 +75,8 @@ class EffectDefinition {
   std::string possible_code_;
   std::vector<StringId> dependencies_;
   std::vector<LuaVariable> lua_variables_;
+  bool is_broken_{false};
+  std::vector<std::string> lua_errors_;
 };
 
 template <typename BaseTypes>

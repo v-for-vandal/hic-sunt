@@ -19,7 +19,7 @@ core_scope_ut_lib = static_library(
         'scope_ut.cpp',
         hs_proto_generated_headers,
     ],
-    dependencies: common_deps + gtest_dep,
+    dependencies: [common_deps, gtest_dep, lua_dep],
     link_with: [core_scope_lib, core_ruleset_ut_lib],
     include_directories: root_include,
 )
@@ -32,7 +32,7 @@ core_scope_tests = executable(
         'scope_change_set_test.cpp',
         hs_proto_generated_headers,
     ],
-    dependencies: common_deps + gtest_dep,
+    dependencies: [common_deps, gtest_dep, lua_dep],
     link_with: [core_scope_lib, core_scope_ut_lib, hs_proto_lib],
     include_directories: root_include,
 )

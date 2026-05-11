@@ -15,6 +15,13 @@ using StdEffectInstance = EffectInstance<StdBaseTypes>;
 using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 
+TEST(StdEffectInstance, RejectsBrokenDefinition) {
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
+      "effect.id", "this is not valid lua", "return");
+
+  EXPECT_THROW((StdEffectInstance(definition)), std::system_error);
+}
+
 TEST(StdEffectInstance, ExposesDefinitionIdentity) {
   auto definition = hs::ruleset::test::MakeEffectDefinition("effect.id", "return true", "return");
 
