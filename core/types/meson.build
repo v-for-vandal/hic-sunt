@@ -12,3 +12,9 @@ core_types_lib = static_library(
     link_with: [utils_lib, hs_proto_lib],
     include_directories: root_include,
 )
+
+core_types_lib_dep = declare_dependency(
+    link_with: core_types_lib,
+    include_directories: root_include,
+    dependencies: common_deps,
+)

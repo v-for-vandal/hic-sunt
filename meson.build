@@ -1,21 +1,32 @@
-project('hic-sunt', 'cpp', 'c', version: '0.0.1',
-  default_options : [
-    'cpp_std=c++23',
-    'warning_level=3',
-    'prefix=',
-    'wrap_mode=forcefallback',
+project(
+    'hic-sunt',
+    'cpp',
+    'c',
+    version: '0.0.1',
+    default_options: [
+        'cpp_std=c++23',
+        'warning_level=3',
+        'prefix=',
+        'wrap_mode=forcefallback',
 
-    ])
+    ],
+)
 # TODO: set warning_level=everything when next version of meson is released
 #
-add_project_arguments([
-  '-Wno-gcc-compat',
-  ], language: 'cpp', )
+add_project_arguments(
+    [
+        '-Wno-gcc-compat',
+    ],
+    language: 'cpp',
+)
 
 # We need this one for sol2, because we compile Lua as C++ module
-add_project_arguments([
-  '-DSOL_USING_CXX_LUA',
-  ], language: 'cpp', )
+add_project_arguments(
+    [
+        '-DSOL_USING_CXX_LUA',
+    ],
+    language: 'cpp',
+)
 
 fs = import('fs')
 
@@ -37,9 +48,8 @@ gtest_dep = dependency('gtest')
 # Move to sol2 wrap after merging it into upstream
 # Expose standard dependency. Library is header-only
 sol2_dep = declare_dependency(
-  include_directories: include_directories('submodules/sol2/include'),
+    include_directories: include_directories('submodules/sol2/include'),
 )
-
 
 # TODO: Fix - our build type is neither debug nor release :(
 #if get_option('buildtype') == 'release'
@@ -48,23 +58,35 @@ sol2_dep = declare_dependency(
 #  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG', language:'cpp')
 #endif
 
-
 subdir('fbs')
 subdir('proto')
 
-common_deps = [fmt_dep, spdlog_dep, flatbuffer_dep, protobuf_dep, abseil]
+root_include = include_directories(
+    [
+        '.',
+        'fbs',
+        'submodules/mdspan/include/experimental',
+    ],
+)
 
-root_include = include_directories([
-    '.',
-    'fbs',
-    'submodules/mdspan/include/experimental',
-    ])
+root_include_dep = declare_dependency(
+    include_directories: root_include,
+)
+
+common_deps = [
+    fmt_dep,
+    spdlog_dep,
+    flatbuffer_dep,
+    protobuf_dep,
+    abseil,
+    root_include_dep,
+]
 
 test_resources_dir = meson.source_root() / 'test-resources'
 test_env = {
-  'TEST_RESOURCES_DIR' :  test_resources_dir,
-  'ASAN_OPTIONS' : 'alloc_dealloc_mismatch=0'
-  }
+    'TEST_RESOURCES_DIR': test_resources_dir,
+    'ASAN_OPTIONS': 'alloc_dealloc_mismatch=0',
+}
 
 subdir('utils')
 subdir('core')

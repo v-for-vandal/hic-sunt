@@ -1,23 +1,44 @@
-core_region_lib = static_library('core_region_lib',
-  sources: [
-  'cell.cpp',
-  'region.cpp',
-  'pnl_statement.cpp',
-  hs_proto_generated_headers,
-  ],
-  dependencies : common_deps,
-  link_with: [utils_lib, core_utils_lib, core_ruleset_lib],
-  include_directories: root_include)
+_core_region_lib_dependencies = [
+    # common deps
+    common_deps,
 
-core_region_tests = executable('unit_tests',
-  sources: [
-    'test_main.cpp',
-    'region_test.cpp',
-    hs_proto_generated_headers
+    # utils
+    utils_lib_dep,
+    core_utils_lib_dep,
+
+    # other core libs
+    core_ruleset_lib_dep,
+]
+
+core_region_lib = static_library(
+    'core_region_lib',
+    sources: [
+        'cell.cpp',
+        'region.cpp',
+        'pnl_statement.cpp',
     ],
-  dependencies : common_deps + gtest_dep,
-  link_with: [core_geometry_lib, core_region_lib, hs_proto_lib, core_scope_ut_lib],
-  include_directories: root_include,
-  )
+    dependencies: _core_region_lib_dependencies,
+)
+
+core_region_lib_dep = declare_dependency(
+    link_with: core_region_lib,
+    dependencies: _core_region_lib_dependencies,
+)
+
+core_region_tests = executable(
+    'unit_tests',
+    sources: [
+        'test_main.cpp',
+        'region_test.cpp',
+    ],
+    dependencies: [
+        common_deps,
+        gtest_dep,
+        core_region_lib_dep,
+        core_geometry_lib_dep,
+        hs_proto_lib_dep,
+        core_scope_ut_lib_dep,
+    ],
+)
 
 test('core.region', core_region_tests, env: environment(test_env))

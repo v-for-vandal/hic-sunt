@@ -1,50 +1,58 @@
 protobuf_dep = dependency('protobuf', version: '>=25')
 
 if not protobuf_dep.found()
-  error('Can not find protobuf')
+    error('Can not find protobuf')
 endif
 
 protoc_prg = find_program('protoc')
 
-proto_gen = generator(protoc_prg,
-  output    : ['@BASENAME@.pb.cc', '@BASENAME@.pb.h'],
-  arguments : ['--proto_path=@CURRENT_SOURCE_DIR@', '--cpp_out=@BUILD_DIR@', '@INPUT@'])
+proto_gen = generator(
+    protoc_prg,
+    output: ['@BASENAME@.pb.cc', '@BASENAME@.pb.h'],
+    arguments: [
+        '--proto_path=@CURRENT_SOURCE_DIR@',
+        '--cpp_out=@BUILD_DIR@',
+        '@INPUT@',
+    ],
+)
 
-proto_gen_hh = generator(protoc_prg,
-  output    : ['@BASENAME@.pb.h'],
-  arguments : ['--proto_path=@CURRENT_SOURCE_DIR@', '--cpp_out=@BUILD_DIR@', '@INPUT@'])
+proto_gen_hh = generator(
+    protoc_prg,
+    output: ['@BASENAME@.pb.h'],
+    arguments: [
+        '--proto_path=@CURRENT_SOURCE_DIR@',
+        '--cpp_out=@BUILD_DIR@',
+        '@INPUT@',
+    ],
+)
 
 hs_proto_schemas = [
-  'geometry/surface_shape.proto',
-  'region/cell.proto',
-  'region/improvement.proto',
-  'region/region.proto',
-  'l10n/localized_name.proto',
-  'terra/cell.proto',
-  'terra/world.proto',
-  'terra/plane.proto',
-  'ruleset/region_improvements.proto',
-  'ruleset/placement_rules.proto',
-  'ruleset/biome.proto',
-  'ruleset/resources.proto',
-  'ruleset/jobs.proto',
-  'ruleset/projects.proto',
-  'ruleset/effect.proto',
-  'ruleset/variables.proto',
-  'render/atlas.proto',
-  'render/render.proto',
-  'scope/scope.proto',
-  'types/control_object.proto',
-  'types/scope_type.proto',
-  ]
+    'geometry/surface_shape.proto',
+    'region/cell.proto',
+    'region/improvement.proto',
+    'region/region.proto',
+    'l10n/localized_name.proto',
+    'terra/cell.proto',
+    'terra/world.proto',
+    'terra/plane.proto',
+    'ruleset/region_improvements.proto',
+    'ruleset/placement_rules.proto',
+    'ruleset/biome.proto',
+    'ruleset/resources.proto',
+    'ruleset/jobs.proto',
+    'ruleset/projects.proto',
+    'ruleset/effect.proto',
+    'ruleset/variables.proto',
+    'render/atlas.proto',
+    'render/render.proto',
+    'scope/scope.proto',
+    'types/control_object.proto',
+    'types/scope_type.proto',
+]
 
-hs_proto_generated = proto_gen.process(
-  hs_proto_schemas,
-  preserve_path_from : meson.current_source_dir())
+hs_proto_generated = proto_gen.process(hs_proto_schemas, preserve_path_from: meson.current_source_dir())
 
-hs_proto_generated_headers = proto_gen_hh.process(
-  hs_proto_schemas,
-  preserve_path_from : meson.current_source_dir())
+hs_proto_generated_headers = proto_gen_hh.process(hs_proto_schemas, preserve_path_from: meson.current_source_dir())
 
 #proto_files = [
 #  'city/placement_rules.proto',
@@ -71,10 +79,21 @@ hs_proto_generated_headers = proto_gen_hh.process(
 #    ],
 #  )
 
-hs_proto_lib = static_library('hs_proto_lib',
-  hs_proto_generated,
-  dependencies: [protobuf_dep,]
-  )
+hs_proto_lib = static_library(
+    'hs_proto_lib',
+    hs_proto_generated,
+    dependencies: [
+        protobuf_dep,
+    ],
+)
+
+hs_proto_lib_dep = declare_dependency(
+    link_with: hs_proto_lib,
+    dependencies: [
+        protobuf_dep,
+    ],
+    sources: hs_proto_generated,
+)
 
 #hs_proto_lib_inc = [
 #   meson.current_build_dir() + '/libhs_proto_lib.a.p/'
