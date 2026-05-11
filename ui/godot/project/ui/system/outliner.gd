@@ -30,3 +30,15 @@ func _on_open_close_button_pressed() -> void:
 		close_outliner()
 	else:
 		open_outliner()
+		
+func on_region_selected(region: RegionObject) -> void:
+	# Selecting region  is not the same as loading it. Region is selected when we are
+	# in world ui. We should only display informatino about region
+	if region != null:
+		%ScopeEditor.set_scope(region.get_scope())
+	else:
+		%ScopeEditor.clear()
+	
+func on_region_loaded(_region: RegionObject) -> void:
+	# This method is called when we load region and open region UI
+	pass

@@ -9,6 +9,7 @@
 #include <expected>
 #include <limits>
 #include <utility>
+#include "core/types/variable_type.hpp"
 
 namespace hs::ruleset {
 
@@ -33,12 +34,7 @@ template <typename BaseTypes = StdBaseTypes>
 class VariableDefinitions {
  public:
   using StringId = typename BaseTypes::StringId;
-
-  enum class VariableType {
-    kMissing,
-    kNumeric,
-    kString,
-  };
+  using VariableType = types::VariableType;
 
   bool IsEmpty() const noexcept {
     return string_definitions_.empty() && numeric_definitions_.empty();

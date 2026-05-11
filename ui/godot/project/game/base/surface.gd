@@ -139,6 +139,15 @@ func clear_select(qr_coords: Vector2i) -> void:
 func clear_all_select() -> void:
 	_select_layer.clear()
 	
+func get_selected() -> Array[Vector2i]:
+	var used_cells := _select_layer.get_used_cells_by_id(_get_select_source_id())
+	var result : Array[Vector2i] = []
+	result.resize(used_cells.size())
+	for i in range(used_cells.size()):
+		result[i] = map_to_axial(used_cells[i])
+		
+	return result
+	
 func highlight(qr_coords: Vector2i, good: bool) -> void:
 	if !_contains(qr_coords):
 		return

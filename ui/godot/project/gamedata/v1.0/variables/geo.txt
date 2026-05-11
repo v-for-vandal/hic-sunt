@@ -1,6 +1,6 @@
 variables : [
 {
-  id: "core.geograph.height",
+  id: "core.geography.height",
   numeric : {
 	minimum: -100000.0
 	maximum: 100000.0

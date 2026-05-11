@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/ruleset/variable_definition.hpp"
 #include "core/types/error_code.hpp"
 #include "scope.hpp"
 #include "spdlog/spdlog.h"
@@ -64,8 +65,10 @@ void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
 template <typename BaseTypes>
 auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expected<Scope::NumericValue, ErrorCode>
 {
-    if (!IsNumericVariable(variable)) {
-        spdlog::error("Variable {} is not of type numeric", variable);
+
+    if (const auto var_type = GetVariableDefinitions()->GetVariableType(variable);
+            var_type != ruleset::VariableDefinitions<BaseTypes>::VariableType::kNumeric) {
+        spdlog::warn("variable {} must be numeric, but it is {}", variable, var_type);
         return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
     }
 

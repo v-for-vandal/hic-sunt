@@ -52,12 +52,12 @@ func load_plane(plane : WorldPlane) -> void:
 	
 	debug_control.add_text("Tilemap scale: %s" % $substrate.scale)
 
-func update_cell(qr_coords: Vector2i, region: RegionObject) -> void:
+func update_cell(qr_coords: Vector2i, _region: RegionObject) -> void:
 	# convert to xy dimensions
 	var xy_coords := axial_to_map(qr_coords)
 	
 	$biomes.set_cell(xy_coords, 0, Vector2i.ZERO, 1)
 	pass
 	
-func _get_select_source_id():
+func _get_select_source_id() -> int:
 	return 5

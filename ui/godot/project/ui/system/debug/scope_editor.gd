@@ -9,7 +9,7 @@ const METADATA_DBG_VIEW_KEY = &"dbg.view"
 
 func _ready() -> void:
 	var tree : Tree = %Tree
-	tree.set_column_custom_minimum_width(0, 200)
+	tree.set_column_custom_minimum_width(0, 100)
 	tree.set_column_custom_minimum_width(1, 70)
 	tree.set_column_custom_minimum_width(2, 70)
 	
@@ -19,8 +19,11 @@ func _ready() -> void:
 	tree.item_selected.connect(_set_debug_display)
 	tree.nothing_selected.connect(_reset_debug_display)
 	
+func clear() -> void:
+	%Tree.clear()
 	
 func set_scope(scope: ScopeObject) -> void:
+	assert(scope != null)
 	var data : Dictionary = scope.explain_all()
 	data.sort()
 	var tree := %Tree

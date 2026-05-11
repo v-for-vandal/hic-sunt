@@ -105,7 +105,7 @@ func _on_select_button_item_selected(index: int) -> void:
 
 
 func clear() -> void:
-	_maps.clear()
+	pass
 
 
 func _do_generate(_debug_mode: bool) -> World:
@@ -121,7 +121,7 @@ func _do_generate(_debug_mode: bool) -> World:
 	
 	add_child(generator) # TODO: REmove generator after creation
 
-	var result := await generator.create_world()
+	var result := await generator.create_world(_ruleset)
 	return result
 
 
