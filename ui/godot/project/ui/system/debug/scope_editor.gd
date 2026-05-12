@@ -7,6 +7,8 @@ const LEVEL_KEY = &"level"
 
 const METADATA_DBG_VIEW_KEY = &"dbg.view"
 
+var _scope: ScopeObject
+
 func _ready() -> void:
 	var tree : Tree = %Tree
 	tree.set_column_custom_minimum_width(0, 100)
@@ -24,6 +26,8 @@ func clear() -> void:
 	
 func set_scope(scope: ScopeObject) -> void:
 	assert(scope != null)
+	$ScopeName.text = scope.get_id()
+	_scope = scope
 	var data : Dictionary = scope.explain_all()
 	data.sort()
 	var tree := %Tree
@@ -38,22 +42,34 @@ func set_scope(scope: ScopeObject) -> void:
 			METADATA_DBG_VIEW_KEY: display_debug_target
 		})
 		varitem.set_text(0, varname)
-		if scope.is_string_variable(varname):
+		var var_is_string := scope.is_string_variable(varname)
+		if var_is_string:
 			var varvalue := scope.get_string_value(varname)
 			varitem.set_text(1, varvalue)
 		else:
 			var varvalue := scope.get_numeric_value(varname)
 			varitem.set_text(1, "%s" % varvalue)
+		varitem.set_text(2, "mturn: %s" % scope.get_modification_time(varname))
 		varitem.collapsed = true
 		var vardata : Dictionary = data[varname]
 		for scope_id : String in vardata:
 			var scope_item : TreeItem = tree.create_item(varitem)
 			var scope_data : Dictionary = vardata[scope_id]
-			scope_item.set_text(0, scope_id)
+			var scope_id_text := scope_id if scope_id.length() > 0 else '""'
+			scope_item.set_text(0, scope_id_text)
+			# Those act as headers
+			if var_is_string:
+				scope_item.set_text(1, &"level")
+				scope_item.set_text(2, &"value")
+			else:
+				scope_item.set_text(1, &"add")
+				scope_item.set_text(2, &"mult")
 			for modifier : String in scope_data:
 				self._add_modifier(varname, modifier, scope_data[modifier], scope_item)
 				
-			
+	_update_parent_button()
+
+
 func _add_modifier(varname: String, modifier: String, modifier_data: Dictionary, parent: TreeItem) -> void:
 	var tree : Tree = %Tree
 	var moditem := tree.create_item(parent)
@@ -104,4 +120,23 @@ func _create_debug_scope() -> ScopeObject:
 	result.add_string_modifier("string_var", "test_string_modifier1", "string_high", 100)
 
 	return result
-		
+
+func _update_parent_button() -> void:
+	if _scope == null:
+		return
+	var parent_scope := _scope.get_parent()
+	if parent_scope == null:
+		%ParentButton.set_text("parent: none" )
+		%ParentButton.disabled = true
+	else:
+		%ParentButton.set_text("parent: \"%s\"" % parent_scope.get_id() )
+		%ParentButton.disabled = false
+
+
+func _on_parent_button_pressed() -> void:
+	if _scope == null:
+		return
+	var parent_scope := _scope.get_parent()
+	if parent_scope == null:
+		return
+	self.set_scope(parent_scope)

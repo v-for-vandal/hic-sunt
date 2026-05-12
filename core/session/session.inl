@@ -119,7 +119,11 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::Prepare() {
         spdlog::error("Failed to retrieve {}", kCoreTurn);
         current_turn_ = 0;
     } else {
-        current_turn_ = *current_turn_val;
+        spdlog::info("Reading current turn from world scope: {}", *current_turn_val);
+        // We want to make sure that there is a modifier for this variable. Otherwise,
+        // given entirely new world, we correctly read 0, because there is var definition,
+        // but no modifier and no modification time
+        SetCurrentTurn(*current_turn_val);
     }
 }
 

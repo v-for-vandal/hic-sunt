@@ -132,9 +132,9 @@ EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
     : data_(std::move(data)),
       id_(BaseTypes::StringIdFromStdString(data_.id())) {
   size_t next_var_index = 0;
-  auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
   std::vector<std::string> possible_errors;
   std::vector<std::string> effect_errors;
+  auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
   if (!possible_processed) {
       lua_errors_.push_back(fmt::format("preprocessing \"possible\" failed with code {}", possible_processed.error()));
       is_broken_ = true;

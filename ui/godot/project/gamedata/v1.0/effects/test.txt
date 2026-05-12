@@ -1,0 +1,10 @@
+effects : [
+  {
+	id: "test.every_turn"
+	scope_type: SCOPE_TYPE_WORLD
+	schedule: EVERY_TURN
+	effect {
+	  lua: "turn = VAR(core.turn)"
+	}
+  }
+]

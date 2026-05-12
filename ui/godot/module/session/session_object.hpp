@@ -26,6 +26,7 @@ class SessionObject : public RefCounted {
   bool add_scope(const Ref<ScopeObject>& scope);
   void advance_next_turn();
   void set_current_turn(int turn);
+  int get_current_turn() const;
   Dictionary get_last_effect_execution_statistics() const;
   Dictionary get_total_effect_execution_statistics() const;
 

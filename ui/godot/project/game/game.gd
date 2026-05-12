@@ -28,7 +28,7 @@ var session: SessionObject:
 
 # TODO: Move to World
 var _current_player_civ: Civilisation
-var _current_turn := 1
+# var _current_turn := 1
 
 var _next_id := 0
 
@@ -66,17 +66,16 @@ func get_current_world() -> World:
 
 
 func get_current_turn() -> int:
-	return _current_turn
+	return _session.get_current_turn()
 
 
 
 # TODO: REname it as end_turn
 func next_turn() -> void:
-	_debug_control.add_text("Advancing from %d to %d" % [_current_turn, _current_turn + 1])
+	_debug_control.add_text("Advancing from %d to %d" % [get_current_turn(), get_current_turn() + 1])
 	_session.advance_next_turn()
 	_current_player_civ.next_turn()
-	_current_turn += 1
-	new_turn_started.emit(_current_turn)
+	new_turn_started.emit(get_current_turn())
 
 
 # TODO: move to ruleset?

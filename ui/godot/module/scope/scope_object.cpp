@@ -15,6 +15,8 @@ void ScopeObject::_bind_methods() {
                        &ScopeObject::get_numeric_value);
   ClassDB::bind_method(D_METHOD("get_string_value"),
                        &ScopeObject::get_string_value);
+  ClassDB::bind_method(D_METHOD("get_modification_time", "variable"),
+                       &ScopeObject::get_modification_time);
   ClassDB::bind_method(
       D_METHOD("add_numeric_modifier", "variable", "key", "add", "mult"),
       &ScopeObject::add_numeric_modifier);
@@ -23,8 +25,15 @@ void ScopeObject::_bind_methods() {
       &ScopeObject::add_string_modifier);
   ClassDB::bind_method(D_METHOD("explain_all"), &ScopeObject::explain_all);
   ClassDB::bind_method(D_METHOD("is_string_variable"), &ScopeObject::is_string_variable);
+  ClassDB::bind_method(D_METHOD("get_id"), &ScopeObject::get_id);
+  ClassDB::bind_method(D_METHOD("get_parent"), &ScopeObject::get_parent);
   ClassDB::bind_static_method("ScopeObject", D_METHOD("create_scope"),
       &ScopeObject::create_scope);
+}
+
+StringName ScopeObject::get_id() const {
+    ERR_FAIL_NULL_SCOPE(StringName{});
+    return scope_->GetId();
 }
 
 float ScopeObject::get_numeric_value(const StringName& variable) {
@@ -49,6 +58,17 @@ StringName ScopeObject::get_string_value(const StringName& variable) {
   return *value;
 }
 
+int ScopeObject::get_modification_time(const StringName& variable) const {
+  ERR_FAIL_NULL_SCOPE(-1);
+
+  auto value = scope_->GetModificationTime(variable);
+  if (!value) {
+    return -1;
+  }
+
+  return static_cast<int>(*value);
+}
+
 bool ScopeObject::add_numeric_modifier(const StringName& variable,
                                        const StringName& key, float add,
                                        float mult) {
@@ -70,6 +90,18 @@ bool ScopeObject::is_string_variable(const StringName& variable) const {
   ERR_FAIL_NULL_SCOPE(false);
 
   return scope_->IsStringVariable(variable);
+}
+
+Ref<ScopeObject> ScopeObject::get_parent() const {
+    Ref<ScopeObject> result;
+    ERR_FAIL_NULL_SCOPE(result);
+
+    auto parent_ptr = scope_->GetParent();
+    if (!parent_ptr) {
+        return result;
+    }
+    result = Ref<ScopeObject>(memnew(ScopeObject(parent_ptr)));
+    return result;
 }
 
 Dictionary ScopeObject::explain_all() {

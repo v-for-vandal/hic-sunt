@@ -36,6 +36,8 @@ void SessionObject::_bind_methods() {
                        &SessionObject::advance_next_turn);
   ClassDB::bind_method(D_METHOD("set_current_turn"),
                        &SessionObject::set_current_turn);
+  ClassDB::bind_method(D_METHOD("get_current_turn"),
+                       &SessionObject::get_current_turn);
   ClassDB::bind_method(D_METHOD("get_last_effect_execution_statistics"),
                        &SessionObject::get_last_effect_execution_statistics);
   ClassDB::bind_method(D_METHOD("get_total_effect_execution_statistics"),
@@ -75,6 +77,10 @@ bool SessionObject::add_scope(const Ref<ScopeObject>& scope) {
 
 void SessionObject::set_current_turn(int turn) {
     data_.SetCurrentTurn(turn);
+}
+
+int SessionObject::get_current_turn() const {
+    return data_.GetCurrentTurn();
 }
 
 void SessionObject::advance_next_turn() { data_.AdvanceNextTurn(); }
