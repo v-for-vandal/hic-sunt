@@ -133,34 +133,42 @@ EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
       id_(BaseTypes::StringIdFromStdString(data_.id())) {
   size_t next_var_index = 0;
   auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
+  std::vector<std::string> possible_errors;
+  std::vector<std::string> effect_errors;
   if (!possible_processed) {
-    throw std::system_error(make_error_code(possible_processed.error()));
+      lua_errors_.push_back(fmt::format("preprocessing \"possible\" failed with code {}", possible_processed.error()));
+      is_broken_ = true;
+  } else {
+      possible_code_ = WrapCodeInFunction(kPossibleFunctionName,
+                                          possible_processed->code);
+      AppendDependencies(dependencies_, possible_processed->dependencies);
+      AppendLuaVariables(lua_variables_, possible_processed->lua_variables);
+      possible_errors = ValidateLuaCode(id_, kPossibleFunctionName, possible_code_);
+
   }
 
   auto effect_processed = PreprocessCode(data_.effect(), next_var_index);
   if (!effect_processed) {
-    throw std::system_error(make_error_code(effect_processed.error()));
+    lua_errors_.push_back(fmt::format("preprocessing \"effect\" failed with code {}", effect_processed.error()));
+    is_broken_ = true;
+  } else {
+      effect_code_ = WrapCodeInFunction(kEffectFunctionName,
+                                        effect_processed->code);
+
+      AppendDependencies(dependencies_, effect_processed->dependencies);
+      AppendLuaVariables(lua_variables_, effect_processed->lua_variables);
+      effect_errors = ValidateLuaCode(id_, kEffectFunctionName, effect_code_);
   }
 
-  possible_code_ = WrapCodeInFunction(kPossibleFunctionName,
-                                      possible_processed->code);
-  effect_code_ = WrapCodeInFunction(kEffectFunctionName,
-                                    effect_processed->code);
-  AppendDependencies(dependencies_, possible_processed->dependencies);
-  AppendDependencies(dependencies_, effect_processed->dependencies);
-  AppendLuaVariables(lua_variables_, possible_processed->lua_variables);
-  AppendLuaVariables(lua_variables_, effect_processed->lua_variables);
-
-  auto possible_errors = ValidateLuaCode(id_, kPossibleFunctionName, possible_code_);
-  auto effect_errors = ValidateLuaCode(id_, kEffectFunctionName, effect_code_);
-  lua_errors_.reserve(possible_errors.size() + effect_errors.size());
+  lua_errors_.reserve(lua_errors_.size() + possible_errors.size() + effect_errors.size());
   lua_errors_.insert(lua_errors_.end(),
                      std::make_move_iterator(possible_errors.begin()),
                      std::make_move_iterator(possible_errors.end()));
   lua_errors_.insert(lua_errors_.end(),
                      std::make_move_iterator(effect_errors.begin()),
                      std::make_move_iterator(effect_errors.end()));
-  is_broken_ = !lua_errors_.empty();
+
+  is_broken_ |= !lua_errors_.empty();
 }
 
 template <typename BaseTypes>
@@ -195,6 +203,7 @@ std::vector<std::string> EffectDefinition<BaseTypes>::ValidateLuaCode(
     return errors;
   }
 
+  /* TODO: REMOVE this code is wrong
   sol::protected_function_result result = loaded();
   if (!result.valid()) {
     const auto error = result.get<sol::error>();
@@ -204,6 +213,7 @@ std::vector<std::string> EffectDefinition<BaseTypes>::ValidateLuaCode(
     spdlog::warn(message);
     errors.push_back(std::move(message));
   }
+  */
 
   return errors;
 }

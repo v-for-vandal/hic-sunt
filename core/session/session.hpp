@@ -47,7 +47,7 @@ class Session {
   // This function will change internal turn counter without any logic. Its
   // primary use is to set current turn when loading game. Changing turn
   // to earlier value is forbidden because it messes up caches.
-  void SetCurrentTurn(size_t value) { current_turn_ = value; }
+  void SetCurrentTurn(size_t value);
 
   // Return current turn
   size_t GetCurrentTurn() const { return current_turn_; }

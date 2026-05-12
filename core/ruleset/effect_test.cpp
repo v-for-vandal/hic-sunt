@@ -3,7 +3,6 @@
 #include <gtest/gtest.h>
 
 #include <ruleset/effect.pb.h>
-#include <system_error>
 
 namespace hs::ruleset {
 
@@ -114,24 +113,24 @@ TEST(StdEffectDefinition, IgnoresVarInsideBlockComments) {
 }
 
 TEST(StdEffectDefinition, RejectsInvalidIdentifierCharacters) {
-  EXPECT_THROW(
+  EXPECT_TRUE(
       StdEffectDefinition(MakeEffect("sample.effect", "return true",
-                                     "return VAR(\"a+z\")")),
-      std::system_error);
+                                     "return VAR(\"a+z\")")).IsBroken()
+      );
 }
 
 TEST(StdEffectDefinition, RejectsPartiallyQuotedIdentifiers) {
-  EXPECT_THROW(
+  EXPECT_TRUE(
       StdEffectDefinition(MakeEffect("sample.effect", "return true",
-                                     "return VAR(\"ab\"c)")),
-      std::system_error);
+                                     "return VAR(\"ab\"c)")).IsBroken()
+      );
 }
 
 TEST(StdEffectDefinition, RejectsUnclosedVarCall) {
-  EXPECT_THROW(
+  EXPECT_TRUE(
       StdEffectDefinition(MakeEffect("sample.effect", "return true",
-                                     "return VAR(abc")),
-      std::system_error);
+                                     "return VAR(abc")).IsBroken()
+      );
 }
 
 }  // namespace hs::ruleset

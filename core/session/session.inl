@@ -22,9 +22,15 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRule
   effects_.reserve(ruleset_->GetAllEffectDefinitions().size());
 
   for (const auto& effect_definition : ruleset_->GetAllEffectDefinitions()) {
+      if (effect_definition->IsBroken()) {
+          spdlog::warn("Skipping effect {} because it is broken. See previous logs for more details");
+          continue;
+      }
       try {
     auto effect_instance =
         std::make_shared<EffectInstance<BaseTypes>>(effect_definition);
+    // TODO: make spdlog::debug
+    spdlog::info("Successfully instantiated effect {}", effect_definition->GetId());
     effects_.push_back(std::move(effect_instance));
       } catch ( const std::system_error& e) {
           spdlog::warn("Failed to instantiate effect {} reason: {}", effect_definition->GetId(), e.what());
@@ -106,6 +112,25 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::Prepare() {
 
     // Reinitialize variable definitions at root scope
     world_->GetScope()->SetVariableDefinitions(ruleset_->GetVariableDefinitions());
+
+    // get current turn
+    auto current_turn_val = world_->GetScope()->GetNumericValue(kCoreTurn);
+    if(!current_turn_val) {
+        spdlog::error("Failed to retrieve {}", kCoreTurn);
+        current_turn_ = 0;
+    } else {
+        current_turn_ = *current_turn_val;
+    }
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+void Session<BaseTypes, WorldPtr, RuleSetPtr>::SetCurrentTurn(size_t value) {
+    current_turn_ = value;
+    // Now, change core.turn variable
+    auto result = world_->GetScope()->SetNumericModifier(kCoreTurn, kCoreTurn, current_turn_, 0, current_turn_);
+    if (!result) {
+        spdlog::error("Error when updating {}: {}", kCoreTurn, result.error());
+    }
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
@@ -120,16 +145,12 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
     return;
   }
 
-  ++current_turn_;
   EffectExecutor<BaseTypes> executor;
   last_effect_execution_statistics_ = executor.Execute(*this, current_turn_);
   total_effect_execution_statistics_.MergeFrom(last_effect_execution_statistics_);
 
-  // Now, change core.turn variable
-  auto result = world_->GetScope()->SetNumericModifier(kCoreTurn, kCoreTurn, current_turn_, 0, current_turn_);
-  if (!result) {
-      spdlog::error("Error when updating {}: {}", kCoreTurn, result.error());
-  }
+  // Now, change turn
+  SetCurrentTurn(current_turn_ + 1);
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>

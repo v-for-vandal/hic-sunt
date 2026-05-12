@@ -47,10 +47,14 @@ auto EffectExecutor<BaseTypes>::Execute(
   std::vector<PendingExecution> pending_executions;
   Statistics statistics;
 
+  spdlog::info("info: starting execution");
+  spdlog::debug("debug: starting execution");
   for (const auto& effect : session.effects_) {
+      spdlog::info("viewing effect {}", effect->GetDefinition()->GetId());
     const auto scope_type = effect->GetDefinition()->GetScopeType();
     const auto scopes_it = session.scopes_by_type_.find(scope_type);
     if (scopes_it == session.scopes_by_type_.end()) {
+        spdlog::info("no scope found for this effect");
       continue;
     }
 
@@ -70,6 +74,7 @@ auto EffectExecutor<BaseTypes>::Execute(
       }
 
       if (!has_recent_dependency) {
+          spdlog::info("No dependency for this effect was changed");
         continue;
       }
 
@@ -85,6 +90,9 @@ auto EffectExecutor<BaseTypes>::Execute(
       }
 
       if (!*possible_result) {
+          // TODO: effect that failes CheckPossible, must have all its
+          // modifiers removed
+          spdlog::info("This effect is not currently possible");
         continue;
       }
 
