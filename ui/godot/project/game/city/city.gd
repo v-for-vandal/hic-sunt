@@ -69,7 +69,7 @@ func build_pnl() -> Dictionary:
 	var profit: Dictionary = { }
 	var losses: Dictionary = { }
 
-	var ruleset := CurrentGame.get_current_player_ruleset()
+	var ruleset := CurrentGame.current_game.ruleset
 	# this is list of jobs
 	var region_jobs: Dictionary = get_region_object().get_jobs(ruleset)
 	print("region jobs: ", region_jobs)

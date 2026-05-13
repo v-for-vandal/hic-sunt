@@ -1,3 +1,4 @@
+#include <system_error>
 #include "ruleset.hpp"
 
 #include "spdlog/spdlog.h"
@@ -31,6 +32,12 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
   effect_definitions_.reserve(GetAllEffects().size());
   for (const auto& effect_proto : GetAllEffects()) {
     auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
+    if (definition->IsBroken()) {
+        spdlog::warn("Failed to load effect {}", effect_proto.id());
+        for(const auto& err : definition->GetLuaErrors()) {
+            spdlog::warn(err);
+        }
+    }
     effect_definitions_.push_back(
         std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
   }
@@ -48,9 +55,13 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
       if (numeric.has_maximum()) {
         numeric_definition.maximum = numeric.maximum();
       }
-      parsed_variable_definitions_.AddNumericDefinition(
+      auto add_result = parsed_variable_definitions_->AddNumericDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
+      if (!add_result) {
+        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        return false;
+      }
     } else if (definition.has_string()) {
       const auto &string_ = definition.string();
       StringVariableDefinition<BaseTypes> string_definition;
@@ -58,16 +69,24 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
         string_definition.default_value =
             BaseTypes::StringIdFromStdString(string_.default_());
       }
-      parsed_variable_definitions_.AddStringDefinition(
+      auto add_result = parsed_variable_definitions_->AddStringDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           string_definition);
+      if (!add_result) {
+        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        return false;
+      }
     } else if (definition.has_boolean()) {
       NumericVariableDefinition<BaseTypes> numeric_definition;
       numeric_definition.minimum = 0;
       numeric_definition.maximum = 1;
-      parsed_variable_definitions_.AddNumericDefinition(
+      auto add_result = parsed_variable_definitions_->AddNumericDefinition(
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
+      if (!add_result) {
+        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        return false;
+      }
     } else {
       SPDLOG_ERROR(
           "Variable {} has undefined type. It is neither numeric, nor string, nor bool",
@@ -83,7 +102,7 @@ template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
   improvements_by_type_.clear();
   jobs_by_type_.clear();
   projects_by_type_.clear();
-  parsed_variable_definitions_.Clear();
+  parsed_variable_definitions_->Clear();
   effect_definitions_.clear();
 }
 

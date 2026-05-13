@@ -40,7 +40,7 @@ class Scope {
   using StringVariable = scope::StringVariable<BaseTypes>;
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
   using ScopeType = types::ScopeType;
-  using VariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<BaseTypes>;
+  using VariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
    *
@@ -68,7 +68,7 @@ class Scope {
 
   // You can and should do it only on one root scope. All other scopes will fetch
   // it automatically
-  void SetVariableDefinitions(const VariableDefinitionsPtr& definitions);
+  void SetVariableDefinitions(const VariableDefinitionsConstPtr& definitions);
 
   // const VariableDefinitions *Definitions() const;
 
@@ -119,6 +119,8 @@ class Scope {
   bool IsStringVariable(const StringId& variable) const;
   bool IsNumericVariable(const StringId& variable) const;
 
+  void ClearCache();
+
  private:
   void FillNumericModifiers(const StringId& variable, NumericValue& add,
                             NumericValue& mult) const;
@@ -126,7 +128,7 @@ class Scope {
   void FillStringModifiers(const StringId& variable, StringId& value,
                            NumericValue& level);
 
-  const VariableDefinitionsPtr& GetVariableDefinitions() const;
+  const VariableDefinitionsConstPtr& GetVariableDefinitions() const;
 
  private:
   StringId id_;
@@ -146,7 +148,7 @@ class Scope {
   absl::flat_hash_map<StringId, StringVariable> string_variables_;
 
   // Access it via special method that will pull it from parent
-  mutable VariableDefinitionsPtr definitions_{};
+  mutable VariableDefinitionsConstPtr cached_definitions_{};
 
   // Note: it may be beneficial to replace it with prefix tree?
 

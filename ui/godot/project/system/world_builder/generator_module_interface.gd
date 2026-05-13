@@ -1,3 +1,4 @@
+@abstract
 # We extend Node, not RefCounted, because it makes way easier to debug
 # generators in Godot editor later
 extends Node
@@ -23,6 +24,4 @@ func _init(_global_context: WorldGeneratorGlobalContext) -> void:
 
 
 ## First pass.
-func first_pass() -> void:
-	assert(false, "Unimplemented")
-	push_error("Unimplemented")
+@abstract func first_pass() -> void;

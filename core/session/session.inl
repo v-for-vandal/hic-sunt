@@ -4,6 +4,7 @@
 #include "session.hpp"
 
 #include <core/session/effect_executor.hpp>
+#include <system_error>
 #include <spdlog/spdlog.h>
 
 namespace hs::session {
@@ -21,10 +22,22 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRule
   effects_.reserve(ruleset_->GetAllEffectDefinitions().size());
 
   for (const auto& effect_definition : ruleset_->GetAllEffectDefinitions()) {
+      if (effect_definition->IsBroken()) {
+          spdlog::warn("Skipping effect {} because it is broken. See previous logs for more details");
+          continue;
+      }
+      try {
     auto effect_instance =
         std::make_shared<EffectInstance<BaseTypes>>(effect_definition);
+    // TODO: make spdlog::debug
+    spdlog::info("Successfully instantiated effect {}", effect_definition->GetId());
     effects_.push_back(std::move(effect_instance));
+      } catch ( const std::system_error& e) {
+          spdlog::warn("Failed to instantiate effect {} reason: {}", effect_definition->GetId(), e.what());
+      }
   }
+
+  Prepare();
 
   return {};
 }
@@ -74,7 +87,54 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorl
   }
 
   world_ = std::move(ptr);
+
+  Prepare();
+
   return {};
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+void Session<BaseTypes, WorldPtr, RuleSetPtr>::Prepare() {
+    if(world_ == nullptr) {
+        return;
+    }
+    if (ruleset_ == nullptr) {
+        return;
+    }
+    // Clear cache in all scopes
+    for(auto& [_, scope] : scopes_by_id_) {
+        scope->ClearCache();
+    }
+
+    // TODO: Clear all modifiers that match effects not found in ruleset
+    // But don't forget about manually set modifiers at world creation - those should
+    // not be cleared
+
+    // Reinitialize variable definitions at root scope
+    world_->GetScope()->SetVariableDefinitions(ruleset_->GetVariableDefinitions());
+
+    // get current turn
+    auto current_turn_val = world_->GetScope()->GetNumericValue(kCoreTurn);
+    if(!current_turn_val) {
+        spdlog::error("Failed to retrieve {}", kCoreTurn);
+        current_turn_ = 0;
+    } else {
+        spdlog::info("Reading current turn from world scope: {}", *current_turn_val);
+        // We want to make sure that there is a modifier for this variable. Otherwise,
+        // given entirely new world, we correctly read 0, because there is var definition,
+        // but no modifier and no modification time
+        SetCurrentTurn(*current_turn_val);
+    }
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+void Session<BaseTypes, WorldPtr, RuleSetPtr>::SetCurrentTurn(size_t value) {
+    current_turn_ = value;
+    // Now, change core.turn variable
+    auto result = world_->GetScope()->SetNumericModifier(kCoreTurn, kCoreTurn, current_turn_, 0, current_turn_);
+    if (!result) {
+        spdlog::error("Error when updating {}: {}", kCoreTurn, result.error());
+    }
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
@@ -89,9 +149,12 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
     return;
   }
 
-  ++current_turn_;
   EffectExecutor<BaseTypes> executor;
-  executor.Execute(*this, current_turn_);
+  last_effect_execution_statistics_ = executor.Execute(*this, current_turn_);
+  total_effect_execution_statistics_.MergeFrom(last_effect_execution_statistics_);
+
+  // Now, change turn
+  SetCurrentTurn(current_turn_ + 1);
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>

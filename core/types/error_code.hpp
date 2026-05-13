@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fmt/format.h>
+
 #include <system_error>
 
 namespace hs {
@@ -23,6 +25,7 @@ namespace hs {
 
         // effect errors
         ERR_INVALID_EFFECT_VARIABLE_REFERENCE,
+        ERR_INVALID_EFFECT_DEFINITION,
         ERR_EFFECT_LUA_RUNTIME_ERROR,
         ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED
     };
@@ -42,6 +45,14 @@ namespace hs {
         return {static_cast<int>(error), error_category()};
     }
 }
+
+template <>
+struct fmt::formatter<hs::ErrorCode> : fmt::formatter<std::string_view> {
+    auto format(hs::ErrorCode error, format_context& ctx) const {
+        return fmt::formatter<std::string_view>::format(
+            hs::error_category().message(static_cast<int>(error)), ctx);
+    }
+};
 
 namespace std
 {

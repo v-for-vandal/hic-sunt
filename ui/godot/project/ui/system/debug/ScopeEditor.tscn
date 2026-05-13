@@ -13,6 +13,14 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_1kqo3")
 
+[node name="ScopeName" type="Label" parent="." unique_id=1295992173]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="ParentButton" type="Button" parent="." unique_id=983348949]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="Tree" type="Tree" parent="." unique_id=438277447]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
@@ -20,3 +28,6 @@ layout_mode = 2
 size_flags_vertical = 3
 columns = 3
 column_titles_visible = true
+hide_root = true
+
+[connection signal="pressed" from="ParentButton" to="." method="_on_parent_button_pressed"]

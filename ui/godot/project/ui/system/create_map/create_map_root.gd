@@ -3,13 +3,15 @@ extends Control
 signal generate_requested(world_size: WBConstants.WorldSize, region_size: int)
 signal transition_back()
 
-var _maps: Dictionary
 var _processing := false
 var _generators: Dictionary[int, WorldBuilderRegistry.WorldGeneratorHandle]
 var _ui_elements: Dictionary[int, Control]
 var _current_selected: int = -1
 
 var no_options_msg_control: Control
+
+var _generated_world: World
+var _ruleset : RulesetObject
 
 
 func _init() -> void:
@@ -18,18 +20,8 @@ func _init() -> void:
 
 func _ready() -> void:
 	_prepare_generators()
-	_prepare_cellinfo()
-	_prepare_highlighters()
 
-	$DebugUiEventBus.set_main_interaction(self)
-
-	var ruleset := CentralSystem.load_ruleset()
-
-	var terrain_mapping := ruleset.get_atlas_render()
-
-	%WorldSurface.terrain_mapping = terrain_mapping
-	%RegionSurface.visualization_data = terrain_mapping
-
+	_ruleset = CentralSystem.load_ruleset()
 
 func _prepare_generators() -> void:
 	# get all possible values for selected category
@@ -50,23 +42,6 @@ func _prepare_generators() -> void:
 		%SelectGeneratorButton.select(0)
 		# just in case signal is not working yet
 		_on_select_button_item_selected(0)
-
-
-func _prepare_cellinfo() -> void:
-	%CellInfo.set_headers(["data", "value"])
-
-
-func _prepare_highlighters() -> void:
-	_add_highlighter(null, &"None")
-	_add_highlighter(preload("res://resources/highlighters/temperature_highlighter.tres"), &"Temperature")
-	_add_highlighter(preload("res://resources/highlighters/precipitation_highlighter.tres"), &"Precipitation")
-	_add_highlighter(preload("res://resources/highlighters/height_highlighter.tres"), &"Height")
-
-
-func _add_highlighter(highlighter: HighlighterInterface, label: StringName) -> void:
-	var idx: int = %HighlightSelect.item_count
-	%HighlightSelect.add_item(label, idx)
-	%HighlightSelect.set_item_metadata(idx, highlighter)
 
 
 func _create_ui_if_absent(index: int) -> void:
@@ -99,24 +74,8 @@ func _on_select_button_item_selected(index: int) -> void:
 
 
 func clear() -> void:
-	_maps.clear()
-
-
-func _add_debug_map(map_name: String, map: Image, legend: Dictionary) -> void:
-	if _maps.has(map_name):
-		# print warning, because generator should not export map with same name
-		# more than once
-		push_error("map with name ", map_name, " already exists, overwriting")
-	else:
-		# add to selectors
-		$%BackgroundSelect.add_item(map_name)
-		$%ForegroundSelect.add_item(map_name)
-
-	# add to dictionary
-	_maps[map_name] = {
-		"texture": ImageTexture.create_from_image(map),
-		"legend": legend,
-	}
+	_generated_world = null
+	pass
 
 
 func _do_generate(_debug_mode: bool) -> World:
@@ -132,7 +91,7 @@ func _do_generate(_debug_mode: bool) -> World:
 	
 	add_child(generator) # TODO: REmove generator after creation
 
-	var result := await generator.create_world()
+	var result := await generator.create_world(_ruleset)
 	return result
 
 
@@ -140,32 +99,8 @@ func _on_generate_button_pressed() -> void:
 	if _processing:
 		return
 	_processing = true
-	var world := await _do_generate(true)
-	%WorldSurface.load_plane(world.get_plane(&"main"))
+	_generated_world = await _do_generate(true)
 	_processing = false
-
-
-func _on_map_selected(_name: String, widget: TextureRect) -> void:
-	assert(_name.is_empty() or _maps.has(_name))
-	if _name.is_empty(): # thats 'none'
-		widget.hide()
-	else:
-		widget.texture = _maps[_name].texture
-		widget.show()
-
-
-func _on_highlight_select_item_selected(index: int) -> void:
-	var highlighter := %HighlightSelect.get_item_metadata(index) as HighlighterInterface
-	%RegionSurface.highlighter = highlighter
-	%WorldSurface.highlighter = highlighter
-
-
-func _on_foreground_select_item_selected(index: int) -> void:
-	var map_name: String = $%ForegroundSelect.get_item_text(index)
-	if index == 0:
-		map_name = ""
-
-	_on_map_selected(map_name, $%DebugForegroundView)
 
 
 func _on_back_button_pressed() -> void:
@@ -182,16 +117,17 @@ func _on_start_game_button_pressed() -> void:
 		return
 	_processing = true
 	print("Starting game")
-	var world := await _do_generate(false)
-	LoadManager.new_game(world)
+	if not _generated_world:
+		_generated_world = await _do_generate(false)
+	LoadManager.new_game(_generated_world, _ruleset)
 	_processing = false
 
 
-func _on_select_generator_button_item_selected(index: int) -> void:
+func _on_select_generator_button_item_selected(_index: int) -> void:
 	pass # Replace with function body.
 
 
-func on_ui_event(event: GameUiEventBus.UIEvent) -> void:
+func on_ui_event(event: UiEventBus.UIEvent) -> void:
 	if event is UiEventBus.UIMovementEvent:
 		if event.prev_qr_coords != event.qr_coords:
 			event.surface.clear_highlight(event.prev_qr_coords)

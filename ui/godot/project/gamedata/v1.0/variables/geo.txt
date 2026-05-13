@@ -1,0 +1,29 @@
+variables : [
+{
+  id: "core.geography.height",
+  numeric : {
+	minimum: -100000.0
+	maximum: 100000.0
+  }
+},
+{
+  id: "core.geography.sp_distance",
+  numeric : {}
+},
+{
+  id: "core.geography.np_distance",
+  numeric : {}
+},
+{
+  id: "core.ecosystem.precipitation",
+  numeric : {}
+},
+{
+  id: "core.ecosystem.temperature",
+  numeric : {}
+},
+{
+  id: "core.ecosystem.biome",
+  string : {}
+}
+]

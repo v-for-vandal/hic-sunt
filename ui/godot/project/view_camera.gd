@@ -36,7 +36,7 @@ func _process(delta: float) -> void:
 
 
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	var handled := false
 
 	var change_zoom := false

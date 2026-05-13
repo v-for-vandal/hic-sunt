@@ -1,3 +1,6 @@
+#pragma once
+
+#include "world.hpp"
 
 #include <core/utils/serialize.hpp>
 

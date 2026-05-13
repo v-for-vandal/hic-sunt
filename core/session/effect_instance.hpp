@@ -51,6 +51,7 @@ class EffectInstance {
   sol::state lua_;
   sol::protected_function possible_function_;
   sol::protected_function effect_function_;
+  bool always_possible_{false};
 };
 
 }  // namespace hs::session

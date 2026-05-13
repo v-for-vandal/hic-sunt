@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://d2up1em61mpqt"
+path="res://.godot/imported/core.biome.rainforest.jpg-c85e390cd444142d1b5ea5002e19d7e2.image"
+
+[deps]
+
+source_file="res://content/worldgen-basic/gfx/biomes/core.biome.rainforest.jpg"
+dest_files=["res://.godot/imported/core.biome.rainforest.jpg-c85e390cd444142d1b5ea5002e19d7e2.image"]
+
+[params]
+

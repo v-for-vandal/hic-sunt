@@ -45,7 +45,7 @@ class NonNullSharedPtr {
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr(const NonNullSharedPtr<U>& other) {
-    value = static_cast<std::shared_ptr<T>>(other);
+    value = std::static_pointer_cast<T>(static_cast<std::shared_ptr<U>>(other));
   }
 
   template <typename U>
@@ -93,7 +93,8 @@ class NonNullSharedPtr {
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr<T>& operator=(const NonNullSharedPtr<U>& other) {
-    value = static_cast<std::shared_ptr<T>>(other);
+      // we can't get other.value directly, but we can call operator shared_ptr
+    value = std::static_pointer_cast<T>(static_cast<std::shared_ptr<U>>(other));
     return *this;
   }
 

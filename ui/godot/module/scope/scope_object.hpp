@@ -20,11 +20,15 @@ class ScopeObject : public RefCounted {
  public:
   float get_numeric_value(const StringName& variable);
   StringName get_string_value(const StringName& variable);
+  int get_modification_time(const StringName& variable) const;
 
   bool add_numeric_modifier(const StringName& variable, const StringName& key,
                             float add, float mult);
   bool add_string_modifier(const StringName& variable, const StringName& key,
                            const StringName& value, float level);
+
+  Ref<ScopeObject> get_parent() const;
+  StringName get_id() const;
 
   static Ref<ScopeObject> create_scope();
 

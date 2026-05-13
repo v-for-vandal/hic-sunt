@@ -1,26 +1,42 @@
-core_terra_lib = static_library('core_terra_lib',
-  sources: [
-  'cell.cpp',
-  'world.cpp',
-  'plane.cpp',
-  fbs_generated,
-  hs_proto_generated_headers,
-  ],
-  dependencies : common_deps,
-  link_with: [utils_lib, core_geometry_lib, core_region_lib, hs_proto_lib],
-  include_directories: root_include)
+_core_terra_lib_dependencies = [
+    # common deps
+    common_deps,
 
-core_terra_tests = executable('unit_tests',
-  sources: [
-    'test_main.cpp',
-    'plane_test.cpp',
-    'world_test.cpp',
-    hs_proto_generated_headers
+    # protobuf
+    hs_proto_lib_dep,
+
+    # our other libs
+    core_geometry_lib_dep,
+    core_region_lib_dep,
+]
+core_terra_lib = static_library(
+    'core_terra_lib',
+    sources: [
+        'cell.cpp',
+        'world.cpp',
+        'plane.cpp',
+        fbs_generated,
     ],
-  dependencies : common_deps + gtest_dep,
-  link_with: [core_terra_lib],
-  include_directories: root_include,
-  )
+    dependencies: _core_terra_lib_dependencies,
+    include_directories: root_include,
+)
+
+core_terra_lib_dep = declare_dependency(
+    link_with: core_terra_lib,
+    dependencies: _core_terra_lib_dependencies,
+)
+
+core_terra_tests = executable(
+    'unit_tests',
+    sources: [
+        'test_main.cpp',
+        'plane_test.cpp',
+        'world_test.cpp',
+    ],
+    dependencies: [
+        gtest_dep,
+        core_terra_lib_dep,
+    ],
+)
 
 test('core.terra', core_terra_tests, env: environment(test_env))
-

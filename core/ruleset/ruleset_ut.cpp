@@ -1,6 +1,8 @@
 #include "ruleset_ut.hpp"
 #include "core/types/scope_type.hpp"
 
+#include <gtest/gtest.h>
+
 namespace hs::ruleset::test {
 
 StdEffectDefinitionPtr MakeEffectDefinition(std::string id,
@@ -9,7 +11,9 @@ StdEffectDefinitionPtr MakeEffectDefinition(std::string id,
                                             std::string effect_code) {
   proto::ruleset::effect::Effect effect;
   effect.set_id(std::move(id));
-  effect.mutable_possible()->set_lua(std::move(possible_code));
+  if (possible_code.size() > 0) {
+    effect.mutable_possible()->set_lua(std::move(possible_code));
+  }
   effect.mutable_effect()->set_lua(std::move(effect_code));
   effect.set_scope_type(scope_type);
 
@@ -23,5 +27,17 @@ StdEffectDefinitionPtr MakeEffectDefinition(std::string id,
                                             std::string effect_code) {
                                                 return MakeEffectDefinition(id, types::ScopeType::SCOPE_TYPE_WORLD, possible_code, effect_code);
                                             }
+
+
+StdVariableDefinitionsConstPtr MakeSimpleVariableDefinitions()
+{
+    auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+    EXPECT_TRUE(mutable_definitions->AddNumericDefinition("numeric_var", {}));
+    EXPECT_TRUE(mutable_definitions->AddStringDefinition("string_var", {}));
+
+    return StdVariableDefinitionsConstPtr(
+        std::static_pointer_cast<const StdVariableDefinitions>(
+            mutable_definitions));
+}
 
 }

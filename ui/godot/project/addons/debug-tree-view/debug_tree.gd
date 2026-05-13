@@ -64,7 +64,7 @@ func _add_element(parent: TreeItem, key: String, node: Control) -> TreeItem:
 		# change name until we find key that is not present
 		var suffix := 2
 		while true:
-			var key_s := "%s (%s)".format([key, str(suffix)])
+			var key_s := "%s (%s)" % [key, str(suffix)]
 			if key_s not in metadata:
 				key = key_s
 				break
@@ -110,6 +110,9 @@ func _add_text_sink(item: TreeItem, sink: RichTextLabel) -> void:
 		return
 		
 	metadata[_TEXT_SINK_KEY] = sink
+	
+	# Sanity check
+	assert(_get_text_sink(item) != null)
 	
 func _get_text_sink(item: TreeItem) -> RichTextLabel:
 	var metadata := _get_tree_item_metadata(item)

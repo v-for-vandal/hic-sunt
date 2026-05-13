@@ -26,6 +26,14 @@ class RulesetObject : public RefCounted {
   const auto& GetRuleSet() const { return ruleset_; }
 
  private:
+  // note: StringName can not be static, it requires Godot runtime
+  const StringName kIdKey{"id"};
+  const StringName kTypeKey{"type"};
+  const StringName kMinimumKey{"minimum"};
+  const StringName kMaximumKey{"maximum"};
+  const StringName kNumericType{"numeric"};
+  const StringName kStringType{"string"};
+
   RuleSet ruleset_;
   // TODO: add unordered_map<string, int> for quick access to improvement by
   // its id
@@ -39,6 +47,7 @@ class RulesetObject : public RefCounted {
   Array get_biomes() const;
   Array get_all_resources() const;
   Array get_projects() const;
+  Dictionary get_variable_definitions() const;
   TypedArray<StringName> get_all_effects() const;
   static Dictionary convert_biome_type(
       const hs::proto::ruleset::Biome& biome_type);
@@ -48,7 +57,7 @@ class RulesetObject : public RefCounted {
       const hs::proto::ruleset::RegionImprovement& improvement_type);
   static Dictionary convert_job(const hs::proto::ruleset::Job& job);
   static Dictionary convert_project(const hs::proto::ruleset::Project& project);
-  static Dictionary load(String folder_path);
+  static Dictionary load(TypedArray<String> folder_path);
 };
 
 }  // namespace hs::godot

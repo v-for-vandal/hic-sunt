@@ -2,6 +2,7 @@
 
 #include "effect_executor.hpp"
 
+#include <chrono>
 #include <system_error>
 #include <utility>
 #include <vector>
@@ -11,20 +12,55 @@
 namespace hs::session {
 
 template <typename BaseTypes>
+void EffectExecutionStatistics<BaseTypes>::RecordExecution(
+    const StringId& effect_id, size_t duration_ns, size_t change_count) {
+  auto& entry = entries_[effect_id];
+  ++entry.execution_count;
+  entry.total_duration_ns += duration_ns;
+  entry.total_changes += change_count;
+}
+
+template <typename BaseTypes>
+void EffectExecutionStatistics<BaseTypes>::RecordFailure(
+    const StringId& effect_id) {
+  ++entries_[effect_id].failure_count;
+}
+
+template <typename BaseTypes>
+void EffectExecutionStatistics<BaseTypes>::RecordPartialFailure(
+    const StringId& effect_id) {
+  ++entries_[effect_id].partial_failure_count;
+}
+
+template <typename BaseTypes>
+void EffectExecutionStatistics<BaseTypes>::MergeFrom(
+    const EffectExecutionStatistics& other) {
+  for (const auto& [effect_id, entry] : other.entries_) {
+    entries_[effect_id] += entry;
+  }
+}
+
+template <typename BaseTypes>
 template <typename WorldPtr, typename RuleSetPtr>
-void EffectExecutor<BaseTypes>::Execute(
-    Session<BaseTypes, WorldPtr, RuleSetPtr>& session, size_t current_time) {
+auto EffectExecutor<BaseTypes>::Execute(
+    Session<BaseTypes, WorldPtr, RuleSetPtr>& session, size_t current_time)
+    -> Statistics {
   struct PendingExecution {
     std::shared_ptr<EffectInstance> effect;
     ScopePtr scope;
   };
 
   std::vector<PendingExecution> pending_executions;
+  Statistics statistics;
 
+  spdlog::info("info: starting execution");
+  spdlog::debug("debug: starting execution");
   for (const auto& effect : session.effects_) {
+      spdlog::info("viewing effect {}", effect->GetDefinition()->GetId());
     const auto scope_type = effect->GetDefinition()->GetScopeType();
     const auto scopes_it = session.scopes_by_type_.find(scope_type);
     if (scopes_it == session.scopes_by_type_.end()) {
+        spdlog::info("no scope found for this effect");
       continue;
     }
 
@@ -44,11 +80,13 @@ void EffectExecutor<BaseTypes>::Execute(
       }
 
       if (!has_recent_dependency) {
+          spdlog::info("No dependency for this effect was changed");
         continue;
       }
 
       auto possible_result = effect->CheckPossible(scope);
       if (!possible_result) {
+        statistics.RecordFailure(effect->GetId());
         spdlog::warn(
             "Failed to check possible for effect {} on scope {}: {}",
             effect->GetId(),
@@ -58,6 +96,9 @@ void EffectExecutor<BaseTypes>::Execute(
       }
 
       if (!*possible_result) {
+          // TODO: effect that failes CheckPossible, must have all its
+          // modifiers removed
+          spdlog::info("This effect is not currently possible");
         continue;
       }
 
@@ -69,19 +110,34 @@ void EffectExecutor<BaseTypes>::Execute(
   }
 
   for (const auto& pending_execution : pending_executions) {
+    const auto started_at = std::chrono::steady_clock::now();
     auto execute_result = pending_execution.effect->Execute(
         pending_execution.scope);
+    const auto finished_at = std::chrono::steady_clock::now();
+
     if (!execute_result) {
-      throw std::system_error(make_error_code(execute_result.error()));
+      statistics.RecordFailure(pending_execution.effect->GetId());
+      continue;
     }
 
+    size_t total_changes = 0;
     for (const auto& changes : *execute_result) {
+      total_changes += changes.GetOperationCount();
       auto apply_result = changes.Apply(current_time);
       if (!apply_result) {
-        throw std::system_error(make_error_code(apply_result.error()));
+        statistics.RecordPartialFailure(pending_execution.effect->GetId());
       }
     }
+
+    const auto duration_ns = static_cast<size_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            finished_at - started_at)
+            .count());
+    statistics.RecordExecution(pending_execution.effect->GetId(), duration_ns,
+                               total_changes);
   }
+
+  return statistics;
 }
 
 }  // namespace hs::session

@@ -1,0 +1,196 @@
+extends Control
+
+signal generate_requested(world_size: WBConstants.WorldSize, region_size: int)
+signal transition_back()
+
+
+var _processing := false
+var _generators: Dictionary[int, WorldBuilderRegistry.WorldGeneratorHandle]
+var _ui_elements: Dictionary[int, Control]
+var _current_selected: int = -1
+var _world: World
+var _ruleset: RulesetObject
+
+var no_options_msg_control: Control
+
+
+func _init() -> void:
+	pass
+
+
+func _ready() -> void:
+	_prepare_highlighters()
+
+	$DebugUiEventBus.set_main_interaction(self)
+
+	var ruleset := CentralSystem.load_ruleset()
+
+	var terrain_mapping := ruleset.get_atlas_render()
+
+	%WorldSurface.terrain_mapping = terrain_mapping
+	%RegionSurface.visualization_data = terrain_mapping
+	
+func set_world(world: World) -> void:
+	_world = world
+	
+func set_ruleset(ruleset: RulesetObject) -> void:
+	_ruleset = ruleset
+
+
+func _prepare_generators() -> void:
+	# get all possible values for selected category
+	var available_generators := WorldBuilderRegistry.get_world_generators()
+
+	for generator_handle: WorldBuilderRegistry.WorldGeneratorHandle in available_generators:
+		var _name := generator_handle.name
+
+		var this_index: int = %SelectGeneratorButton.item_count
+		%SelectGeneratorButton.add_item(_name)
+
+		_generators[this_index] = generator_handle
+
+	_ui_elements[-1] = %NoOptionsMsg
+	no_options_msg_control = %NoOptionsMsg
+
+	if len(_generators) > 0:
+		%SelectGeneratorButton.select(0)
+		# just in case signal is not working yet
+		_on_select_button_item_selected(0)
+
+
+func _prepare_cellinfo() -> void:
+	%CellInfo.set_headers(["data", "value"])
+
+
+func _prepare_highlighters() -> void:
+	_add_highlighter(null, &"None")
+	_add_highlighter(preload("res://resources/highlighters/temperature_highlighter.tres"), &"Temperature")
+	_add_highlighter(preload("res://resources/highlighters/precipitation_highlighter.tres"), &"Precipitation")
+	_add_highlighter(preload("res://resources/highlighters/height_highlighter.tres"), &"Height")
+
+
+func _add_highlighter(highlighter: HighlighterInterface, label: StringName) -> void:
+	var idx: int = %HighlightSelect.item_count
+	%HighlightSelect.add_item(label, idx)
+	%HighlightSelect.set_item_metadata(idx, highlighter)
+
+
+func _create_ui_if_absent(index: int) -> void:
+	if index in _ui_elements and _ui_elements[index] != null:
+		return
+
+	var control := _generators[index].create_ui()
+	if control != null:
+		_ui_elements[index] = control
+	else:
+		_ui_elements[index] = no_options_msg_control
+
+	return
+
+
+func _on_select_button_item_selected(index: int) -> void:
+	if _current_selected in _ui_elements:
+		var _current_control := _ui_elements[_current_selected]
+		_current_control.visible = false
+		if _current_control.get_parent() != null:
+			%GeneratorOptionsScroll.remove_child(_current_control)
+
+	_current_selected = index
+	_create_ui_if_absent(index)
+	assert(index in _ui_elements)
+	assert(_ui_elements[index] != null)
+	var new_control := _ui_elements[index]
+	new_control.visible = true
+	%GeneratorOptionsScroll.add_child(new_control)
+
+
+func clear() -> void:
+	pass
+
+
+func _do_generate(_debug_mode: bool) -> World:
+	if _current_selected == -1:
+		return null
+
+	var _selected_generator_module := _generators[_current_selected]
+	var _selected_config: Variant = _ui_elements[_current_selected].get_config()
+
+	var _debug_control := DebugRoot.get_debug_control().add_random_group()
+
+	var generator := _selected_generator_module.create_generator(_selected_config, _debug_control)
+	
+	add_child(generator) # TODO: REmove generator after creation
+
+	var result := await generator.create_world(_ruleset)
+	return result
+
+
+func _on_generate_button_pressed() -> void:
+	if _processing:
+		return
+	_processing = true
+	var world := await _do_generate(true)
+	%WorldSurface.load_plane(world.get_plane(&"main"))
+	_processing = false
+
+
+func _on_highlight_select_item_selected(index: int) -> void:
+	var highlighter := %HighlightSelect.get_item_metadata(index) as HighlighterInterface
+	%RegionSurface.highlighter = highlighter
+	%WorldSurface.highlighter = highlighter
+
+
+func _on_back_button_pressed() -> void:
+	transition_back.emit()
+
+
+func _on_world_builder_report_progress(message: String, progress: int) -> void:
+	print("Received pogress signal ", progress)
+	$%GenerationProgressBar.value = progress
+
+
+func _on_start_game_button_pressed() -> void:
+	if _processing:
+		return
+	_processing = true
+	print("Starting game")
+	var world := await _do_generate(false)
+	LoadManager.new_game(world)
+	_processing = false
+
+
+func _on_select_generator_button_item_selected(index: int) -> void:
+	pass # Replace with function body.
+
+
+func on_ui_event(event: UiEventBus.UIEvent) -> void:
+	if event is UiEventBus.UIMovementEvent:
+		if event.prev_qr_coords != event.qr_coords:
+			event.surface.clear_highlight(event.prev_qr_coords)
+		event.surface.highlight(event.qr_coords, true)
+		
+	if event is UiEventBus.UIActionEvent:
+		if event.action_type == UiEventBus.ActionType.PRIMARY:
+			if event.surface.is_selected(event.qr_coords):
+				# in world ui, load region
+				if event.surface.surface_type == GameTileSurface.SurfaceType.WORLD_SURFACE:
+					var plane: WorldPlane = event.surface.get_plane()
+					var region := plane.plane_object.get_region(event.qr_coords)
+					%RegionSurface.load_region(region)
+			else:
+				event.surface.clear_all_select()
+				event.surface.select(event.qr_coords, true)
+				# load info
+				if event.surface.surface_type == GameTileSurface.SurfaceType.WORLD_SURFACE:
+					var plane: WorldPlane = event.surface.get_plane()
+					var region := plane.plane_object.get_region(event.qr_coords)
+					%InfoContainer.set_region(region, event.qr_coords)
+				elif event.surface.surface_type == GameTileSurface.SurfaceType.REGION_SURFACE:
+					var region: RegionObject = event.surface.get_region()
+					%InfoContainer.set_cell(event.qr_coords)
+			event.accept()
+			return
+
+	if event is UiEventBus.CancellationEvent:
+		event.accept()
+		return

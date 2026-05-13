@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://cjkx708uja6xu"]
+
+[ext_resource type="Script" uid="uid://dcvgkd38wb02v" path="res://ui/system/outliner.gd" id="1_c0mso"]
+[ext_resource type="Theme" uid="uid://c55e6nn3k8vgw" path="res://ui/theme/main_small.tres" id="1_caw55"]
+[ext_resource type="PackedScene" uid="uid://cb5s3dxd63nmp" path="res://ui/system/debug/ScopeEditor.tscn" id="2_4o3ld"]
+[ext_resource type="Texture2D" uid="uid://th6qiwitek5k" path="res://addons/plenticons/icons/64x-hidpi/2d/diamond-blue.png" id="2_caw55"]
+[ext_resource type="Texture2D" uid="uid://ci0833uevvsqk" path="res://addons/plenticons/icons/64x-hidpi/2d/triangle-up-blue.png" id="3_u7o34"]
+[ext_resource type="Texture2D" uid="uid://0ax3aokw21sd" path="res://addons/plenticons/icons/64x-hidpi/2d/double-chevron-right-blue.png" id="4_g1hs8"]
+
+[node name="Outliner" type="VBoxContainer" unique_id=836447073]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_caw55")
+script = ExtResource("1_c0mso")
+
+[node name="Control" type="HBoxContainer" parent="." unique_id=1219166613]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+
+[node name="TabBar" type="TabBar" parent="Control" unique_id=1712284716]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/icon_max_width = 24
+current_tab = 0
+close_with_middle_mouse = false
+tab_count = 2
+tab_0/icon = ExtResource("2_caw55")
+tab_1/icon = ExtResource("3_u7o34")
+
+[node name="Spacer" type="Control" parent="Control" unique_id=49386807]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OpenCloseButton" type="Button" parent="Control" unique_id=356177602]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+icon = ExtResource("4_g1hs8")
+expand_icon = true
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1934223030]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DebugTab" type="VBoxContainer" parent="PanelContainer" unique_id=741980746]
+layout_mode = 2
+
+[node name="FoldableContainer" type="FoldableContainer" parent="PanelContainer/DebugTab" unique_id=1209489755]
+layout_mode = 2
+size_flags_vertical = 3
+title = "Scope"
+
+[node name="ScopeEditor" parent="PanelContainer/DebugTab/FoldableContainer" unique_id=1437484229 instance=ExtResource("2_4o3ld")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[connection signal="pressed" from="Control/OpenCloseButton" to="." method="_on_open_close_button_pressed"]

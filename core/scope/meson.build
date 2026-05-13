@@ -1,3 +1,12 @@
+_core_scope_lib_dependencies = [
+    # common deps
+    common_deps,
+
+    # proto and utils
+    utils_lib_dep,
+    hs_proto_lib_dep,
+]
+
 core_scope_lib = static_library(
     'core_scope_lib',
     sources: [
@@ -6,22 +15,32 @@ core_scope_lib = static_library(
         'scoped_object.cpp',
         'numeric_variable.cpp',
         'string_variable.cpp',
-        hs_proto_generated_headers,
     ],
-    dependencies: common_deps,
-    link_with: [utils_lib, hs_proto_lib],
-    include_directories: root_include,
+    dependencies: _core_scope_lib_dependencies,
+)
+
+core_scope_lib_dep = declare_dependency(
+    link_with: core_scope_lib,
+    dependencies: _core_scope_lib_dependencies,
 )
 
 core_scope_ut_lib = static_library(
     'core_scope_ut_lib',
     sources: [
         'scope_ut.cpp',
-        hs_proto_generated_headers,
     ],
-    dependencies: common_deps + gtest_dep,
-    link_with: [core_scope_lib],
-    include_directories: root_include,
+    dependencies: [common_deps, gtest_dep, core_scope_lib_dep, core_ruleset_ut_lib_dep],
+)
+
+core_scope_ut_lib_dep = declare_dependency(
+    link_with: core_scope_ut_lib,
+    dependencies: [
+        common_deps,
+        gtest_dep,
+        lua_dep,
+        core_scope_lib_dep,
+        core_ruleset_ut_lib_dep,
+    ],
 )
 
 core_scope_tests = executable(
@@ -30,11 +49,8 @@ core_scope_tests = executable(
         'test_main.cpp',
         'scope_test.cpp',
         'scope_change_set_test.cpp',
-        hs_proto_generated_headers,
     ],
-    dependencies: common_deps + gtest_dep,
-    link_with: [core_scope_lib, core_scope_ut_lib, hs_proto_lib],
-    include_directories: root_include,
+    dependencies: [core_scope_ut_lib_dep],
 )
 
 test('core.scope', core_scope_tests, env: environment(test_env))

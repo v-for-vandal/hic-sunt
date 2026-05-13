@@ -34,6 +34,7 @@ class ScopeChangeSet {
   std::expected<void, ErrorCode> Apply(size_t modification_time) const;
 
   bool Empty() const noexcept { return operations_.empty(); }
+  size_t GetOperationCount() const noexcept { return operations_.size(); }
   void Clear() { operations_.clear(); }
 
  private:

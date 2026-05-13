@@ -57,11 +57,19 @@ func ask_confirm(message: String) -> bool:
 	return await _pimpl.ask_confirm(message, get_tree().current_scene)
 
 
-func load_ruleset(ruleset_path: String = "") -> RulesetObject:
+func load_ruleset() -> RulesetObject:
 	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/v1.0')
-	if ruleset_path == "":
-		ruleset_path = core_ruleset_path
-	var _ruleset_dict: Dictionary = RulesetObject.load(ruleset_path)
+	
+	# get paths to all mods
+	var active_mods := _pimpl.get_active_mods()
+	var all_paths := [core_ruleset_path]
+	
+	for mod_path in  active_mods.keys():
+		all_paths.append(ProjectSettings.globalize_path(mod_path))
+	
+	
+
+	var _ruleset_dict: Dictionary = RulesetObject.load(all_paths)
 	# TODO: Process loading errors properly
 	var _ruleset_object: RulesetObject
 	if _ruleset_dict.success:

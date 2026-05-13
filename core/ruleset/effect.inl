@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <utility>
 
+#include <sol/sol.hpp>
+#include <spdlog/spdlog.h>
+
 namespace hs::ruleset {
 
 namespace details {
@@ -129,22 +132,98 @@ EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
     : data_(std::move(data)),
       id_(BaseTypes::StringIdFromStdString(data_.id())) {
   size_t next_var_index = 0;
-  auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
-  if (!possible_processed) {
-    throw std::system_error(make_error_code(possible_processed.error()));
+  std::vector<std::string> possible_errors;
+  std::vector<std::string> effect_errors;
+  if (data_.has_possible()) {
+    auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
+    if (!possible_processed) {
+      lua_errors_.push_back(fmt::format(
+          "preprocessing \"possible\" failed with code {}",
+          possible_processed.error()));
+      is_broken_ = true;
+    } else {
+      possible_processed->code =
+          WrapCodeInFunction(kPossibleFunctionName, possible_processed->code);
+      possible_code_ = std::move(*possible_processed);
+      AppendDependencies(dependencies_, possible_code_->dependencies);
+      AppendLuaVariables(lua_variables_, possible_code_->lua_variables);
+      possible_errors =
+          ValidateLuaCode(id_, kPossibleFunctionName, possible_code_->code);
+    }
   }
 
   auto effect_processed = PreprocessCode(data_.effect(), next_var_index);
   if (!effect_processed) {
-    throw std::system_error(make_error_code(effect_processed.error()));
+    lua_errors_.push_back(fmt::format(
+        "preprocessing \"effect\" failed with code {}",
+        effect_processed.error()));
+    is_broken_ = true;
+  } else {
+    effect_processed->code =
+        WrapCodeInFunction(kEffectFunctionName, effect_processed->code);
+    effect_code_ = std::move(*effect_processed);
+
+    AppendDependencies(dependencies_, effect_code_.dependencies);
+    AppendLuaVariables(lua_variables_, effect_code_.lua_variables);
+    effect_errors = ValidateLuaCode(id_, kEffectFunctionName, effect_code_.code);
   }
 
-  possible_code_ = std::move(possible_processed->code);
-  effect_code_ = std::move(effect_processed->code);
-  AppendDependencies(dependencies_, possible_processed->dependencies);
-  AppendDependencies(dependencies_, effect_processed->dependencies);
-  AppendLuaVariables(lua_variables_, possible_processed->lua_variables);
-  AppendLuaVariables(lua_variables_, effect_processed->lua_variables);
+  lua_errors_.reserve(lua_errors_.size() + possible_errors.size() + effect_errors.size());
+  lua_errors_.insert(lua_errors_.end(),
+                     std::make_move_iterator(possible_errors.begin()),
+                     std::make_move_iterator(possible_errors.end()));
+  lua_errors_.insert(lua_errors_.end(),
+                     std::make_move_iterator(effect_errors.begin()),
+                     std::make_move_iterator(effect_errors.end()));
+
+  is_broken_ |= !lua_errors_.empty();
+}
+
+template <typename BaseTypes>
+std::string EffectDefinition<BaseTypes>::WrapCodeInFunction(
+    std::string_view function_name, const std::string& code) {
+  return "function " + std::string(function_name) + "(target)\n" + code +
+         "\nend";
+}
+
+template <typename BaseTypes>
+std::vector<std::string> EffectDefinition<BaseTypes>::ValidateLuaCode(
+    const StringId& effect_id, std::string_view chunk_name,
+    const std::string& wrapped_code) {
+  std::vector<std::string> errors;
+
+  if (wrapped_code.empty()) {
+    return errors;
+  }
+
+  sol::state lua;
+  lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table,
+                     sol::lib::string);
+
+  sol::load_result loaded = lua.load(wrapped_code);
+  if (!loaded.valid()) {
+    const auto error = loaded.get<sol::error>();
+    auto message = fmt::format(
+        "Failed to validate lua chunk {} for effect {}: {}", chunk_name,
+        effect_id, error.what());
+    spdlog::warn(message);
+    errors.push_back(std::move(message));
+    return errors;
+  }
+
+  /* TODO: REMOVE this code is wrong
+  sol::protected_function_result result = loaded();
+  if (!result.valid()) {
+    const auto error = result.get<sol::error>();
+    auto message = fmt::format(
+        "Failed to initialize lua chunk {} for effect {}: {}", chunk_name,
+        effect_id, error.what());
+    spdlog::warn(message);
+    errors.push_back(std::move(message));
+  }
+  */
+
+  return errors;
 }
 
 template <typename BaseTypes>
@@ -162,13 +241,13 @@ void EffectDefinition<BaseTypes>::AppendLuaVariables(
 template <typename BaseTypes>
 auto EffectDefinition<BaseTypes>::PreprocessCode(
     const proto::ruleset::effect::Code& code, size_t& next_var_index)
-    -> std::expected<PreprocessedCode, ErrorCode> {
+    -> std::expected<Code, ErrorCode> {
   std::string source;
   if (code.has_lua()) {
     source = code.lua();
   }
 
-  PreprocessedCode result;
+  Code result;
   result.code.reserve(source.size());
 
   size_t pos = 0;

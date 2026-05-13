@@ -18,6 +18,9 @@ namespace hs::session {
 template <typename BaseTypes>
 class EffectExecutor;
 
+template <typename BaseTypes>
+class EffectExecutionStatistics;
+
 template <typename BaseTypes = StdBaseTypes,
           typename WorldPtr = std::shared_ptr<terra::World<BaseTypes>>,
           typename RuleSetPtr =
@@ -44,7 +47,7 @@ class Session {
   // This function will change internal turn counter without any logic. Its
   // primary use is to set current turn when loading game. Changing turn
   // to earlier value is forbidden because it messes up caches.
-  void SetCurrentTurn(size_t value) { current_turn_ = value; }
+  void SetCurrentTurn(size_t value);
 
   // Return current turn
   size_t GetCurrentTurn() const { return current_turn_; }
@@ -53,7 +56,15 @@ class Session {
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
   auto& GetEffects() noexcept { return effects_; }
   const auto& GetEffects() const noexcept { return effects_; }
+  const auto& GetLastEffectExecutionStatistics() const noexcept {
+    return last_effect_execution_statistics_;
+  }
+  const auto& GetTotalEffectExecutionStatistics() const noexcept {
+    return total_effect_execution_statistics_;
+  }
 
+ private:
+  void Prepare();
  private:
   friend class EffectExecutor<BaseTypes>;
 
@@ -63,6 +74,12 @@ class Session {
   absl::flat_hash_map<StringId, ScopePtr> scopes_by_id_;
   absl::flat_hash_map<ScopeType, std::vector<ScopePtr>> scopes_by_type_;
   std::vector<std::shared_ptr<EffectInstance<BaseTypes>>> effects_;
+  EffectExecutionStatistics<BaseTypes> last_effect_execution_statistics_;
+  EffectExecutionStatistics<BaseTypes> total_effect_execution_statistics_;
+
+  // static StringId aren't possible because godot::StringName requires godot runtime
+  // being active.
+  StringId kCoreTurn{"core.turn"};
 };
 
 }  // namespace hs::session

@@ -57,6 +57,7 @@ func _ready()->void:
 func _contains(_tile_qr: Vector2i) -> bool;
 
 func _on_input_event_from_cell(tile_qr: Vector2i, event: InputEvent) -> void:
+	assert(event_bus != null)
 	if _contains(tile_qr):
 		if tile_qr != _last_tile_qr:
 			var ui_event := _create_movement_event()
@@ -69,7 +70,7 @@ func _on_input_event_from_cell(tile_qr: Vector2i, event: InputEvent) -> void:
 				var ui_event := _create_action_event()
 				ui_event.qr_coords = tile_qr
 				ui_event.surface = self
-				ui_event.action_type = GameUiEventBus.mouse_button_to_action_type(event.button_index)
+				ui_event.action_type = CurrentGame.event_bus.mouse_button_to_action_type(event.button_index)
 				event_bus.emit_event(ui_event)
 		
 		_last_tile_qr = tile_qr
@@ -137,6 +138,15 @@ func clear_select(qr_coords: Vector2i) -> void:
 	
 func clear_all_select() -> void:
 	_select_layer.clear()
+	
+func get_selected() -> Array[Vector2i]:
+	var used_cells := _select_layer.get_used_cells_by_id(_get_select_source_id())
+	var result : Array[Vector2i] = []
+	result.resize(used_cells.size())
+	for i in range(used_cells.size()):
+		result[i] = map_to_axial(used_cells[i])
+		
+	return result
 	
 func highlight(qr_coords: Vector2i, good: bool) -> void:
 	if !_contains(qr_coords):

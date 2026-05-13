@@ -85,4 +85,25 @@ TEST(StdEffectExecutor, SkipsEffectWhenPossibleReturnsFalse) {
   EXPECT_EQ(*numeric_value, 3.0);
 }
 
+TEST(StdEffectExecutor, HandlingRuntimeError) {
+  StdSession session;
+  auto scope = hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION);
+  ASSERT_TRUE(session.AddScope(scope));
+
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
+      "effect.id", ScopeType::SCOPE_TYPE_REGION,
+      "",
+      "a = VAR(numeric_var); target:set_numeric_modifier('numeric_var', 'break', 4.0, 0.0, 0.0, 'no', 55)");
+  session.GetEffects().push_back(std::make_shared<EffectInstance<StdBaseTypes>>(definition));
+
+  ASSERT_TRUE(scope->SetNumericModifier("numeric_var", "seed", 3.0, 0.0, 10));
+
+  StdEffectExecutor executor;
+  executor.Execute(session, 10);
+
+  auto numeric_value = scope->GetNumericValue("numeric_var");
+  ASSERT_TRUE(numeric_value.has_value());
+  EXPECT_EQ(*numeric_value, 3.0);
+}
+
 }  // namespace hs::session

@@ -11,6 +11,10 @@ namespace hs::session {
 template <typename BaseTypes>
 EffectInstance<BaseTypes>::EffectInstance(const EffectDefinitionPtr& definition)
     : definition_(definition) {
+  if (definition_->IsBroken()) {
+    throw std::system_error(make_error_code(ErrorCode::ERR_INVALID_EFFECT_DEFINITION));
+  }
+
   InitializeLuaState();
   auto load_result = LoadFunctions();
   if (!load_result) {
@@ -34,35 +38,35 @@ void EffectInstance<BaseTypes>::InitializeLuaState() {
 
 template <typename BaseTypes>
 std::expected<void, ErrorCode> EffectInstance<BaseTypes>::LoadFunctions() {
-  {
-      // TODO: pass __var_X as function arguments and not as global bound variables
-    const std::string source =
-        "function __hic_sunt_possible(target)\n" +
-        definition_->GetPossibleCode() + "\nend";
-    sol::load_result loaded = lua_.load(source);
+  if (auto possible_code = definition_->GePossibleCode()) {
+    sol::load_result loaded = lua_.load(possible_code->code);
     if (!loaded.valid()) {
+      auto error = loaded.get<sol::error>();
+      spdlog::warn("Failed to load lua script with error: {}", error.what());
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
     sol::protected_function_result result = loaded();
     if (!result.valid()) {
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
-    possible_function_ = lua_["__hic_sunt_possible"];
+    possible_function_ = lua_[std::string(EffectDefinition::kPossibleFunctionName)];
+  } else {
+      // effects without possible code are always possible
+      always_possible_ = true;
   }
 
   {
-    const std::string source =
-        "function __hic_sunt_effect(target)\n" +
-        definition_->GetEffectCode() + "\nend";
-    sol::load_result loaded = lua_.load(source);
+    sol::load_result loaded = lua_.load(definition_->GetEffectCode().code);
     if (!loaded.valid()) {
+      auto error = loaded.get<sol::error>();
+      spdlog::warn("Failed to load lua script with error: {}", error.what());
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
     sol::protected_function_result result = loaded();
     if (!result.valid()) {
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
-    effect_function_ = lua_["__hic_sunt_effect"];
+    effect_function_ = lua_[std::string(EffectDefinition::kEffectFunctionName)];
   }
 
   return {};
@@ -121,6 +125,8 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
         std::string_view::npos) {
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED);
     }
+    spdlog::warn("Execution of effect {} aborted with error: {}", definition_->GetId(),
+        message);
     return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
   }
 
@@ -138,6 +144,10 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
 template <typename BaseTypes>
 std::expected<bool, ErrorCode> EffectInstance<BaseTypes>::CheckPossible(
     const ScopePtr& scope, std::optional<int> max_operations) {
+  if (always_possible_) {
+    return true;
+  }
+
   auto bind_result = BindVariables(scope);
   if (!bind_result) {
     return std::unexpected(bind_result.error());

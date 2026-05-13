@@ -5,7 +5,7 @@ libdir=${prefix}/lib/x86_64-linux-gnu
 Name: libspdlog
 Description: Fast C++ logging library.
 URL: https://github.com/gabime/spdlog
-Version: 1.15.3
+Version: 1.17.0
 Requires: fmt
 Libs: -L${libdir} -lspdlog -pthread
 Cflags: -I${includedir} -pthread -DSPDLOG_FMT_EXTERNAL -DSPDLOG_COMPILED_LIB

@@ -15,6 +15,13 @@ using StdEffectInstance = EffectInstance<StdBaseTypes>;
 using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 
+TEST(StdEffectInstance, RejectsBrokenDefinition) {
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
+      "effect.id", "this is not valid lua", "return");
+
+  EXPECT_THROW((StdEffectInstance(definition)), std::system_error);
+}
+
 TEST(StdEffectInstance, ExposesDefinitionIdentity) {
   auto definition = hs::ruleset::test::MakeEffectDefinition("effect.id", "return true", "return");
 
@@ -30,6 +37,29 @@ TEST(StdEffectInstance, CheckPossibleReturnsBoolean) {
 
   StdEffectInstance instance(definition);
   auto scope = hs::scope::test::MakeSeededScope();
+
+  auto result = instance.CheckPossible(scope, 10000);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(*result);
+}
+
+TEST(StdEffectInstance, CheckPossibleReturnsTrueWhenPossibleCodeIsEmpty) {
+  auto definition = hs::ruleset::test::MakeEffectDefinition("effect.id", "", "return");
+
+  StdEffectInstance instance(definition);
+  auto scope = hs::scope::test::MakeSeededScope();
+
+  auto result = instance.CheckPossible(scope, 10000);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(*result);
+}
+
+TEST(StdEffectInstance, CheckPossibleReturnsTrueWhenPossibleCodeIsEmptyAndScopeHasNoDependencies) {
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
+      "effect.id", "", "target:set_numeric_modifier('numeric_var', 1.0, 0.0)");
+
+  StdEffectInstance instance(definition);
+  auto scope = hs::scope::test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_REGION);
 
   auto result = instance.CheckPossible(scope, 10000);
   ASSERT_TRUE(result.has_value());

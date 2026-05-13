@@ -4,6 +4,10 @@ var load_mod_impl_ := preload("res://system/central/impl/load_mod_impl.gd").new(
 
 var _savegames_dir := "user://savegames"
 
+# TODO: We should distinguis between active and disabled mod
+# mapping path -> modconfig file
+var _all_mods : Dictionary[String, ConfigFile] = {}
+
 
 func ensure_savegames_dir() -> Error:
 	if not DirAccess.dir_exists_absolute(_savegames_dir):
@@ -114,11 +118,16 @@ func ask_confirm(message: String, current_scene: Node) -> bool:
 	return result
 
 
-func load_mods() -> Array:
-	var result := []
+func load_mods() -> Dictionary[String, ConfigFile]:
+	var result : Dictionary[String, ConfigFile]= {}
 	# load everything from our content folder
-	result.append_array(load_mod_impl_.load_mods_from_folder('res://content'))
+	result.merge(load_mod_impl_.load_mods_from_folder('res://content'))
 	# load everything from user mods folder
-	result.append_array(load_mod_impl_.load_mods_from_folder('user://mods'))
+	result.merge(load_mod_impl_.load_mods_from_folder('user://mods'))
 
+	_all_mods = result
 	return result
+	
+func get_active_mods() -> Dictionary[String, ConfigFile]:
+	# TODO: make separate list for enabled mods
+	return _all_mods

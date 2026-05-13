@@ -10,8 +10,8 @@ var _current_select_callback: Variant
 var _is_in_select_mode := false
 
 func _ready() -> void:
-	CurrentGame.new_turn_started.connect(_on_new_turn_started)
-	_on_new_turn_started(CurrentGame.get_current_turn())
+	CurrentGame.current_game.new_turn_started.connect(_on_new_turn_started)
+	_on_new_turn_started(CurrentGame.current_game.get_current_turn())
 	pass
 
 func _gui_input(event : InputEvent) -> void:
@@ -36,6 +36,11 @@ func _on_info_button_toggled(toggled_on: bool) -> void:
 	else:
 		$InfoTabContainer.visible = false
 
+func on_region_selected(region: RegionObject) -> void:
+	$Outliner.on_region_selected(region)
+	
+func on_region_deselected(region: RegionObject) -> void:
+	pass
 
 func on_world_cell_clicked_forward(world_object: WorldObject, qr: Vector2i) -> void:
 	world_cell_selected.emit(world_object, qr)
