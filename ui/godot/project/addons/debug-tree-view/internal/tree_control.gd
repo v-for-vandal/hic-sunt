@@ -70,7 +70,7 @@ func add_text_node(key: String, text: String) -> RefCounted:
 	_debug_tree._add_text_sink(new_item, text_receiver)
 
 	return _wrap_in_class(new_item)
-	
+
 func add_text(text: String) -> void:
 	# if we are text node:
 	var text_node := _debug_tree._get_text_sink(_item)
@@ -79,27 +79,27 @@ func add_text(text: String) -> void:
 		var logs_node := add_text_node("log", text)
 		text_node = _debug_tree._get_text_sink(logs_node._item)
 		_debug_tree._add_text_sink(_item, text_node)
-		
+
 		return
-	
+
 	text_node.add_text(text)
 	text_node.newline()
-	
+
 ## Adds an image
 ## Will place image into scroll container, if needed.
 func add_image_node(key: String, image: Image) -> RefCounted:
-	
+
 	var display_container := Control.new()
 	display_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	
+
 	var image_node := _ImageHolder.instantiate()
 	image_node.stretch_mode = TextureRect.STRETCH_KEEP
 	image_node.texture = ImageTexture.create_from_image(image)
-	
+
 	var overlay_node := _OverlayHolder.instantiate()
 	overlay_node.name = "OverlayHolder"
 	overlay_node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	
+
 	var control_node := _ImageControl.instantiate()
 	control_node.set_texture(image_node.texture)
 	control_node.set_overlay_holder(overlay_node)
@@ -107,33 +107,33 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 	#control_node.set_anchors_preset(Control.PRESET_TOP_LEFT, true)
 	#control_node.set_size(Vector2(300, 100))
 	#control_node.position = Vector2.ZERO
-	
+
 	var on_set_modulate = func(color: Color):
 		image_node.self_modulate = color
-		
+
 	control_node.set_modulate.connect(on_set_modulate)
 	control_node.overlay_selected.connect(overlay_node.show_overlay)
-	
+
 	image_node.add_child(overlay_node)
 	display_container.add_child(image_node)
 	display_container.add_child(control_node)
-	
-	
+
+
 	var new_item := _add_element(key, display_container)
 	_debug_tree._add_overlay_sink(new_item, overlay_node)
-	
+
 	# recenter image after adding it to tree
 	image_node.position = display_container.get_viewport_rect().size / 2
-		
+
 	return _wrap_in_class(new_item)
-	
+
 func add_to_overlay(node: Control) -> void:
 		# if we are text node:
 	var overlay_node := _debug_tree._get_overlay_sink(_item)
 	if overlay_node == null:
 		push_error("Trying to add to overlay for node that does not support one")
 		return
-	
+
 	# overlays start invisible by default
 	node.visible = false
 	overlay_node.add_child(node)
@@ -143,6 +143,60 @@ func add_empty_node(key: String) -> RefCounted:
 	var new_item := _debug_tree._add_element(_item, key, null)
 
 	return _wrap_in_class(new_item)
+
+
+func add_structured_data_node(key: String, data : Dictionary) -> RefCounted:
+	var tree := Tree.new()
+	tree.hide_root = true
+	tree.columns = 2
+
+	var root_item := tree.create_item()
+	root_item.collapsed = false
+	_root_fill_structured_data(root_item, data)
+	return _wrap_in_class(
+		_add_element(key, tree),
+	)
+
+
+
+func _root_fill_structured_data(parent: TreeItem, data: Dictionary) -> void:
+	parent.collapsed = false
+	for key in data:
+		_add_structured_data_value(parent, str(key), data[key])
+
+
+func _add_structured_data_value(parent: TreeItem, key: String, value: Variant) -> void:
+	var item := parent.create_child(parent.get_child_count())
+	item.set_text(0, DebugTree._normalize_key(key))
+	item.collapsed = false
+
+	if value is Dictionary:
+		for child_key in value:
+			_add_structured_data_value(item, str(child_key), value[child_key])
+		return
+
+	if value is Array:
+		for index in value.size():
+			_add_structured_data_value(item, str(index), value[index])
+		return
+
+	item.set_text(1, _format_structured_data_value(value))
+
+
+func _format_structured_data_value(value: Variant) -> String:
+	if value == null:
+		return "null"
+
+	match typeof(value):
+		TYPE_BOOL:
+			return "true" if value else "false"
+		TYPE_OBJECT:
+			var object_value := value as Object
+			if object_value == null:
+				return "Object(null)"
+			return "%s(%s)" % [object_value.get_class(), str(object_value)]
+		_:
+			return str(value)
 
 
 func add_group(path: String) -> RefCounted:
@@ -169,7 +223,7 @@ func add_random_group(prefix: String = "") -> RefCounted:
 		key = "%s%X" % [prefix, randi()]
 
 	return _wrap_in_class(_add_element(key, null))
-	
+
 func find_node(path: String) -> RefCounted:
 	var components := path.split('/', false)
 	if components.is_empty():

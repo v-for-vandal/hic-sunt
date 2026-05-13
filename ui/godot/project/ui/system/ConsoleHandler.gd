@@ -46,25 +46,17 @@ func _dump_statistics(statistics_type: String) -> void:
 		Console.print_line("Unknown statistics %s. Valid statistics are: %s" % [statistics_type, _stats_dumpers.keys()])
 		return
 		
-	var stat_group := CurrentGame.current_game.debug_control.add_group("statistics")
-	var effect_node : DebugTree.TreeControl = stat_group.find_node(statistics_type)
-	if effect_node == null:
-		effect_node = stat_group.add_text_node(statistics_type, "")
+	var stat_group := CurrentGame.current_game.debug_control.add_group("statistics#%s/effects" % CurrentGame.current_game.get_current_turn())
 	
-	_stats_dumpers[statistics_type].call(effect_node)
-	
-func _dump_dict_to_text_node(target: Dictionary, debug_node: DebugTree.TreeControl) -> void:
-	for key: Variant in target:
-		debug_node.add_text("%-32s: %10s" % [key, target[key]])
-	
+	_stats_dumpers[statistics_type].call(stat_group)
+
 func _dump_statistics_effects(debug_node: DebugTree.TreeControl) -> void:
-	debug_node.add_text("Total statistics\n")
 	var total_stats := CurrentGame.current_game.session.get_total_effect_execution_statistics()
-	_dump_dict_to_text_node(total_stats, debug_node)
+	debug_node.add_structured_data_node("total", total_stats)
 		
-	debug_node.add_text("Turn statistics\n")
+
 	var turn_stats := CurrentGame.current_game.session.get_last_effect_execution_statistics()
-	_dump_dict_to_text_node(turn_stats, debug_node)
+	debug_node.add_structured_data_node("turn", turn_stats)
 	
 func _reload_ruleset() -> void:
 	var new_ruleset := CentralSystem.load_ruleset()

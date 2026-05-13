@@ -35,6 +35,13 @@ func add_image_node(key: String, image: Image) -> RefCounted:
 @abstract
 func add_to_overlay(node: Control) -> void;
 
+## Add dictionary of data as node. Dictionary will be represented
+## as Tree. Properly supports dictionaries inside dictionaries and so on.
+## Essentially, you can put any json-like data here. But if depth is way to much,
+## UI will be ugly.
+@abstract
+func add_structured_data_node(key: String, data : Dictionary) -> RefCounted;
+
 
 ## Creates an hierarchy and returns a handle to created node
 ## add_group("a/b/c") will create
