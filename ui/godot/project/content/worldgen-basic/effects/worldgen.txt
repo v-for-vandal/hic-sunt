@@ -4,7 +4,7 @@ effects : [
 	scope_type: SCOPE_TYPE_CELL
 	schedule: EVERY_TURN
 	effect {
-	  lua: "target:set_numeric_modifier(VAR(core.geography.height) * (-6.5) / 1000)"
+	  lua: "target:set_numeric_modifier('core.ecosystem.temperature', VAR(core.geography.height) * (-6.5) / 1000, 0);"
 	}
   }
 ]

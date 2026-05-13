@@ -2,8 +2,13 @@
 
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/string_name.hpp>
+#include <sol/forward.hpp>
+#include <sol/sol.hpp>
 #include <ui/godot/module/types/godot_serialize.hpp>
 #include <ui/godot/module/utils/fmt.hpp>
+#include <ui/godot/module/utils/to_string.hpp>
+
+#include <string>
 
 namespace hs::godot {
 
@@ -64,3 +69,53 @@ H AbslHashValue(H h, const ::godot::String& target) {
   return H::combine(std::move(h), target.hash());
 }
 }  // namespace godot
+
+template <typename Handler>
+bool sol_lua_check(sol::types<::godot::StringName>, lua_State* L, int index,
+                   Handler&& handler, sol::stack::record& tracking) {
+  const int absolute_index = lua_absindex(L, index);
+  const bool success =
+      sol::stack::check<std::string>(L, absolute_index,
+                                     std::forward<Handler>(handler), tracking);
+  //tracking.use(1);
+  return success;
+}
+
+inline ::godot::StringName sol_lua_get(sol::types<::godot::StringName>, lua_State* L,
+                                int index, sol::stack::record& tracking) {
+  const int absolute_index = lua_absindex(L, index);
+  const std::string value =
+      sol::stack::get<std::string>(L, absolute_index, tracking);
+  //tracking.use(1);
+  return hs::godot::utils::to_string_name(value);
+}
+
+inline int sol_lua_push(sol::types<::godot::StringName>, lua_State* L,
+                 const ::godot::StringName& value) {
+  return sol::stack::push(L, hs::godot::utils::from_string(value));
+}
+
+template <typename Handler>
+bool sol_lua_check(sol::types<::godot::String>, lua_State* L, int index,
+                   Handler&& handler, sol::stack::record& tracking) {
+  const int absolute_index = lua_absindex(L, index);
+  const bool success =
+      sol::stack::check<std::string>(L, absolute_index,
+                                     std::forward<Handler>(handler), tracking);
+  //tracking.use(1);
+  return success;
+}
+
+inline ::godot::String sol_lua_get(sol::types<::godot::String>, lua_State* L,
+                            int index, sol::stack::record& tracking) {
+  const int absolute_index = lua_absindex(L, index);
+  const std::string value =
+      sol::stack::get<std::string>(L, absolute_index, tracking);
+  //tracking.use(1);
+  return hs::godot::utils::to_string(value);
+}
+
+inline int sol_lua_push(sol::types<::godot::String>, lua_State* L,
+                 const ::godot::String& value) {
+  return sol::stack::push(L, hs::godot::utils::from_string(value));
+}
