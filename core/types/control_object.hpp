@@ -10,10 +10,8 @@ namespace hs::types {
 class ControlObject;
 using ControlObjectPtr = ::hs::utils::NonNullSharedPtr<ControlObject>;
 
-void SerializeTo(const ControlObject &source,
-                 proto::types::ControlObject &target);
-ControlObject ParseFrom(const proto::types::ControlObject &source,
-                        serialize::To<ControlObject>);
+void SerializeTo(const ControlObject &source, proto::types::ControlObject &target);
+ControlObject ParseFrom(const proto::types::ControlObject &source, serialize::To<ControlObject>);
 
 class ControlObject {
  public:
@@ -29,8 +27,7 @@ class ControlObject {
   static ControlObjectPtr Create() { return ControlObjectPtr{}; }
 
  private:
-  friend void SerializeTo(const ControlObject &source,
-                          proto::types::ControlObject &target);
+  friend void SerializeTo(const ControlObject &source, proto::types::ControlObject &target);
   friend ControlObject ParseFrom(const proto::types::ControlObject &world,
                                  serialize::To<ControlObject>);
 

@@ -11,8 +11,7 @@ namespace hs::geometry {
 
 template <typename Cell>
 using CellsArrayView =
-    std::mdspan<Cell,
-                std::extents<int, std::dynamic_extent, std::dynamic_extent>,
+    std::mdspan<Cell, std::extents<int, std::dynamic_extent, std::dynamic_extent>,
                 std::layout_right>;
 
 template <typename Cell_, typename CoordinateSystem>
@@ -35,9 +34,7 @@ class SurfaceView {
     s_end_(s_end) {}
     */
   SurfaceView(CellsArrayView<Cell> target, const SurfaceShape &shape)
-      : target_(std::move(target)),
-        shape_(shape),
-        bounding_box_(shape.BoundingBox()) {}
+      : target_(std::move(target)), shape_(shape), bounding_box_(shape.BoundingBox()) {}
 
   SurfaceView(const SurfaceView &) = default;
   SurfaceView(SurfaceView &&) = default;
@@ -47,8 +44,7 @@ class SurfaceView {
   const SurfaceShape &GetShape() const noexcept { return shape_; }
 
   Cell &GetCell(Coords coords) {
-    return const_cast<Cell &>(
-        const_cast<const SurfaceView &>(*this).GetCell(coords));
+    return const_cast<Cell &>(const_cast<const SurfaceView &>(*this).GetCell(coords));
   }
   Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
     return GetCell(Coords{q, r});
@@ -58,8 +54,7 @@ class SurfaceView {
     return target_[(coords.q() - q_start()).ToUnderlying(),
                    (coords.r() - r_start()).ToUnderlying()];
   }
-  const Cell &GetCell(typename Coords::QAxis q,
-                      typename Coords::RAxis r) const {
+  const Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
     return GetCell(Coords{q, r});
   }
 
@@ -70,12 +65,8 @@ class SurfaceView {
    */
   auto BoundingSize() const { return target_.size(); }
 
-  auto q_size() const {
-    return typename CoordinateSystem::QDelta{target_.extent(0)};
-  }
-  auto r_size() const {
-    return typename CoordinateSystem::RDelta{target_.extent(1)};
-  }
+  auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
+  auto r_size() const { return typename CoordinateSystem::RDelta{target_.extent(1)}; }
 
   auto q_end() const { return bounding_box_.end().q(); }
   auto r_end() const { return bounding_box_.end().r(); }
@@ -157,8 +148,7 @@ class Surface {
   using SCS = CoordinateSystem;
   using SCSize = DeltaCoords<CoordinateSystem>;
 
-  Surface()
-      : Surface(SurfaceShape(geometry::RhombusSurface(Box::MakeOne()))) {};
+  Surface() : Surface(SurfaceShape(geometry::RhombusSurface(Box::MakeOne()))) {};
   explicit Surface(SurfaceShape shape);
   Surface(const Surface &) = delete;
   Surface(Surface &&) = default;
@@ -224,8 +214,7 @@ class Surface {
   SurfaceView<Cell, CoordinateSystem> cells_;
 
  private:
-  static std::pair<size_t, size_t> GetAllocationSize(
-      const SurfaceShape &shape) noexcept;
+  static std::pair<size_t, size_t> GetAllocationSize(const SurfaceShape &shape) noexcept;
 };
 
 }  // namespace hs::geometry

@@ -37,10 +37,9 @@ class RegionObject : public RefCounted, public ScopeMixin {
   Ref<ScopeObject> get_scope() const { return ScopeMixin::get_scope(); }
   // iterates over cells and gets N most frequent values of given variable
   // For values with eqaul frequency, sort by alphabet
-  TypedArray<StringName> get_string_value_topn(StringName variable,
-                                               int N) const;
-  TypedDictionary<StringName, GodotBaseTypes::NumericValue>
-  get_numeric_value_aggregates(StringName variable) const;
+  TypedArray<StringName> get_string_value_topn(StringName variable, int N) const;
+  TypedDictionary<StringName, GodotBaseTypes::NumericValue> get_numeric_value_aggregates(
+      StringName variable) const;
 
   Rect2i get_dimensions() const;
   Dictionary get_cell_info(Vector2i coords) const;
@@ -51,8 +50,7 @@ class RegionObject : public RefCounted, public ScopeMixin {
   bool set_city_id(String city_id) const;
   Array get_available_improvements() const;
   String get_region_id() const;
-  Dictionary convert_to_dictionary(
-      const hs::proto::region::Improvement& improvement) const;
+  Dictionary convert_to_dictionary(const hs::proto::region::Improvement& improvement) const;
   Ref<PnlObject> get_pnl_statement(Ref<RulesetObject> ruleset) const;
   Dictionary get_jobs(Ref<RulesetObject> ruleset_object) const;
   Dictionary get_info() const;
@@ -62,8 +60,8 @@ class RegionObject : public RefCounted, public ScopeMixin {
   int get_numeric_value(const StringName& variable);
   String get_string_value(const StringName& variable);
 
-  int add_numeric_modifier(const StringName& variables, const StringName& key,
-                           float add, float mult);
+  int add_numeric_modifier(const StringName& variables, const StringName& key, float add,
+                           float mult);
 
   // environmental properties
   /*

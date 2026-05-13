@@ -42,9 +42,7 @@ class SharedPtr {
     return false;
   }
 
-  bool operator!=(const SharedPtr<T> &other) const noexcept {
-    return !(*this == other);
-  }
+  bool operator!=(const SharedPtr<T> &other) const noexcept { return !(*this == other); }
   bool operator==(nullptr_t) const noexcept { return value == nullptr; }
   bool operator!=(nullptr_t) const noexcept { return value != nullptr; }
 };

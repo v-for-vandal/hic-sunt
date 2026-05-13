@@ -20,9 +20,7 @@ class QRSCompact {
 
   QAxis q() const noexcept { return q_; }
   RAxis r() const noexcept { return r_; }
-  SAxis s() const noexcept {
-    return SAxis{0 - q().ToUnderlying() - r().ToUnderlying()};
-  }
+  SAxis s() const noexcept { return SAxis{0 - q().ToUnderlying() - r().ToUnderlying()}; }
 
   bool operator==(const QRSCompact &) const noexcept = default;
 
@@ -102,13 +100,9 @@ class Coords {
   SAxis s() const noexcept { return data_.s(); }
 
   // Not very type safe, try to not use it outside of tests
-  static Coords MakeCoords(int q, int r) noexcept {
-    return Coords(QAxis(q), RAxis(r));
-  }
+  static Coords MakeCoords(int q, int r) noexcept { return Coords(QAxis(q), RAxis(r)); }
 
-  DeltaCoords AsDelta() const noexcept {
-    return DeltaCoords(q().AsDelta(), r().AsDelta());
-  }
+  DeltaCoords AsDelta() const noexcept { return DeltaCoords(q().AsDelta(), r().AsDelta()); }
 
   /* TODO: RM
   bool IsUndefined() const noexcept;

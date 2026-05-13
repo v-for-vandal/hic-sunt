@@ -30,15 +30,15 @@ TEST(NonNullSharedPtr, Basic) {
 }
 
 TEST(NonNullSharedPtr, ConstAssignment) {
-    NonNullSharedPtr<const int> recv(10);
-    ASSERT_EQ(10, *recv);
-    NonNullSharedPtr<int> val;
-    *val = 15;
-    ASSERT_EQ(15, *val);
+  NonNullSharedPtr<const int> recv(10);
+  ASSERT_EQ(10, *recv);
+  NonNullSharedPtr<int> val;
+  *val = 15;
+  ASSERT_EQ(15, *val);
 
-    recv = val;
+  recv = val;
 
-    ASSERT_EQ(15, *recv);
+  ASSERT_EQ(15, *recv);
 }
 
 }  // namespace hs::utils

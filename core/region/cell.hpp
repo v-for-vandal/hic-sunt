@@ -13,6 +13,7 @@
 #include <core/utils/serialize.hpp>
 #include <string>
 #include <string_view>
+
 #include "core/types/scope_type.hpp"
 
 namespace hs::region {
@@ -24,8 +25,7 @@ class Cell;
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes> &source, proto::region::Cell &to);
 template <typename BaseTypes>
-Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
-                          serialize::To<Cell<BaseTypes>>);
+Cell<BaseTypes> ParseFrom(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
 
 /// One cell in region map
 template <typename BaseTypes = StdBaseTypes>
@@ -40,25 +40,19 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
   StringId GetFeature() const { return feature_; }
 
   bool HasImprovement() const { return !improvement_.type().empty(); }
-  const proto::region::Improvement &GetImprovement() const {
-    return improvement_;
-  }
+  const proto::region::Improvement &GetImprovement() const { return improvement_; }
 
   bool operator==(const Cell &) const;
 
  private:
   friend Region<BaseTypes>;
-  friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source,
-                                     proto::region::Cell &to);
-  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell &from,
-                                   serialize::To<Cell<BaseTypes>>);
+  friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source, proto::region::Cell &to);
+  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
   // Using this method is not recommended - instead use Region::SetBiome
   // because region tracks some aggregated information about cells
   void SetBiome(StringId biome) { biome_ = biome; }
   void SetFeature(StringId feature) { feature_ = feature; }
-  void SetImprovement(proto::region::Improvement improvement) {
-    improvement_ = improvement;
-  }
+  void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
   /* TODO: REMOVE?
   void SetHeight(double value) noexcept {
     height_ = value;

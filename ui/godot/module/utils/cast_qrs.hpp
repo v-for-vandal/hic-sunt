@@ -16,8 +16,7 @@ inline auto cast_qrs_size(Vector2i size) noexcept {
 }
 
 inline QRSCoords cast_qrs(Vector2i coords) noexcept {
-  return QRSCoords{QRSCoordinateSystem::QAxis{coords.x},
-                   QRSCoordinateSystem::RAxis{coords.y}};
+  return QRSCoords{QRSCoordinateSystem::QAxis{coords.x}, QRSCoordinateSystem::RAxis{coords.y}};
 }
 
 inline QRSBox cast_qrs_box(Rect2i coords) noexcept {

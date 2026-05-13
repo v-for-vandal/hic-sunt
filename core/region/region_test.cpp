@@ -2,9 +2,9 @@
 
 #include <gtest/gtest.h>
 
+#include <core/scope/scope_ut.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
-#include <core/scope/scope_ut.hpp>
 
 namespace hs::region {
 
@@ -14,8 +14,7 @@ using StdRegion = Region<StdBaseTypes>;
 using StdScope = scope::Scope<StdBaseTypes>;
 using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
-using StdVariableDefinitionsPtr =
-    hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
+using StdVariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
 
 TEST(StdRegion, Serialize) {
   StdRegion ref_region("test", 15);
@@ -32,8 +31,7 @@ TEST(StdRegion, Serialize) {
   auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{});
 
   EXPECT_EQ(ref_region, parse_region);
-  EXPECT_EQ(ref_region.GetSurfaceObject().data_size(),
-            parse_region.GetSurfaceObject().data_size());
+  EXPECT_EQ(ref_region.GetSurfaceObject().data_size(), parse_region.GetSurfaceObject().data_size());
 }
 
 TEST(StdRegion, SerializeDefaultConstructed) {
@@ -51,8 +49,7 @@ TEST(StdRegion, SerializeDefaultConstructed) {
   auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{});
 
   EXPECT_EQ(ref_region, parse_region);
-  EXPECT_EQ(ref_region.GetSurfaceObject().data_size(),
-            parse_region.GetSurfaceObject().data_size());
+  EXPECT_EQ(ref_region.GetSurfaceObject().data_size(), parse_region.GetSurfaceObject().data_size());
 }
 
 TEST(StdRegion, Equality) {
@@ -64,7 +61,7 @@ TEST(StdRegion, Equality) {
 }
 
 TEST(StdRegion, Scope) {
-    auto parent_scope = scope::test::MakeSimpleScope();
+  auto parent_scope = scope::test::MakeSimpleScope();
   StdRegion ref_region("test", 2);
   ASSERT_NE(ref_region.GetScope(), nullptr);
   ref_region.GetScope()->SetParent(parent_scope);
@@ -78,13 +75,12 @@ TEST(StdRegion, CellScopeParent) {
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
 
-  region.GetSurface().Foreach([&region](auto, auto& cell) {
-    ASSERT_EQ(cell.GetScope()->GetParent(), region.GetScope());
-  });
+  region.GetSurface().Foreach(
+      [&region](auto, auto& cell) { ASSERT_EQ(cell.GetScope()->GetParent(), region.GetScope()); });
 }
 
 TEST(StdRegion, TopNStringValues) {
- auto parent_scope = scope::test::MakeSimpleScope();
+  auto parent_scope = scope::test::MakeSimpleScope();
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
   region.GetScope()->SetParent(parent_scope);
@@ -98,8 +94,7 @@ TEST(StdRegion, TopNStringValues) {
 
   std::vector<std::string> data;
   std::vector<std::string> first{4, FIRST};
-  std::vector<std::string> second{
-      4, SECOND};  // same number, but greater in lexicographic score
+  std::vector<std::string> second{4, SECOND};  // same number, but greater in lexicographic score
   std::vector<std::string> third{2, THIRD};
   std::vector<std::string> fourth{1, FOURTH};
 
@@ -122,8 +117,7 @@ TEST(StdRegion, TopNStringValues) {
 
   auto top1 = region.GetTopNStringValues(var_name, 1);
   ASSERT_FALSE(top1.empty());
-  EXPECT_EQ(top1[0],
-            make_pair(4, SECOND));  // "second" is lexicographicaly greater
+  EXPECT_EQ(top1[0], make_pair(4, SECOND));  // "second" is lexicographicaly greater
 
   auto top2 = region.GetTopNStringValues(var_name, 2);
   ASSERT_FALSE(top2.empty());

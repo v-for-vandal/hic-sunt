@@ -11,16 +11,13 @@ constexpr fill_tag_t fill_tag;
 template <typename T, typename E>
 class EnumArray : public std::array<T, static_cast<size_t>(E::kSize)> {
   // TODO: use std::to_underlying as soon as it is ready
-  static_assert(static_cast<int64_t>(E::kSize) > 0,
-                "enum must have at least one element");
+  static_assert(static_cast<int64_t>(E::kSize) > 0, "enum must have at least one element");
 
  public:
   static constexpr int kSize{E::kSize};
   using Base = std::array<T, static_cast<size_t>(E::kSize)>;
   using Base::Base;
-  EnumArray(fill_tag_t, auto value) {
-    std::fill(Base::begin(), Base::end(), value);
-  }
+  EnumArray(fill_tag_t, auto value) { std::fill(Base::begin(), Base::end(), value); }
 
   using Base::operator[];
   constexpr auto& operator[](E elem) noexcept {

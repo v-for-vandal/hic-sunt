@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <memory>
 #include <vector>
+
 #include "effect_instance.hpp"
 
 namespace hs::session {
@@ -23,8 +24,7 @@ class EffectExecutionStatistics;
 
 template <typename BaseTypes = StdBaseTypes,
           typename WorldPtr = std::shared_ptr<terra::World<BaseTypes>>,
-          typename RuleSetPtr =
-              std::shared_ptr<ruleset::RuleSet<BaseTypes>>>
+          typename RuleSetPtr = std::shared_ptr<ruleset::RuleSet<BaseTypes>>>
 class Session {
  public:
   using Scope = scope::Scope<BaseTypes>;
@@ -65,6 +65,7 @@ class Session {
 
  private:
   void Prepare();
+
  private:
   friend class EffectExecutor<BaseTypes>;
 
@@ -77,8 +78,8 @@ class Session {
   EffectExecutionStatistics<BaseTypes> last_effect_execution_statistics_;
   EffectExecutionStatistics<BaseTypes> total_effect_execution_statistics_;
 
-  // static StringId aren't possible because godot::StringName requires godot runtime
-  // being active.
+  // static StringId aren't possible because godot::StringName requires godot
+  // runtime being active.
   StringId kCoreTurn{"core.turn"};
 };
 

@@ -1,6 +1,3 @@
 #pragma once
 
-namespace hs::session::test {
-
-
-}
+namespace hs::session::test {}

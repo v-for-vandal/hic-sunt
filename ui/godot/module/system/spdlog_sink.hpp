@@ -18,8 +18,7 @@ class godot_sink : public spdlog::sinks::base_sink<Mutex> {
 using godot_sink_mt = godot_sink<std::mutex>;
 
 template <typename Factory = spdlog::synchronous_factory>
-inline std::shared_ptr<spdlog::logger> godot_logger_mt(
-    const std::string &logger_name) {
+inline std::shared_ptr<spdlog::logger> godot_logger_mt(const std::string &logger_name) {
   auto result = Factory::template create<godot_sink_mt>(logger_name);
   // set pattern to prevent colors from appearing
   result->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l]  %v");

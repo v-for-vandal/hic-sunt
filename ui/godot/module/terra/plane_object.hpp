@@ -43,8 +43,8 @@ class PlaneObject : public RefCounted {
   bool contains(Vector2i coords) const;
   static Dictionary create_error(const char* error);
   static Dictionary create_success();
-  float get_distance_between_cells(Vector2i region1, Vector2i cell1,
-                                   Vector2i region2, Vector2i cell2);
+  float get_distance_between_cells(Vector2i region1, Vector2i cell1, Vector2i region2,
+                                   Vector2i cell2);
   // String get_cell_terrain(Vector2i coords) const;
 };
 

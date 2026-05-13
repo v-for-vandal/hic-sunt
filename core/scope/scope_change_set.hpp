@@ -1,11 +1,10 @@
 #pragma once
 
-#include <vector>
-
 #include <core/scope/scope.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/std_base_types.hpp>
 #include <expected>
+#include <vector>
 
 namespace hs::scope {
 
@@ -19,17 +18,15 @@ class ScopeChangeSet {
 
   explicit ScopeChangeSet(const ScopePtr& target_scope) : target_scope_(target_scope) {}
 
-  std::expected<void, ErrorCode> SetNumericModifier(
-      const StringId& variable, const StringId& key, NumericValue add,
-      NumericValue mult);
+  std::expected<void, ErrorCode> SetNumericModifier(const StringId& variable, const StringId& key,
+                                                    NumericValue add, NumericValue mult);
 
-  std::expected<void, ErrorCode> ChangeNumericModifier(
-      const StringId& variable, const StringId& key, NumericValue add,
-      NumericValue mult);
+  std::expected<void, ErrorCode> ChangeNumericModifier(const StringId& variable,
+                                                       const StringId& key, NumericValue add,
+                                                       NumericValue mult);
 
-  std::expected<void, ErrorCode> SetStringModifier(
-      const StringId& variable, const StringId& key, const StringId& value,
-      NumericValue level);
+  std::expected<void, ErrorCode> SetStringModifier(const StringId& variable, const StringId& key,
+                                                   const StringId& value, NumericValue level);
 
   std::expected<void, ErrorCode> Apply(size_t modification_time) const;
 
@@ -54,10 +51,10 @@ class ScopeChangeSet {
     NumericValue level{0};
   };
 
-  std::expected<void, ErrorCode> ValidateNumericVariable(
-      const StringId& variable, const StringId& key) const;
-  std::expected<void, ErrorCode> ValidateStringVariable(
-      const StringId& variable, const StringId& key) const;
+  std::expected<void, ErrorCode> ValidateNumericVariable(const StringId& variable,
+                                                         const StringId& key) const;
+  std::expected<void, ErrorCode> ValidateStringVariable(const StringId& variable,
+                                                        const StringId& key) const;
 
   ScopePtr target_scope_;
   std::vector<Operation> operations_;

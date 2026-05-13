@@ -28,8 +28,7 @@ class SurfaceRectView {
   SurfaceRectView &operator=(SurfaceRectView &&) = default;
 
   Cell &GetCell(Coords coords) {
-    return const_cast<Cell &>(
-        const_cast<const SurfaceRectView &>(*this).GetCell(coords));
+    return const_cast<Cell &>(const_cast<const SurfaceRectView &>(*this).GetCell(coords));
   }
   Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
     return GetCell(Coords{q, r});
@@ -39,17 +38,12 @@ class SurfaceRectView {
     return target_((coords.q() - q_start()).ToUnderlying(),
                    (coords.r() - r_start()).ToUnderlying());
   }
-  const Cell &GetCell(typename Coords::QAxis q,
-                      typename Coords::RAxis r) const {
+  const Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
     return GetCell(Coords{q, r});
   }
 
-  auto q_size() const {
-    return typename CoordinateSystem::QDelta{target_.extent(0)};
-  }
-  auto r_size() const {
-    return typename CoordinateSystem::RDelta{target_.extent(1)};
-  }
+  auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
+  auto r_size() const { return typename CoordinateSystem::RDelta{target_.extent(1)}; }
 
   auto q_end() const { return q_start() + q_size(); }
   auto r_end() const { return r_start() + r_size(); }
@@ -73,9 +67,7 @@ class SurfaceRectView {
   }
 
   bool operator==(const SurfaceRectView &other) const;
-  bool operator!=(const SurfaceRectView &other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const SurfaceRectView &other) const { return !(*this == other); }
 
   /*
   auto begin() { return target_.begin(); }

@@ -8,9 +8,7 @@ class MinMax {
   T GetMin() const noexcept { return min_; }
   T GetMax() const noexcept { return max_; }
 
-  std::pair<T, T> GetRange() const noexcept {
-    return std::make_pair(min_, max_);
-  }
+  std::pair<T, T> GetRange() const noexcept { return std::make_pair(min_, max_); }
 
   void Account(T value) {
     min_ = std::min(min_, value);

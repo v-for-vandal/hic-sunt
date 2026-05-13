@@ -12,19 +12,13 @@ class StdBaseTypes {
   using String = std::string;
   using NumericValue = double;
 
-  template<typename T>
+  template <typename T>
   using SharedPtr = std::shared_ptr<T>;
 
-  static StringId StringIdFromStdString(const std::string &data) noexcept {
-    return data;
-  }
-  static StringId StringIdFromStdString(std::string &&data) noexcept {
-    return std::move(data);
-  }
+  static StringId StringIdFromStdString(const std::string &data) noexcept { return data; }
+  static StringId StringIdFromStdString(std::string &&data) noexcept { return std::move(data); }
 
-  static bool IsNullToken(const auto &string) noexcept {
-    return string.size() == 0;
-  }
+  static bool IsNullToken(const auto &string) noexcept { return string.size() == 0; }
 
   template <typename T>
   static auto ToProtoString(T &&input) noexcept {
@@ -40,8 +34,7 @@ class StdBaseTypes {
   */
 };
 
-inline void SerializeTo(const std::string &source,
-                        std::string &target) noexcept {
+inline void SerializeTo(const std::string &source, std::string &target) noexcept {
   target = source;
 }
 

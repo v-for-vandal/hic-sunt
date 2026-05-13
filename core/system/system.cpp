@@ -2,8 +2,8 @@
 
 #include <core/utils/serialize.hpp>
 #include <fstream>
-#include <vector>
 #include <sol/function.hpp>
+#include <vector>
 
 namespace hs::system {
 

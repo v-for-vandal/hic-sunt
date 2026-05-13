@@ -1,10 +1,10 @@
-#include "ruleset.hpp"
-
 #include <gtest/gtest.h>
 
 #include <core/utils/error_message.hpp>
 #include <cstdlib>
 #include <fstream>
+
+#include "ruleset.hpp"
 
 namespace hs::ruleset {
 
@@ -30,14 +30,11 @@ void WriteTextFile(const std::filesystem::path& path, const std::string& content
 
 TEST(StdRuleSet, LoadRecursivelyMergesFilesFromDirectories) {
   const auto root = MakeTempDir("recursive_merge");
-  WriteTextFile(root / "biomes" / "base.txt",
-                "biomes { id: \"biome.one\" }\n");
+  WriteTextFile(root / "biomes" / "base.txt", "biomes { id: \"biome.one\" }\n");
   WriteTextFile(root / "biomes" / "nested" / "more.txt",
                 "biome_features { id: \"feature.one\" }\n");
-  WriteTextFile(root / "resources" / "a.txt",
-                "resources { id: \"resource.one\" }\n");
-  WriteTextFile(root / "effects" / "e.txt",
-                "effects { id: \"effect.one\" }\n");
+  WriteTextFile(root / "resources" / "a.txt", "resources { id: \"resource.one\" }\n");
+  WriteTextFile(root / "effects" / "e.txt", "effects { id: \"effect.one\" }\n");
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -98,8 +95,7 @@ TEST(StdRuleSet, LoadIgnoresNonDirectoryPaths) {
 
 TEST(StdRuleSet, LoadIgnoresUnreadableOrInvalidFiles) {
   const auto root = MakeTempDir("ignore_invalid_files");
-  WriteTextFile(root / "variables" / "good.txt",
-                "variables { id: \"var.one\" string {} }\n");
+  WriteTextFile(root / "variables" / "good.txt", "variables { id: \"var.one\" string {} }\n");
   WriteTextFile(root / "variables" / "bad.txt", "this is not protobuf text\n");
 
   StdRuleSet ruleset;

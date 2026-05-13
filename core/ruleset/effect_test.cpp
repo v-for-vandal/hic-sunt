@@ -1,7 +1,6 @@
 #include "effect.hpp"
 
 #include <gtest/gtest.h>
-
 #include <ruleset/effect.pb.h>
 
 namespace hs::ruleset {
@@ -22,17 +21,16 @@ proto::ruleset::effect::Effect MakeEffect(std::string id, std::string possible,
 }  // namespace
 
 TEST(StdEffectDefinition, StoresIdAndProcessedCode) {
-  StdEffectDefinition effect(MakeEffect(
-      "sample.effect",
-      "return VAR(possible.dep)",
-      "return VAR(foo.bar) .. ':' .. VAR(\"baz_qux\")"));
+  StdEffectDefinition effect(MakeEffect("sample.effect", "return VAR(possible.dep)",
+                                        "return VAR(foo.bar) .. ':' .. VAR(\"baz_qux\")"));
 
   EXPECT_EQ(effect.GetId(), "sample.effect");
   ASSERT_TRUE(effect.GePossibleCode().has_value());
   EXPECT_EQ(effect.GePossibleCode()->code,
             "function __hic_sunt_possible(target)\nreturn __var_0\nend");
   EXPECT_EQ(effect.GetEffectCode().code,
-            "function __hic_sunt_effect(target)\nreturn __var_1 .. ':' .. __var_2\nend");
+            "function __hic_sunt_effect(target)\nreturn __var_1 .. ':' .. "
+            "__var_2\nend");
 
   ASSERT_EQ(effect.GetDependencies().size(), 3u);
   EXPECT_EQ(effect.GetDependencies()[0], "possible.dep");
@@ -56,82 +54,70 @@ TEST(StdEffectDefinition, ReportsNotBrokenForValidLua) {
 }
 
 TEST(StdEffectDefinition, MarksBrokenAndCollectsErrorsForInvalidLua) {
-  StdEffectDefinition effect(MakeEffect(
-      "sample.effect",
-      "this is not valid lua",
-      "also not valid lua"));
+  StdEffectDefinition effect(
+      MakeEffect("sample.effect", "this is not valid lua", "also not valid lua"));
 
   EXPECT_TRUE(effect.IsBroken());
   ASSERT_EQ(effect.GetLuaErrors().size(), 2u);
 }
 
 TEST(StdEffectDefinition, IgnoresVarInsideDoubleQuotedStrings) {
-  StdEffectDefinition effect(MakeEffect(
-      "sample.effect",
-      "return true",
-      "return \"VAR(fake.value)\", VAR(real_value)"));
+  StdEffectDefinition effect(
+      MakeEffect("sample.effect", "return true", "return \"VAR(fake.value)\", VAR(real_value)"));
 
   EXPECT_EQ(effect.GetEffectCode().code,
-            "function __hic_sunt_effect(target)\nreturn \"VAR(fake.value)\", __var_0\nend");
+            "function __hic_sunt_effect(target)\nreturn \"VAR(fake.value)\", "
+            "__var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
   EXPECT_EQ(effect.GetDependencies()[0], "real_value");
 }
 
 TEST(StdEffectDefinition, IgnoresVarInsideSingleQuotedStrings) {
-  StdEffectDefinition effect(MakeEffect(
-      "sample.effect",
-      "return true",
-      "return 'VAR(fake.value)', VAR(real_value)"));
+  StdEffectDefinition effect(
+      MakeEffect("sample.effect", "return true", "return 'VAR(fake.value)', VAR(real_value)"));
 
   EXPECT_EQ(effect.GetEffectCode().code,
-            "function __hic_sunt_effect(target)\nreturn 'VAR(fake.value)', __var_0\nend");
+            "function __hic_sunt_effect(target)\nreturn 'VAR(fake.value)', "
+            "__var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
   EXPECT_EQ(effect.GetDependencies()[0], "real_value");
 }
 
 TEST(StdEffectDefinition, IgnoresVarInsideLineComments) {
-  StdEffectDefinition effect(MakeEffect(
-      "sample.effect",
-      "return true",
-      "-- VAR(fake.value)\nreturn VAR(real_value)"));
+  StdEffectDefinition effect(
+      MakeEffect("sample.effect", "return true", "-- VAR(fake.value)\nreturn VAR(real_value)"));
 
   EXPECT_EQ(effect.GetEffectCode().code,
-            "function __hic_sunt_effect(target)\n-- VAR(fake.value)\nreturn __var_0\nend");
+            "function __hic_sunt_effect(target)\n-- VAR(fake.value)\nreturn "
+            "__var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
   EXPECT_EQ(effect.GetDependencies()[0], "real_value");
 }
 
 TEST(StdEffectDefinition, IgnoresVarInsideBlockComments) {
-  StdEffectDefinition effect(MakeEffect(
-      "sample.effect",
-      "return true",
-      "--[[ VAR(fake.value) ]]\nreturn VAR(real_value)"));
+  StdEffectDefinition effect(MakeEffect("sample.effect", "return true",
+                                        "--[[ VAR(fake.value) ]]\nreturn VAR(real_value)"));
 
   EXPECT_EQ(effect.GetEffectCode().code,
-            "function __hic_sunt_effect(target)\n--[[ VAR(fake.value) ]]\nreturn __var_0\nend");
+            "function __hic_sunt_effect(target)\n--[[ VAR(fake.value) "
+            "]]\nreturn __var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
   EXPECT_EQ(effect.GetDependencies()[0], "real_value");
 }
 
 TEST(StdEffectDefinition, RejectsInvalidIdentifierCharacters) {
-  EXPECT_TRUE(
-      StdEffectDefinition(MakeEffect("sample.effect", "return true",
-                                     "return VAR(\"a+z\")")).IsBroken()
-      );
+  EXPECT_TRUE(StdEffectDefinition(MakeEffect("sample.effect", "return true", "return VAR(\"a+z\")"))
+                  .IsBroken());
 }
 
 TEST(StdEffectDefinition, RejectsPartiallyQuotedIdentifiers) {
-  EXPECT_TRUE(
-      StdEffectDefinition(MakeEffect("sample.effect", "return true",
-                                     "return VAR(\"ab\"c)")).IsBroken()
-      );
+  EXPECT_TRUE(StdEffectDefinition(MakeEffect("sample.effect", "return true", "return VAR(\"ab\"c)"))
+                  .IsBroken());
 }
 
 TEST(StdEffectDefinition, RejectsUnclosedVarCall) {
   EXPECT_TRUE(
-      StdEffectDefinition(MakeEffect("sample.effect", "return true",
-                                     "return VAR(abc")).IsBroken()
-      );
+      StdEffectDefinition(MakeEffect("sample.effect", "return true", "return VAR(abc")).IsBroken());
 }
 
 }  // namespace hs::ruleset

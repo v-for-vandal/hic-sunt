@@ -9,15 +9,12 @@ namespace hs::godot {
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("save", "filename"), &WorldObject::save);
   ClassDB::bind_method(D_METHOD("load", "filename"), &WorldObject::load);
-  ClassDB::bind_method(D_METHOD("create_plane", "plane_id", "box",
-                                "region_radius", "region_external_radius"),
-                       &WorldObject::create_plane);
-  ClassDB::bind_method(D_METHOD("get_plane", "plane_id"),
-                       &WorldObject::get_plane);
-  ClassDB::bind_method(D_METHOD("get_region_by_id", "region_id"),
-                       &WorldObject::get_region_by_id);
-  ClassDB::bind_static_method("WorldObject", D_METHOD("create_world"),
-                              &WorldObject::create_world);
+  ClassDB::bind_method(
+      D_METHOD("create_plane", "plane_id", "box", "region_radius", "region_external_radius"),
+      &WorldObject::create_plane);
+  ClassDB::bind_method(D_METHOD("get_plane", "plane_id"), &WorldObject::get_plane);
+  ClassDB::bind_method(D_METHOD("get_region_by_id", "region_id"), &WorldObject::get_region_by_id);
+  ClassDB::bind_static_method("WorldObject", D_METHOD("create_world"), &WorldObject::create_world);
 }
 
 Error WorldObject::save(String filename) {
@@ -28,8 +25,7 @@ Error WorldObject::save(String filename) {
     std::fstream output(filename.utf8().get_data(),
                         std::ios::out | std::ios::trunc | std::ios::binary);
     if (!proto_world.SerializeToOstream(&output)) {
-      spdlog::error("Can't write filename {} as proto object",
-                    filename.utf8().get_data());
+      spdlog::error("Can't write filename {} as proto object", filename.utf8().get_data());
       return ERR_FILE_CANT_WRITE;
     }
   } catch (const std::exception& e) {
@@ -42,11 +38,9 @@ Error WorldObject::load(String filename) {
   hs::proto::terra::World proto_world;
 
   try {
-    std::fstream input(filename.utf8().get_data(),
-                       std::ios::in | std::ios::binary);
+    std::fstream input(filename.utf8().get_data(), std::ios::in | std::ios::binary);
     if (!proto_world.ParseFromIstream(&input)) {
-      spdlog::error("Can't read filename {} as proto object",
-                    filename.utf8().get_data());
+      spdlog::error("Can't read filename {} as proto object", filename.utf8().get_data());
       return ERR_FILE_CANT_READ;
     }
   } catch (const std::exception& e) {
@@ -104,11 +98,9 @@ Ref<RegionObject> WorldObject::get_region_by_id(StringName region_id) {
   return result;
 }
 
-Ref<PlaneObject> WorldObject::create_plane(StringName name, Rect2i box,
-                                           int region_radius,
+Ref<PlaneObject> WorldObject::create_plane(StringName name, Rect2i box, int region_radius,
                                            int region_external_radius) {
-  auto plane_ptr = data_.AddPlane(name, cast_qrs_box(box), region_radius,
-                                  region_external_radius);
+  auto plane_ptr = data_.AddPlane(name, cast_qrs_box(box), region_radius, region_external_radius);
   Ref<PlaneObject> result(memnew(PlaneObject(plane_ptr)));
   ERR_FAIL_NULL_V_MSG(result.ptr(), result, "Failed to create new plane");
   return result;

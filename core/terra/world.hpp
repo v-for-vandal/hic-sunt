@@ -24,8 +24,7 @@ class World;
 template <typename BaseTypes>
 void SerializeTo(const World<BaseTypes> &source, proto::terra::World &target);
 template <typename BaseTypes>
-World<BaseTypes> ParseFrom(const proto::terra::World &world,
-                           serialize::To<World<BaseTypes>>);
+World<BaseTypes> ParseFrom(const proto::terra::World &world, serialize::To<World<BaseTypes>>);
 
 // World is a collection of planes
 template <typename BaseTypes = StdBaseTypes>
@@ -49,9 +48,8 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   World &operator=(World &&) = default;
 
   PlanePtr GetPlane(const StringId &id) const;
-  PlanePtr AddPlane(const StringId &id, QRSBox box, int region_radius,
-                    int region_external_radius);
-  auto& GetPlanes() noexcept { return planes_; }
+  PlanePtr AddPlane(const StringId &id, QRSBox box, int region_radius, int region_external_radius);
+  auto &GetPlanes() noexcept { return planes_; }
 
   RegionPtr GetRegionById(const StringId &region_id) const noexcept;
   bool HasRegion(const StringId &region_id) const noexcept;
@@ -60,10 +58,8 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   bool operator!=(const World &other) const { return !(*this == other); }
 
  private:
-  friend void SerializeTo<BaseTypes>(const World &source,
-                                     proto::terra::World &target);
-  friend World ParseFrom<BaseTypes>(const proto::terra::World &world,
-                                    serialize::To<World>);
+  friend void SerializeTo<BaseTypes>(const World &source, proto::terra::World &target);
+  friend World ParseFrom<BaseTypes>(const proto::terra::World &world, serialize::To<World>);
   void InitNonpersistent();
 
  private:

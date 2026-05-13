@@ -22,8 +22,7 @@ template <typename BaseTypes>
 void SerializeTo(const Region<BaseTypes> &source, proto::region::Region &to);
 
 template <typename BaseTypes>
-Region<BaseTypes> ParseFrom(const proto::region::Region &from,
-                            serialize::To<Region<BaseTypes>>);
+Region<BaseTypes> ParseFrom(const proto::region::Region &from, serialize::To<Region<BaseTypes>>);
 
 template <typename BaseTypes = StdBaseTypes>
 class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_REGION> {
@@ -32,11 +31,9 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   using QRSCoordinateSystem = geometry::QRSCoordinateSystem;
   using QRSCoords = geometry::Coords<geometry::QRSCoordinateSystem>;
   using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
-  using QRSSize =
-      typename geometry::Coords<geometry::QRSCoordinateSystem>::DeltaCoords;
+  using QRSSize = typename geometry::Coords<geometry::QRSCoordinateSystem>::DeltaCoords;
   using Surface = geometry::Surface<Cell<BaseTypes>, QRSCoordinateSystem>;
-  using SurfaceView =
-      geometry::SurfaceView<Cell<BaseTypes>, QRSCoordinateSystem>;
+  using SurfaceView = geometry::SurfaceView<Cell<BaseTypes>, QRSCoordinateSystem>;
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
   using NumericValue = typename BaseTypes::NumericValue;
@@ -60,9 +57,7 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   // void SetId(const StringId& id) { id_ = id; }
 
   bool SetBiome(QRSCoords coords, const StringId &biome);
-  std::vector<std::pair<StringId, int>> GetTopKBiomes(int k) const {
-    return biome_count_.TopK(k);
-  }
+  std::vector<std::pair<StringId, int>> GetTopKBiomes(int k) const { return biome_count_.TopK(k); }
 
   bool SetFeature(QRSCoords coords, const StringId &biome);
 
@@ -76,14 +71,11 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   const auto &GetImprovedCells() const { return cells_with_improvements_; }
 
   // TODO: Perhaphs this method should not be inside region?
-  PnlStatement BuildPnlStatement(
-      const ruleset::RuleSet<BaseTypes> &ruleset) const;
+  PnlStatement BuildPnlStatement(const ruleset::RuleSet<BaseTypes> &ruleset) const;
 
   // Auxilary methods for aggregation over cells
-  std::vector<std::pair<size_t, StringId>> GetTopNStringValues(
-      StringId variable, int N) const;
-  utils::NumericAggregationInfo<NumericValue> GetNumericValueAggregates(
-      StringId variable) const;
+  std::vector<std::pair<size_t, StringId>> GetTopNStringValues(StringId variable, int N) const;
+  utils::NumericAggregationInfo<NumericValue> GetNumericValueAggregates(StringId variable) const;
 
   /* TODO: REMOVE
    * replaced with Scope
@@ -133,10 +125,8 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   void InitNonpersistent();
 
  private:
-  friend void SerializeTo<BaseTypes>(const Region &source,
-                                     proto::region::Region &to);
-  friend Region ParseFrom<BaseTypes>(const proto::region::Region &from,
-                                     serialize::To<Region>);
+  friend void SerializeTo<BaseTypes>(const Region &source, proto::region::Region &to);
+  friend Region ParseFrom<BaseTypes>(const proto::region::Region &from, serialize::To<Region>);
 };
 
 }  // namespace hs::region

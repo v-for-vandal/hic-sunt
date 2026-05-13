@@ -1,7 +1,6 @@
 #include "effect_instance.hpp"
 
 #include <gtest/gtest.h>
-
 #include <ruleset/effect.pb.h>
 
 #include <core/ruleset/ruleset_ut.hpp>
@@ -16,8 +15,8 @@ using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 
 TEST(StdEffectInstance, RejectsBrokenDefinition) {
-  auto definition = hs::ruleset::test::MakeEffectDefinition(
-      "effect.id", "this is not valid lua", "return");
+  auto definition =
+      hs::ruleset::test::MakeEffectDefinition("effect.id", "this is not valid lua", "return");
 
   EXPECT_THROW((StdEffectInstance(definition)), std::system_error);
 }
@@ -79,8 +78,7 @@ TEST(StdEffectInstance, CheckPossibleRejectsNonBooleanResult) {
 
 TEST(StdEffectInstance, ExecuteReturnsChangeSetWithAppliedChanges) {
   auto definition = hs::ruleset::test::MakeEffectDefinition(
-      "effect.id",
-      "return true",
+      "effect.id", "return true",
       "target:set_numeric_modifier('numeric_var', VAR(numeric_var), 0.5) "
       "target:set_string_modifier('string_var', VAR(string_var), 3.0)");
 
@@ -103,9 +101,7 @@ TEST(StdEffectInstance, ExecuteReturnsChangeSetWithAppliedChanges) {
 
 TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
   auto definition = hs::ruleset::test::MakeEffectDefinition(
-      "effect.id",
-      "return true",
-      "target:set_numeric_modifier('numeric_var', 2.0, 0.0)");
+      "effect.id", "return true", "target:set_numeric_modifier('numeric_var', 2.0, 0.0)");
 
   StdEffectInstance instance(definition);
   auto scope = hs::scope::test::MakeSeededScope();
@@ -124,33 +120,29 @@ TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
   };
 
   std::vector<NumericExplanation> explanations;
-  scope->ExplainNumericVariable(
-      "numeric_var",
-      [&explanations](const auto& scope_id, const auto& variable,
-                      const auto& modifier, auto add, auto mult) {
-        explanations.push_back(NumericExplanation{
-            .scope_id = scope_id,
-            .variable = variable,
-            .modifier = modifier,
-            .add = add,
-            .mult = mult,
-        });
-      });
+  scope->ExplainNumericVariable("numeric_var",
+                                [&explanations](const auto& scope_id, const auto& variable,
+                                                const auto& modifier, auto add, auto mult) {
+                                  explanations.push_back(NumericExplanation{
+                                      .scope_id = scope_id,
+                                      .variable = variable,
+                                      .modifier = modifier,
+                                      .add = add,
+                                      .mult = mult,
+                                  });
+                                });
 
   ASSERT_EQ(explanations.size(), 2u);
-  const auto fit = std::ranges::find_if(explanations, [](const auto& item) {
-    return item.modifier == "effect.id";
-  });
+  const auto fit = std::ranges::find_if(
+      explanations, [](const auto& item) { return item.modifier == "effect.id"; });
   ASSERT_NE(fit, explanations.end());
   EXPECT_EQ(fit->add, 2.0);
   EXPECT_EQ(fit->mult, 0.0);
 }
 
 TEST(StdEffectInstance, ExecuteReturnsRuntimeErrorForLuaFailure) {
-  auto definition = hs::ruleset::test::MakeEffectDefinition(
-      "effect.id",
-      "return true",
-      "error('boom')");
+  auto definition =
+      hs::ruleset::test::MakeEffectDefinition("effect.id", "return true", "error('boom')");
 
   StdEffectInstance instance(definition);
   auto scope = hs::scope::test::MakeSeededScope();
@@ -161,10 +153,8 @@ TEST(StdEffectInstance, ExecuteReturnsRuntimeErrorForLuaFailure) {
 }
 
 TEST(StdEffectInstance, ExecuteReturnsOperationLimitError) {
-  auto definition = hs::ruleset::test::MakeEffectDefinition(
-      "effect.id",
-      "return true",
-      "while true do end");
+  auto definition =
+      hs::ruleset::test::MakeEffectDefinition("effect.id", "return true", "while true do end");
 
   StdEffectInstance instance(definition);
   auto scope = hs::scope::test::MakeSeededScope();

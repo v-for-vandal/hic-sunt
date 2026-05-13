@@ -21,8 +21,7 @@ class RuleSetBase {
  public:
   using ErrorsCollection = utils::ErrorsCollection;
   void Clear();
-  bool Load(const std::vector<std::filesystem::path>& paths,
-            ErrorsCollection& errors);
+  bool Load(const std::vector<std::filesystem::path>& paths, ErrorsCollection& errors);
 
   auto& GetRegionImprovements() const { return improvements_; }
   auto& GetBiomes() const { return biomes_; }

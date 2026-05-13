@@ -1,10 +1,10 @@
 #include "effect.hpp"
+
 #include <expected>
 
 namespace hs::ruleset {
 
-
-# if 0
+#if 0
     std::expected<void, ErrorCode> ApplyEffect(Effect& effect, World& world, RuleSetBase& ruleset);
 
     std::expected<void, ErrorCode> ApplyWorldEffect(Session& session, size_t turn, Effect& effect, World& world, RuleSetBase& ruleset) {
@@ -35,4 +35,4 @@ namespace hs::ruleset {
     }
 #endif
 
-}
+}  // namespace hs::ruleset

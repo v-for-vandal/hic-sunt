@@ -2,8 +2,8 @@
 
 #include <gtest/gtest.h>
 
-#include <core/scope/scope_ut.hpp>
 #include <core/ruleset/variable_definition.hpp>
+#include <core/scope/scope_ut.hpp>
 #include <core/types/std_base_types.hpp>
 
 namespace hs::scope {
@@ -12,8 +12,7 @@ using StdScope = Scope<StdBaseTypes>;
 using StdScopePtr = ScopePtr<StdBaseTypes>;
 using StdScopeChangeSet = ScopeChangeSet<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
-using StdVariableDefinitionsPtr =
-    hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
+using StdVariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
 
 TEST(StdScopeChangeSet, EmptyAndClear) {
   auto scope = test::MakeSimpleScope();

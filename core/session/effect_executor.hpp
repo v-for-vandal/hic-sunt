@@ -30,8 +30,7 @@ class EffectExecutionStatistics {
     }
   };
 
-  void RecordExecution(const StringId& effect_id, size_t duration_ns,
-                       size_t change_count);
+  void RecordExecution(const StringId& effect_id, size_t duration_ns, size_t change_count);
   void RecordFailure(const StringId& effect_id);
   void RecordPartialFailure(const StringId& effect_id);
   void MergeFrom(const EffectExecutionStatistics& other);
@@ -52,8 +51,7 @@ class EffectExecutor {
   EffectExecutor() = default;
 
   template <typename WorldPtr, typename RuleSetPtr>
-  Statistics Execute(Session<BaseTypes, WorldPtr, RuleSetPtr>& session,
-                     size_t current_time);
+  Statistics Execute(Session<BaseTypes, WorldPtr, RuleSetPtr>& session, size_t current_time);
 };
 
 }  // namespace hs::session

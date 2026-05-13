@@ -25,16 +25,14 @@ class ScopedObject {
   ScopePtr scope_;
 };
 
-// This is a helper class for cases when you known scope type in advance, at compile
-// time. Those are rare, but it makes code easier to read.
+// This is a helper class for cases when you known scope type in advance, at
+// compile time. Those are rare, but it makes code easier to read.
 template <typename BaseTypes, types::ScopeType scope_type>
 struct TypedScopedObject : public ScopedObject<BaseTypes> {
-    using StringId = typename BaseTypes::StringId;
-    TypedScopedObject():
-        TypedScopedObject(StringId{}) {}
+  using StringId = typename BaseTypes::StringId;
+  TypedScopedObject() : TypedScopedObject(StringId{}) {}
 
-    TypedScopedObject(StringId id):
-        ScopedObject<BaseTypes>(id, scope_type) {}
+  TypedScopedObject(StringId id) : ScopedObject<BaseTypes>(id, scope_type) {}
 };
 
 }  // namespace hs::scope

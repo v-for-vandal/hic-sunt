@@ -49,9 +49,9 @@ inline constexpr std::string_view ToString(Direction direction) {
 
 inline constexpr auto GetAllDirections() noexcept {
   // TODO: ranges!
-  constexpr const std::array directions_{
-      Direction::kQNegative, Direction::kQPositive, Direction::kRNegative,
-      Direction::kRPositive, Direction::kSNegative, Direction::kSPositive};
+  constexpr const std::array directions_{Direction::kQNegative, Direction::kQPositive,
+                                         Direction::kRNegative, Direction::kRPositive,
+                                         Direction::kSNegative, Direction::kSPositive};
   return directions_;
 }
 
@@ -77,8 +77,7 @@ inline constexpr Direction GetReverseDirection(Direction input) noexcept {
   return Direction::kSize;
 }
 
-inline constexpr std::array<Direction, 2> GetAxisDirections(
-    Axis axis) noexcept {
+inline constexpr std::array<Direction, 2> GetAxisDirections(Axis axis) noexcept {
   switch (axis) {
     case Axis::kQ:
       return std::array{Direction::kQNegative, Direction::kQPositive};
@@ -153,8 +152,7 @@ inline bool IsNegativeDirection(Direction direction) noexcept {
 
 template <>
 struct fmt::formatter<::hs::geometry::Direction> {
-  constexpr auto parse(format_parse_context &ctx) const
-      -> decltype(ctx.begin()) {
+  constexpr auto parse(format_parse_context &ctx) const -> decltype(ctx.begin()) {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
     if (it != end && *it != '}') {

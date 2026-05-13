@@ -18,24 +18,20 @@ class RuleSet : public RuleSetBase {
   using StringId = typename BaseTypes::StringId;
   void Clear();
   // Adds data to ruleset
-  bool Load(const std::vector<std::filesystem::path>& paths,
-            ErrorsCollection& errors);
+  bool Load(const std::vector<std::filesystem::path> &paths, ErrorsCollection &errors);
 
   const proto::ruleset::RegionImprovement *FindRegionImprovementByType(
       const StringId &improvement_type_id) const;
 
   const proto::ruleset::Job *FindJobByType(const StringId &job_type_id) const;
 
-  const proto::ruleset::Project *FindProjectByType(
-      const StringId &project_type_id) const;
+  const proto::ruleset::Project *FindProjectByType(const StringId &project_type_id) const;
 
   const VariableDefinitionsPtr<BaseTypes> &GetVariableDefinitions() const {
     return parsed_variable_definitions_;
   }
 
-  const auto& GetAllEffectDefinitions() const noexcept {
-    return effect_definitions_;
-  }
+  const auto &GetAllEffectDefinitions() const noexcept { return effect_definitions_; }
 
  private:
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
