@@ -34,6 +34,12 @@ class RuleSet : public RuleSetBase {
   const auto &GetAllEffectDefinitions() const noexcept { return effect_definitions_; }
 
  private:
+  bool LoadImprovements([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadJobs([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadProjects([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadEffects(ErrorsCollection &errors);
+  bool LoadVariableDefinitions(ErrorsCollection &errors);
+
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;

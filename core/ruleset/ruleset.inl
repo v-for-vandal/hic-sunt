@@ -4,6 +4,20 @@
 #include "spdlog/spdlog.h"
 namespace hs::ruleset {
 
+namespace {
+
+inline void AddWarning(utils::ErrorsCollection &errors, const std::string &message) {
+  spdlog::warn(message);
+  errors.AddError({message});
+}
+
+inline void AddError(utils::ErrorsCollection &errors, const std::string &message) {
+  spdlog::error(message);
+  errors.AddError({message});
+}
+
+}  // namespace
+
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
                               ErrorsCollection &errors) {
@@ -12,36 +26,71 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
     return false;
   }
 
-  // Building hashes
+  bool success = true;
+  success &= LoadImprovements(errors);
+  success &= LoadJobs(errors);
+  success &= LoadProjects(errors);
+  success &= LoadEffects(errors);
+  success &= LoadVariableDefinitions(errors);
+
+  return success;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection &errors) {
+  improvements_by_type_.clear();
   for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
     const auto &improvement = improvements_.improvements(idx);
     improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
   }
 
+  return true;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadJobs([[maybe_unused]] ErrorsCollection &errors) {
+  jobs_by_type_.clear();
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto &job = jobs_.jobs(idx);
     jobs_by_type_.try_emplace(BaseTypes::StringIdFromStdString(job.id()), idx);
   }
 
+  return true;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadProjects([[maybe_unused]] ErrorsCollection &errors) {
+  projects_by_type_.clear();
   for (int idx = 0; idx < projects_.projects_size(); ++idx) {
     const auto &project = projects_.projects(idx);
     projects_by_type_.try_emplace(BaseTypes::StringIdFromStdString(project.id()), idx);
   }
 
+  return true;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection &errors) {
   effect_definitions_.clear();
   effect_definitions_.reserve(GetAllEffects().size());
   for (const auto& effect_proto : GetAllEffects()) {
     auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
     if (definition->IsBroken()) {
-        spdlog::warn("Failed to load effect {}", effect_proto.id());
-        for(const auto& err : definition->GetLuaErrors()) {
-            spdlog::warn(err);
-        }
+      AddWarning(errors, fmt::format("Failed to load effect {}", effect_proto.id()));
+      for (const auto& err : definition->GetLuaErrors()) {
+        AddWarning(errors, err);
+      }
     }
     effect_definitions_.push_back(
         std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
   }
 
+  return true;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadVariableDefinitions(ErrorsCollection &errors) {
+  parsed_variable_definitions_->Clear();
   for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();
        ++idx) {
     const auto &definition = RuleSetBase::GetVariableDefinitions().variables(idx);
@@ -59,7 +108,8 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
       if (!add_result) {
-        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        AddError(errors, fmt::format("Variable {} has conflicting type definition",
+                                     definition.id()));
         return false;
       }
     } else if (definition.has_string()) {
@@ -73,7 +123,8 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
           BaseTypes::StringIdFromStdString(definition.id()),
           string_definition);
       if (!add_result) {
-        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        AddError(errors, fmt::format("Variable {} has conflicting type definition",
+                                     definition.id()));
         return false;
       }
     } else if (definition.has_boolean()) {
@@ -84,13 +135,14 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
           BaseTypes::StringIdFromStdString(definition.id()),
           numeric_definition);
       if (!add_result) {
-        SPDLOG_ERROR("Variable {} has conflicting type definition", definition.id());
+        AddError(errors, fmt::format("Variable {} has conflicting type definition",
+                                     definition.id()));
         return false;
       }
     } else {
-      SPDLOG_ERROR(
-          "Variable {} has undefined type. It is neither numeric, nor string, nor bool",
-          definition.id());
+      AddError(errors,
+               fmt::format("Variable {} has undefined type. It is neither numeric, nor string, nor bool",
+                           definition.id()));
     }
   }
 

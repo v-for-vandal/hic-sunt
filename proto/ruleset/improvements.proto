@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package hs.proto.ruleset;
+
+import "l10n/localized_name.proto";
+import "ruleset/effect.proto";
+import "ruleset/placement_rules.proto";
+
+message ResourceBill {
+  map<string, int32> amounts = 1;
+}
+
+// This is improvement type(class, whatever). Like 'palace', or 'lumber mill'
+// Specific instance of improvement (this palace, or that lumber mill) has
+// it's own proto scheme
+message Improvement {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+
+  repeated placement_rules.PlacementRule placement_rules = 3;
+
+  // How much it costs to build entity
+  ResourceBill cost = 6;
+
+  //map<string, int32> jobs = 7;
+
+  // this effect is inline. It will always be active only for this building clas
+  // - we will always set target as 'improvement_class' and put this improvement
+  // class into selectors.
+  // You should put here effects that do not depend on specific instance building,
+  // for example if 'mill' should always provide 2 millers, this effect can go here.
+  // If mill additionally provides 2 millers when it is build near river, that part of the
+  // effect should go into instance_effect.
+  //
+  // Please note that these inline effects are provided only for ease of maintainence.
+  // You can achive the same effect by writing effects in effect definitions file. So
+  // if you need to add some effect to building in your mod, don't overwrite the building -
+  // just add effect externally.
+  effect.Effect class_effect = 8;
+
+  // this effect is inline. It will always be active only for this building clas
+  // - we will always set target as 'improvement' and put this improvement
+  // class into selectors.
+  // You should place here effects that depend on specific instance. For example,
+  // effect that adds 2 millers to the mill if it is built on the fast river should
+  // go here.
+  // Please note that these inline effects are provided only for ease of maintainence.
+  // You can achive the same effect by writing effects in effect definitions file. So
+  // if you need to add some effect to building in your mod, don't overwrite the building -
+  // just add effect externally.
+  effect.Effect instance_effect = 8;
+}
+
+message Improvements {
+  repeated Improvement improvements = 1;
+}
