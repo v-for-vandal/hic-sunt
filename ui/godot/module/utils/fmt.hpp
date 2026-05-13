@@ -17,8 +17,7 @@ struct fmt::formatter<::godot::String> : public fmt::formatter<std::string> {
 };
 
 template <>
-struct fmt::formatter<::godot::StringName>
-    : public fmt::formatter<std::string> {
+struct fmt::formatter<::godot::StringName> : public fmt::formatter<std::string> {
   template <typename FormatCtx>
   auto format(const ::godot::StringName& value, FormatCtx& ctx) const {
     std::string converted = hs::godot::utils::from_string(value);

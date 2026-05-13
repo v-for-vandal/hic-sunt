@@ -16,11 +16,9 @@ template <typename BaseTypes>
 class Cell;
 
 template <typename BaseTypes>
-void SerializeTo(const Cell<BaseTypes> &source,
-                 proto::terra::Cell &proto_destination);
+void SerializeTo(const Cell<BaseTypes> &source, proto::terra::Cell &proto_destination);
 template <typename BaseTypes>
-Cell<BaseTypes> ParseFrom(const proto::terra::Cell &source,
-                          serialize::To<Cell<BaseTypes>>);
+Cell<BaseTypes> ParseFrom(const proto::terra::Cell &source, serialize::To<Cell<BaseTypes>>);
 
 template <typename BaseTypes>
 class Cell {
@@ -46,9 +44,7 @@ class Cell {
   auto &GetRegionPtr() const { return region_; }
   const auto &GetRegionPtr() { return region_; }
 
-  bool operator==(const Cell &other) const {
-    return *region_ == *(other.region_);
-  }
+  bool operator==(const Cell &other) const { return *region_ == *(other.region_); }
 
   bool operator!=(const Cell &other) const { return !(*this == other); }
 

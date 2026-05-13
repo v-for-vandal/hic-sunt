@@ -1,6 +1,3 @@
 #include "session_ut.hpp"
 
-namespace hs::session::test {
-
-
-}
+namespace hs::session::test {}

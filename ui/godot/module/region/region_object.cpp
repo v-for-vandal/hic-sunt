@@ -5,44 +5,36 @@
 
 #define ERR_FAIL_NULL_TARGET_REGION(region, result) \
   ERR_FAIL_NULL_V_MSG(region, result, ERR_MSG_REGION_IS_NULL)
-#define ERR_FAIL_NULL_REGION(result) \
-  ERR_FAIL_NULL_TARGET_REGION(region_, result)
+#define ERR_FAIL_NULL_REGION(result) ERR_FAIL_NULL_TARGET_REGION(region_, result)
 
 namespace hs::godot {
 
-static constexpr const char* ERR_MSG_REGION_IS_NULL =
-    "null-containing region object";
+static constexpr const char* ERR_MSG_REGION_IS_NULL = "null-containing region object";
 
 void RegionObject::_bind_methods() {
   ScopeMixin::_bind_methods<RegionObject>();
 
-  ClassDB::bind_method(D_METHOD("get_dimensions"),
-                       &RegionObject::get_dimensions);
+  ClassDB::bind_method(D_METHOD("get_dimensions"), &RegionObject::get_dimensions);
   ClassDB::bind_method(D_METHOD("get_id"), &RegionObject::get_region_id);
   ClassDB::bind_method(D_METHOD("get_info"), &RegionObject::get_info);
   ClassDB::bind_method(D_METHOD("get_city_id"), &RegionObject::get_city_id);
-  ClassDB::bind_method(D_METHOD("set_city_id", "city_id"),
-                       &RegionObject::set_city_id);
+  ClassDB::bind_method(D_METHOD("set_city_id", "city_id"), &RegionObject::set_city_id);
   ClassDB::bind_method(D_METHOD("get_string_value_topn", "variable", "N"),
                        &RegionObject::get_string_value_topn);
   ClassDB::bind_method(D_METHOD("get_numeric_value_aggregates", "variable"),
                        &RegionObject::get_numeric_value_aggregates);
-  ClassDB::bind_method(D_METHOD("get_cell_info", "coords"),
-                       &RegionObject::get_cell_info);
+  ClassDB::bind_method(D_METHOD("get_cell_info", "coords"), &RegionObject::get_cell_info);
   ClassDB::bind_method(D_METHOD("get_cell", "coords"), &RegionObject::get_cell);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &RegionObject::contains);
   // ClassDB::bind_method(D_METHOD("set_biome", "coords", "biome"),
   // &RegionObject::set_biome);
-  ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"),
-                       &RegionObject::set_feature);
+  ClassDB::bind_method(D_METHOD("set_feature", "coords", "feature"), &RegionObject::set_feature);
   ClassDB::bind_method(D_METHOD("set_improvement", "coords", "improvement"),
                        &RegionObject::set_improvement);
   ClassDB::bind_method(D_METHOD("get_available_improvements"),
                        &RegionObject::get_available_improvements);
-  ClassDB::bind_method(D_METHOD("get_pnl_statement", "ruleset"),
-                       &RegionObject::get_pnl_statement);
-  ClassDB::bind_method(D_METHOD("get_jobs", "ruleset"),
-                       &RegionObject::get_jobs);
+  ClassDB::bind_method(D_METHOD("get_pnl_statement", "ruleset"), &RegionObject::get_pnl_statement);
+  ClassDB::bind_method(D_METHOD("get_jobs", "ruleset"), &RegionObject::get_jobs);
 
   /* TODO: RM ?
   ClassDB::bind_method(D_METHOD("set_data_string", "coords", "key", "value"),
@@ -86,8 +78,7 @@ ScopePtr RegionObject::GetScope() const {
   return region_->GetScope();
 }
 
-TypedArray<StringName> RegionObject::get_string_value_topn(StringName variable,
-                                                           int N) const {
+TypedArray<StringName> RegionObject::get_string_value_topn(StringName variable, int N) const {
   ERR_FAIL_NULL_REGION(TypedArray<StringName>{});
 
   auto topN = region_->GetTopNStringValues(variable, N);
@@ -120,9 +111,8 @@ Rect2i RegionObject::get_dimensions() const {
   ERR_FAIL_NULL_REGION(result);
 
   auto box = region_->GetSurface().GetShape().BoundingBox();
-  result = Rect2i(
-      Vector2i(box.start().q().ToUnderlying(), box.start().r().ToUnderlying()),
-      Vector2i(box.q_size().ToUnderlying(), box.r_size().ToUnderlying()));
+  result = Rect2i(Vector2i(box.start().q().ToUnderlying(), box.start().r().ToUnderlying()),
+                  Vector2i(box.q_size().ToUnderlying(), box.r_size().ToUnderlying()));
 
   return result;
 }
@@ -313,14 +303,11 @@ bool RegionObject::set_city_id(String city_id) const {
   return region_->SetCityId(city_id);
 }
 
-Ref<PnlObject> RegionObject::get_pnl_statement(
-    Ref<RulesetObject> ruleset) const {
+Ref<PnlObject> RegionObject::get_pnl_statement(Ref<RulesetObject> ruleset) const {
   ERR_FAIL_NULL_REGION(Ref<PnlObject>{});
-  ERR_FAIL_NULL_V_MSG(ruleset, Ref<PnlObject>{},
-                      "null-containing ruleset object");
+  ERR_FAIL_NULL_V_MSG(ruleset, Ref<PnlObject>{}, "null-containing ruleset object");
 
-  Ref<PnlObject> result(
-      memnew(PnlObject(region_->BuildPnlStatement(ruleset->GetRuleSet()))));
+  Ref<PnlObject> result(memnew(PnlObject(region_->BuildPnlStatement(ruleset->GetRuleSet()))));
 
   return result;
 }
@@ -350,8 +337,7 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
             GodotBaseTypes::StringIdFromStdString(improvement.type()));
 
     if (improvement_ruleset == nullptr) {
-      spdlog::error("Can\'t get ruleset info for improvement {}",
-                    improvement.type());
+      spdlog::error("Can\'t get ruleset info for improvement {}", improvement.type());
       continue;
     }
 

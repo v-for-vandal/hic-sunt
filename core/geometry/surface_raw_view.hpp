@@ -8,8 +8,7 @@ namespace hs::geometry {
 
 template <typename Cell>
 using CellsArrayView =
-    std::mdspan<Cell,
-                std::extents<int, std::dynamic_extent, std::dynamic_extent>,
+    std::mdspan<Cell, std::extents<int, std::dynamic_extent, std::dynamic_extent>,
                 std::layout_right>;
 
 // RawView is view over raw surface data. It correspondes to physical presence -
@@ -34,8 +33,7 @@ class SurfaceRawView {
   SurfaceRawView &operator=(SurfaceRawView &&) = default;
 
   Cell &GetCell(Coords coords) {
-    return const_cast<Cell &>(
-        const_cast<const SurfaceRawView &>(*this).GetCell(coords));
+    return const_cast<Cell &>(const_cast<const SurfaceRawView &>(*this).GetCell(coords));
   }
   Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
     return GetCell(Coords{q, r});
@@ -45,17 +43,12 @@ class SurfaceRawView {
     return target_((coords.q() - q_start()).ToUnderlying(),
                    (coords.r() - r_start()).ToUnderlying());
   }
-  const Cell &GetCell(typename Coords::QAxis q,
-                      typename Coords::RAxis r) const {
+  const Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
     return GetCell(Coords{q, r});
   }
 
-  auto q_size() const {
-    return typename CoordinateSystem::QDelta{target_.extent(0)};
-  }
-  auto r_size() const {
-    return typename CoordinateSystem::RDelta{target_.extent(1)};
-  }
+  auto q_size() const { return typename CoordinateSystem::QDelta{target_.extent(0)}; }
+  auto r_size() const { return typename CoordinateSystem::RDelta{target_.extent(1)}; }
 
   auto q_end() const { return q_start() + q_size(); }
   auto r_end() const { return r_start() + r_size(); }
@@ -77,9 +70,7 @@ class SurfaceRawView {
   }
 
   bool operator==(const SurfaceRawView &other) const;
-  bool operator!=(const SurfaceRawView &other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const SurfaceRawView &other) const { return !(*this == other); }
 
   /*
   auto begin() { return target_.begin(); }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
 #include <ui/godot/module/scope/scope_object.hpp>
 #include <ui/godot/module/session/session.hpp>

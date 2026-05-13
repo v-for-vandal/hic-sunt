@@ -3,17 +3,17 @@
 #include <absl/container/flat_hash_map.h>
 #include <scope/scope.pb.h>
 
-#include <core/types/std_base_types.hpp>
 #include <core/types/error_code.hpp>
-#include "variable_base.hpp"
-
+#include <core/types/std_base_types.hpp>
 #include <expected>
+
+#include "variable_base.hpp"
 
 namespace hs::scope {
 
 /*! \brief String variable holds string value. Modifiers determine what value
- * will be in the end. Modifier with higher level wins. For equal level, order is
- * based on key comparison.
+ * will be in the end. Modifier with higher level wins. For equal level, order
+ * is based on key comparison.
  */
 template <typename BaseTypes = StdBaseTypes>
 class StringVariable : public VariableBase<BaseTypes> {
@@ -28,7 +28,7 @@ class StringVariable : public VariableBase<BaseTypes> {
    * Parameter \p level will determine what is the final result of the variable
    */
   std::expected<void, ErrorCode> SetModifier(const StringId& key, const StringId& val,
-                    NumericValue level, size_t modification_time);
+                                             NumericValue level, size_t modification_time);
 
   // Method takes current level as input, and if this variable has
   // value with higher level, it will overwrite both value and level

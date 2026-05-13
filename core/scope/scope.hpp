@@ -7,6 +7,7 @@
 #include <core/scope/string_variable.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
+
 #include "core/ruleset/variable_definition.hpp"
 #include "core/types/scope_type.hpp"
 // #include <core/scope/variable_definition.hpp>
@@ -20,8 +21,7 @@ template <typename BaseTypes>
 void SerializeTo(const Scope<BaseTypes>& source, proto::scope::Scope& to);
 
 template <typename BaseTypes>
-Scope<BaseTypes> ParseFrom(const proto::scope::Scope& from,
-                           serialize::To<Scope<BaseTypes>>);
+Scope<BaseTypes> ParseFrom(const proto::scope::Scope& from, serialize::To<Scope<BaseTypes>>);
 
 template <typename BaseTypes>
 using ScopePtr = utils::NonNullSharedPtr<Scope<BaseTypes>>;
@@ -66,8 +66,8 @@ class Scope {
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
   void SetParent(const std::shared_ptr<Scope>& parent) { parent_ = parent; }
 
-  // You can and should do it only on one root scope. All other scopes will fetch
-  // it automatically
+  // You can and should do it only on one root scope. All other scopes will
+  // fetch it automatically
   void SetVariableDefinitions(const VariableDefinitionsConstPtr& definitions);
 
   // const VariableDefinitions *Definitions() const;
@@ -81,31 +81,30 @@ class Scope {
    * If modifier does not exist, it will be created
    */
   std::expected<void, ErrorCode> SetNumericModifier(const StringId& variable, const StringId& key,
-                          NumericValue add, NumericValue mult,
-                          size_t modificationTime = 0);
+                                                    NumericValue add, NumericValue mult,
+                                                    size_t modificationTime = 0);
 
   /*! \brief Adjusts modifier for given variable by given difference.
    *
    * If modifier does not exist, it will be created
    */
-  std::expected<void, ErrorCode> ChangeNumericModifier(const StringId& variable, const StringId& key,
-                          NumericValue add, NumericValue mult,
-                          size_t modificationTime = 0);
+  std::expected<void, ErrorCode> ChangeNumericModifier(const StringId& variable,
+                                                       const StringId& key, NumericValue add,
+                                                       NumericValue mult,
+                                                       size_t modificationTime = 0);
 
   std::expected<void, ErrorCode> SetStringModifier(const StringId& variable, const StringId& key,
-                         const StringId& value, NumericValue level,
-                         size_t modificationTime = 0);
+                                                   const StringId& value, NumericValue level,
+                                                   size_t modificationTime = 0);
 
   // Legacy compatibility wrappers
-  bool AddNumericModifier(const StringId& variable, const StringId& key,
-                          NumericValue add, NumericValue mult,
-                          size_t modificationTime = 0) {
+  bool AddNumericModifier(const StringId& variable, const StringId& key, NumericValue add,
+                          NumericValue mult, size_t modificationTime = 0) {
     return SetNumericModifier(variable, key, add, mult, modificationTime).has_value();
   }
 
-  bool AddStringModifier(const StringId& variable, const StringId& key,
-                         const StringId& value, NumericValue level,
-                         size_t modificationTime = 0) {
+  bool AddStringModifier(const StringId& variable, const StringId& key, const StringId& value,
+                         NumericValue level, size_t modificationTime = 0) {
     return SetStringModifier(variable, key, value, level, modificationTime).has_value();
   }
 
@@ -122,11 +121,9 @@ class Scope {
   void ClearCache();
 
  private:
-  void FillNumericModifiers(const StringId& variable, NumericValue& add,
-                            NumericValue& mult) const;
+  void FillNumericModifiers(const StringId& variable, NumericValue& add, NumericValue& mult) const;
 
-  void FillStringModifiers(const StringId& variable, StringId& value,
-                           NumericValue& level);
+  void FillStringModifiers(const StringId& variable, StringId& value, NumericValue& level);
 
   const VariableDefinitionsConstPtr& GetVariableDefinitions() const;
 
@@ -153,10 +150,8 @@ class Scope {
   // Note: it may be beneficial to replace it with prefix tree?
 
  private:
-  friend void SerializeTo<BaseTypes>(const Scope& source,
-                                     proto::scope::Scope& to);
-  friend Scope ParseFrom<BaseTypes>(const proto::scope::Scope& from,
-                                    serialize::To<Scope>);
+  friend void SerializeTo<BaseTypes>(const Scope& source, proto::scope::Scope& to);
+  friend Scope ParseFrom<BaseTypes>(const proto::scope::Scope& from, serialize::To<Scope>);
 };
 
 }  // namespace hs::scope

@@ -1,14 +1,13 @@
 #include "ruleset_ut.hpp"
-#include "core/types/scope_type.hpp"
 
 #include <gtest/gtest.h>
 
+#include "core/types/scope_type.hpp"
+
 namespace hs::ruleset::test {
 
-StdEffectDefinitionPtr MakeEffectDefinition(std::string id,
-                                            types::ScopeType scope_type,
-                                            std::string possible_code,
-                                            std::string effect_code) {
+StdEffectDefinitionPtr MakeEffectDefinition(std::string id, types::ScopeType scope_type,
+                                            std::string possible_code, std::string effect_code) {
   proto::ruleset::effect::Effect effect;
   effect.set_id(std::move(id));
   if (possible_code.size() > 0) {
@@ -18,26 +17,21 @@ StdEffectDefinitionPtr MakeEffectDefinition(std::string id,
   effect.set_scope_type(scope_type);
 
   auto definition = std::make_shared<StdEffectDefinition>(std::move(effect));
-  return StdEffectDefinitionPtr(
-      std::static_pointer_cast<const StdEffectDefinition>(definition));
+  return StdEffectDefinitionPtr(std::static_pointer_cast<const StdEffectDefinition>(definition));
 }
 
-StdEffectDefinitionPtr MakeEffectDefinition(std::string id,
-                                            std::string possible_code,
+StdEffectDefinitionPtr MakeEffectDefinition(std::string id, std::string possible_code,
                                             std::string effect_code) {
-                                                return MakeEffectDefinition(id, types::ScopeType::SCOPE_TYPE_WORLD, possible_code, effect_code);
-                                            }
-
-
-StdVariableDefinitionsConstPtr MakeSimpleVariableDefinitions()
-{
-    auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
-    EXPECT_TRUE(mutable_definitions->AddNumericDefinition("numeric_var", {}));
-    EXPECT_TRUE(mutable_definitions->AddStringDefinition("string_var", {}));
-
-    return StdVariableDefinitionsConstPtr(
-        std::static_pointer_cast<const StdVariableDefinitions>(
-            mutable_definitions));
+  return MakeEffectDefinition(id, types::ScopeType::SCOPE_TYPE_WORLD, possible_code, effect_code);
 }
 
+StdVariableDefinitionsConstPtr MakeSimpleVariableDefinitions() {
+  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+  EXPECT_TRUE(mutable_definitions->AddNumericDefinition("numeric_var", {}));
+  EXPECT_TRUE(mutable_definitions->AddStringDefinition("string_var", {}));
+
+  return StdVariableDefinitionsConstPtr(
+      std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions));
 }
+
+}  // namespace hs::ruleset::test

@@ -17,8 +17,7 @@ HexagonSurface ParseFrom(const proto::geometry::HexagonSurface &source,
   return HexagonSurface(source.radius());
 }
 
-void SerializeTo(const HexagonSurface &source,
-                 proto::geometry::HexagonSurface &target) {
+void SerializeTo(const HexagonSurface &source, proto::geometry::HexagonSurface &target) {
   target.set_radius(source.radius_);
 }
 
@@ -38,8 +37,7 @@ RhombusSurface ParseFrom(const proto::geometry::RhombusSurface &source,
   return RhombusSurface{RhombusSurface::Box{start, end}};
 }
 
-void SerializeTo(const RhombusSurface &source,
-                 proto::geometry::RhombusSurface &target) {
+void SerializeTo(const RhombusSurface &source, proto::geometry::RhombusSurface &target) {
   target.set_q_start(source.BoundingBox().start().q().ToUnderlying());
   target.set_r_start(source.BoundingBox().start().r().ToUnderlying());
   target.set_q_end(source.BoundingBox().end().q().ToUnderlying());
@@ -50,8 +48,7 @@ SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(
     const proto::geometry::SurfaceShape &source,
     serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>) {
   if (source.has_hexagon()) {
-    const HexagonSurface hexagon =
-        ParseFrom(source.hexagon(), serialize::To<HexagonSurface>{});
+    const HexagonSurface hexagon = ParseFrom(source.hexagon(), serialize::To<HexagonSurface>{});
     return SurfaceShape<geometry::QRSCoordinateSystem>{hexagon};
   } else if (source.has_rhombus()) {
     return SurfaceShape<geometry::QRSCoordinateSystem>(
@@ -63,12 +60,11 @@ SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(
 
 void SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem> &source,
                  proto::geometry::SurfaceShape &target) {
-  auto visitor = overloads{[&target](const HexagonSurface &surface) {
-                             SerializeTo(surface, *target.mutable_hexagon());
-                           },
-                           [&target](const RhombusSurface &surface) {
-                             SerializeTo(surface, *target.mutable_rhombus());
-                           }};
+  auto visitor = overloads{
+      [&target](const HexagonSurface &surface) { SerializeTo(surface, *target.mutable_hexagon()); },
+      [&target](const RhombusSurface &surface) {
+        SerializeTo(surface, *target.mutable_rhombus());
+      }};
 
   std::visit(visitor, source.data_);
 }

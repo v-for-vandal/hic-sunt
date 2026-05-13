@@ -22,8 +22,8 @@ class ScopeObject : public RefCounted {
   StringName get_string_value(const StringName& variable);
   int get_modification_time(const StringName& variable) const;
 
-  bool add_numeric_modifier(const StringName& variable, const StringName& key,
-                            float add, float mult);
+  bool add_numeric_modifier(const StringName& variable, const StringName& key, float add,
+                            float mult);
   bool add_string_modifier(const StringName& variable, const StringName& key,
                            const StringName& value, float level);
 

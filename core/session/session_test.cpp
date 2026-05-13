@@ -1,16 +1,14 @@
 #include "session.hpp"
 
 #include <gtest/gtest.h>
-
-#include <fstream>
-#include <memory>
-
 #include <ruleset/effect.pb.h>
-#include <core/ruleset/variable_definition.hpp>
 
 #include <core/geometry/box.hpp>
 #include <core/geometry/coord_system.hpp>
+#include <core/ruleset/variable_definition.hpp>
 #include <core/terra/world.hpp>
+#include <fstream>
+#include <memory>
 
 namespace hs::session {
 
@@ -26,9 +24,7 @@ using ScopeType = types::ScopeType;
 
 namespace {
 
-StdScopePtr MakeScope(const std::string& id, ScopeType type) {
-  return StdScopePtr(id, type);
-}
+StdScopePtr MakeScope(const std::string& id, ScopeType type) { return StdScopePtr(id, type); }
 
 StdScopePtr MakeEffectScope(const std::string& id, ScopeType type) {
   auto definitions = std::make_shared<StdVariableDefinitions>();
@@ -41,8 +37,7 @@ StdScopePtr MakeEffectScope(const std::string& id, ScopeType type) {
 }
 
 StdEffectDefinitionPtr MakeEffectDefinition(std::string id, ScopeType scope_type,
-                                            std::string possible,
-                                            std::string effect_code) {
+                                            std::string possible, std::string effect_code) {
   proto::ruleset::effect::Effect effect;
   effect.set_id(std::move(id));
   effect.set_scope_type(scope_type);
@@ -50,8 +45,7 @@ StdEffectDefinitionPtr MakeEffectDefinition(std::string id, ScopeType scope_type
   effect.mutable_effect()->set_lua(std::move(effect_code));
 
   auto definition = std::make_shared<StdEffectDefinition>(std::move(effect));
-  return StdEffectDefinitionPtr(
-      std::static_pointer_cast<const StdEffectDefinition>(definition));
+  return StdEffectDefinitionPtr(std::static_pointer_cast<const StdEffectDefinition>(definition));
 }
 
 StdWorldPtr MakeWorld() {
@@ -60,8 +54,7 @@ StdWorldPtr MakeWorld() {
   using namespace geometry::literals;
 
   auto world = std::make_shared<StdWorld>();
-  world->AddPlane(
-      "plane.id", QRSBox(QRSCoords{0_q, 0_r}, QRSCoords{0_q, 0_r}), 1, 1);
+  world->AddPlane("plane.id", QRSBox(QRSCoords{0_q, 0_r}, QRSCoords{0_q, 0_r}), 1, 1);
   return world;
 }
 
@@ -166,12 +159,10 @@ TEST(StdSession, AdvanceNextTurnIncrementsTurnAndExecutesEffects) {
   auto scope = MakeEffectScope("scope.id", ScopeType::SCOPE_TYPE_REGION);
   ASSERT_TRUE(session.AddScope(scope));
 
-  auto definition = MakeEffectDefinition(
-      "effect.id", ScopeType::SCOPE_TYPE_REGION,
-      "return VAR(numeric_var) >= 0",
-      "target:set_numeric_modifier('numeric_var', 4.0, 0.0)");
-  session.GetEffects().push_back(
-      std::make_shared<EffectInstance<StdBaseTypes>>(definition));
+  auto definition = MakeEffectDefinition("effect.id", ScopeType::SCOPE_TYPE_REGION,
+                                         "return VAR(numeric_var) >= 0",
+                                         "target:set_numeric_modifier('numeric_var', 4.0, 0.0)");
+  session.GetEffects().push_back(std::make_shared<EffectInstance<StdBaseTypes>>(definition));
 
   ASSERT_TRUE(scope->SetNumericModifier("numeric_var", "seed", 3.0, 0.0, 1));
 
@@ -192,7 +183,8 @@ TEST(StdSession, SetRuleSetBuildsEffectInstances) {
   std::filesystem::create_directories(root / "effects");
   {
     std::ofstream out(root / "effects" / "effect.txt");
-    out << "effects { id: \"effect.id\" possible { lua: \"return true\" } effect { lua: \"return\" } }\n";
+    out << "effects { id: \"effect.id\" possible { lua: \"return true\" } "
+           "effect { lua: \"return\" } }\n";
   }
 
   auto ruleset = std::make_shared<StdRuleSet>();

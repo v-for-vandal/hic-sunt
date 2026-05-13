@@ -1,8 +1,7 @@
 #pragma once
 
-#include <godot_cpp/classes/ref.hpp>
-
 #include <core/session/session.hpp>
+#include <godot_cpp/classes/ref.hpp>
 #include <ui/godot/module/game/ruleset.hpp>
 #include <ui/godot/module/game/ruleset_object.hpp>
 #include <ui/godot/module/terra/world.hpp>
@@ -25,23 +24,19 @@ class RefDataPtrAdapter {
 
   explicit operator bool() const noexcept { return ref_.ptr() != nullptr; }
 
-  friend bool operator==(const RefDataPtrAdapter& adapter,
-                         std::nullptr_t) noexcept {
+  friend bool operator==(const RefDataPtrAdapter& adapter, std::nullptr_t) noexcept {
     return !static_cast<bool>(adapter);
   }
 
-  friend bool operator==(std::nullptr_t,
-                         const RefDataPtrAdapter& adapter) noexcept {
+  friend bool operator==(std::nullptr_t, const RefDataPtrAdapter& adapter) noexcept {
     return !static_cast<bool>(adapter);
   }
 
-  friend bool operator!=(const RefDataPtrAdapter& adapter,
-                         std::nullptr_t) noexcept {
+  friend bool operator!=(const RefDataPtrAdapter& adapter, std::nullptr_t) noexcept {
     return static_cast<bool>(adapter);
   }
 
-  friend bool operator!=(std::nullptr_t,
-                         const RefDataPtrAdapter& adapter) noexcept {
+  friend bool operator!=(std::nullptr_t, const RefDataPtrAdapter& adapter) noexcept {
     return static_cast<bool>(adapter);
   }
 

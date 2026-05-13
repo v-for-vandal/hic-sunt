@@ -39,8 +39,7 @@ std::vector<std::filesystem::path> FilterValidRuleRoots(
 
   for (const auto& root : roots) {
     if (!std::filesystem::exists(root) || !std::filesystem::is_directory(root)) {
-      spdlog::warn("Ruleset path {} is not a directory and will be ignored",
-                   root.string());
+      spdlog::warn("Ruleset path {} is not a directory and will be ignored", root.string());
       continue;
     }
     result.push_back(root);
@@ -49,15 +48,13 @@ std::vector<std::filesystem::path> FilterValidRuleRoots(
   return result;
 }
 
-std::vector<std::filesystem::path> CollectRuleFiles(
-    const std::vector<std::filesystem::path>& roots,
-    const std::filesystem::path& subdirectory) {
+std::vector<std::filesystem::path> CollectRuleFiles(const std::vector<std::filesystem::path>& roots,
+                                                    const std::filesystem::path& subdirectory) {
   std::vector<std::filesystem::path> result;
 
   for (const auto& root : roots) {
     const auto rules_root = root / subdirectory;
-    if (!std::filesystem::exists(rules_root) ||
-        !std::filesystem::is_directory(rules_root)) {
+    if (!std::filesystem::exists(rules_root) || !std::filesystem::is_directory(rules_root)) {
       continue;
     }
 
@@ -91,8 +88,7 @@ int FindById(const auto& repeated_field, const std::string& id) {
 
 template <typename RepeatedField, typename Element>
 void UpsertRepeatedField(RepeatedField* target, const Element& source,
-                         const std::filesystem::path& file_path,
-                         const char* object_type_name) {
+                         const std::filesystem::path& file_path, const char* object_type_name) {
   const int existing_idx = FindById<Element>(*target, source.id());
   if (existing_idx >= 0) {
     spdlog::info("Overriding {} {} from file {}", object_type_name, source.id(),
@@ -103,8 +99,7 @@ void UpsertRepeatedField(RepeatedField* target, const Element& source,
   }
 }
 
-void ApplyFile(proto::ruleset::RegionImprovements& target,
-               const std::filesystem::path& file_path) {
+void ApplyFile(proto::ruleset::RegionImprovements& target, const std::filesystem::path& file_path) {
   proto::ruleset::RegionImprovements parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
@@ -116,8 +111,7 @@ void ApplyFile(proto::ruleset::RegionImprovements& target,
   }
 }
 
-void ApplyFile(proto::ruleset::Biomes& target,
-               const std::filesystem::path& file_path) {
+void ApplyFile(proto::ruleset::Biomes& target, const std::filesystem::path& file_path) {
   proto::ruleset::Biomes parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
@@ -127,26 +121,22 @@ void ApplyFile(proto::ruleset::Biomes& target,
     UpsertRepeatedField(target.mutable_biomes(), biome, file_path, "biome");
   }
   for (const auto& biome_feature : parsed.biome_features()) {
-    UpsertRepeatedField(target.mutable_biome_features(), biome_feature,
-                        file_path, "biome feature");
+    UpsertRepeatedField(target.mutable_biome_features(), biome_feature, file_path, "biome feature");
   }
 }
 
-void ApplyFile(proto::ruleset::Resources& target,
-               const std::filesystem::path& file_path) {
+void ApplyFile(proto::ruleset::Resources& target, const std::filesystem::path& file_path) {
   proto::ruleset::Resources parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
   }
 
   for (const auto& resource : parsed.resources()) {
-    UpsertRepeatedField(target.mutable_resources(), resource, file_path,
-                        "resource");
+    UpsertRepeatedField(target.mutable_resources(), resource, file_path, "resource");
   }
 }
 
-void ApplyFile(proto::ruleset::Jobs& target,
-               const std::filesystem::path& file_path) {
+void ApplyFile(proto::ruleset::Jobs& target, const std::filesystem::path& file_path) {
   proto::ruleset::Jobs parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
@@ -157,42 +147,37 @@ void ApplyFile(proto::ruleset::Jobs& target,
   }
 }
 
-void ApplyFile(proto::ruleset::Projects& target,
-               const std::filesystem::path& file_path) {
+void ApplyFile(proto::ruleset::Projects& target, const std::filesystem::path& file_path) {
   proto::ruleset::Projects parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
   }
 
   for (const auto& project : parsed.projects()) {
-    UpsertRepeatedField(target.mutable_projects(), project, file_path,
-                        "project");
+    UpsertRepeatedField(target.mutable_projects(), project, file_path, "project");
   }
 }
 
-void ApplyFile(proto::render::Rendering& target,
-               const std::filesystem::path& file_path) {
+void ApplyFile(proto::render::Rendering& target, const std::filesystem::path& file_path) {
   proto::render::Rendering parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
   }
 
   for (const auto& atlas_rendering : parsed.atlas_rendering()) {
-    UpsertRepeatedField(target.mutable_atlas_rendering(), atlas_rendering,
-                        file_path, "atlas rendering");
+    UpsertRepeatedField(target.mutable_atlas_rendering(), atlas_rendering, file_path,
+                        "atlas rendering");
   }
 }
 
-void ApplyFile(proto::ruleset::Variables& target,
-               const std::filesystem::path& file_path) {
+void ApplyFile(proto::ruleset::Variables& target, const std::filesystem::path& file_path) {
   proto::ruleset::Variables parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
   }
 
   for (const auto& variable : parsed.variables()) {
-    UpsertRepeatedField(target.mutable_variables(), variable, file_path,
-                        "variable");
+    UpsertRepeatedField(target.mutable_variables(), variable, file_path, "variable");
   }
 }
 
@@ -204,12 +189,10 @@ void ApplyFile(std::vector<proto::ruleset::effect::Effect>& target,
   }
 
   for (const auto& effect : parsed.effects()) {
-    const auto fit = std::ranges::find_if(target, [&effect](const auto& existing) {
-      return existing.id() == effect.id();
-    });
+    const auto fit = std::ranges::find_if(
+        target, [&effect](const auto& existing) { return existing.id() == effect.id(); });
     if (fit != target.end()) {
-      spdlog::info("Overriding effect {} from file {}", effect.id(),
-                   file_path.string());
+      spdlog::info("Overriding effect {} from file {}", effect.id(), file_path.string());
       *fit = effect;
     } else {
       target.push_back(effect);
@@ -218,8 +201,7 @@ void ApplyFile(std::vector<proto::ruleset::effect::Effect>& target,
 }
 
 template <typename Target>
-void LoadOrderedFilesInto(Target& target,
-                         const std::vector<std::filesystem::path>& files) {
+void LoadOrderedFilesInto(Target& target, const std::vector<std::filesystem::path>& files) {
   for (const auto& file : files) {
     ApplyFile(target, file);
   }

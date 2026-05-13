@@ -1,6 +1,6 @@
-#include <core/ruleset/variable_definition.hpp>
-
 #include <gtest/gtest.h>
+
+#include <core/ruleset/variable_definition.hpp>
 
 namespace hs::ruleset {
 

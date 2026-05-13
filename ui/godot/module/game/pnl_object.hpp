@@ -19,9 +19,7 @@ class PnlObject : public RefCounted {
 
   static void _bind_methods();
 
-  void SetPnlStatement(PnlStatement statement) {
-    pnl_statement_ = std::move(statement);
-  }
+  void SetPnlStatement(PnlStatement statement) { pnl_statement_ = std::move(statement); }
 
  private:
   PnlStatement pnl_statement_;

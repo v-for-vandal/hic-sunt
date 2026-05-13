@@ -28,12 +28,8 @@ class Box {
   const auto &start() const noexcept { return start_; }
   const auto &end() const noexcept { return end_; }
 
-  auto q_size() const noexcept {
-    return abs(end_.q() - start_.q()) + QDelta(1);
-  }
-  auto r_size() const noexcept {
-    return abs(end_.r() - start_.r()) + RDelta(1);
-  }
+  auto q_size() const noexcept { return abs(end_.q() - start_.q()) + QDelta(1); }
+  auto r_size() const noexcept { return abs(end_.r() - start_.r()) + RDelta(1); }
 
   bool operator==(const Box &) const = default;
   bool operator!=(const Box &) const = default;
@@ -46,8 +42,7 @@ class Box {
   }
 
   bool Contains(Coords coords) const noexcept {
-    return coords.q().InRange(start_.q(), end_.q()) &&
-           coords.r().InRange(start_.r(), end_.r()) &&
+    return coords.q().InRange(start_.q(), end_.q()) && coords.r().InRange(start_.r(), end_.r()) &&
            coords.s().InRange(start_.s(), end_.s());
   }
 

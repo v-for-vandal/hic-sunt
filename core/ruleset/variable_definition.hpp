@@ -9,6 +9,7 @@
 #include <expected>
 #include <limits>
 #include <utility>
+
 #include "core/types/variable_type.hpp"
 
 namespace hs::ruleset {
@@ -47,7 +48,8 @@ class VariableDefinitions {
 
   std::expected<void, ErrorCode> AddNumericDefinition(
       const StringId& id, NumericVariableDefinition<BaseTypes> definition) {
-    if (const auto var_type = GetVariableType(id); var_type != VariableType::kNumeric && var_type != VariableType::kMissing) {
+    if (const auto var_type = GetVariableType(id);
+        var_type != VariableType::kNumeric && var_type != VariableType::kMissing) {
       return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
     }
 
@@ -57,7 +59,8 @@ class VariableDefinitions {
 
   std::expected<void, ErrorCode> AddStringDefinition(
       const StringId& id, StringVariableDefinition<BaseTypes> definition) {
-    if (const auto var_type = GetVariableType(id); var_type != VariableType::kString && var_type != VariableType::kMissing ) {
+    if (const auto var_type = GetVariableType(id);
+        var_type != VariableType::kString && var_type != VariableType::kMissing) {
       return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
     }
 
@@ -89,8 +92,8 @@ class VariableDefinitions {
 
   // Finds and returns definition for variable with given id
   // Returns copy to prevent abuse.
-  std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode>
-  FindNumericVariable(const StringId& id) const {
+  std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode> FindNumericVariable(
+      const StringId& id) const {
     const auto fit = numeric_definitions_.find(id);
     if (fit == numeric_definitions_.end()) {
       spdlog::error("Variable {} is unknown or is not numeric", id);
@@ -100,16 +103,12 @@ class VariableDefinitions {
     return fit->second;
   }
 
-  const auto& GetNumericDefinitions() const noexcept {
-    return numeric_definitions_;
-  }
+  const auto& GetNumericDefinitions() const noexcept { return numeric_definitions_; }
 
-  const auto& GetStringDefinitions() const noexcept {
-    return string_definitions_;
-  }
+  const auto& GetStringDefinitions() const noexcept { return string_definitions_; }
 
-  std::expected<StringVariableDefinition<BaseTypes>, ErrorCode>
-  FindStringVariable(const StringId& id) const {
+  std::expected<StringVariableDefinition<BaseTypes>, ErrorCode> FindStringVariable(
+      const StringId& id) const {
     const auto fit = string_definitions_.find(id);
     if (fit == string_definitions_.end()) {
       spdlog::error("Variable {} is unknown or is not string", id);
@@ -120,17 +119,13 @@ class VariableDefinitions {
   }
 
  private:
-  absl::flat_hash_map<StringId, NumericVariableDefinition<BaseTypes>>
-      numeric_definitions_;
-  absl::flat_hash_map<StringId, StringVariableDefinition<BaseTypes>>
-      string_definitions_;
+  absl::flat_hash_map<StringId, NumericVariableDefinition<BaseTypes>> numeric_definitions_;
+  absl::flat_hash_map<StringId, StringVariableDefinition<BaseTypes>> string_definitions_;
 };
 
 template <typename BaseTypes>
-using VariableDefinitionsPtr =
-    utils::NonNullSharedPtr<VariableDefinitions<BaseTypes>>;
+using VariableDefinitionsPtr = utils::NonNullSharedPtr<VariableDefinitions<BaseTypes>>;
 template <typename BaseTypes>
-using VariableDefinitionsConstPtr =
-        utils::NonNullSharedPtr<const VariableDefinitions<BaseTypes>>;
+using VariableDefinitionsConstPtr = utils::NonNullSharedPtr<const VariableDefinitions<BaseTypes>>;
 
 }  // namespace hs::ruleset

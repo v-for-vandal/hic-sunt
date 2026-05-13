@@ -30,12 +30,8 @@ class IntDelta {
 
   auto operator<=>(int val) const noexcept { return val_ <=> val; }
 
-  auto operator+(IntDelta other) const noexcept {
-    return IntDelta{val_ + other.val_};
-  }
-  auto operator-(IntDelta other) const noexcept {
-    return IntDelta{val_ + other.val_};
-  }
+  auto operator+(IntDelta other) const noexcept { return IntDelta{val_ + other.val_}; }
+  auto operator-(IntDelta other) const noexcept { return IntDelta{val_ + other.val_}; }
   auto operator+=(IntDelta other) noexcept { val_ += other.val_; }
   auto operator-=(IntDelta other) noexcept { val_ -= other.val_; }
   auto operator*=(int other) noexcept { val_ *= other; }

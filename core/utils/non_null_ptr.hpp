@@ -11,8 +11,7 @@ template <typename T>
 class NonNullSharedPtr {
  private:
   template <typename U>
-  static constexpr bool kCompatibleSharedPtr =
-      std::is_convertible_v<U*, T*>;
+  static constexpr bool kCompatibleSharedPtr = std::is_convertible_v<U*, T*>;
 
   std::shared_ptr<T> value;
 
@@ -64,8 +63,8 @@ class NonNullSharedPtr {
   NonNullSharedPtr<T>& operator=(const NonNullSharedPtr<T>& other) = default;
 
   NonNullSharedPtr<T>& operator=(T&& data) {
-      value = std::make_shared<T>(std::move(data));
-      return * this;
+    value = std::make_shared<T>(std::move(data));
+    return *this;
   }
 
   template <typename U>
@@ -93,7 +92,7 @@ class NonNullSharedPtr {
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr<T>& operator=(const NonNullSharedPtr<U>& other) {
-      // we can't get other.value directly, but we can call operator shared_ptr
+    // we can't get other.value directly, but we can call operator shared_ptr
     value = std::static_pointer_cast<T>(static_cast<std::shared_ptr<U>>(other));
     return *this;
   }
@@ -117,9 +116,7 @@ class NonNullSharedPtr {
   const auto& operator->() const { return value; }
 
   bool operator==(const NonNullSharedPtr<T>& other) const noexcept = default;
-  bool operator==(const std::shared_ptr<T>& other) const noexcept {
-    return value == other;
-  }
+  bool operator==(const std::shared_ptr<T>& other) const noexcept { return value == other; }
 
   bool operator!=(const NonNullSharedPtr<T>& other) const noexcept = default;
 

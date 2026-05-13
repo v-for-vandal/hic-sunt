@@ -1,13 +1,12 @@
 #pragma once
 
-#include <sol/sol.hpp>
-
 #include <core/ruleset/effect.hpp>
 #include <core/scope/scope_change_set.hpp>
 #include <core/session/lua_scope_change_set.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/std_base_types.hpp>
 #include <expected>
+#include <sol/sol.hpp>
 
 namespace hs::session {
 
@@ -24,9 +23,7 @@ class EffectInstance {
 
   explicit EffectInstance(const EffectDefinitionPtr& definition);
 
-  const EffectDefinitionPtr& GetDefinition() const noexcept {
-    return definition_;
-  }
+  const EffectDefinitionPtr& GetDefinition() const noexcept { return definition_; }
   const StringId& GetId() const { return definition_->GetId(); }
 
   std::expected<bool, ErrorCode> CheckPossible(const ScopePtr& scope,
@@ -44,8 +41,7 @@ class EffectInstance {
 
   template <typename Result, typename... Args>
   std::expected<Result, ErrorCode> CallWithLimit(sol::protected_function& func,
-                                                 std::optional<int> max_operations,
-                                                 Args&&... args);
+                                                 std::optional<int> max_operations, Args&&... args);
 
   EffectDefinitionPtr definition_;
   sol::state lua_;

@@ -8,22 +8,17 @@ namespace hs::godot {
 
 void PlaneObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_id"), &PlaneObject::get_id);
-  ClassDB::bind_method(D_METHOD("get_dimensions"),
-                       &PlaneObject::get_dimensions);
-  ClassDB::bind_method(D_METHOD("get_region", "coords"),
-                       &PlaneObject::get_region);
-  ClassDB::bind_method(D_METHOD("get_region_by_id", "region_id"),
-                       &PlaneObject::get_region_by_id);
+  ClassDB::bind_method(D_METHOD("get_dimensions"), &PlaneObject::get_dimensions);
+  ClassDB::bind_method(D_METHOD("get_region", "coords"), &PlaneObject::get_region);
+  ClassDB::bind_method(D_METHOD("get_region_by_id", "region_id"), &PlaneObject::get_region_by_id);
   ClassDB::bind_method(D_METHOD("contains", "coords"), &PlaneObject::contains);
-  ClassDB::bind_method(D_METHOD("get_region_info", "coords"),
-                       &PlaneObject::get_region_info);
+  ClassDB::bind_method(D_METHOD("get_region_info", "coords"), &PlaneObject::get_region_info);
   ClassDB::bind_method(D_METHOD("get_region_external_radius"),
                        &PlaneObject::get_region_external_radius);
-  ClassDB::bind_method(D_METHOD("get_distance_between_cells", "region1",
-                                "cell1", "region2", "cell2"),
-                       &PlaneObject::get_distance_between_cells);
-  ClassDB::bind_method(D_METHOD("foreach_surface", "callback"),
-                       &PlaneObject::foreach_surface);
+  ClassDB::bind_method(
+      D_METHOD("get_distance_between_cells", "region1", "cell1", "region2", "cell2"),
+      &PlaneObject::get_distance_between_cells);
+  ClassDB::bind_method(D_METHOD("foreach_surface", "callback"), &PlaneObject::foreach_surface);
 }
 
 StringName PlaneObject::get_id() const { return data_->GetPlaneId(); }
@@ -38,9 +33,8 @@ Rect2i PlaneObject::get_dimensions() const {
 Ref<RegionObject> PlaneObject::get_region(Vector2i coords) const {
   auto qrs_coords = cast_qrs(coords);
 
-  ERR_FAIL_COND_V_MSG(
-      !data_->GetSurface().Contains(qrs_coords), Ref<RegionObject>{},
-      utils::to_string(fmt::format("no region at coords {}", qrs_coords)));
+  ERR_FAIL_COND_V_MSG(!data_->GetSurface().Contains(qrs_coords), Ref<RegionObject>{},
+                      utils::to_string(fmt::format("no region at coords {}", qrs_coords)));
 
   /* TODO: check above should take care of that
   if (!data_->GetSurface().Contains(qrs_coords)) {
@@ -49,28 +43,25 @@ Ref<RegionObject> PlaneObject::get_region(Vector2i coords) const {
   }
   */
 
-  Ref<RegionObject> result(memnew(
-      RegionObject(data_->GetSurface().GetCell(qrs_coords).GetRegionPtr())));
+  Ref<RegionObject> result(
+      memnew(RegionObject(data_->GetSurface().GetCell(qrs_coords).GetRegionPtr())));
 
   return result;
 }
 
 Ref<RegionObject> PlaneObject::get_region_by_id(String region_id) const {
-  ERR_FAIL_COND_V_MSG(
-      !data_->HasRegion(region_id), Ref<RegionObject>{},
-      utils::to_string(fmt::format("no region with id {}", region_id)));
+  ERR_FAIL_COND_V_MSG(!data_->HasRegion(region_id), Ref<RegionObject>{},
+                      utils::to_string(fmt::format("no region with id {}", region_id)));
 
-  Ref<RegionObject> result(
-      memnew(RegionObject(data_->GetRegionById(region_id))));
+  Ref<RegionObject> result(memnew(RegionObject(data_->GetRegionById(region_id))));
 
   return result;
 }
 
 void PlaneObject::foreach_surface(const Callable& callback) {
-  data_->GetSurface().Foreach([&callback, data(this->data_)](QRSCoords coords,
-                                                             Cell& cell) {
-    Ref<RegionObject> region(memnew(
-        RegionObject(data->GetSurface().GetCell(coords).GetRegionPtr())));
+  data_->GetSurface().Foreach([&callback, data(this->data_)](QRSCoords coords, Cell& cell) {
+    Ref<RegionObject> region(
+        memnew(RegionObject(data->GetSurface().GetCell(coords).GetRegionPtr())));
     callback.call(coords.q().ToUnderlying(), coords.r().ToUnderlying(), region);
   });
 }
@@ -93,15 +84,12 @@ Dictionary PlaneObject::get_region_info(Vector2i coords) const {
   return RegionObject::make_region_info(region);
 }
 
-int PlaneObject::get_region_external_radius() const {
-  return data_->GetExternalRadius();
-}
+int PlaneObject::get_region_external_radius() const { return data_->GetExternalRadius(); }
 
-float PlaneObject::get_distance_between_cells(Vector2i region1, Vector2i cell1,
-                                              Vector2i region2,
+float PlaneObject::get_distance_between_cells(Vector2i region1, Vector2i cell1, Vector2i region2,
                                               Vector2i cell2) {
-  return data_->GetDistanceBetweenCells(cast_qrs(region1), cast_qrs(cell1),
-                                        cast_qrs(region2), cast_qrs(cell2));
+  return data_->GetDistanceBetweenCells(cast_qrs(region1), cast_qrs(cell1), cast_qrs(region2),
+                                        cast_qrs(cell2));
 }
 
 Dictionary PlaneObject::create_error(const char* error) {

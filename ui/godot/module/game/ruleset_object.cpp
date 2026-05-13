@@ -8,18 +8,14 @@ void RulesetObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_all_region_improvements"),
                        &RulesetObject::get_all_region_improvements);
   ClassDB::bind_method(D_METHOD("get_biomes"), &RulesetObject::get_biomes);
-  ClassDB::bind_method(D_METHOD("get_all_resources"),
-                       &RulesetObject::get_all_resources);
+  ClassDB::bind_method(D_METHOD("get_all_resources"), &RulesetObject::get_all_resources);
   ClassDB::bind_method(D_METHOD("get_variable_definitions"),
                        &RulesetObject::get_variable_definitions);
-  ClassDB::bind_method(D_METHOD("get_all_effects"),
-                       &RulesetObject::get_all_effects);
-  ClassDB::bind_method(D_METHOD("get_atlas_render"),
-                       &RulesetObject::get_atlas_render);
+  ClassDB::bind_method(D_METHOD("get_all_effects"), &RulesetObject::get_all_effects);
+  ClassDB::bind_method(D_METHOD("get_atlas_render"), &RulesetObject::get_atlas_render);
   ClassDB::bind_method(D_METHOD("get_improvement_info", "improvement_id"),
                        &RulesetObject::get_improvement_info);
-  ClassDB::bind_method(D_METHOD("get_job_info", "job_id"),
-                       &RulesetObject::get_job_info);
+  ClassDB::bind_method(D_METHOD("get_job_info", "job_id"), &RulesetObject::get_job_info);
   ClassDB::bind_method(D_METHOD("get_project_info", "project_id"),
                        &RulesetObject::get_project_info);
   ClassDB::bind_static_method("RulesetObject", D_METHOD("load", "folder_path"),
@@ -39,16 +35,16 @@ Array RulesetObject::get_biomes() const {
 }
 
 TypedArray<StringName> RulesetObject::get_all_effects() const {
-    TypedArray<StringName> result;
-    const auto& all_effects = ruleset_.GetAllEffects();
-    // reserve is not supported ???
-    //result.reserve(all_effects.size());
+  TypedArray<StringName> result;
+  const auto& all_effects = ruleset_.GetAllEffects();
+  // reserve is not supported ???
+  // result.reserve(all_effects.size());
 
-    for(const auto& effect: all_effects) {
-        result.append(StringName(effect.id().c_str()));
-    }
+  for (const auto& effect : all_effects) {
+    result.append(StringName(effect.id().c_str()));
+  }
 
-    return result;
+  return result;
 }
 
 Dictionary RulesetObject::get_variable_definitions() const {
@@ -72,8 +68,7 @@ Dictionary RulesetObject::get_variable_definitions() const {
   return result;
 }
 
-Dictionary RulesetObject::convert_biome_type(
-    const hs::proto::ruleset::Biome& biome_type) {
+Dictionary RulesetObject::convert_biome_type(const hs::proto::ruleset::Biome& biome_type) {
   Dictionary result;
   result["id"] = biome_type.id().c_str();
 
@@ -106,8 +101,7 @@ Dictionary RulesetObject::convert_improvement(
   return result;
 }
 
-Dictionary RulesetObject::convert_render(
-    const hs::proto::render::AtlasRender& render) {
+Dictionary RulesetObject::convert_render(const hs::proto::render::AtlasRender& render) {
   Dictionary result;
   result["resource"] = render.resource().c_str();
   result["source_id"] = render.source_id();
@@ -146,8 +140,7 @@ Dictionary RulesetObject::convert_job(const hs::proto::ruleset::Job& job) {
   return result;
 }
 
-Dictionary RulesetObject::convert_project(
-    const hs::proto::ruleset::Project& project) {
+Dictionary RulesetObject::convert_project(const hs::proto::ruleset::Project& project) {
   Dictionary result;
   result["id"] = project.id().c_str();
   result["script"] = project.script().c_str();
@@ -180,8 +173,7 @@ Array RulesetObject::get_all_region_improvements() const {
 
 Dictionary RulesetObject::get_improvement_info(String id) const {
   auto ascii_id = id.ascii();
-  const auto* improvement =
-      ruleset_.FindRegionImprovementByType(ascii_id.get_data());
+  const auto* improvement = ruleset_.FindRegionImprovementByType(ascii_id.get_data());
 
   if (improvement == nullptr) {
     spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
@@ -234,10 +226,9 @@ Dictionary RulesetObject::load(TypedArray<String> folders) {
   std::vector<std::filesystem::path> paths;
   paths.reserve(folders.size());
   for (int i = 0; i < folders.size(); ++i) {
-      paths.push_back(std::filesystem::path(static_cast<String>(folders[i]).utf8().get_data()));
+    paths.push_back(std::filesystem::path(static_cast<String>(folders[i]).utf8().get_data()));
   }
-  bool success =
-      ruleset.Load(paths, errors);
+  bool success = ruleset.Load(paths, errors);
 
   Array errors_godot;
   for (auto& error_msg : errors.errors) {
@@ -246,8 +237,7 @@ Dictionary RulesetObject::load(TypedArray<String> folders) {
   result[String("errors")] = errors_godot;
 
   if (success) {
-    Ref<RulesetObject> ruleset_object(
-        memnew(RulesetObject(std::move(ruleset))));
+    Ref<RulesetObject> ruleset_object(memnew(RulesetObject(std::move(ruleset))));
     result[String("ruleset")] = ruleset_object;
     result[String("success")] = true;
   } else {

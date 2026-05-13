@@ -13,6 +13,7 @@
 #include <core/types/control_object.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
+
 #include "core/types/scope_type.hpp"
 
 namespace hs::terra {
@@ -26,8 +27,7 @@ class World;
 template <typename BaseTypes>
 void SerializeTo(const Plane<BaseTypes> &source, proto::terra::Plane &target);
 template <typename BaseTypes>
-Plane<BaseTypes> ParseFrom(const proto::terra::Plane &world,
-                           serialize::To<Plane<BaseTypes>>);
+Plane<BaseTypes> ParseFrom(const proto::terra::Plane &world, serialize::To<Plane<BaseTypes>>);
 
 // Plane is essentially one playable map that consists of multiple regions
 template <typename BaseTypes = StdBaseTypes>
@@ -76,9 +76,7 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   const Surface &GetSurfaceObject() const { return surface_; }
 
   RegionPtr GetRegionById(const StringId &region_id) const;
-  bool HasRegion(const StringId &region_id) const {
-    return region_index_.contains(region_id);
-  }
+  bool HasRegion(const StringId &region_id) const { return region_index_.contains(region_id); }
   void SetRegion(QRSCoords coords, Region region);
   RegionPtr GetRegion(QRSCoords coords) const;
 
@@ -96,16 +94,14 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   // TODO: This function should take into account plane wrapping
   // If some value is invalid (no such region or no such cell), then -1 is
   // returned.
-  float GetDistanceBetweenCells(QRSCoords region1, QRSCoords cell1,
-                                QRSCoords region2, QRSCoords cell2);
+  float GetDistanceBetweenCells(QRSCoords region1, QRSCoords cell1, QRSCoords region2,
+                                QRSCoords cell2);
 
   int GetExternalRadius() const { return external_region_radius_; }
 
  private:
-  friend void SerializeTo<BaseTypes>(const Plane &source,
-                                     proto::terra::Plane &target);
-  friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane &world,
-                                    serialize::To<Plane>);
+  friend void SerializeTo<BaseTypes>(const Plane &source, proto::terra::Plane &target);
+  friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane &world, serialize::To<Plane>);
   friend class World<BaseTypes>;
 
   void InitNonpersistent();

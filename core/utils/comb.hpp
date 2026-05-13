@@ -81,9 +81,7 @@ class Comb {
   }
 
   bool operator==(const Comb &other) const noexcept;
-  bool operator!=(const Comb &other) const noexcept {
-    return !(*this == other);
-  }
+  bool operator!=(const Comb &other) const noexcept { return !(*this == other); }
 
  private:
   std::map<int, std::unordered_set<StringId>> comb_;

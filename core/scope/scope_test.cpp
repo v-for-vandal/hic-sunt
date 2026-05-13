@@ -2,18 +2,16 @@
 
 #include <gtest/gtest.h>
 
+#include <core/scope/scope_ut.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/serialize.hpp>
-#include <core/scope/scope_ut.hpp>
 
 namespace hs::scope {
 
 using StdScope = Scope<StdBaseTypes>;
 using StdScopePtr = ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
-using StdVariableDefinitionsPtr =
-    hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
-
+using StdVariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
 
 TEST(StdScope, Create) {
   StdScope stack_scope;
