@@ -7,6 +7,7 @@
 #include <core/types/scope_type.hpp>
 #include <core/utils/non_null_ptr.hpp>
 #include <expected>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -24,6 +25,12 @@ class EffectDefinition {
     StringId variable_id;
   };
 
+  struct Code {
+    std::string code;
+    std::vector<StringId> dependencies;
+    std::vector<LuaVariable> lua_variables;
+  };
+
   EffectDefinition() = default;
   explicit EffectDefinition(ProtoEffect data);
 
@@ -34,8 +41,8 @@ class EffectDefinition {
 
   const StringId& GetId() const noexcept { return id_; }
   types::ScopeType GetScopeType() const noexcept { return data_.scope_type(); }
-  const std::string& GetEffectCode() const noexcept { return effect_code_; }
-  const std::string& GetPossibleCode() const noexcept { return possible_code_; }
+  const Code& GetEffectCode() const noexcept { return effect_code_; }
+  std::optional<Code> GePossibleCode() const noexcept { return possible_code_; }
   const ProtoEffect& GetData() const noexcept { return data_; }
   const std::vector<StringId>& GetDependencies() const noexcept {
     return dependencies_;
@@ -50,13 +57,7 @@ class EffectDefinition {
   int GetMaxOperations() const noexcept;
 
  private:
-  struct PreprocessedCode {
-    std::string code;
-    std::vector<StringId> dependencies;
-    std::vector<LuaVariable> lua_variables;
-  };
-
-  static std::expected<PreprocessedCode, ErrorCode> PreprocessCode(
+  static std::expected<Code, ErrorCode> PreprocessCode(
       const proto::ruleset::effect::Code& code, size_t& next_var_index);
   static std::string WrapCodeInFunction(std::string_view function_name,
                                         const std::string& code);
@@ -71,8 +72,8 @@ class EffectDefinition {
 
   ProtoEffect data_;
   StringId id_{};
-  std::string effect_code_;
-  std::string possible_code_;
+  Code effect_code_;
+  std::optional<Code> possible_code_;
   std::vector<StringId> dependencies_;
   std::vector<LuaVariable> lua_variables_;
   bool is_broken_{false};

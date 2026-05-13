@@ -134,30 +134,38 @@ EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
   size_t next_var_index = 0;
   std::vector<std::string> possible_errors;
   std::vector<std::string> effect_errors;
-  auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
-  if (!possible_processed) {
-      lua_errors_.push_back(fmt::format("preprocessing \"possible\" failed with code {}", possible_processed.error()));
+  if (data_.has_possible()) {
+    auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
+    if (!possible_processed) {
+      lua_errors_.push_back(fmt::format(
+          "preprocessing \"possible\" failed with code {}",
+          possible_processed.error()));
       is_broken_ = true;
-  } else {
-      possible_code_ = WrapCodeInFunction(kPossibleFunctionName,
-                                          possible_processed->code);
-      AppendDependencies(dependencies_, possible_processed->dependencies);
-      AppendLuaVariables(lua_variables_, possible_processed->lua_variables);
-      possible_errors = ValidateLuaCode(id_, kPossibleFunctionName, possible_code_);
-
+    } else {
+      possible_processed->code =
+          WrapCodeInFunction(kPossibleFunctionName, possible_processed->code);
+      possible_code_ = std::move(*possible_processed);
+      AppendDependencies(dependencies_, possible_code_->dependencies);
+      AppendLuaVariables(lua_variables_, possible_code_->lua_variables);
+      possible_errors =
+          ValidateLuaCode(id_, kPossibleFunctionName, possible_code_->code);
+    }
   }
 
   auto effect_processed = PreprocessCode(data_.effect(), next_var_index);
   if (!effect_processed) {
-    lua_errors_.push_back(fmt::format("preprocessing \"effect\" failed with code {}", effect_processed.error()));
+    lua_errors_.push_back(fmt::format(
+        "preprocessing \"effect\" failed with code {}",
+        effect_processed.error()));
     is_broken_ = true;
   } else {
-      effect_code_ = WrapCodeInFunction(kEffectFunctionName,
-                                        effect_processed->code);
+    effect_processed->code =
+        WrapCodeInFunction(kEffectFunctionName, effect_processed->code);
+    effect_code_ = std::move(*effect_processed);
 
-      AppendDependencies(dependencies_, effect_processed->dependencies);
-      AppendLuaVariables(lua_variables_, effect_processed->lua_variables);
-      effect_errors = ValidateLuaCode(id_, kEffectFunctionName, effect_code_);
+    AppendDependencies(dependencies_, effect_code_.dependencies);
+    AppendLuaVariables(lua_variables_, effect_code_.lua_variables);
+    effect_errors = ValidateLuaCode(id_, kEffectFunctionName, effect_code_.code);
   }
 
   lua_errors_.reserve(lua_errors_.size() + possible_errors.size() + effect_errors.size());
@@ -233,13 +241,13 @@ void EffectDefinition<BaseTypes>::AppendLuaVariables(
 template <typename BaseTypes>
 auto EffectDefinition<BaseTypes>::PreprocessCode(
     const proto::ruleset::effect::Code& code, size_t& next_var_index)
-    -> std::expected<PreprocessedCode, ErrorCode> {
+    -> std::expected<Code, ErrorCode> {
   std::string source;
   if (code.has_lua()) {
     source = code.lua();
   }
 
-  PreprocessedCode result;
+  Code result;
   result.code.reserve(source.size());
 
   size_t pos = 0;

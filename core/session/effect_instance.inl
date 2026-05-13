@@ -38,11 +38,11 @@ void EffectInstance<BaseTypes>::InitializeLuaState() {
 
 template <typename BaseTypes>
 std::expected<void, ErrorCode> EffectInstance<BaseTypes>::LoadFunctions() {
-  {
-    sol::load_result loaded = lua_.load(definition_->GetPossibleCode());
+  if (auto possible_code = definition_->GePossibleCode()) {
+    sol::load_result loaded = lua_.load(possible_code->code);
     if (!loaded.valid()) {
-        auto error = loaded.get<sol::error>();
-        spdlog::warn("Failed to load lua script with error: {}", error.what());
+      auto error = loaded.get<sol::error>();
+      spdlog::warn("Failed to load lua script with error: {}", error.what());
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
     sol::protected_function_result result = loaded();
@@ -50,13 +50,16 @@ std::expected<void, ErrorCode> EffectInstance<BaseTypes>::LoadFunctions() {
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
     possible_function_ = lua_[std::string(EffectDefinition::kPossibleFunctionName)];
+  } else {
+      // effects without possible code are always possible
+      always_possible_ = true;
   }
 
   {
-    sol::load_result loaded = lua_.load(definition_->GetEffectCode());
+    sol::load_result loaded = lua_.load(definition_->GetEffectCode().code);
     if (!loaded.valid()) {
-        auto error = loaded.get<sol::error>();
-        spdlog::warn("Failed to load lua script with error: {}", error.what());
+      auto error = loaded.get<sol::error>();
+      spdlog::warn("Failed to load lua script with error: {}", error.what());
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
     }
     sol::protected_function_result result = loaded();
@@ -122,6 +125,8 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
         std::string_view::npos) {
       return std::unexpected(ErrorCode::ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED);
     }
+    spdlog::warn("Execution of effect {} aborted with error: {}", definition_->GetId(),
+        message);
     return std::unexpected(ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
   }
 
@@ -139,8 +144,7 @@ std::expected<Result, ErrorCode> EffectInstance<BaseTypes>::CallWithLimit(
 template <typename BaseTypes>
 std::expected<bool, ErrorCode> EffectInstance<BaseTypes>::CheckPossible(
     const ScopePtr& scope, std::optional<int> max_operations) {
-  if (definition_->GetData().possible().has_lua() &&
-      definition_->GetData().possible().lua().empty()) {
+  if (always_possible_) {
     return true;
   }
 

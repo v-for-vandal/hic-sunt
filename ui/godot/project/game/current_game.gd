@@ -11,6 +11,14 @@ func init_game(world: World, ruleset: RulesetObject) -> void:
 	event_bus = UiEventBus.new()
 	
 	_setup_nodes()
+	
+## Replaces ruleset in running game. Potentialy dangerous operation
+func replace_ruleset(ruleset: RulesetObject) -> void:
+	if current_game == null:
+		push_error("Attempt to replace ruleset while no current game is present")
+		return
+		
+	current_game.replace_ruleset(ruleset)
 
 
 func next_turn() -> void:

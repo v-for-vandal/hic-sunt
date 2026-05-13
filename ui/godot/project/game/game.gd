@@ -55,7 +55,9 @@ func _ready() -> void:
 		var vardata : Dictionary = var_defines[varname]
 		var var_type : StringName = vardata[&"type"];
 		variables_d_c.add_text("%-80s| %-10s" % [varname, var_type])
-	
+
+func replace_ruleset(ruleset_: RulesetObject) -> void:
+	_session.set_ruleset(ruleset_)
 
 func get_current_player_civ() -> Civilisation:
 	return _current_player_civ

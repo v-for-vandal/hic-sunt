@@ -6,5 +6,13 @@ effects : [
 	effect {
 	  lua: "turn = VAR(core.turn)"
 	}
+  },
+  {
+	id: "test.every_t_turn"
+	scope_type: SCOPE_TYPE_WORLD
+	schedule: EVERY_TURN
+	effect {
+	  lua: "turn = VAR(core.turn)"
+	}
   }
 ]

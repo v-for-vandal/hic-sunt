@@ -13,6 +13,7 @@ func _register_dev_console_commands()-> void:
 	Console.create_command("build", self._dev_build , "Immediatelly build specified improvement")
 	Console.create_command("next_turn", CurrentGame.next_turn, "Start next turn")
 	Console.create_command("dump_statistics", self._dump_statistics, "Dump specified statistics to log. Statistics type: %s" % [_stats_dumpers.keys()])
+	Console.create_command("reload_ruleset", self._reload_ruleset, "Re-read ruleset files and replace current ruleset with new one")
 	
 func _dev_build(improvement_id : Variant = null) -> void:
 	var resolved_improvment_id : String
@@ -64,6 +65,16 @@ func _dump_statistics_effects(debug_node: DebugTree.TreeControl) -> void:
 	debug_node.add_text("Turn statistics\n")
 	var turn_stats := CurrentGame.current_game.session.get_last_effect_execution_statistics()
 	_dump_dict_to_text_node(turn_stats, debug_node)
+	
+func _reload_ruleset() -> void:
+	var new_ruleset := CentralSystem.load_ruleset()
+	if new_ruleset == null:
+		Console.print_line("Ruleset can not be loaded, aborting")
+		return
+		
+	CurrentGame.replace_ruleset(new_ruleset)
+	Console.print_line("Ruleset replaced")
+	
 	
 func _input(event: InputEvent) -> void:
 	# We have to catch this key before _gui_input, otherwise
