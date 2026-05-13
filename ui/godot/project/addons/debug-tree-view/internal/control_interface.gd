@@ -18,18 +18,18 @@ func add_2d_node(key: String, node: Node2D, hint: Rect2i = Rect2i(0, 0, 100, 100
 ## Adds text as a node with given key
 func add_text_node(key: String, text: String) -> RefCounted:
 	return null
-	
+
 ## Adds text if this node is a text node. If it is not, it will create
 ## a text node and later invocations will add text to this node
 func add_text(text: String) -> void:
 	return
-	
+
 ## Adds an image
 ## Will place image into scroll container, if needed.
 func add_image_node(key: String, image: Image) -> RefCounted:
 	return null
-	
-	
+
+
 ## Add given Control to overlay. Overlays are supported only for some types
 ## of nodes.
 @abstract
@@ -40,7 +40,7 @@ func add_to_overlay(node: Control) -> void;
 ## Essentially, you can put any json-like data here. But if depth is way to much,
 ## UI will be ugly.
 @abstract
-func add_structured_data_node(key: String, data : Dictionary) -> RefCounted;
+func add_structured_data_node(key: String, data : Dictionary, time_suffixes: bool = false) -> RefCounted;
 
 
 ## Creates an hierarchy and returns a handle to created node
@@ -59,7 +59,7 @@ func add_group(path: String) -> RefCounted:
 func add_random_group(prefix : String = '') -> RefCounted:
 	assert(false, "Unimplemented")
 	return RefCounted.new()
-	
+
 ## Finds a node by given path (relative to this item)
 ## Returns null if no such node exists
 @abstract func find_node(path: String) -> RefCounted;

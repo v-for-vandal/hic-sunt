@@ -145,58 +145,84 @@ func add_empty_node(key: String) -> RefCounted:
 	return _wrap_in_class(new_item)
 
 
-func add_structured_data_node(key: String, data : Dictionary) -> RefCounted:
+func add_structured_data_node(key: String, data : Dictionary, time_suffixes: bool = false) -> RefCounted:
 	var tree := Tree.new()
 	tree.hide_root = true
 	tree.columns = 2
 
 	var root_item := tree.create_item()
 	root_item.collapsed = false
-	_root_fill_structured_data(root_item, data)
+	_root_fill_structured_data(root_item, data, time_suffixes)
 	return _wrap_in_class(
 		_add_element(key, tree),
 	)
 
 
 
-func _root_fill_structured_data(parent: TreeItem, data: Dictionary) -> void:
+func _root_fill_structured_data(parent: TreeItem, data: Dictionary, time_suffixes: bool) -> void:
 	parent.collapsed = false
 	for key in data:
-		_add_structured_data_value(parent, str(key), data[key])
+		_add_structured_data_value(parent, str(key), data[key], time_suffixes)
 
 
-func _add_structured_data_value(parent: TreeItem, key: String, value: Variant) -> void:
+func _add_structured_data_value(parent: TreeItem, key: String, value: Variant, time_suffixes: bool) -> void:
 	var item := parent.create_child(parent.get_child_count())
 	item.set_text(0, DebugTree._normalize_key(key))
 	item.collapsed = false
 
 	if value is Dictionary:
 		for child_key in value:
-			_add_structured_data_value(item, str(child_key), value[child_key])
+			_add_structured_data_value(item, str(child_key), value[child_key], time_suffixes)
 		return
 
 	if value is Array:
 		for index in value.size():
-			_add_structured_data_value(item, str(index), value[index])
+			_add_structured_data_value(item, str(index), value[index], time_suffixes)
 		return
 
-	item.set_text(1, _format_structured_data_value(value))
+	item.set_text(1, _format_structured_data_value(key, value, time_suffixes))
 
 
-func _format_structured_data_value(value: Variant) -> String:
-	if value == null:
-		return "null"
+func _format_structured_data_value(key: String, value: Variant, time_suffixes: bool) -> String:
+	if time_suffixes:
+		if _get_time_suffix_scale(key) != -1.0:
+			var formatted_time := _try_format_time_value(key, value)
+			if formatted_time != "":
+				return formatted_time
 
-	match typeof(value):
-		TYPE_BOOL:
-			return "true" if value else "false"
-		TYPE_OBJECT:
-			var object_value := value as Object
-			if object_value == null:
-				return "Object(null)"
-			return "%s(%s)" % [object_value.get_class(), str(object_value)]
-		_:
-			return str(value)
+	return str(value)
+
+
+func _try_format_time_value(key: String, value: Variant) -> String:
+	var unit_scale := _get_time_suffix_scale(key)
+	if unit_scale < 0.0:
+		return ""
+
+	if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
+		return ""
+
+	var seconds := float(value) * unit_scale
+	var abs_seconds := absf(seconds)
+
+	if abs_seconds >= 0.1:
+		return "%.3f s" % seconds
+	if abs_seconds >= 0.0001:
+		return "%.3f ms" % (seconds * 1000.0)
+	if abs_seconds >= 0.0000001:
+		return "%.3f us" % (seconds * 1000000.0)
+	return "%.3f ns" % (seconds * 1000000000.0)
+
+
+func _get_time_suffix_scale(key: String) -> float:
+	if key.ends_with("_ns"):
+		return 0.000000001
+	if key.ends_with("_us"):
+		return 0.000001
+	if key.ends_with("_ms"):
+		return 0.001
+	if key.ends_with("_s"):
+		return 1.0
+	return -1.0
 
 
 func add_group(path: String) -> RefCounted:

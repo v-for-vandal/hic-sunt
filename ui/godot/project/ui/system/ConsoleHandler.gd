@@ -52,11 +52,11 @@ func _dump_statistics(statistics_type: String) -> void:
 
 func _dump_statistics_effects(debug_node: DebugTree.TreeControl) -> void:
 	var total_stats := CurrentGame.current_game.session.get_total_effect_execution_statistics()
-	debug_node.add_structured_data_node("total", total_stats)
+	debug_node.add_structured_data_node("total", total_stats, true)
 		
 
 	var turn_stats := CurrentGame.current_game.session.get_last_effect_execution_statistics()
-	debug_node.add_structured_data_node("turn", turn_stats)
+	debug_node.add_structured_data_node("turn", turn_stats, true)
 	
 func _reload_ruleset() -> void:
 	var new_ruleset := CentralSystem.load_ruleset()
