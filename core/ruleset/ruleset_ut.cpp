@@ -11,7 +11,9 @@ StdEffectDefinitionPtr MakeEffectDefinition(std::string id,
                                             std::string effect_code) {
   proto::ruleset::effect::Effect effect;
   effect.set_id(std::move(id));
-  effect.mutable_possible()->set_lua(std::move(possible_code));
+  if (possible_code.size() > 0) {
+    effect.mutable_possible()->set_lua(std::move(possible_code));
+  }
   effect.mutable_effect()->set_lua(std::move(effect_code));
   effect.set_scope_type(scope_type);
 

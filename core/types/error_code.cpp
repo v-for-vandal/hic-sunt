@@ -26,6 +26,8 @@ std::string ErrorCategory::message(int ev) const {
             return "effect lua runtime error";
         case ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED:
             return "effect lua operation limit exceeded";
+        case ERR_INVALID_EFFECT_DEFINITION:
+            return "effect definition is not valid (most likely lua code)";
         case ERR_INVALID_RULESET:
             return "invalid or null ruleset object";
         default:

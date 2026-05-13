@@ -1,10 +1,10 @@
-//effects : [
-//  {
-//	id: "worldgen.lapse_rate"
-//	scope_type: SCOPE_TYPE_CELL
-//	schedule: EVERY_TURN
-//	effect {
-//	  lua: "target:set_numeric_modifier(VAR(core.geography.height) * (-6.5) / 1000)"
-//	}
-//  }
-//]
+effects : [
+  {
+	id: "worldgen.lapse_rate"
+	scope_type: SCOPE_TYPE_CELL
+	schedule: EVERY_TURN
+	effect {
+	  lua: "target:set_numeric_modifier(VAR(core.geography.height) * (-6.5) / 1000)"
+	}
+  }
+]

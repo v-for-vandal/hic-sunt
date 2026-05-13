@@ -17,6 +17,7 @@ Dictionary MakeEffectExecutionStatisticsDictionary(
     item["total_duration_ns"] = static_cast<int64_t>(entry.total_duration_ns);
     item["total_changes"] = static_cast<int64_t>(entry.total_changes);
     item["failure_count"] = static_cast<int64_t>(entry.failure_count);
+    item["partial_failure_count"] = static_cast<int64_t>(entry.partial_failure_count);
     result[effect_id] = item;
   }
 

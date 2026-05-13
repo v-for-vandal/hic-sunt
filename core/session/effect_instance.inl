@@ -12,7 +12,7 @@ template <typename BaseTypes>
 EffectInstance<BaseTypes>::EffectInstance(const EffectDefinitionPtr& definition)
     : definition_(definition) {
   if (definition_->IsBroken()) {
-    throw std::system_error(make_error_code(ErrorCode::ERR_INVALID_RULESET));
+    throw std::system_error(make_error_code(ErrorCode::ERR_INVALID_EFFECT_DEFINITION));
   }
 
   InitializeLuaState();

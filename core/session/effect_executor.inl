@@ -27,6 +27,12 @@ void EffectExecutionStatistics<BaseTypes>::RecordFailure(
 }
 
 template <typename BaseTypes>
+void EffectExecutionStatistics<BaseTypes>::RecordPartialFailure(
+    const StringId& effect_id) {
+  ++entries_[effect_id].partial_failure_count;
+}
+
+template <typename BaseTypes>
 void EffectExecutionStatistics<BaseTypes>::MergeFrom(
     const EffectExecutionStatistics& other) {
   for (const auto& [effect_id, entry] : other.entries_) {
@@ -111,7 +117,7 @@ auto EffectExecutor<BaseTypes>::Execute(
 
     if (!execute_result) {
       statistics.RecordFailure(pending_execution.effect->GetId());
-      throw std::system_error(make_error_code(execute_result.error()));
+      continue;
     }
 
     size_t total_changes = 0;
@@ -119,8 +125,7 @@ auto EffectExecutor<BaseTypes>::Execute(
       total_changes += changes.GetOperationCount();
       auto apply_result = changes.Apply(current_time);
       if (!apply_result) {
-        statistics.RecordFailure(pending_execution.effect->GetId());
-        throw std::system_error(make_error_code(apply_result.error()));
+        statistics.RecordPartialFailure(pending_execution.effect->GetId());
       }
     }
 

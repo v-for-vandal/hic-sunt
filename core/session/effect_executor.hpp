@@ -17,12 +17,15 @@ class EffectExecutionStatistics {
     size_t total_duration_ns{0};
     size_t total_changes{0};
     size_t failure_count{0};
+    // Increased for every scope change that we failed to apply
+    size_t partial_failure_count{0};
 
     Entry& operator+=(const Entry& other) {
       execution_count += other.execution_count;
       total_duration_ns += other.total_duration_ns;
       total_changes += other.total_changes;
       failure_count += other.failure_count;
+      partial_failure_count += other.partial_failure_count;
       return *this;
     }
   };
@@ -30,6 +33,7 @@ class EffectExecutionStatistics {
   void RecordExecution(const StringId& effect_id, size_t duration_ns,
                        size_t change_count);
   void RecordFailure(const StringId& effect_id);
+  void RecordPartialFailure(const StringId& effect_id);
   void MergeFrom(const EffectExecutionStatistics& other);
 
   const auto& GetEntries() const noexcept { return entries_; }
