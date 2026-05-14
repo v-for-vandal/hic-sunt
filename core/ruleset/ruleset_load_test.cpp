@@ -106,4 +106,6 @@ TEST(StdRuleSet, LoadIgnoresUnreadableOrInvalidFiles) {
   EXPECT_FALSE(ruleset.GetVariableDefinitions()->IsNumericVariable("var.one"));
 }
 
+
+
 }  // namespace hs::ruleset

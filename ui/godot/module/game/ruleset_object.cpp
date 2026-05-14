@@ -86,7 +86,7 @@ Dictionary RulesetObject::get_atlas_render() const {
 }
 
 Dictionary RulesetObject::convert_improvement(
-    const hs::proto::ruleset::RegionImprovement& improvement_type) {
+    const hs::proto::ruleset::Improvement& improvement_type) {
   Dictionary result;
   result["id"] = improvement_type.id().c_str();
 

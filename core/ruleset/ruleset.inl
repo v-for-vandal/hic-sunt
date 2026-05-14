@@ -94,46 +94,23 @@ bool RuleSet<BaseTypes>::LoadVariableDefinitions(ErrorsCollection &errors) {
   for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();
        ++idx) {
     const auto &definition = RuleSetBase::GetVariableDefinitions().variables(idx);
+    const auto parsed_definition =
+        VariableDefinitions<BaseTypes>::ParseFromProto(definition);
+    const auto variable_id = BaseTypes::StringIdFromStdString(definition.id());
 
-    if (definition.has_numeric()) {
-      const auto &numeric = definition.numeric();
-      NumericVariableDefinition<BaseTypes> numeric_definition;
-      if (numeric.has_minimum()) {
-        numeric_definition.minimum = numeric.minimum();
-      }
-      if (numeric.has_maximum()) {
-        numeric_definition.maximum = numeric.maximum();
-      }
+    if (const auto *numeric_definition =
+            std::get_if<NumericVariableDefinition<BaseTypes>>(&parsed_definition)) {
       auto add_result = parsed_variable_definitions_->AddNumericDefinition(
-          BaseTypes::StringIdFromStdString(definition.id()),
-          numeric_definition);
+          variable_id, *numeric_definition);
       if (!add_result) {
         AddError(errors, fmt::format("Variable {} has conflicting type definition",
                                      definition.id()));
         return false;
       }
-    } else if (definition.has_string()) {
-      const auto &string_ = definition.string();
-      StringVariableDefinition<BaseTypes> string_definition;
-      if (!string_.default_().empty()) {
-        string_definition.default_value =
-            BaseTypes::StringIdFromStdString(string_.default_());
-      }
+    } else if (const auto *string_definition =
+                   std::get_if<StringVariableDefinition<BaseTypes>>(&parsed_definition)) {
       auto add_result = parsed_variable_definitions_->AddStringDefinition(
-          BaseTypes::StringIdFromStdString(definition.id()),
-          string_definition);
-      if (!add_result) {
-        AddError(errors, fmt::format("Variable {} has conflicting type definition",
-                                     definition.id()));
-        return false;
-      }
-    } else if (definition.has_boolean()) {
-      NumericVariableDefinition<BaseTypes> numeric_definition;
-      numeric_definition.minimum = 0;
-      numeric_definition.maximum = 1;
-      auto add_result = parsed_variable_definitions_->AddNumericDefinition(
-          BaseTypes::StringIdFromStdString(definition.id()),
-          numeric_definition);
+          variable_id, *string_definition);
       if (!add_result) {
         AddError(errors, fmt::format("Variable {} has conflicting type definition",
                                      definition.id()));
@@ -159,7 +136,7 @@ template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
 }
 
 template <typename BaseTypes>
-const proto::ruleset::RegionImprovement *
+const proto::ruleset::Improvement *
 RuleSet<BaseTypes>::FindRegionImprovementByType(
     const StringId &improvement_type_id) const {
   auto fit = improvements_by_type_.find(improvement_type_id);

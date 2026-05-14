@@ -157,7 +157,7 @@ auto Region<BaseTypes>::BuildPnlStatement(
     auto& improvement = cell.GetImprovement();
 
     // Get its type
-    const proto::ruleset::RegionImprovement* improvement_ruleset =
+    const proto::ruleset::Improvement* improvement_ruleset =
       ruleset.FindRegionImprovementByType(improvement.type());
 
     if(improvement_ruleset == nullptr) {

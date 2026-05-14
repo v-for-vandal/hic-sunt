@@ -16,3 +16,24 @@ enum ScopeType {
   SCOPE_TYPE_UNIT = 10;
   SCOPE_TYPE_UNIT_CLASS = 12;
 }
+
+enum ScopeTypeSet {
+  SCOPE_TYPE_SET_UNSPECIFIED = 0;
+  // Geo-related scopes.
+  // Includes SCOPE_TYPE_WORLD, SCOPE_TYPE_PLANE, SCOPE_TYPE_REGION, SCOPE_TYPE_CELL
+  SCOPE_TYPE_SET_GEO = 1;
+  // Civilization-related scopes. Includes SCOPE_TYPE_PLAYER, SCOPE_TYPE_CITY,
+  // SCOPE_TYPE_IMPROVEMENT, SCOPE_TYPE_IMPROVEMENT_CLASS
+  SCOPE_TYPE_SET_CIV = 2;
+
+  // Military-related scopes
+  // Includes SCOPE_TYPE_ARMY, SCOPE_TYPE_UNIT, SCOPE_TYPE_UNIT_CLASS
+  SCOPE_TYPE_SET_MILLITARY = 3;
+}
+
+// Element matches filter if it matches any element. Meaning everything is joined
+// via OR
+message ScopeTypeFilter {
+  repeated ScopeTypeSet scope_type_sets = 1;
+  repeated ScopeType scope_types = 2;
+}

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package hs.proto.ruleset;
 
+import "types/scope_type.proto";
+
 message NumericVariable {
   optional double minimum = 2;
   optional double maximum = 3;
@@ -20,6 +22,10 @@ message Variable {
     StringVariable string = 4;
     BooleanVariable boolean = 5;
   }
+
+  // Allowed scopes. Variable can not be modified in scopes
+  // not in the list (but can still be requested)
+  types.ScopeTypeFilter allowed_scopes = 6;
 }
 
 message Variables {

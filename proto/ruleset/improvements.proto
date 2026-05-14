@@ -22,7 +22,8 @@ message Improvement {
   // How much it costs to build entity
   ResourceBill cost = 6;
 
-  //map<string, int32> jobs = 7;
+  // TODO: RM
+  map<string, int32> jobs = 7;
 
   // this effect is inline. It will always be active only for this building clas
   // - we will always set target as 'improvement_class' and put this improvement
@@ -48,7 +49,7 @@ message Improvement {
   // You can achive the same effect by writing effects in effect definitions file. So
   // if you need to add some effect to building in your mod, don't overwrite the building -
   // just add effect externally.
-  effect.Effect instance_effect = 8;
+  effect.Effect instance_effect = 9;
 }
 
 message Improvements {

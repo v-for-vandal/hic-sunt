@@ -4,7 +4,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 #include <ruleset/effect.pb.h>
-#include <ruleset/region_improvements.pb.h>
+#include <ruleset/improvements.pb.h>
 #include <ruleset/variables.pb.h>
 #include <spdlog/spdlog.h>
 
@@ -99,8 +99,8 @@ void UpsertRepeatedField(RepeatedField* target, const Element& source,
   }
 }
 
-void ApplyFile(proto::ruleset::RegionImprovements& target, const std::filesystem::path& file_path) {
-  proto::ruleset::RegionImprovements parsed;
+void ApplyFile(proto::ruleset::Improvements& target, const std::filesystem::path& file_path) {
+  proto::ruleset::Improvements parsed;
   if (!ReadFromFile(file_path, parsed)) {
     return;
   }

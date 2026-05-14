@@ -332,7 +332,7 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
     auto& improvement = cell.GetImprovement();
 
     // Get its type
-    const hs::proto::ruleset::RegionImprovement* improvement_ruleset =
+    const hs::proto::ruleset::Improvement* improvement_ruleset =
         ruleset.FindRegionImprovementByType(
             GodotBaseTypes::StringIdFromStdString(improvement.type()));
 
