@@ -242,6 +242,7 @@ void SerializeTo(const Scope<BaseTypes> &source,
                  proto::scope::Scope &target) {
   target.Clear();
   target.set_id(BaseTypes::ToProtoString(source.id_));
+  target.set_scope_type(source.scope_type_);
   // TODO: finish other serialization
 }
 
@@ -250,6 +251,7 @@ Scope<BaseTypes> ParseFrom(const proto::scope::Scope &scope,
                             serialize::To<Scope<BaseTypes>>) {
   Scope<BaseTypes> result;
   result.id_ = ParseFrom(scope.id(), serialize::To<typename BaseTypes::StringId>{});
+  result.scope_type_ = scope.scope_type();
 
   // TODO: Finish other serializations
 

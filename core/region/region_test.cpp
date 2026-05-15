@@ -61,7 +61,7 @@ TEST(StdRegion, Equality) {
 }
 
 TEST(StdRegion, Scope) {
-  auto parent_scope = scope::test::MakeSimpleScope();
+  auto parent_scope = scope::test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_PLANE);
   StdRegion ref_region("test", 2);
   ASSERT_NE(ref_region.GetScope(), nullptr);
   ASSERT_TRUE(ref_region.GetScope()->SetParent(parent_scope));
@@ -80,7 +80,7 @@ TEST(StdRegion, CellScopeParent) {
 }
 
 TEST(StdRegion, TopNStringValues) {
-  auto parent_scope = scope::test::MakeSimpleScope();
+  auto parent_scope = scope::test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_PLANE);
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
   ASSERT_TRUE(region.GetScope()->SetParent(parent_scope));

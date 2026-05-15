@@ -56,11 +56,6 @@ Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
     result.SetImprovement(from.improvements(0));
   }
 
-  spdlog::info("parsing from protobuf, height is {}", from.height());
-
-  // TODO: RM
-  //result.SetHeight(from.height());
-
   ParseStringIdMapFrom(BaseTypes{}, from.user_data_string(),
                        result.user_data_string_);
   ParseStringIdMapFrom(BaseTypes{}, from.user_data_numeric(),

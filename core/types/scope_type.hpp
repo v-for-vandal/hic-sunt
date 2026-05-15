@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include <fmt/format.h>
 #include <types/scope_type.pb.h>
 
 #include <core/utils/enum_bitset.hpp>
@@ -76,5 +77,12 @@ constexpr bool CanLinkScopes(ScopeType from, ScopeType to) {
 }
 
 }  // namespace hs::types
+
+template <>
+struct fmt::formatter<hs::types::ScopeType> : fmt::formatter<std::string_view> {
+  auto format(hs::types::ScopeType value, format_context& ctx) const {
+    return fmt::formatter<std::string_view>::format(hs::proto::types::ScopeType_Name(value), ctx);
+  }
+};
 
 #include "scope_type.inl"
