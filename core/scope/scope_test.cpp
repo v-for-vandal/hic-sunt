@@ -29,10 +29,10 @@ TEST(StdScope, NumericVariable) {
 }
 
 TEST(StdScope, InheritanceParent) {
-  StdScopePtr parent_scope = test::MakeSimpleScope();
-  StdScopePtr scope("test");
+  StdScopePtr parent_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_WORLD);
+  StdScopePtr scope("test", types::ScopeType::SCOPE_TYPE_PLANE);
 
-  scope->SetParent(parent_scope);
+  ASSERT_TRUE(scope->SetParent(parent_scope));
 
   EXPECT_TRUE(scope->SetNumericModifier("numeric_var", "some_key", 1.0, 1.0, 0));
   EXPECT_TRUE(parent_scope->SetNumericModifier("numeric_var", "other_key", 1.0, 1.0));

@@ -92,13 +92,13 @@ bool RuleSet<BaseTypes>::LoadJobs([[maybe_unused]] ErrorsCollection &errors) {
       produces_definition.minimum = 0;
 
       const auto produces_variable_id =
-          BaseTypes::StringIdFromStdString("job/" + job.id() + "/produces/" + BaseTypes::StdStringFromStringId(resource_id));
+          BaseTypes::StringIdFromStdString(fmt::format("job/{}/produces/{}", job.id(), resource_id));
       add_result = parsed_variable_definitions_->AddNumericDefinition(produces_variable_id,
                                                                       produces_definition);
       if (!add_result) {
         AddError(errors,
                  fmt::format("Variable job/{}/produces/{} has conflicting type definition",
-                             job.id(), BaseTypes::StdStringFromStringId(resource_id)));
+                             job.id(), resource_id));
         return false;
       }
 
@@ -108,13 +108,13 @@ bool RuleSet<BaseTypes>::LoadJobs([[maybe_unused]] ErrorsCollection &errors) {
       consumes_definition.minimum = 0;
 
       const auto consumes_variable_id =
-          BaseTypes::StringIdFromStdString("job/" + job.id() + "/consumes/" + BaseTypes::StdStringFromStringId(resource_id));
+          BaseTypes::StringIdFromStdString(fmt::format("job/{}/consumes/{}", job.id(), resource_id));
       add_result = parsed_variable_definitions_->AddNumericDefinition(consumes_variable_id,
                                                                       consumes_definition);
       if (!add_result) {
         AddError(errors,
                  fmt::format("Variable job/{}/consumes/{} has conflicting type definition",
-                             job.id(), BaseTypes::StdStringFromStringId(resource_id)));
+                             job.id(), resource_id));
         return false;
       }
     }

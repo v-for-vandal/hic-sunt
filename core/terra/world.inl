@@ -51,7 +51,9 @@ auto World<BaseTypes>::AddPlane(const StringId &plane_id, QRSBox box,
   auto plane_ptr =
       std::make_shared<Plane>(control_object_, effective_plane_id, box,
                               region_radius, region_external_radius);
-  plane_ptr->GetScope()->SetParent(this->GetScope());
+  if(!plane_ptr->GetScope()->SetParent(this->GetScope())) {
+      throw std::runtime_error("Can't set world as parent to plane, unrecoverable error");
+  };
   planes_[effective_plane_id] = plane_ptr;
 
   return plane_ptr;
@@ -117,7 +119,9 @@ template <typename BaseTypes> void World<BaseTypes>::InitNonpersistent() {
   // set control object
   for (auto &[_, plane_ptr] : planes_) {
     plane_ptr->SetControlObject(control_object_);
-    plane_ptr->GetScope()->SetParent(this->GetScope());
+    if(!plane_ptr->GetScope()->SetParent(this->GetScope())) {
+        throw std::runtime_error("Can't set up plane parent to self");
+    }
   }
 
   // TODO: build region index

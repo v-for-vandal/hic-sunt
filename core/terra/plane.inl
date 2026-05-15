@@ -74,14 +74,18 @@ template <typename BaseTypes> void Plane<BaseTypes>::InitNonpersistent() {
   GetSurface().Foreach ([this](auto &, auto &cell) {
     auto region_ptr = cell.GetRegionPtr();
     auto region_id = region_ptr->GetId();
-    region_ptr->GetScope()->SetParent(this->GetScope());
+    if(!region_ptr->GetScope()->SetParent(this->GetScope())) {
+        throw std::runtime_error("Can't set region parent to self, unrecoverable error");
+    };
     region_index_[region_id] = region_ptr;
   });
 
   for (auto &cell : off_surface_) {
     auto region_ptr = cell.GetRegionPtr();
     auto region_id = region_ptr->GetId();
-    region_ptr->GetScope()->SetParent(this->GetScope());
+    if(!region_ptr->GetScope()->SetParent(this->GetScope())) {
+        throw std::runtime_error("Can't set region parent to self, unrecoverable error");
+    }
     region_index_[region_id] = region_ptr;
   }
 }

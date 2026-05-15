@@ -7,8 +7,10 @@
 #include <core/scope/string_variable.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
+#include <expected>
 
 #include "core/ruleset/variable_definition.hpp"
+#include "core/types/error_code.hpp"
 #include "core/types/scope_type.hpp"
 // #include <core/scope/variable_definition.hpp>
 
@@ -64,7 +66,18 @@ class Scope {
   ScopeType GetType() const noexcept { return scope_type_; }
 
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
-  void SetParent(const std::shared_ptr<Scope>& parent) { parent_ = parent; }
+  [[nodiscard]] std::expected<void, ErrorCode> SetParent(const std::shared_ptr<Scope>& parent) {
+     if(parent) {
+        if( !hs::types::CanLinkScopes(scope_type_, parent->scope_type_)) {
+            spdlog::warn("Scope of type {} can not be child of scope of type {}",
+                scope_type_, parent->scope_type_);
+            return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+        }
+     }
+      parent_ = parent;
+
+      return {};
+  }
 
   // You can and should do it only on one root scope. All other scopes will
   // fetch it automatically

@@ -124,7 +124,9 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
   cells_with_improvements_.clear();
   GetSurface().Foreach([this](QRSCoords coords, Cell<BaseTypes>& cell) {
         // Set parent scope for cell
-        cell.GetScope()->SetParent(this->GetScope());
+        if(!cell.GetScope()->SetParent(this->GetScope())) {
+            throw std::runtime_error("Can't set cell parent to self");
+        };
         feature_count_[cell.GetFeature()]++;
         if (cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);

@@ -16,6 +16,7 @@ project(
 add_project_arguments(
     [
         '-Wno-gcc-compat',
+        '-Werror=unused-result',
     ],
     language: 'cpp',
 )

@@ -78,7 +78,7 @@ TEST(StdVariableDefinitions, ParseStringVariableDefaultsAllowedScopesToAllScopeT
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_PLANE]);
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_REGION]);
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CELL]);
-  EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_PLAYER]);
+  EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CIV]);
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT]);
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS]);
@@ -106,7 +106,7 @@ TEST(StdVariableDefinitions, ParseNumericVariableLoadsAllowedScopesFromFilter) {
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CELL]);
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
 
-  EXPECT_FALSE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_PLAYER]);
+  EXPECT_FALSE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CIV]);
   EXPECT_FALSE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT]);
   EXPECT_FALSE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS]);
   EXPECT_FALSE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);

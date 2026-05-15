@@ -64,7 +64,7 @@ TEST(StdRegion, Scope) {
   auto parent_scope = scope::test::MakeSimpleScope();
   StdRegion ref_region("test", 2);
   ASSERT_NE(ref_region.GetScope(), nullptr);
-  ref_region.GetScope()->SetParent(parent_scope);
+  ASSERT_TRUE(ref_region.GetScope()->SetParent(parent_scope));
 
   ref_region.GetScope()->AddNumericModifier("numeric_var", "some_key", 1.0, 2.0);
   auto result = ref_region.GetScope()->GetNumericValue("numeric_var");
@@ -83,7 +83,7 @@ TEST(StdRegion, TopNStringValues) {
   auto parent_scope = scope::test::MakeSimpleScope();
   StdRegion region("test", 2);
   ASSERT_NE(region.GetScope(), nullptr);
-  region.GetScope()->SetParent(parent_scope);
+  ASSERT_TRUE(region.GetScope()->SetParent(parent_scope));
 
   const char* var_name = "string_var";
 
