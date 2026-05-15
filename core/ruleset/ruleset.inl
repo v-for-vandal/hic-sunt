@@ -2,6 +2,8 @@
 
 #include "ruleset.hpp"
 
+#include <string>
+
 #include "spdlog/spdlog.h"
 namespace hs::ruleset {
 
@@ -51,10 +53,10 @@ bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection &err
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection &errors) {
-  resources_by_type_.clear();
+  resources_by_id_.clear();
   for (int idx = 0; idx < resources_.resources_size(); ++idx) {
     const auto &resource = resources_.resources(idx);
-    resources_by_type_.try_emplace(BaseTypes::StringIdFromStdString(resource.id()), idx);
+    resources_by_id_.try_emplace(BaseTypes::StringIdFromStdString(resource.id()), idx);
   }
 
   return true;
@@ -65,7 +67,57 @@ bool RuleSet<BaseTypes>::LoadJobs([[maybe_unused]] ErrorsCollection &errors) {
   jobs_by_type_.clear();
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto &job = jobs_.jobs(idx);
-    jobs_by_type_.try_emplace(BaseTypes::StringIdFromStdString(job.id()), idx);
+    const auto job_id = BaseTypes::StringIdFromStdString(job.id());
+    jobs_by_type_.try_emplace(job_id, idx);
+
+    NumericVariableDefinition<BaseTypes> count_definition;
+    count_definition.allowed_scopes.reset();
+    count_definition.allowed_scopes |= types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
+    count_definition.minimum = 0;
+
+    auto add_result = parsed_variable_definitions_->AddNumericDefinition(
+        BaseTypes::StringIdFromStdString("job/" + job.id() + "/count"), count_definition);
+    if (!add_result) {
+      AddError(errors,
+               fmt::format("Variable job/{}/count has conflicting type definition", job.id()));
+      return false;
+    }
+
+    for (const auto &[resource_id, resource_idx] : resources_by_id_) {
+      (void)resource_idx;
+
+      NumericVariableDefinition<BaseTypes> produces_definition;
+      produces_definition.allowed_scopes.reset();
+      produces_definition.allowed_scopes |= types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
+      produces_definition.minimum = 0;
+
+      const auto produces_variable_id =
+          BaseTypes::StringIdFromStdString("job/" + job.id() + "/produces/" + BaseTypes::StdStringFromStringId(resource_id));
+      add_result = parsed_variable_definitions_->AddNumericDefinition(produces_variable_id,
+                                                                      produces_definition);
+      if (!add_result) {
+        AddError(errors,
+                 fmt::format("Variable job/{}/produces/{} has conflicting type definition",
+                             job.id(), BaseTypes::StdStringFromStringId(resource_id)));
+        return false;
+      }
+
+      NumericVariableDefinition<BaseTypes> consumes_definition;
+      consumes_definition.allowed_scopes.reset();
+      consumes_definition.allowed_scopes |= types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
+      consumes_definition.minimum = 0;
+
+      const auto consumes_variable_id =
+          BaseTypes::StringIdFromStdString("job/" + job.id() + "/consumes/" + BaseTypes::StdStringFromStringId(resource_id));
+      add_result = parsed_variable_definitions_->AddNumericDefinition(consumes_variable_id,
+                                                                      consumes_definition);
+      if (!add_result) {
+        AddError(errors,
+                 fmt::format("Variable job/{}/consumes/{} has conflicting type definition",
+                             job.id(), BaseTypes::StdStringFromStringId(resource_id)));
+        return false;
+      }
+    }
   }
 
   return true;
@@ -142,7 +194,7 @@ bool RuleSet<BaseTypes>::LoadVariableDefinitions(ErrorsCollection &errors) {
 template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
   RuleSetBase::Clear();
   improvements_by_type_.clear();
-  resources_by_type_.clear();
+  resources_by_id_.clear();
   jobs_by_type_.clear();
   projects_by_type_.clear();
   parsed_variable_definitions_->Clear();
@@ -165,8 +217,8 @@ RuleSet<BaseTypes>::FindRegionImprovementByType(
 template <typename BaseTypes>
 const proto::ruleset::Resource *
 RuleSet<BaseTypes>::FindResourceByType(const StringId &resource_type_id) const {
-  auto fit = resources_by_type_.find(resource_type_id);
-  if (fit != resources_by_type_.end()) {
+  auto fit = resources_by_id_.find(resource_type_id);
+  if (fit != resources_by_id_.end()) {
     const auto result_idx = fit->second;
     return &resources_.resources(result_idx);
   }

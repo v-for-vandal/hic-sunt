@@ -44,7 +44,7 @@ class RuleSet : public RuleSetBase {
   bool LoadVariableDefinitions(ErrorsCollection &errors);
 
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
-  absl::flat_hash_map<StringId, size_t> resources_by_type_;
+  absl::flat_hash_map<StringId, size_t> resources_by_id_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
 

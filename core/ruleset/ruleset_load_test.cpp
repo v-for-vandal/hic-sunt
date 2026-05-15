@@ -106,6 +106,56 @@ TEST(StdRuleSet, LoadIgnoresUnreadableOrInvalidFiles) {
   EXPECT_FALSE(ruleset.GetVariableDefinitions()->IsNumericVariable("var.one"));
 }
 
+TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
+  const auto root = MakeTempDir("job_variable_definitions");
+  WriteTextFile(root / "resources" / "resources.txt",
+                "resources { id: \"resource.wood\" }\n"
+                "resources { id: \"resource.tools\" }\n"
+                "resources { id: \"resource.food\" }\n");
+  WriteTextFile(root / "jobs" / "jobs.txt",
+                "jobs {\n"
+                "  id: \"job.one\"\n"
+                "  input { key: \"resource.wood\" value: 2 }\n"
+                "  output { key: \"resource.tools\" value: 1 }\n"
+                "}\n");
 
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({root}, errors));
+
+  const auto &definitions = ruleset.GetVariableDefinitions();
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/count"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.wood"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.tools"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.food"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.wood"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.tools"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.food"));
+
+  const auto count_definition = definitions->FindNumericVariable("job/job.one/count");
+  ASSERT_TRUE(count_definition.has_value());
+  EXPECT_EQ(count_definition->minimum, 0);
+  EXPECT_EQ(count_definition->maximum,
+            std::numeric_limits<StdBaseTypes::NumericValue>::max());
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
+
+  const auto produces_definition =
+      definitions->FindNumericVariable("job/job.one/produces/resource.food");
+  ASSERT_TRUE(produces_definition.has_value());
+  EXPECT_EQ(produces_definition->minimum, 0);
+  EXPECT_TRUE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_TRUE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
+
+  const auto consumes_definition =
+      definitions->FindNumericVariable("job/job.one/consumes/resource.food");
+  ASSERT_TRUE(consumes_definition.has_value());
+  EXPECT_EQ(consumes_definition->minimum, 0);
+  EXPECT_TRUE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_TRUE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
+}
 
 }  // namespace hs::ruleset

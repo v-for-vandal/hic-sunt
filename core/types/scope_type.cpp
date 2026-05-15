@@ -30,6 +30,10 @@ ScopeTypeFilter ToScopeTypeFilter(ScopeTypeSet scope_type_set) {
       result.set(ScopeType::SCOPE_TYPE_UNIT);
       result.set(ScopeType::SCOPE_TYPE_UNIT_CLASS);
       break;
+    case ScopeTypeSet::SCOPE_TYPE_SET_JOBS:
+      result |= ToScopeTypeFilter(ScopeTypeSet::SCOPE_TYPE_SET_GEO);
+      result |= ToScopeTypeFilter(ScopeTypeSet::SCOPE_TYPE_SET_CIV);
+      break;
     case ScopeTypeSet::SCOPE_TYPE_SET_UNSPECIFIED:
     default:
       break;

@@ -29,6 +29,10 @@ enum ScopeTypeSet {
   // Military-related scopes
   // Includes SCOPE_TYPE_ARMY, SCOPE_TYPE_UNIT, SCOPE_TYPE_UNIT_CLASS
   SCOPE_TYPE_SET_MILLITARY = 3;
+
+  // Everything that can have modifiers for jobs
+  // Includes SCOPE_TYPE_SET_GEO и SCOPE_TYPE_SET_CIV
+  SCOPE_TYPE_SET_JOBS = 4;
 }
 
 // Element matches filter if it matches any element. Meaning everything is joined
