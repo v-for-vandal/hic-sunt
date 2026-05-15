@@ -12,8 +12,13 @@ ScopeChangeSet<BaseTypes>::ValidateNumericVariable(const StringId& variable,
     return std::unexpected(ErrorCode::ERR_EMPTY_MODIFIER_KEY);
   }
 
-  if (!target_scope_->IsNumericVariable(variable)) {
+  const auto variable_definition = variable_definitions_->FindNumericVariable(variable);
+  if (!variable_definition) {
     return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+  }
+
+  if (!variable_definition->allowed_scopes[target_scope_->GetType()]) {
+    return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
   }
 
   return {};
@@ -27,8 +32,13 @@ ScopeChangeSet<BaseTypes>::ValidateStringVariable(const StringId& variable,
     return std::unexpected(ErrorCode::ERR_EMPTY_MODIFIER_KEY);
   }
 
-  if (!target_scope_->IsStringVariable(variable)) {
+  const auto variable_definition = variable_definitions_->FindStringVariable(variable);
+  if (!variable_definition) {
     return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+  }
+
+  if (!variable_definition->allowed_scopes[target_scope_->GetType()]) {
+    return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
   }
 
   return {};

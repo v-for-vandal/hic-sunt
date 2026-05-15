@@ -13,6 +13,35 @@ using StdScopePtr = ScopePtr<StdBaseTypes>;
 using StdScopeChangeSet = ScopeChangeSet<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using StdVariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
+using StdVariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<StdBaseTypes>;
+
+namespace {
+
+StdVariableDefinitionsConstPtr MakeRestrictedVariableDefinitions() {
+  auto definitions = std::make_shared<StdVariableDefinitions>();
+
+  hs::ruleset::NumericVariableDefinition<StdBaseTypes> numeric_definition;
+  numeric_definition.allowed_scopes.reset();
+  numeric_definition.allowed_scopes.set(types::ScopeType::SCOPE_TYPE_WORLD);
+  EXPECT_TRUE(definitions->AddNumericDefinition("numeric_var", numeric_definition));
+
+  hs::ruleset::StringVariableDefinition<StdBaseTypes> string_definition;
+  string_definition.allowed_scopes.reset();
+  string_definition.allowed_scopes.set(types::ScopeType::SCOPE_TYPE_WORLD);
+  EXPECT_TRUE(definitions->AddStringDefinition("string_var", string_definition));
+
+  return StdVariableDefinitionsConstPtr(
+      std::static_pointer_cast<const StdVariableDefinitions>(definitions));
+}
+
+StdScopePtr MakeScopeWithDefinitions(types::ScopeType scope_type,
+                                     const StdVariableDefinitionsConstPtr &definitions) {
+  StdScopePtr scope("test_scope", scope_type);
+  scope->SetVariableDefinitions(definitions);
+  return scope;
+}
+
+}  // namespace
 
 TEST(StdScopeChangeSet, EmptyAndClear) {
   auto scope = test::MakeSimpleScope();
@@ -52,6 +81,26 @@ TEST(StdScopeChangeSet, RejectsIncorrectStringVariableType) {
   auto result = changes.SetStringModifier("numeric_var", "key", "value", 1.0);
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+}
+
+TEST(StdScopeChangeSet, RejectsNumericVariableForDisallowedScopeType) {
+  auto scope = MakeScopeWithDefinitions(types::ScopeType::SCOPE_TYPE_CITY,
+                                        MakeRestrictedVariableDefinitions());
+  StdScopeChangeSet changes(scope);
+
+  auto result = changes.SetNumericModifier("numeric_var", "key", 1.0, 2.0);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+}
+
+TEST(StdScopeChangeSet, RejectsStringVariableForDisallowedScopeType) {
+  auto scope = MakeScopeWithDefinitions(types::ScopeType::SCOPE_TYPE_CITY,
+                                        MakeRestrictedVariableDefinitions());
+  StdScopeChangeSet changes(scope);
+
+  auto result = changes.SetStringModifier("string_var", "key", "value", 1.0);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
 }
 
 TEST(StdScopeChangeSet, AppliesNumericOperationsInInsertionOrder) {

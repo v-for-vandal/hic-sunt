@@ -12,6 +12,8 @@ std::string ErrorCategory::message(int ev) const {
       return "replacing ruleset is forbidden";
     case ERR_RULESET_MUST_BE_SET_FIRST:
       return "ruleset must be set first";
+    case ERR_INCORRECT_SCOPE_TYPE:
+      return "variable is not allowed for this scope type";
     case ERR_SCOPE_ALREADY_EXISTS:
       return "scope with this id already exists";
     case ERR_SCOPE_TYPE_UNSPECIFIED:

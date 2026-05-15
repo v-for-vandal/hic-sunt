@@ -69,6 +69,7 @@ class Scope {
   // You can and should do it only on one root scope. All other scopes will
   // fetch it automatically
   void SetVariableDefinitions(const VariableDefinitionsConstPtr& definitions);
+  const VariableDefinitionsConstPtr& GetVariableDefinitions() const;
 
   // const VariableDefinitions *Definitions() const;
 
@@ -125,7 +126,6 @@ class Scope {
 
   void FillStringModifiers(const StringId& variable, StringId& value, NumericValue& level);
 
-  const VariableDefinitionsConstPtr& GetVariableDefinitions() const;
 
  private:
   StringId id_;
