@@ -1,4 +1,5 @@
-#include <system_error>
+#pragma once
+
 #include "ruleset.hpp"
 
 #include "spdlog/spdlog.h"
@@ -28,6 +29,7 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
 
   bool success = true;
   success &= LoadImprovements(errors);
+  success &= LoadResources(errors);
   success &= LoadJobs(errors);
   success &= LoadProjects(errors);
   success &= LoadEffects(errors);
@@ -42,6 +44,17 @@ bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection &err
   for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
     const auto &improvement = improvements_.improvements(idx);
     improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
+  }
+
+  return true;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection &errors) {
+  resources_by_type_.clear();
+  for (int idx = 0; idx < resources_.resources_size(); ++idx) {
+    const auto &resource = resources_.resources(idx);
+    resources_by_type_.try_emplace(BaseTypes::StringIdFromStdString(resource.id()), idx);
   }
 
   return true;
@@ -129,6 +142,7 @@ bool RuleSet<BaseTypes>::LoadVariableDefinitions(ErrorsCollection &errors) {
 template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
   RuleSetBase::Clear();
   improvements_by_type_.clear();
+  resources_by_type_.clear();
   jobs_by_type_.clear();
   projects_by_type_.clear();
   parsed_variable_definitions_->Clear();
@@ -143,6 +157,18 @@ RuleSet<BaseTypes>::FindRegionImprovementByType(
   if (fit != improvements_by_type_.end()) {
     const auto result_idx = fit->second;
     return &improvements_.improvements(result_idx);
+  }
+
+  return nullptr;
+}
+
+template <typename BaseTypes>
+const proto::ruleset::Resource *
+RuleSet<BaseTypes>::FindResourceByType(const StringId &resource_type_id) const {
+  auto fit = resources_by_type_.find(resource_type_id);
+  if (fit != resources_by_type_.end()) {
+    const auto result_idx = fit->second;
+    return &resources_.resources(result_idx);
   }
 
   return nullptr;

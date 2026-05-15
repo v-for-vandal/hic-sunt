@@ -23,6 +23,8 @@ class RuleSet : public RuleSetBase {
   const proto::ruleset::Improvement *FindRegionImprovementByType(
       const StringId &improvement_type_id) const;
 
+  const proto::ruleset::Resource *FindResourceByType(const StringId &resource_type_id) const;
+
   const proto::ruleset::Job *FindJobByType(const StringId &job_type_id) const;
 
   const proto::ruleset::Project *FindProjectByType(const StringId &project_type_id) const;
@@ -35,12 +37,14 @@ class RuleSet : public RuleSetBase {
 
  private:
   bool LoadImprovements([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadResources([[maybe_unused]] ErrorsCollection &errors);
   bool LoadJobs([[maybe_unused]] ErrorsCollection &errors);
   bool LoadProjects([[maybe_unused]] ErrorsCollection &errors);
   bool LoadEffects(ErrorsCollection &errors);
   bool LoadVariableDefinitions(ErrorsCollection &errors);
 
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
+  absl::flat_hash_map<StringId, size_t> resources_by_type_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
 
