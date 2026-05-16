@@ -206,7 +206,7 @@ double RegionObject::get_height(Vector2i coords) const {
 #endif
 
 bool RegionObject::set_feature(Vector2i coords, String feature) const {
-    // Method is now working and is disabled
+    // Method is not working and is disabled
   return false;
 
   if (!region_) {

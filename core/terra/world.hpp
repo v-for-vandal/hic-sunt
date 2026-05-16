@@ -26,7 +26,9 @@ void SerializeTo(const World<BaseTypes> &source, proto::terra::World &target);
 template <typename BaseTypes>
 World<BaseTypes> ParseFrom(const proto::terra::World &world, serialize::To<World<BaseTypes>>);
 
-// World is a collection of planes
+// World is a central object, that contains all planes, players, civilizations
+// and so on. Combined with ruleset, it constitutes game field.
+// It is also root for the tree of scopes
 template <typename BaseTypes = StdBaseTypes>
 class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_WORLD> {
  public:

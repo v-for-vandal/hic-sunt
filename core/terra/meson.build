@@ -13,6 +13,7 @@ core_terra_lib = static_library(
     'core_terra_lib',
     sources: [
         'cell.cpp',
+        'civilization.cpp',
         'world.cpp',
         'plane.cpp',
         fbs_generated,
