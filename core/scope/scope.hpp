@@ -66,6 +66,7 @@ class Scope {
   ScopeType GetType() const noexcept { return scope_type_; }
 
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
+
   [[nodiscard]] std::expected<void, ErrorCode> SetParent(const std::shared_ptr<Scope>& parent) {
      if(parent) {
         if( !hs::types::CanLinkScopes(scope_type_, parent->scope_type_)) {

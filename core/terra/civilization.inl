@@ -8,7 +8,7 @@ template <typename BaseTypes>
 Civilization<BaseTypes>::Civilization(StringId id) : Base(id) {}
 
 template <typename BaseTypes>
-std::expected<void, ErrorCode> Civilization<BaseTypes>::AddScope(const ScopePtr& scope) {
+std::expected<void, ErrorCode> Civilization<BaseTypes>::AddChildScope(const ScopePtr& scope) {
   if (!types::CanLinkScopes(scope->GetType(), this->GetScope()->GetType())) {
     return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
   }
@@ -27,8 +27,32 @@ std::expected<void, ErrorCode> Civilization<BaseTypes>::AddScope(const ScopePtr&
 }
 
 template <typename BaseTypes>
+bool Civilization<BaseTypes>::HasChildScope(ScopeType scope_type, const StringId& id) const
+{
+    auto& scopes_of_type = child_scopes_[scope_type];
+    auto fit = scopes_of_type.find(id);
+    return fit != scopes_of_type.end();
+}
+
+template <typename BaseTypes>
+auto Civilization<BaseTypes>::GetChildScope(ScopeType scope_type, const StringId& id) const -> ScopePtr
+{
+    auto st_fit = child_scopes_.find(scope_type);
+    if (st_fit == child_scopes_.end()) {
+        return {};
+    }
+    auto& scopes_of_type = st_fit->second;
+    auto fit = scopes_of_type.find(id);
+    if (fit != scopes_of_type.end()) {
+        return fit->second;
+    }
+
+    return {};
+}
+
+template <typename BaseTypes>
 std::expected<typename Civilization<BaseTypes>::ScopePtr, ErrorCode>
-Civilization<BaseTypes>::FindOrCreate(ScopeType scope_type, const StringId& id) {
+Civilization<BaseTypes>::CreateChildScope(ScopeType scope_type, const StringId& id) {
   if (!types::CanLinkScopes(scope_type, this->GetScope()->GetType())) {
     return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
   }
@@ -36,17 +60,24 @@ Civilization<BaseTypes>::FindOrCreate(ScopeType scope_type, const StringId& id) 
   auto& scopes_of_type = child_scopes_[scope_type];
   auto fit = scopes_of_type.find(id);
   if (fit != scopes_of_type.end()) {
-    return fit->second;
+      return std::unexpected(ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
   }
 
   ScopePtr scope{id, scope_type};
-  auto parent_result = scope->SetParent(this->GetScope());
-  if (!parent_result) {
-    return std::unexpected(parent_result.error());
-  }
+  return AddScope(scope);
+}
 
-  auto [it, inserted] = scopes_of_type.emplace(id, scope);
-  return it->second;
+
+template <typename BaseTypes>
+std::expected<typename Civilization<BaseTypes>::ScopePtr, ErrorCode>
+Civilization<BaseTypes>::GetOrCreateChildScope(ScopeType scope_type, const StringId& id) {
+    // note: this function is not called often and at the moment, there is no need
+    // for optimization
+    if (HasScope(scope_type, id)) {
+        return GetScope(scope_type, id);
+    }
+
+    return CreateScope(scope_type, id);
 }
 
 template <typename BaseTypes>

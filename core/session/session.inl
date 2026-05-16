@@ -196,15 +196,32 @@ std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, Strin
         throw std::runtime_error(fmt::format("Faild to set class for new scope of class {}", improvement_class));
     }
 
+    // Find civilization
+    if (!world_->HasCivilization(civ_id)) {
+        return std::unexpected(ERR_NO_SUCH_CIV);
+    }
+    auto civ = world_->GetOrCreateCivilization(civ_id);
+
     // Find improvement class for this civilization. If it is not present,
     // create one. No-civ (empty civ_id) is handled inside this method.
-    auto improvement_class_scope = FindOrCreateImprovementClassScope(
-        civ_id,
-        improvement_class
-    );
+    auto improvement_class_scope_id = fmt::format("civ/{}/iclass/{}", civ_id, improvement_class);
+    ScopePtr improvement_class_scope;
+    if (!civ.HasScope(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
+        // Create one
+        auto improvement_class_scope =
+        auto creation_result = civ->GetOrCreate(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
+        if (!creation_result) {
+            utils::LogCriticalAndThrow("Failed to create scope {}; this is unrecoverable error", improvement_class_scope_id);
+        }
+        improvement_class_scope = *creation_result;
+        AddScope(improvement_class_scope);
+    } else {
+        improvement_class_scope = civ->GetOrCreate(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS)
+    }
 
     // set it as a tag
     result->AddTag(kCoreClass, improvement_class_scope);
+    AddScope(result);
 
     return result;
 }

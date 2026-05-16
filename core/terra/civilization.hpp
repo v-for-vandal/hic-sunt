@@ -31,8 +31,18 @@ class Civilization
   Civilization() = default;
   explicit Civilization(StringId id);
 
-  std::expected<void, ErrorCode> AddScope(const ScopePtr& scope);
-  std::expected<ScopePtr, ErrorCode> FindOrCreate(ScopeType scope_type, const StringId& id);
+  // Add given scope. Scope must be new, as it will be added as our child.
+  std::expected<void, ErrorCode> AddChildScope(const ScopePtr& scope);
+  // Creates new scope and adds it. If scope with this id exists (within this class), then
+  // error is returned
+  std::expected<ScopePtr, ErrorCode> CreateChildScope(ScopeType scope_type, const StringId& id);
+  bool HasChildScope(ScopeType scope_type, const StringId& id) const;
+
+  std::expected<ScopePtr, ErrorCode> GetOrCreateChildScope(ScopeType scope_type, const StringId& id);
+  // This method will return default-initialized ScopePtr if no such id is present. Remember that
+  // ScopePtr is non-nullable and will always contain data. It is very hard to check ScopePtr for
+  // 'validness' - it is better to check HasScope before calling this method.
+  ScopePtr GetChildScope(ScopeType scope_type, const StringId& id) const;
 
   const ScopedChildrenMap& GetChildScopes() const noexcept;
   const ScopeMap* FindScopesByType(ScopeType scope_type) const noexcept;
