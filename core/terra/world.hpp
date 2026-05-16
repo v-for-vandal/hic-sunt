@@ -10,6 +10,7 @@
 #include <core/ruleset/ruleset.hpp>
 #include <core/scope/scoped_object.hpp>
 #include <core/terra/cell.hpp>
+#include <core/terra/civilization.hpp>
 #include <core/terra/plane.hpp>
 #include <core/terra/types.hpp>
 #include <core/types/control_object.hpp>
@@ -39,6 +40,8 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   using QRSBox = geometry::Box<geometry::QRSCoordinateSystem>;
   using Plane = Plane<BaseTypes>;
   using PlanePtr = PlanePtr<BaseTypes>;
+  using Civilization = Civilization<BaseTypes>;
+  using CivilizationPtr = CivilizationPtr<BaseTypes>;
   using RegionPtr = region::RegionPtr<BaseTypes>;
   using StringId = BaseTypes::StringId;
   using String = BaseTypes::String;
@@ -52,6 +55,11 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   PlanePtr GetPlane(const StringId &id) const;
   PlanePtr AddPlane(const StringId &id, QRSBox box, int region_radius, int region_external_radius);
   auto &GetPlanes() noexcept { return planes_; }
+
+  CivilizationPtr GetOrCreateCivilization(const StringId &id);
+  bool HasCivilization(const StringId &id) const noexcept;
+  auto &GetCivilizations() noexcept { return civilizations_; }
+  const auto &GetCivilizations() const noexcept { return civilizations_; }
 
   RegionPtr GetRegionById(const StringId &region_id) const noexcept;
   bool HasRegion(const StringId &region_id) const noexcept;
@@ -67,6 +75,7 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
  private:
   // ScopePtr scope_ is inherited from ScopedObject
   std::unordered_map<StringId, PlanePtr> planes_;
+  std::unordered_map<StringId, CivilizationPtr> civilizations_;
   ControlObjectPtr control_object_;
 };
 

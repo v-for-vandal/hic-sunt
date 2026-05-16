@@ -11,6 +11,11 @@
 
 namespace hs::terra {
 
+/* \brief Class that incapsulates working with scope of type SCOPE_TYPE_CIV
+ *
+ * This class is not intended to store all complexity of civilization - this logic lives in Godot.
+ * Instead, we have here methods that simplify working with scopes.
+ */
 template <typename BaseTypes = StdBaseTypes>
 class Civilization
     : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_CIV> {
