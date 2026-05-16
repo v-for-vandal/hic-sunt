@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/scope/scope.hpp>
+#include <string_view>
 
 namespace hs::scope::test {
 
@@ -15,7 +16,7 @@ using StdVariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<
  * string_var. You should use it as root scope, so that those definitions were
  * inherited
  */
-StdScopePtr MakeSimpleScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD);
+StdScopePtr MakeSimpleScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD, std::string_view scope_id = "test_scope");
 
 /*! This function will create Simple scope and will additionally seed variables
  * with predefined values:
@@ -24,6 +25,6 @@ StdScopePtr MakeSimpleScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD);
  * StringVariable { id = "string_var", key = "seed", value = "value", level
  * = 3.0}
  */
-StdScopePtr MakeSeededScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD);
+StdScopePtr MakeSeededScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD, std::string_view scope_id = "test_scope");
 
 }  // namespace hs::scope::test
