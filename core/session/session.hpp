@@ -81,6 +81,7 @@ class Session {
   // static StringId aren't possible because godot::StringName requires godot
   // runtime being active.
   StringId kCoreTurn{"core.turn"};
+  StringId kClass{"core.class"};
 };
 
 }  // namespace hs::session

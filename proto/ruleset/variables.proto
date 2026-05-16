@@ -26,6 +26,20 @@ message Variable {
   // Allowed scopes. Variable can not be modified in scopes
   // not in the list (but can still be requested)
   types.ScopeTypeFilter allowed_scopes = 6;
+
+  // Immutable variable can not be adjusted with modifiers. Those are
+  // system variables, like current turn, or game version and so on.
+  // Effects can read it, but can not write it. World generator scripts and
+  // c++ modules can set and read them.
+  bool immutable = 7;
+
+  // Uninheritable variables are not accessible from child scopes. Marking variable
+  // as uninheritable will prevent it from being read other then in this scope.
+  // That feature is rarely needed. One example is 'core.class' - this property
+  // is unique to every scope that have one, and child should always have their own.
+  // Marking variable as uninheritable is mostly to prevent easy to miss, hard to
+  // catch bugs
+  bool uninheritable = 8;
 }
 
 message Variables {

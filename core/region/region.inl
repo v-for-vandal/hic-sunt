@@ -52,37 +52,6 @@ bool Region<BaseTypes>::operator==(const Region &other) const {
 }
 
 template <typename BaseTypes>
-bool Region<BaseTypes>::SetBiome(QRSCoords coords, const StringId &biome) {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  if (BaseTypes::IsNullToken(biome)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  if (!BaseTypes::IsNullToken(cell.GetBiome())) {
-    biome_count_.Remove(cell.GetBiome());
-  }
-  cell.SetBiome(biome);
-  biome_count_.Add(biome);
-
-  return true;
-}
-
-template <typename BaseTypes>
-bool Region<BaseTypes>::SetFeature(QRSCoords coords, const StringId &feature) {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  cell.SetFeature(feature);
-  return true;
-}
-
-template <typename BaseTypes>
 bool Region<BaseTypes>::SetImprovement(QRSCoords coords,
                                        const StringId &improvement_type) {
   if (!surface_.Contains(coords)) {
@@ -127,7 +96,7 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
         if(!cell.GetScope()->SetParent(this->GetScope())) {
             throw std::runtime_error("Can't set cell parent to self");
         };
-        feature_count_[cell.GetFeature()]++;
+        //feature_count_[cell.GetFeature()]++;
         if (cell.HasImprovement()) {
           cells_with_improvements_.insert(coords);
         }

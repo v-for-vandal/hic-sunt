@@ -56,10 +56,7 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   const StringId &GetId() const { return id_; }
   // void SetId(const StringId& id) { id_ = id; }
 
-  bool SetBiome(QRSCoords coords, const StringId &biome);
   std::vector<std::pair<StringId, int>> GetTopKBiomes(int k) const { return biome_count_.TopK(k); }
-
-  bool SetFeature(QRSCoords coords, const StringId &biome);
 
   bool SetImprovement(QRSCoords coords, const StringId &improvement_type);
 

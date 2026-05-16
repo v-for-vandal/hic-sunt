@@ -36,9 +36,6 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
 
   Cell() = default;
 
-  StringId GetBiome() const { return biome_; }
-  StringId GetFeature() const { return feature_; }
-
   bool HasImprovement() const { return !improvement_.type().empty(); }
   const proto::region::Improvement &GetImprovement() const { return improvement_; }
 
@@ -48,41 +45,11 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
   friend Region<BaseTypes>;
   friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source, proto::region::Cell &to);
   friend Cell ParseFrom<BaseTypes>(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
-  // Using this method is not recommended - instead use Region::SetBiome
-  // because region tracks some aggregated information about cells
-  void SetBiome(StringId biome) { biome_ = biome; }
-  void SetFeature(StringId feature) { feature_ = feature; }
   void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
-  /* TODO: REMOVE?
-  void SetHeight(double value) noexcept {
-    height_ = value;
-  }
-  */
-  /* TODO: REMOVE, replaced with modifiers
-  void SetTemperature(double value) noexcept { temperature_ = value; }
-  void SetPrecipitation(double value) noexcept { precipitation_ = value; }
-  */
 
  private:
-  // Note: ScopePtr scope_ will be inherited from ScopedObject
-
-  StringId biome_;
-  StringId feature_;
-
-  /* TODO: REMOVE
-  // height, in meters, above/under sea level (whatever sea this may be)
-  // negative is under sea level, positive is above sea level
-  double height_{0};
-  // temperature, in celsius
-  double temperature_{0};
-  // precipitation, in millimeters
-  double precipitation_{0};
-  */
 
   proto::region::Improvement improvement_;
-
-  absl::flat_hash_map<StringId, double> user_data_numeric_;
-  absl::flat_hash_map<StringId, String> user_data_string_;
 };
 
 }  // namespace hs::region

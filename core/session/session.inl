@@ -180,4 +180,34 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::AddScop
   return {};
 }
 
+/*
+std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, StringId improvement_class) {
+    auto scope_id = CreateNewScopeId();
+    ScopePtr result{scope_id, ScopeType::SCOPE_TYPE_IMPROVEMENT};
+
+    auto success = result->SetStringModifier(
+        kCoreClass,
+        kCoreClass,
+        1,
+        improvement_class
+        );
+    if (!success) {
+        // This one can not happen and is unrecoverable
+        throw std::runtime_error(fmt::format("Faild to set class for new scope of class {}", improvement_class));
+    }
+
+    // Find improvement class for this civilization. If it is not present,
+    // create one. No-civ (empty civ_id) is handled inside this method.
+    auto improvement_class_scope = FindOrCreateImprovementClassScope(
+        civ_id,
+        improvement_class
+    );
+
+    // set it as a tag
+    result->AddTag(kCoreClass, improvement_class_scope);
+
+    return result;
+}
+*/
+
 }  // namespace hs::session

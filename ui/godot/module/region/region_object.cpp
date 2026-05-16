@@ -131,7 +131,7 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
 
   // Fill result
   Dictionary result;
-  result["feature"] = cell.GetFeature();
+  //result["feature"] = cell.GetFeature();
   result["improvement"] = convert_to_dictionary(cell.GetImprovement());
   /* TODO: RM
   result["biome"] = cell.GetBiome();
@@ -206,6 +206,9 @@ double RegionObject::get_height(Vector2i coords) const {
 #endif
 
 bool RegionObject::set_feature(Vector2i coords, String feature) const {
+    // Method is now working and is disabled
+  return false;
+
   if (!region_) {
     return false;
   }
@@ -215,7 +218,8 @@ bool RegionObject::set_feature(Vector2i coords, String feature) const {
     return false;
   }
 
-  auto success = region_->SetFeature(qrs_coords, feature);
+  //auto success = region_->SetFeature(qrs_coords, feature);
+  auto success = true;
 
   if (success) {
     emit_signals_for_cell(coords, 0);
