@@ -1,3 +1,6 @@
+#pragma once
+#include "variable_definition.hpp"
+
 namespace hs::ruleset {
 
 template <typename BaseTypes>
@@ -51,6 +54,7 @@ std::expected<void, ErrorCode> VariableDefinitions<BaseTypes>::AddNumericDefinit
     return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
   }
 
+  definition.id = id;
   numeric_definitions_[id] = std::move(definition);
   return {};
 }
@@ -63,6 +67,7 @@ std::expected<void, ErrorCode> VariableDefinitions<BaseTypes>::AddStringDefiniti
     return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
   }
 
+  definition.id = id;
   string_definitions_[id] = std::move(definition);
   return {};
 }
@@ -101,6 +106,21 @@ VariableDefinitions<BaseTypes>::FindStringVariable(const StringId &id) const {
   }
 
   return fit->second;
+}
+
+template <typename BaseTypes>
+std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode>
+VariableDefinitions<BaseTypes>::FindVariable(const StringId &id) const {
+  if (const auto numeric = FindNumericVariable(id); numeric) {
+      return numeric;
+  }
+
+  if (const auto string_ = FindStringVariable(id); string_) {
+    return string_;
+  }
+
+  spdlog::error("Variable {} is unknown", id);
+  return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
 }  // namespace hs::ruleset

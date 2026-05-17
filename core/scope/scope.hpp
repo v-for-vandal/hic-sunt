@@ -44,6 +44,9 @@ class Scope {
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
   using ScopeType = types::ScopeType;
   using VariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<BaseTypes>;
+  using VariableDefinitionBase = hs::ruleset::VariableDefinitionBase<BaseTypes>;
+  using NumericVariableDefinition = hs::ruleset::NumericVariableDefinition<BaseTypes>;
+  using StringVariableDefinition = hs::ruleset::StringVariableDefinition<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
    *
@@ -141,16 +144,15 @@ class Scope {
  private:
   using VisitedScopes = absl::flat_hash_set<const Scope*>;
 
-  void FillNumericModifiers(const StringId& variable, NumericValue& add, NumericValue& mult) const;
-  void FillNumericModifiers(const StringId& variable, NumericValue& add, NumericValue& mult,
+  void FillNumericModifiers(const NumericVariableDefinition& variable_definition,
+                            NumericValue& add, NumericValue& mult,
                             VisitedScopes& visited) const;
 
-  void FillStringModifiers(const StringId& variable, StringId& value, NumericValue& level);
-  void FillStringModifiers(const StringId& variable, StringId& value, NumericValue& level,
-                           VisitedScopes& visited);
+  void FillStringModifiers(const StringVariableDefinition& variable_definition, StringId& value,
+                           NumericValue& level, VisitedScopes& visited);
 
-  std::expected<size_t, ErrorCode> DoGetModificationTime(const StringId& variable,
-                                                         VisitedScopes& visited) const;
+  size_t DoGetModificationTime(
+      const VariableDefinitionBase& variable_definition, VisitedScopes& visited) const;
 
   template <typename CollectFn>
   void DoExplainNumericVariable(const StringId& variable, CollectFn&& collect_fn,
@@ -159,6 +161,9 @@ class Scope {
   template <typename CollectFn>
   void DoExplainStringVariable(const StringId& variable, CollectFn&& collect_fn,
                                VisitedScopes& visited);
+
+  template <typename CollectFn>
+  void DoExplainAllVariables(CollectFn&& collect_fn, VisitedScopes& visited);
 
  private:
   StringId id_;

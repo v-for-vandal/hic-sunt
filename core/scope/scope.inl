@@ -33,65 +33,47 @@ void Scope<BaseTypes>::SetVariableDefinitions(const VariableDefinitionsConstPtr&
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::FillNumericModifiers(const StringId &variable,
-    NumericValue& add, NumericValue& mult) const
-{
-  VisitedScopes visited;
-  FillNumericModifiers(variable, add, mult, visited);
-}
-
-template <typename BaseTypes>
-void Scope<BaseTypes>::FillNumericModifiers(const StringId &variable,
+void Scope<BaseTypes>::FillNumericModifiers(const NumericVariableDefinition& variable_definition,
     NumericValue& add, NumericValue& mult, VisitedScopes& visited) const
 {
   if (!visited.insert(this).second) {
     return;
   }
 
-  auto it = numeric_variables_.find(variable);
-  if (it != numeric_variables_.end()) {
+  if (auto it = numeric_variables_.find(variable_definition.id); it != numeric_variables_.end()) {
       it->second.CalculateModifiers(add, mult);
   }
 
   if(parent_ != nullptr) {
-      parent_->FillNumericModifiers(variable, add, mult, visited);
+      parent_->FillNumericModifiers(variable_definition, add, mult, visited);
   }
 
   for (const auto& tag_scope : tag_scopes_) {
       if (tag_scope != nullptr) {
-          tag_scope->FillNumericModifiers(variable, add, mult, visited);
+          tag_scope->FillNumericModifiers(variable_definition, add, mult, visited);
       }
   }
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
-    StringId& value, NumericValue& level)
-{
-    VisitedScopes visited;
-    FillStringModifiers(variable, value, level, visited);
-}
-
-template <typename BaseTypes>
-void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
+void Scope<BaseTypes>::FillStringModifiers(const StringVariableDefinition& variable_definition,
     StringId& value, NumericValue& level, VisitedScopes& visited)
 {
     if (!visited.insert(this).second) {
         return;
     }
 
-    auto fit = string_variables_.find(variable);
-    if( fit != string_variables_.end()) {
+    if (auto fit = string_variables_.find(variable_definition.id); fit != string_variables_.end()) {
         fit->second.CalculateModifiers(value, level);
     }
 
     // get parent value
     if(parent_ != nullptr) {
-        parent_->FillStringModifiers(variable, value, level, visited);
+        parent_->FillStringModifiers(variable_definition, value, level, visited);
     }
 
     for (const auto& tag_scope : tag_scopes_) {
-        tag_scope->FillStringModifiers(variable, value, level, visited);
+        tag_scope->FillStringModifiers(variable_definition, value, level, visited);
     }
 
 }
@@ -114,7 +96,8 @@ auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expecte
   NumericValue add{0};
   NumericValue mult{0};
 
-  FillNumericModifiers(variable, add, mult);
+  VisitedScopes visited;
+  FillNumericModifiers(*vardef, add, mult, visited);
 
   mult = 1 + mult;
   mult = std::max<NumericValue>(mult, 0);
@@ -133,10 +116,16 @@ auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> std::expected
         return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
     }
 
+    auto vardef = GetVariableDefinitions()->FindStringVariable(variable);
+    if (!vardef) {
+        return std::unexpected(vardef.error());
+    }
+
     NumericValue level{0};
     StringId result;
 
-    FillStringModifiers(variable, result, level);
+    VisitedScopes visited;
+    FillStringModifiers(*vardef, result, level, visited);
 
     return result;
 }
@@ -178,53 +167,43 @@ std::expected<void, ErrorCode> Scope<BaseTypes>::SetStringModifier(const StringI
 
 template <typename BaseTypes>
 std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(const StringId& variable) const  {
+   auto vardef = GetVariableDefinitions()->FindVariable(variable);
+   if (!vardef) {
+       return std::unexpected(vardef.error());
+   }
+
    VisitedScopes visited;
-   return DoGetModificationTime(variable, visited);
+   return DoGetModificationTime(*vardef, visited);
 }
 
 template <typename BaseTypes>
-std::expected<size_t, ErrorCode> Scope<BaseTypes>::DoGetModificationTime(const StringId& variable,
-    VisitedScopes& visited) const {
+size_t Scope<BaseTypes>::DoGetModificationTime(
+    const VariableDefinitionBase& variable_definition, VisitedScopes& visited) const {
    if (!visited.insert(this).second) {
        return 0;
    }
 
    size_t modification_time = 0;
 
-   if (auto fit = numeric_variables_.find(variable); fit != numeric_variables_.end()) {
+   if (auto fit = numeric_variables_.find(variable_definition.id); fit != numeric_variables_.end()) {
        modification_time = std::max(modification_time, fit->second.GetModificationTime());
    }
 
-   if (auto fit = string_variables_.find(variable); fit != string_variables_.end()) {
+   if (auto fit = string_variables_.find(variable_definition.id); fit != string_variables_.end()) {
        modification_time = std::max(modification_time, fit->second.GetModificationTime());
    }
 
    if (parent_ != nullptr) {
-       auto parent_modification_time = parent_->DoGetModificationTime(variable, visited);
-       if (!parent_modification_time.has_value()) {
-           return parent_modification_time;
-       }
-       modification_time = std::max(modification_time, *parent_modification_time);
+       auto parent_modification_time = parent_->DoGetModificationTime(variable_definition, visited);
+       modification_time = std::max(modification_time, parent_modification_time);
    }
 
    for (const auto& tag_scope : tag_scopes_) {
-       auto tag_modification_time = tag_scope->DoGetModificationTime(variable, visited);
-       if (!tag_modification_time.has_value()) {
-           return tag_modification_time;
-       }
-       modification_time = std::max(modification_time, *tag_modification_time);
+       auto tag_modification_time = tag_scope->DoGetModificationTime(variable_definition, visited);
+       modification_time = std::max(modification_time, tag_modification_time);
    }
 
-   if (modification_time != 0) {
-       return modification_time;
-   }
-
-   const auto& definitions = GetVariableDefinitions();
-   if (!definitions->IsVariable(variable)) {
-       return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
-   }
-
-   return 0;
+   return modification_time;
 }
 
 template <typename BaseTypes>

@@ -19,6 +19,9 @@ namespace hs::ruleset {
 template <typename BaseTypes = StdBaseTypes>
 class VariableDefinitionBase {
  public:
+  using StringId = typename BaseTypes::StringId;
+
+  StringId id{};
   types::ScopeTypeFilter allowed_scopes = [] {
     types::ScopeTypeFilter result;
     result.set();
@@ -86,12 +89,14 @@ class VariableDefinitions {
   std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode> FindNumericVariable(
       const StringId& id) const;
 
+  std::expected<StringVariableDefinition<BaseTypes>, ErrorCode> FindStringVariable(
+      const StringId& id) const;
+
+  std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode> FindVariable(const StringId& id) const;
+
   const auto& GetNumericDefinitions() const noexcept { return numeric_definitions_; }
 
   const auto& GetStringDefinitions() const noexcept { return string_definitions_; }
-
-  std::expected<StringVariableDefinition<BaseTypes>, ErrorCode> FindStringVariable(
-      const StringId& id) const;
 
  private:
   absl::flat_hash_map<StringId, NumericVariableDefinition<BaseTypes>> numeric_definitions_;
