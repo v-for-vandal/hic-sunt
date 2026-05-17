@@ -45,6 +45,10 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRule
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorld(
     WorldPtr ptr) {
+    if (!ptr) {
+        spdlog::error("Trying to set world to nullptr");
+        return std::unexpected(ErrorCode::ERR_WORLD_MUST_BE_SET_FIRST);
+    }
   if (world_) {
     spdlog::error("Can not set world more than once");
     return std::unexpected(ErrorCode::ERR_WORLD_ALREADY_SET);
@@ -138,15 +142,15 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::SetCurrentTurn(size_t value) {
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
-void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
+std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
   if (!ruleset_) {
     spdlog::error("Ruleset is not set");
-    return;
+    return std::unexpected(ERR_RULESET_MUST_BE_SET_FIRST);
   }
 
   if (!world_) {
     spdlog::error("World is not set");
-    return;
+    return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);
   }
 
   EffectExecutor<BaseTypes> executor;
@@ -155,6 +159,8 @@ void Session<BaseTypes, WorldPtr, RuleSetPtr>::AdvanceNextTurn() {
 
   // Now, change turn
   SetCurrentTurn(current_turn_ + 1);
+
+  return {};
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
@@ -180,10 +186,27 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::AddScop
   return {};
 }
 
-/*
-std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, StringId improvement_class) {
-    auto scope_id = CreateNewScopeId();
-    ScopePtr result{scope_id, ScopeType::SCOPE_TYPE_IMPROVEMENT};
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId civ_id, StringId improvement_class) -> std::expected<ScopePtr, ErrorCode> {
+    if(!world_) {
+        utils::LogCriticalAndThrow("Can not create scopes without world");
+    }
+
+    if(BaseTypes::IsNullToken(civ_id)) {
+        spdlog::warn("Null token passed as civ_id");
+        return std::unexpected(ERR_NULL_ID);
+    }
+
+    if(BaseTypes::IsNullToken(improvement_class)) {
+        spdlog::warn("Null token passed as improvement_class");
+        return std::unexpected(ERR_NULL_ID);
+    }
+
+    auto next_int = world_->GetNextId();
+    auto scope_id = BaseTypes::StringIdFromStdString(
+        fmt::format("imprv/{}", next_int));
+
+    ScopePtr result{scope_id, types::ScopeType::SCOPE_TYPE_IMPROVEMENT};
 
     auto success = result->SetStringModifier(
         kCoreClass,
@@ -193,11 +216,14 @@ std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, Strin
         );
     if (!success) {
         // This one can not happen and is unrecoverable
-        throw std::runtime_error(fmt::format("Faild to set class for new scope of class {}", improvement_class));
+        throw std::runtime_error(fmt::format("Faild to set class for new scope of class {}, original error is {}",
+            improvement_class,
+            success.error()));
     }
 
     // Find civilization
     if (!world_->HasCivilization(civ_id)) {
+        spdlog::warn("No such civilization: {}", civ_id);
         return std::unexpected(ERR_NO_SUCH_CIV);
     }
     auto civ = world_->GetOrCreateCivilization(civ_id);
@@ -206,17 +232,21 @@ std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, Strin
     // create one. No-civ (empty civ_id) is handled inside this method.
     auto improvement_class_scope_id = fmt::format("civ/{}/iclass/{}", civ_id, improvement_class);
     ScopePtr improvement_class_scope;
-    if (!civ.HasScope(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
+    if (!civ.HasChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
         // Create one
-        auto improvement_class_scope =
-        auto creation_result = civ->GetOrCreate(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
+        auto creation_result = civ->GetOrCreate(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
         if (!creation_result) {
             utils::LogCriticalAndThrow("Failed to create scope {}; this is unrecoverable error", improvement_class_scope_id);
         }
         improvement_class_scope = *creation_result;
-        AddScope(improvement_class_scope);
+        auto add_success = AddScope(improvement_class_scope);
+        if (!add_success) {
+            spdlog::warn("Failed to register newly created improvement class scope {}, reason: {}",
+                improvement_class_scope_id, add_success.error());
+            return std::unexpected(add_success.error());
+        }
     } else {
-        improvement_class_scope = civ->GetOrCreate(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS)
+        improvement_class_scope = civ->GetChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
     }
 
     // set it as a tag
@@ -225,6 +255,5 @@ std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, Strin
 
     return result;
 }
-*/
 
 }  // namespace hs::session

@@ -43,7 +43,7 @@ TEST(StdScope, InheritanceParent) {
 
 TEST(StdScope, InheritanceIncludesTagScopes) {
   StdScopePtr parent_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_WORLD, "parent");
-  StdScopePtr tag_scope("tag", types::ScopeType::SCOPE_TYPE_WORLD);
+  StdScopePtr tag_scope("tag", types::ScopeType::SCOPE_TYPE_PLANE_CLASS);
   StdScopePtr scope("test", types::ScopeType::SCOPE_TYPE_PLANE);
 
   ASSERT_TRUE(scope->SetParent(parent_scope));
@@ -55,19 +55,19 @@ TEST(StdScope, InheritanceIncludesTagScopes) {
 
   auto result = scope->GetNumericValue("numeric_var");
   ASSERT_TRUE(result);
-  EXPECT_EQ(*result, 12.0);  // add=(1+2+3) * (1 + mult=(0+1+0.5))
+  EXPECT_EQ(*result, 15.0);  // add=(1+2+3) * (1 + mult=(0+1+0.5))
 }
 
 TEST(StdScope, GraphTraversalSkipsAlreadyVisitedTagScopes) {
-  StdScopePtr shared_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_WORLD, "shared");
-  StdScopePtr parent_scope("parent", types::ScopeType::SCOPE_TYPE_WORLD);
+  StdScopePtr world_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_WORLD, "world");
+  StdScopePtr plane_class_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_PLANE_CLASS, "plane_class");
   StdScopePtr scope("test", types::ScopeType::SCOPE_TYPE_PLANE);
 
-  ASSERT_TRUE(scope->SetParent(parent_scope));
-  ASSERT_TRUE(scope->AddTagLink("tag_name", shared_scope));
-  ASSERT_TRUE(parent_scope->AddTagLink("tag_name", shared_scope));
+  ASSERT_TRUE(scope->SetParent(world_scope));
+  ASSERT_TRUE(scope->AddTagLink("tag_name", plane_class_scope));
+  ASSERT_TRUE(plane_class_scope->SetParent(world_scope));
 
-  EXPECT_TRUE(shared_scope->SetNumericModifier("numeric_var", "shared", 2.0, 1.0));
+  EXPECT_TRUE(world_scope->SetNumericModifier("numeric_var", "shared", 2.0, 1.0));
 
   auto result = scope->GetNumericValue("numeric_var");
   ASSERT_TRUE(result);
@@ -93,7 +93,7 @@ TEST(StdScope, GraphTraversalSkipsAlreadyVisitedTagScopes) {
                                 });
 
   ASSERT_EQ(explanations.size(), 1u);
-  EXPECT_EQ(explanations[0].scope_id, "shared");
+  EXPECT_EQ(explanations[0].scope_id, "world");
   EXPECT_EQ(explanations[0].modifier, "shared");
 
   auto modification_time = scope->GetModificationTime("numeric_var");
@@ -102,9 +102,9 @@ TEST(StdScope, GraphTraversalSkipsAlreadyVisitedTagScopes) {
 }
 
 TEST(StdScope, AddTagLinkRejectsDuplicateScopeId) {
-  StdScopePtr scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_WORLD, "scope");
-  StdScopePtr tag_scope_a("shared", types::ScopeType::SCOPE_TYPE_WORLD);
-  StdScopePtr tag_scope_b("shared", types::ScopeType::SCOPE_TYPE_WORLD);
+  StdScopePtr scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_PLANE, "scope");
+  StdScopePtr tag_scope_a("shared", types::ScopeType::SCOPE_TYPE_PLANE_CLASS);
+  StdScopePtr tag_scope_b("shared", types::ScopeType::SCOPE_TYPE_PLANE_CLASS);
 
   ASSERT_TRUE(scope->AddTagLink("tag_a", tag_scope_a));
 

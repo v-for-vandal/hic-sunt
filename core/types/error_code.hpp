@@ -8,9 +8,13 @@ namespace hs {
 
 enum ErrorCode {
   NO_ERROR = 0,
+
+  // Common errors
+  ERR_NULL_ID, // returned when give id is empty string
   // Session errors
   ERR_REPLACING_RULESET_FORBIDDEN,
   ERR_RULESET_MUST_BE_SET_FIRST,
+  ERR_WORLD_MUST_BE_SET_FIRST,
 
   // variables errors
   ERR_EMPTY_MODIFIER_KEY,
@@ -30,7 +34,11 @@ enum ErrorCode {
   ERR_INVALID_EFFECT_VARIABLE_REFERENCE,
   ERR_INVALID_EFFECT_DEFINITION,
   ERR_EFFECT_LUA_RUNTIME_ERROR,
-  ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED
+  ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED,
+
+  // civ errors
+  ERR_INVALID_CIV_ID,
+  ERR_NO_SUCH_CIV
 };
 
 class ErrorCategory final : public std::error_category {

@@ -47,6 +47,7 @@ constexpr ScopeTypeLinkTable BuildScopeTypeLinkTable() {
   }
   */
   table[ScopeType::SCOPE_TYPE_PLANE] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_WORLD);
+  table[ScopeType::SCOPE_TYPE_PLANE_CLASS] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_WORLD);
   table[ScopeType::SCOPE_TYPE_REGION] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_PLANE);
   table[ScopeType::SCOPE_TYPE_CELL] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_REGION);
   table[ScopeType::SCOPE_TYPE_CIV] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_WORLD);
@@ -55,11 +56,30 @@ constexpr ScopeTypeLinkTable BuildScopeTypeLinkTable() {
         // TODO: Decide relation between city and region
   );
   table[ScopeType::SCOPE_TYPE_IMPROVEMENT] = ScopeTypeFilter::Make(
-      ScopeType::SCOPE_TYPE_CELL,
+      ScopeType::SCOPE_TYPE_CELL
+  );
+  table[ScopeType::SCOPE_TYPE_JOB] = ScopeTypeFilter::Make(
+      ScopeType::SCOPE_TYPE_IMPROVEMENT
+  );
+  table[ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS] = ScopeTypeFilter::Make(
+      ScopeType::SCOPE_TYPE_CIV
+  );
+  table[ScopeType::SCOPE_TYPE_JOB_CLASS] = ScopeTypeFilter::Make(
+      ScopeType::SCOPE_TYPE_CIV
+  );
+
+  return table;
+}
+
+constexpr ScopeTypeLinkTable BuildScopeTypeTagLinkTable() {
+  ScopeTypeLinkTable table{};
+  table[ScopeType::SCOPE_TYPE_PLANE] = ScopeTypeFilter::Make(
+      ScopeType::SCOPE_TYPE_PLANE_CLASS
+  );
+  table[ScopeType::SCOPE_TYPE_IMPROVEMENT] = ScopeTypeFilter::Make(
       ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS
   );
   table[ScopeType::SCOPE_TYPE_JOB] = ScopeTypeFilter::Make(
-      ScopeType::SCOPE_TYPE_IMPROVEMENT,
       ScopeType::SCOPE_TYPE_JOB_CLASS
   );
 
@@ -74,6 +94,16 @@ constexpr const ScopeTypeFilter& AllowedTargets(ScopeType from) {
 
 constexpr bool CanLinkScopes(ScopeType from, ScopeType to) {
   return AllowedTargets(from).test(to);
+}
+
+inline constexpr ScopeTypeLinkTable kScopeTypeTagLinkTable = BuildScopeTypeTagLinkTable();
+
+constexpr const ScopeTypeFilter& AllowedTagTargets(ScopeType from) {
+  return kScopeTypeTagLinkTable[static_cast<size_t>(from)];
+}
+
+constexpr bool CanTagLinkScopes(ScopeType from, ScopeType to) {
+  return AllowedTagTargets(from).test(to);
 }
 
 }  // namespace hs::types

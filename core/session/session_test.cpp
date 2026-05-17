@@ -166,7 +166,7 @@ TEST(StdSession, AdvanceNextTurnIncrementsTurnAndExecutesEffects) {
 
   ASSERT_TRUE(scope->SetNumericModifier("numeric_var", "seed", 3.0, 0.0, 1));
 
-  session.AdvanceNextTurn();
+  ASSERT_TRUE(session.AdvanceNextTurn());
 
   EXPECT_EQ(session.GetCurrentTurn(), 1u);
   auto numeric_value = scope->GetNumericValue("numeric_var");

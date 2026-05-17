@@ -42,7 +42,7 @@ class Session {
 
   // Advance next turn will move timeline to next turn and execute all
   // required scripts, functions and so on.
-  void AdvanceNextTurn();
+  [[nodiscard]] std::expected<void, ErrorCode> AdvanceNextTurn();
 
   // This function will change internal turn counter without any logic. Its
   // primary use is to set current turn when loading game. Changing turn
@@ -51,6 +51,10 @@ class Session {
 
   // Return current turn
   size_t GetCurrentTurn() const { return current_turn_; }
+
+  // This function creates and registers new improvement scope (and also all realated class and tag scopes)
+  // It does not place the improvement on the map - it only creates scope.
+  std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, StringId improvement_class);
 
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
@@ -81,7 +85,7 @@ class Session {
   // static StringId aren't possible because godot::StringName requires godot
   // runtime being active.
   StringId kCoreTurn{"core.turn"};
-  StringId kClass{"core.class"};
+  StringId kCoreClass{"core.class"};
 };
 
 }  // namespace hs::session

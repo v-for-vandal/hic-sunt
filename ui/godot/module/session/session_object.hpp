@@ -24,7 +24,7 @@ class SessionObject : public RefCounted {
   bool set_ruleset(const Ref<RulesetObject>& ruleset);
   bool set_world(const Ref<WorldObject>& world);
   bool add_scope(const Ref<ScopeObject>& scope);
-  void advance_next_turn();
+  bool advance_next_turn();
   void set_current_turn(int turn);
   int get_current_turn() const;
   Dictionary get_last_effect_execution_statistics() const;

@@ -70,7 +70,7 @@ void SessionObject::set_current_turn(int turn) { data_.SetCurrentTurn(turn); }
 
 int SessionObject::get_current_turn() const { return data_.GetCurrentTurn(); }
 
-void SessionObject::advance_next_turn() { data_.AdvanceNextTurn(); }
+bool SessionObject::advance_next_turn() { return static_cast<bool>(data_.AdvanceNextTurn()); }
 
 Dictionary SessionObject::get_last_effect_execution_statistics() const {
   return MakeEffectExecutionStatisticsDictionary(data_.GetLastEffectExecutionStatistics());

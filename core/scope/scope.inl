@@ -308,6 +308,11 @@ void Scope<BaseTypes>::ExplainAllVariables(auto&& collect_fn) {
 template <typename BaseTypes>
 std::expected<void, ErrorCode> Scope<BaseTypes>::AddTagLink([[maybe_unused]] const StringId&  tag_name,
     const ScopePtr& tag_scope) {
+        if( !hs::types::CanTagLinkScopes(scope_type_, tag_scope->scope_type_)) {
+            spdlog::warn("Scope of type {} can not be tag-linked to of scope of type {}",
+                scope_type_, tag_scope->scope_type_);
+            return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+        }
 
     for (const auto& existing_scope : tag_scopes_) {
         if (existing_scope->GetId() == tag_scope->GetId()) {

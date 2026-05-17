@@ -64,6 +64,9 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   RegionPtr GetRegionById(const StringId &region_id) const noexcept;
   bool HasRegion(const StringId &region_id) const noexcept;
 
+  // Creates next integer, always unique
+  auto GetNextId() const { return control_object_->GetNextId(); }
+
   bool operator==(const World &other) const;
   bool operator!=(const World &other) const { return !(*this == other); }
 
