@@ -272,11 +272,14 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
         spdlog::warn("Failed to link improvement with its class: reason {}", add_tag_link_result.error());
         return std::unexpected(add_tag_link_result.error());
     }
+
+    /* Because this scope orphaned (no parent), we should not register it within session
     auto add_scope_result = AddScope(result);
     if(!add_scope_result) {
         spdlog::warn("Failed to register newly created improvement, reasion: {}", add_scope_result.error());
         return std::unexpected(add_scope_result.error());
     }
+    */
 
     return result;
 }

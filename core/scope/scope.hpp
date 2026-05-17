@@ -84,6 +84,11 @@ class Scope {
       return {};
   }
 
+  // Every scope except SCOPE_TYPE_WORLD should have a parent. Scopes without parent are valid,
+  // for example that could be temporary scopes to show effects and so on. However, generally
+  // they should not participate in effects calculation
+  bool IsOrphaned() const noexcept { return parent_ == nullptr && scope_type_ != types::ScopeType::SCOPE_TYPE_WORLD; }
+
   // You can and should do it only on one root scope. All other scopes will
   // fetch it automatically
   void SetVariableDefinitions(const VariableDefinitionsConstPtr& definitions);
