@@ -37,6 +37,7 @@ class Session {
   std::expected<void, ErrorCode> SetRuleSet(RuleSetPtr ptr);
 
   std::expected<void, ErrorCode> SetWorld(WorldPtr ptr);
+  const auto& GetWorld() const noexcept { return world_; }
 
   std::expected<void, ErrorCode> AddScope(const ScopePtr& scope);
 

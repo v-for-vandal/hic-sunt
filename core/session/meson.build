@@ -61,6 +61,7 @@ core_session_tests = executable(
         'effect_executor_test.cpp',
         'effect_instance_test.cpp',
         'session_test.cpp',
+        'create_improvement_scope_test.cpp',
     ],
     dependencies: [core_session_ut_lib_dep, sol2_dep, lua_dep],
 )

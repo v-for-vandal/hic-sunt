@@ -111,8 +111,9 @@ auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expecte
 
 template <typename BaseTypes>
 auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> std::expected<Scope::StringId, ErrorCode> {
-    if (!IsStringVariable(variable)) {
-        spdlog::error("Variable {} is not of type string", variable);
+    if (const auto var_type = GetVariableDefinitions()->GetVariableType(variable);
+            var_type != ruleset::VariableDefinitions<BaseTypes>::VariableType::kString) {
+        spdlog::warn("variable {} must be string, but it is {}", variable, var_type);
         return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
     }
 
@@ -209,10 +210,11 @@ size_t Scope<BaseTypes>::DoGetModificationTime(
 template <typename BaseTypes>
 auto Scope<BaseTypes>::GetVariableDefinitions() const ->const VariableDefinitionsConstPtr&
 {
-
     if (cached_definitions_->IsEmpty()) {
         if (parent_) {
             cached_definitions_ = parent_->GetVariableDefinitions();
+        } else {
+            spdlog::warn("Can not find non-empty variable definitions because scope {} has no parent", id_);
         }
     }
 

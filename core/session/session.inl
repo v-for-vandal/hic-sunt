@@ -233,7 +233,7 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
     // create one. No-civ (empty civ_id) is handled inside this method.
     auto improvement_class_scope_id = BaseTypes::StringIdFromStdString(fmt::format("civ/{}/iclass/{}", civ_id, improvement_class));
     ScopePtr improvement_class_scope;
-    if (!civ.HasChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
+    if (!civ->HasChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
         // Create one
         auto creation_result = civ->CreateChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
         if (!creation_result) {
