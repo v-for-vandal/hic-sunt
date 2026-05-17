@@ -58,6 +58,12 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
 
   CivilizationPtr GetOrCreateCivilization(const StringId &id);
   bool HasCivilization(const StringId &id) const noexcept;
+  /* \brief Method will return civilization object.
+   *
+   * Please note that CivilizationPtr is non-nullable. If such civilization doesn't exist, a new
+   * detached scope will be returned.
+   */
+  CivilizationPtr GetCivilization(const StringId& id) const noexcept;
   auto &GetCivilizations() noexcept { return civilizations_; }
   const auto &GetCivilizations() const noexcept { return civilizations_; }
 

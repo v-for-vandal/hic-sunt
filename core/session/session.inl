@@ -189,7 +189,7 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::AddScop
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId civ_id, StringId improvement_class) -> std::expected<ScopePtr, ErrorCode> {
     if(!world_) {
-        utils::LogCriticalAndThrow("Can not create scopes without world");
+        return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);
     }
 
     if(BaseTypes::IsNullToken(civ_id)) {
@@ -211,8 +211,9 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
     auto success = result->SetStringModifier(
         kCoreClass,
         kCoreClass,
+        improvement_class,
         1,
-        improvement_class
+        current_turn_
         );
     if (!success) {
         // This one can not happen and is unrecoverable
@@ -226,19 +227,20 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
         spdlog::warn("No such civilization: {}", civ_id);
         return std::unexpected(ERR_NO_SUCH_CIV);
     }
-    auto civ = world_->GetOrCreateCivilization(civ_id);
+    auto civ = world_->GetCivilization(civ_id);
 
     // Find improvement class for this civilization. If it is not present,
     // create one. No-civ (empty civ_id) is handled inside this method.
-    auto improvement_class_scope_id = fmt::format("civ/{}/iclass/{}", civ_id, improvement_class);
+    auto improvement_class_scope_id = BaseTypes::StringIdFromStdString(fmt::format("civ/{}/iclass/{}", civ_id, improvement_class));
     ScopePtr improvement_class_scope;
     if (!civ.HasChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
         // Create one
-        auto creation_result = civ->GetOrCreate(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
+        auto creation_result = civ->CreateChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
         if (!creation_result) {
             utils::LogCriticalAndThrow("Failed to create scope {}; this is unrecoverable error", improvement_class_scope_id);
         }
         improvement_class_scope = *creation_result;
+        // register class scope in session
         auto add_success = AddScope(improvement_class_scope);
         if (!add_success) {
             spdlog::warn("Failed to register newly created improvement class scope {}, reason: {}",
@@ -250,8 +252,16 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
     }
 
     // set it as a tag
-    result->AddTag(kCoreClass, improvement_class_scope);
-    AddScope(result);
+    auto add_tag_link_result = result->AddTagLink(kCoreClass, improvement_class_scope);
+    if(!add_tag_link_result) {
+        spdlog::warn("Failed to link improvement with its class: reason {}", add_tag_link_result.error());
+        return std::unexpected(add_tag_link_result.error());
+    }
+    auto add_scope_result = AddScope(result);
+    if(!add_scope_result) {
+        spdlog::warn("Failed to register newly created improvement, reasion: {}", add_scope_result.error());
+        return std::unexpected(add_scope_result.error());
+    }
 
     return result;
 }

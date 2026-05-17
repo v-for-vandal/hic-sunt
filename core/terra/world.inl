@@ -85,6 +85,15 @@ bool World<BaseTypes>::HasCivilization(const StringId &id) const noexcept {
 }
 
 template <typename BaseTypes>
+auto World<BaseTypes>::GetCivilization(const StringId& id) const noexcept -> CivilizationPtr {
+    if (auto fit = civilizations_.find(id); fit != civilizations_.end()) {
+      return fit->second;
+    }
+
+    return {};
+}
+
+template <typename BaseTypes>
 auto World<BaseTypes>::GetRegionById(const StringId &region_id) const noexcept
     -> RegionPtr {
   RegionPtr result;
