@@ -29,6 +29,7 @@ StdVariableDefinitionsConstPtr MakeSimpleVariableDefinitions() {
   auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
   EXPECT_TRUE(mutable_definitions->AddNumericDefinition("numeric_var", {}));
   EXPECT_TRUE(mutable_definitions->AddStringDefinition("string_var", {}));
+  EXPECT_TRUE(mutable_definitions->AddStringDefinition("core.class", {}));
 
   return StdVariableDefinitionsConstPtr(
       std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions));

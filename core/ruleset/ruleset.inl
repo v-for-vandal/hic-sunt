@@ -140,7 +140,7 @@ bool RuleSet<BaseTypes>::LoadProjects([[maybe_unused]] ErrorsCollection &errors)
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection &errors) {
-  effect_definitions_.reserve(GetAllEffects().size());
+  effect_definitions_.reserve(GetAllEffects().size() + 2 * improvements_by_type_.size());
   for (const auto& effect_proto : GetAllEffects()) {
     auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
     if (definition->IsBroken()) {

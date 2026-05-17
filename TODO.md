@@ -11,6 +11,7 @@ Session:
      1. modifiers for world generation. We could require having effect for them
      2. core.turn - we set it manually. May be some flag for variable definition to mark
         this variable as manual? Or as 'system'
+  * Implement cleaning modifiers if effect.CheckPossible is false.
 
 Variables:
   * Support variables with disabled multiplier. For example, 'core.turn' can not have

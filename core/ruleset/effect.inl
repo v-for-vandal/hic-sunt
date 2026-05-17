@@ -3,7 +3,6 @@
 #include "effect.hpp"
 
 #include <cctype>
-#include <stdexcept>
 #include <utility>
 
 #include <sol/sol.hpp>
@@ -299,6 +298,10 @@ auto EffectDefinition<BaseTypes>::PreprocessCode(
 
     result.code += source[pos];
     ++pos;
+  }
+
+  for(const auto& explicit_dependency: code.dependencies() ) {
+      result.dependencies.push_back(BaseTypes::StringIdFromStdString(explicit_dependency));
   }
 
   return result;

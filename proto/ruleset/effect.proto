@@ -9,17 +9,29 @@ message Code {
   oneof code {
     string lua = 1;
   }
+
+  // Although generally dependencies are pulled from source code,
+  // you could declare them explicitly. Especially if you don't need the value,
+  // but just an activation
+  repeated string dependencies = 2;
 }
 
+// Selectors allows for basic filtering. It only supports a handful of fields,
+// but we try to optimize code for them.
+// Everything that can not be expressed by selectors, can be expressed by
+// effect.posible
 message Selector {
-  int32 placeholder = 1;
+  // filter by 'core.class' variable
+  string class = 1;
+  // filter by scope id. This one could be dangerous as generally scope id are
+  // random. You should only use this if you are responsible for scope id.
+  string scope_id = 2;
 }
 
 // Effect is executed for every entity that matches the selector.
 // Effect requires declaring its target and set of required input variables
 // Scheduling affects how effects are executed.
 message Effect {
-
   enum Schedule {
     MANUAL = 0;
     EVERY_TURN = 1;
@@ -31,13 +43,15 @@ message Effect {
   // Scope type that this effect can be used on.
   types.ScopeType scope_type = 3;
 
-  // This field limits what targets to execute this effect on
+  // This field limits what targets to execute this effect on. More in-depth customization
+  // can be acchived with 'possible' code.
   Selector selector = 4;
 
   // When this effect is executed
   Schedule schedule = 6;
 
-  // Predicate to check if effect should be executed
+  // Predicate to check if effect should be executed. Basic customization can be achived with
+  // 'selector'
   Code possible = 5;
 
   // Code to execute

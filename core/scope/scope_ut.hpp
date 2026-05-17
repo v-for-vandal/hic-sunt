@@ -29,7 +29,8 @@ struct StringExplanation {
 };
 
 /*! This function returns a simple scope with two definitions - numeric_var and
- * string_var. You should use it as root scope, so that those definitions were
+ * string_var, in adition to some standard system one.
+ * You should use it as root scope, so that those definitions were
  * inherited
  */
 StdScopePtr MakeSimpleScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD, std::string_view scope_id = "test_scope");
