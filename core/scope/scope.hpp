@@ -1,6 +1,7 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
 #include <scope/scope.pb.h>
 
 #include <core/scope/numeric_variable.hpp>
@@ -126,6 +127,8 @@ class Scope {
   // Returns abstract token that represents when this variable was last modified
   std::expected<size_t, ErrorCode> GetModificationTime(const StringId& variable) const;
 
+  std::expected<void, ErrorCode> AddTagLink(const StringId& tag_name, const ScopePtr& tag_scope);
+
   void ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
   void ExplainStringVariable(const StringId& variable, auto&& collect_fn);
   void ExplainAllVariables(auto&& collect_fn);
@@ -136,10 +139,26 @@ class Scope {
   void ClearCache();
 
  private:
+  using VisitedScopes = absl::flat_hash_set<const Scope*>;
+
   void FillNumericModifiers(const StringId& variable, NumericValue& add, NumericValue& mult) const;
+  void FillNumericModifiers(const StringId& variable, NumericValue& add, NumericValue& mult,
+                            VisitedScopes& visited) const;
 
   void FillStringModifiers(const StringId& variable, StringId& value, NumericValue& level);
+  void FillStringModifiers(const StringId& variable, StringId& value, NumericValue& level,
+                           VisitedScopes& visited);
 
+  std::expected<size_t, ErrorCode> DoGetModificationTime(const StringId& variable,
+                                                         VisitedScopes& visited) const;
+
+  template <typename CollectFn>
+  void DoExplainNumericVariable(const StringId& variable, CollectFn&& collect_fn,
+                                VisitedScopes& visited);
+
+  template <typename CollectFn>
+  void DoExplainStringVariable(const StringId& variable, CollectFn&& collect_fn,
+                               VisitedScopes& visited);
 
  private:
   StringId id_;
