@@ -73,19 +73,13 @@ TEST(StdScope, GraphTraversalSkipsAlreadyVisitedTagScopes) {
   ASSERT_TRUE(result);
   EXPECT_EQ(*result, 4.0);  // shared scope contributes only once
 
-  struct NumericExplanation {
-    std::string scope_id;
-    std::string modifier;
-    double add{0};
-    double mult{0};
-  };
-
-  std::vector<NumericExplanation> explanations;
+  std::vector<test::NumericExplanation> explanations;
   scope->ExplainNumericVariable("numeric_var",
                                 [&explanations](const auto& scope_id, const auto&, const auto& modifier,
                                                 auto add, auto mult) {
-                                  explanations.push_back(NumericExplanation{
+                                  explanations.push_back(test::NumericExplanation{
                                       .scope_id = scope_id,
+                                      .variable = "",
                                       .modifier = modifier,
                                       .add = add,
                                       .mult = mult,

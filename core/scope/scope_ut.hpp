@@ -12,6 +12,22 @@ using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using StdVariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
 using StdVariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<StdBaseTypes>;
 
+struct NumericExplanation {
+  std::string scope_id;
+  std::string variable;
+  std::string modifier;
+  double add{0};
+  double mult{0};
+};
+
+struct StringExplanation {
+  std::string scope_id;
+  std::string variable;
+  std::string modifier;
+  std::string value;
+  double level{0};
+};
+
 /*! This function returns a simple scope with two definitions - numeric_var and
  * string_var. You should use it as root scope, so that those definitions were
  * inherited

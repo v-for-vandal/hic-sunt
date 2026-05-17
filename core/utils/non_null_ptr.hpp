@@ -67,6 +67,10 @@ class NonNullSharedPtr {
     return *this;
   }
 
+  T* get() const noexcept {
+      return value.get();
+  }
+
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr<T>& operator=(const std::shared_ptr<U>& other) {

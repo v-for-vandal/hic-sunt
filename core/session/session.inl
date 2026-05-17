@@ -88,6 +88,21 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorl
     if (!add_result) {
       return add_result;
     }
+
+    // Get all scopes from civ
+    for(auto& [civ_id, civ]: ptr->GetCivilizations()) {
+        add_result = AddScope(civ->GetScope());
+        if(!add_result) {
+            return add_result;
+        }
+
+        for(auto& [child_scope_id, child_scope] : civ->GetChildScopes()) {
+            add_result = AddScope(child_scope);
+            if(!add_result) {
+                return add_result;
+            }
+        }
+    }
   }
 
   world_ = std::move(ptr);

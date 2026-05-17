@@ -5,6 +5,7 @@
 #include <core/geometry/box.hpp>
 #include <core/geometry/coord_system.hpp>
 #include <core/ruleset/ruleset.hpp>
+#include <core/scope/scope_ut.hpp>
 #include <core/terra/world.hpp>
 #include <fstream>
 
@@ -136,19 +137,11 @@ TEST(StdSessionCreateImprovementScope, SetsCoreClassModifierAndClassTag) {
   ASSERT_TRUE(class_value.has_value());
   EXPECT_EQ(*class_value, "farm");
 
-  struct StringExplanation {
-    std::string scope_id;
-    std::string variable;
-    std::string modifier;
-    std::string value;
-    double level{0};
-  };
-
-  std::vector<StringExplanation> explanations;
+  std::vector<scope::test::StringExplanation> explanations;
   improvement_scope->ExplainStringVariable(
       "core.class", [&explanations](const auto& scope_id, const auto& variable,
                                       const auto& modifier, const auto& value, auto level) {
-        explanations.push_back(StringExplanation{
+        explanations.push_back(scope::test::StringExplanation{
             .scope_id = scope_id,
             .variable = variable,
             .modifier = modifier,

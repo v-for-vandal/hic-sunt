@@ -19,17 +19,26 @@ std::expected<void, ErrorCode> Civilization<BaseTypes>::AddChildScope(const Scop
   if(!set_parent_success) {
       return std::unexpected(set_parent_success.error());
   }
+  {
 
-  auto& scopes_of_type = child_scopes_[scope->GetType()];
-  auto fit = scopes_of_type.find(scope->GetId());
-  if (fit != scopes_of_type.end()) {
-    if (fit->second != scope) {
-      return std::unexpected(ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
+    auto& scopes_of_type = child_scopes_[scope->GetType()];
+    const auto& [fit, inserted] = scopes_of_type.try_emplace(scope->GetId(), scope);
+    if(!inserted) {
+        if(fit->second.get() != scope.get()) {
+            return std::unexpected(ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
+        }
     }
-    return {};
   }
 
-  scopes_of_type.emplace(scope->GetId(), scope);
+  {
+    const auto& [fit, inserted] = all_child_scopes_.try_emplace(scope->GetId(), scope);
+    if(!inserted) {
+        if(fit->second.get() != scope.get()) {
+            return std::unexpected(ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
+        }
+    }
+  }
+
   return {};
 }
 
@@ -99,9 +108,13 @@ Civilization<BaseTypes>::GetOrCreateChildScope(ScopeType scope_type, const Strin
 }
 
 template <typename BaseTypes>
-const typename Civilization<BaseTypes>::ScopedChildrenMap&
-Civilization<BaseTypes>::GetChildScopes() const noexcept {
+auto Civilization<BaseTypes>::GetChildScopesByType() const noexcept -> const ScopedChildrenMap& {
   return child_scopes_;
+}
+
+template <typename BaseTypes>
+auto Civilization<BaseTypes>::GetChildScopes() const noexcept -> const ScopeMap& {
+  return all_child_scopes_;
 }
 
 template <typename BaseTypes>

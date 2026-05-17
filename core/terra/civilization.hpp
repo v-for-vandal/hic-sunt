@@ -44,11 +44,13 @@ class Civilization
   // 'validness' - it is better to check HasScope before calling this method.
   ScopePtr GetChildScope(ScopeType scope_type, const StringId& id) const;
 
-  const ScopedChildrenMap& GetChildScopes() const noexcept;
+  const ScopedChildrenMap& GetChildScopesByType() const noexcept;
+  const ScopeMap& GetChildScopes() const noexcept;
   const ScopeMap* FindScopesByType(ScopeType scope_type) const noexcept;
 
  private:
   ScopedChildrenMap child_scopes_;
+  ScopeMap all_child_scopes_;
 };
 
 }  // namespace hs::terra
