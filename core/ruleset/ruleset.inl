@@ -141,16 +141,43 @@ bool RuleSet<BaseTypes>::LoadProjects([[maybe_unused]] ErrorsCollection &errors)
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection &errors) {
   effect_definitions_.reserve(GetAllEffects().size() + 2 * improvements_by_type_.size());
+
+  const auto add_effect_definition =
+      [this, &errors](const proto::ruleset::effect::Effect& effect_proto) {
+        auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
+        if (definition->IsBroken()) {
+          AddWarning(errors, fmt::format("Failed to load effect {}", effect_proto.id()));
+          for (const auto& err : definition->GetLuaErrors()) {
+            AddWarning(errors, err);
+          }
+        }
+        effect_definitions_.push_back(
+            std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
+      };
+
   for (const auto& effect_proto : GetAllEffects()) {
-    auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
-    if (definition->IsBroken()) {
-      AddWarning(errors, fmt::format("Failed to load effect {}", effect_proto.id()));
-      for (const auto& err : definition->GetLuaErrors()) {
-        AddWarning(errors, err);
-      }
+    add_effect_definition(effect_proto);
+  }
+
+  for (const auto& improvement : improvements_.improvements()) {
+    if (improvement.has_class_effect()) {
+      proto::ruleset::effect::Effect effect_proto;
+      effect_proto.set_id(fmt::format("{}/class.effect", improvement.id()));
+      effect_proto.set_scope_type(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
+      effect_proto.mutable_selector()->set_class_(improvement.id());
+      *effect_proto.mutable_effect() = improvement.class_effect();
+      add_effect_definition(effect_proto);
     }
-    effect_definitions_.push_back(
-        std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
+
+    if (improvement.has_instance_effect()) {
+      proto::ruleset::effect::Effect effect_proto;
+      effect_proto.set_id(fmt::format("{}/instance.effect", improvement.id()));
+      effect_proto.set_scope_type(types::ScopeType::SCOPE_TYPE_IMPROVEMENT);
+      effect_proto.mutable_selector()->set_class_(improvement.id());
+      effect_proto.mutable_possible()->set_lua("return true");
+      *effect_proto.mutable_effect() = improvement.instance_effect();
+      add_effect_definition(effect_proto);
+    }
   }
 
   return true;

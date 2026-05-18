@@ -158,4 +158,38 @@ TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
   EXPECT_FALSE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
 }
 
+TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {
+  const auto root = MakeTempDir("inline_improvement_effects");
+  WriteTextFile(root / "improvements" / "improvements.txt",
+                "improvements {\n"
+                "  id: \"mill\"\n"
+                "  class_effect { lua: \"return VAR(mill.class.dep)\" }\n"
+                "  instance_effect { lua: \"return VAR(mill.instance.dep)\" }\n"
+                "}\n");
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({root}, errors));
+
+  const auto &effects = ruleset.GetAllEffectDefinitions();
+  ASSERT_EQ(effects.size(), 2u);
+
+  const auto &class_effect = effects[0];
+  EXPECT_EQ(class_effect->GetId(), "mill/class.effect");
+  EXPECT_EQ(class_effect->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
+  EXPECT_EQ(class_effect->GetData().selector().class_(), "mill");
+  EXPECT_FALSE(class_effect->GetData().has_possible());
+  EXPECT_TRUE(class_effect->GePossibleCode().has_value() == false);
+  EXPECT_EQ(class_effect->GetData().effect().lua(), "return VAR(mill.class.dep)");
+
+  const auto &instance_effect = effects[1];
+  EXPECT_EQ(instance_effect->GetId(), "mill/instance.effect");
+  EXPECT_EQ(instance_effect->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT);
+  EXPECT_EQ(instance_effect->GetData().selector().class_(), "mill");
+  EXPECT_TRUE(instance_effect->GetData().has_possible());
+  EXPECT_EQ(instance_effect->GetData().possible().lua(), "return true");
+  EXPECT_TRUE(instance_effect->GePossibleCode().has_value());
+  EXPECT_EQ(instance_effect->GetData().effect().lua(), "return VAR(mill.instance.dep)");
+}
+
 }  // namespace hs::ruleset
