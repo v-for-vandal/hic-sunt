@@ -246,22 +246,15 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
 
     // Find improvement class for this civilization. If it is not present,
     // create one. No-civ (empty civ_id) is handled inside this method.
-    auto improvement_class_scope_id = BaseTypes::StringIdFromStdString(fmt::format("civ/{}/iclass/{}", civ_id, improvement_class));
+    auto improvement_class_scope_id = RuleSet::ImprovementClassScopeId(civ_id, improvement_class);
     ScopePtr improvement_class_scope;
     if (!civ->HasChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
         // Create one
-        auto creation_result = civ->CreateChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
-        if (!creation_result) {
-            utils::LogCriticalAndThrow("Failed to create scope {}; this is unrecoverable error", improvement_class_scope_id);
+        auto create_success = CreateImprovementClassScope(civ, improvement_class);
+        if(!create_success) {
+            return std::unexpected(create_success.error());
         }
-        improvement_class_scope = *creation_result;
-        // register class scope in session
-        auto add_success = AddScope(improvement_class_scope);
-        if (!add_success) {
-            spdlog::warn("Failed to register newly created improvement class scope {}, reason: {}",
-                improvement_class_scope_id, add_success.error());
-            return std::unexpected(add_success.error());
-        }
+        improvement_class_scope =  *create_success;
     } else {
         improvement_class_scope = civ->GetChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id);
     }
@@ -280,6 +273,45 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
         return std::unexpected(add_scope_result.error());
     }
     */
+
+    return result;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementClassScope(const CivilizationPtr& civ, StringId improvement_class) -> std::expected<ScopePtr, ErrorCode> {
+
+    const auto& civ_id = civ->GetId();
+    auto improvement_class_scope_id = RuleSet::ImprovementClassScopeId(civ_id, improvement_class);
+    if(civ->HasChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement_class_scope_id)) {
+        return std::unexpected(ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
+    }
+
+    ScopePtr result{improvement_class_scope_id, types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS};
+
+    // Lets set kCoreClass to improvement class
+    if(auto success = result->SetStringModifier(
+        kCoreClass,
+        kCoreClass,
+        improvement_class,
+        1,
+        current_turn_
+        );
+        !success) {
+        spdlog::warn("Failed to set core.class on scope {}", improvement_class_scope_id);
+        return std::unexpected(success.error());
+    }
+
+    if(auto add_success = civ->AddChildScope(result); !add_success) {
+        return std::unexpected(add_success.error());
+    }
+
+    // register scope in session. We can safely do it for improvemnt class, because we will likely need
+    // it anyway
+    if(auto add_success = AddScope(result); !add_success) {
+        spdlog::warn("Failed to register newly created improvement class scope {}, reason: {}",
+            improvement_class_scope_id, add_success.error());
+        return std::unexpected(add_success.error());
+    }
 
     return result;
 }

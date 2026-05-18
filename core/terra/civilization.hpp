@@ -31,6 +31,9 @@ class Civilization
   Civilization() = default;
   explicit Civilization(StringId id);
 
+  /* \brief Return civilization id */
+  auto GetId() const noexcept { return Base::GetScope()->GetId(); }
+
   // Add given scope. Scope must be new, as it will be added as our child.
   std::expected<void, ErrorCode> AddChildScope(const ScopePtr& scope);
   // Creates new scope and adds it. If scope with this id exists (within this class), then
@@ -48,9 +51,21 @@ class Civilization
   const ScopeMap& GetChildScopes() const noexcept;
   const ScopeMap* FindScopesByType(ScopeType scope_type) const noexcept;
 
+  /* \brief Creates class scope for given improvement class id.
+   *
+   * There is no check that this improvement_class id is present in the system. This method
+   * simply initializes scope properly and adds it with AddChildScope. If such scope already exists,
+   * ERR_SCOPE_ALREADY_EXISTS is returned
+
+   Note: bad idea, has no access to modification time and ruleset
+  std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(StringId civ_id, StringId improvement_class);
+  */
+
  private:
   ScopedChildrenMap child_scopes_;
   ScopeMap all_child_scopes_;
+
+  StringId kCoreClass{"core.class"};
 };
 
 }  // namespace hs::terra

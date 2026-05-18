@@ -3,6 +3,7 @@
 #include "civilization.hpp"
 
 #include <core/utils/throw.hpp>
+#include <core/ruleset/ruleset.hpp>
 
 namespace hs::terra {
 
@@ -123,5 +124,6 @@ Civilization<BaseTypes>::FindScopesByType(ScopeType scope_type) const noexcept {
   auto fit = child_scopes_.find(scope_type);
   return fit == child_scopes_.end() ? nullptr : &fit->second;
 }
+
 
 }  // namespace hs::terra

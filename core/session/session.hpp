@@ -5,6 +5,7 @@
 #include <core/ruleset/ruleset.hpp>
 #include <core/scope/scope.hpp>
 #include <core/terra/world.hpp>
+#include <core/terra/types.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/scope_type.hpp>
 #include <expected>
@@ -31,6 +32,8 @@ class Session {
   using ScopePtr = scope::ScopePtr<BaseTypes>;
   using StringId = typename BaseTypes::StringId;
   using ScopeType = types::ScopeType;
+  using RuleSet = ruleset::RuleSet<BaseTypes>;
+  using CivilizationPtr = terra::CivilizationPtr<BaseTypes>;
 
   Session() = default;
 
@@ -73,6 +76,9 @@ class Session {
 
  private:
   friend class EffectExecutor<BaseTypes>;
+
+  // This function will create improvement class scope and propertly initialize it
+  std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(const CivilizationPtr& civ, StringId improvement_class);
 
   RuleSetPtr ruleset_;
   WorldPtr world_;

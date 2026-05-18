@@ -252,4 +252,9 @@ RuleSet<BaseTypes>::FindProjectByType(const StringId &project_type_id) const {
   return nullptr;
 }
 
+template <typename BaseTypes>
+auto RuleSet<BaseTypes>::ImprovementClassScopeId(StringId civ_id, StringId improvement_class) -> StringId {
+    return BaseTypes::StringIdFromStdString(fmt::format("civ/{}/iclass/{}", civ_id, improvement_class));
+}
+
 } // namespace hs::ruleset

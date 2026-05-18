@@ -35,6 +35,13 @@ class RuleSet : public RuleSetBase {
 
   const auto &GetAllEffectDefinitions() const noexcept { return effect_definitions_; }
 
+  // Functions that generates fixed scope id
+
+  /* \brief Returns scope id for scope SCOPE_TYPE_IMPROVEMENT_CLASS for improvement id and civ id
+   *
+   */
+  static StringId ImprovementClassScopeId(StringId civ_id, StringId job_type_id);
+
  private:
   bool LoadImprovements([[maybe_unused]] ErrorsCollection &errors);
   bool LoadResources([[maybe_unused]] ErrorsCollection &errors);
