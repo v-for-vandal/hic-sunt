@@ -11,6 +11,7 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/minmax.hpp>
 #include <core/utils/serialize.hpp>
+#include <expected>
 #include <string>
 #include <string_view>
 
@@ -33,22 +34,26 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
  public:
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
+  using ScopePtr = scope::ScopePtr<BaseTypes>;
 
   Cell() = default;
 
-  bool HasImprovement() const { return !improvement_.type().empty(); }
-  const proto::region::Improvement &GetImprovement() const { return improvement_; }
-
   bool operator==(const Cell &) const;
+
+  bool HasImprovement(int slot) const;
+  std::expected<void, ErrorCode> AddImprovement(int slot, const ScopePtr& improvement);
+  StringId GetImprovementId(int slot) const;
 
  private:
   friend Region<BaseTypes>;
   friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source, proto::region::Cell &to);
   friend Cell ParseFrom<BaseTypes>(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
-  void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
 
  private:
+     // map slot -> improvement in this slot
+     absl::flat_hash_map<int, ScopePtr> improvements_;
 
+     // TODO: RM
   proto::region::Improvement improvement_;
 };
 

@@ -124,8 +124,8 @@ class NonNullSharedPtr {
 
   bool operator!=(const NonNullSharedPtr<T>& other) const noexcept = default;
 
-  bool operator==(nullptr_t) const noexcept { return value == nullptr; }
-  bool operator!=(nullptr_t) const noexcept { return value != nullptr; }
+  constexpr bool operator==(nullptr_t) const noexcept __attribute__((warning("NonNull ptr is never equal to null"))) { return false; }
+  constexpr bool operator!=(nullptr_t) const noexcept __attribute__((warning("NonNull ptr is never equal to null"))) { return true;; }
 
   bool IsEmpty() const noexcept { return value == nullptr; }
 

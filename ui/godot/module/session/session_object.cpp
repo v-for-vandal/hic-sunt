@@ -72,6 +72,20 @@ int SessionObject::get_current_turn() const { return data_.GetCurrentTurn(); }
 
 bool SessionObject::advance_next_turn() { return static_cast<bool>(data_.AdvanceNextTurn()); }
 
+bool SessionObject::add_improvement(const Ref<CellObject>& cell, StringName civ_id, StringName improvement_id)
+{
+    ERR_FAIL_NULL_V_MSG(cell.ptr(), false, "null-containing cell object");
+    ERR_FAIL_COND_V_MSG((civ_id.length() == 0), false, "empty civ id is not allowed");
+    // Create scope for new improvement
+    auto create_scope_result = data_.CreateImprovementScope(civ_id, improvement_id);
+    if(!create_scope_result) {
+        return false;
+    }
+
+    // place it onto the map
+    //cell->GetCell().
+}
+
 Dictionary SessionObject::get_last_effect_execution_statistics() const {
   return MakeEffectExecutionStatisticsDictionary(data_.GetLastEffectExecutionStatistics());
 }

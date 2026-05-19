@@ -28,6 +28,15 @@ ScopePtr CellObject::GetScope() const {
   return cell.GetScope();
 }
 
+auto CellObject::GetCell() -> Cell& {
+    if(!region_) {
+        static Cell fallback;
+        ERR_FAIL_NULL_REGION(fallback);
+    }
+
+    return region_->GetSurface().GetCell(cell_coords_);
+}
+
 String CellObject::get_region_id() const {
   ERR_FAIL_NULL_REGION(String{});
 

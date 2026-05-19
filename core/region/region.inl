@@ -51,6 +51,7 @@ bool Region<BaseTypes>::operator==(const Region &other) const {
   return true;
 }
 
+#if 0
 template <typename BaseTypes>
 bool Region<BaseTypes>::SetImprovement(QRSCoords coords,
                                        const StringId &improvement_type) {
@@ -75,6 +76,7 @@ bool Region<BaseTypes>::SetImprovement(QRSCoords coords,
 
   return true;
 }
+#endif
 
 template <typename BaseTypes>
 bool Region<BaseTypes>::SetCityId(const StringId &city_id) {
@@ -97,7 +99,8 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
             throw std::runtime_error("Can't set cell parent to self");
         };
         //feature_count_[cell.GetFeature()]++;
-        if (cell.HasImprovement()) {
+        // TODO: Fix it, check all slots
+        if (cell.HasImprovement(0)) {
           cells_with_improvements_.insert(coords);
         }
       }

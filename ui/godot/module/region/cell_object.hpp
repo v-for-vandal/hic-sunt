@@ -8,6 +8,8 @@
 #include <ui/godot/module/scope/scope_object.hpp>
 #include <ui/godot/module/terra/world.hpp>
 
+#include "cell.hpp"
+
 namespace hs::godot {
 
 using namespace ::godot;
@@ -28,6 +30,7 @@ class CellObject : public RefCounted, public ScopeMixin {
   static void _bind_methods();
 
   ScopePtr GetScope() const;
+  Cell& GetCell();
 
  private:
   // Unlike other Godot objects, here we store pointer to region

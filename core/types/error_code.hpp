@@ -38,7 +38,11 @@ enum ErrorCode {
 
   // civ errors
   ERR_INVALID_CIV_ID,
-  ERR_NO_SUCH_CIV
+  ERR_NO_SUCH_CIV,
+
+  // region/cell improvement errors
+  ERR_IMPROVEMENT_SCOPE_ALREADY_HAS_PARENT,
+  ERR_IMPROVEMENT_SLOT_OCCUPIED
 };
 
 class ErrorCategory final : public std::error_category {
