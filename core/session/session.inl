@@ -54,58 +54,13 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetWorl
     return std::unexpected(ErrorCode::ERR_WORLD_ALREADY_SET);
   }
 
-  auto add_result = AddScope(ptr->GetScope());
-  if (!add_result) {
-    return add_result;
-  }
-
-  for (const auto& [_, plane] : ptr->GetPlanes()) {
-    add_result = AddScope(plane->GetScope());
-    if (!add_result) {
-      return add_result;
-    }
-
-    plane->GetSurface().Foreach([this, &add_result](auto, auto& region_cell) {
-      if (!add_result) {
-        return;
-      }
-
-      auto& region = region_cell.GetRegion();
-
-      add_result = AddScope(region.GetScope());
-      if (!add_result) {
-        return;
-      }
-
-      region.GetSurface().Foreach([this, &add_result](auto, auto& cell) {
-        if (!add_result) {
-          return;
-        }
-        add_result = AddScope(cell.GetScope());
-      });
-    });
-
-    if (!add_result) {
-      return add_result;
-    }
-
-    // Get all scopes from civ
-    for(auto& [civ_id, civ]: ptr->GetCivilizations()) {
-        add_result = AddScope(civ->GetScope());
-        if(!add_result) {
-            return add_result;
-        }
-
-        for(auto& [child_scope_id, child_scope] : civ->GetChildScopes()) {
-            add_result = AddScope(child_scope);
-            if(!add_result) {
-                return add_result;
-            }
-        }
-    }
-  }
-
   world_ = std::move(ptr);
+
+  world_->VisitScopes([this](auto&& scope_ptr) {
+      this->AddScope(scope_ptr);
+  });
+
+
 
   Prepare();
 
