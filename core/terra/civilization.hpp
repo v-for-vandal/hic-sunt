@@ -51,6 +51,8 @@ class Civilization
   const ScopeMap& GetChildScopes() const noexcept;
   const ScopeMap* FindScopesByType(ScopeType scope_type) const noexcept;
 
+  void VisitScopes(this auto&& self, auto&& visitor);
+
   /* \brief Creates class scope for given improvement class id.
    *
    * There is no check that this improvement_class id is present in the system. This method

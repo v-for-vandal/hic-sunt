@@ -44,6 +44,7 @@ func _update_region() -> void:
 	#$InfoTabContainer/Projects.load_region(_region)
 	#$InfoTabContainer/Jobs.load_region(_region)
 	#$ScrollContainer/VBoxContainer/BuildingList.load_region(_region)
+	$Outliner.on_region_loaded(_region)
 	
 func _on_close_button_pressed() -> void:
 	close_requested.emit()
@@ -72,7 +73,10 @@ func _on_build_improvement(improvement_id: String) -> void:
 	new_build_interaction.improvement_id = improvement_id
 	_interaction = new_build_interaction
 	CurrentGame.event_bus.set_main_interaction(new_build_interaction)
-	
+
+func on_cell_selected(cell: CellObject) -> void:
+	$Outliner.on_cell_selected(cell)
+
 # This function is called by parent class when something inside region has changed
 func _on_region_changed(_area: Rect2i, flags: int) -> void:
 	if _region == null:

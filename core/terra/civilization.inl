@@ -8,6 +8,15 @@
 namespace hs::terra {
 
 template <typename BaseTypes>
+void Civilization<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
+  visitor(self.GetScope());
+
+  for (auto& [_, child_scope] : self.all_child_scopes_) {
+    visitor(child_scope);
+  }
+}
+
+template <typename BaseTypes>
 Civilization<BaseTypes>::Civilization(StringId id) : Base(id) {}
 
 template <typename BaseTypes>

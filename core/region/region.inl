@@ -7,6 +7,15 @@
 
 namespace hs::region {
 
+template <typename BaseTypes>
+void Region<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
+  visitor(self.GetScope());
+
+  self.GetSurface().Foreach([&visitor](auto, auto& cell) {
+    cell.VisitScopes(visitor);
+  });
+}
+
 template <typename BaseTypes> Region<BaseTypes>::Region() : Region("", 1) {}
 
 template <typename BaseTypes>

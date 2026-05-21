@@ -75,7 +75,6 @@ func _clear_old_region()->void:
 
 	
 func _on_region_ui_close_requested() -> void:
-	print("emiting exit region request") # TODO: RM
 	exit_reqion_request.emit()
 	
 func _connect_region_object(_region_object_: RegionObject) -> void:

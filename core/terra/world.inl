@@ -7,6 +7,19 @@
 namespace hs::terra {
 
 template <typename BaseTypes>
+void World<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
+  visitor(self.GetScope());
+
+  for (auto& [_, plane] : self.planes_) {
+    plane->VisitScopes(visitor);
+  }
+
+  for (auto& [_, civilization] : self.civilizations_) {
+    civilization->VisitScopes(visitor);
+  }
+}
+
+template <typename BaseTypes>
 bool World<BaseTypes>::operator==(const World &other) const {
   if (this == &other) {
     return true;

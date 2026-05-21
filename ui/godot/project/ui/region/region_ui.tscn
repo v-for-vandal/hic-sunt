@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://brhsewnl00nkp"]
+[gd_scene format=3 uid="uid://brhsewnl00nkp"]
 
 [ext_resource type="Script" uid="uid://cuo0kal3fuvwd" path="res://ui/region/region_ui.gd" id="1_j578s"]
 [ext_resource type="Script" uid="uid://bps81is67jlqo" path="res://ui/world/InfoTabContainer.gd" id="2_itlrf"]
@@ -7,8 +7,9 @@
 [ext_resource type="Script" uid="uid://b2fcva54o43ye" path="res://ui/region/Resources.gd" id="5_wjejd"]
 [ext_resource type="PackedScene" uid="uid://cls0hdxhdqsxu" path="res://ui/city/city_projects_queue.tscn" id="6_uhseh"]
 [ext_resource type="PackedScene" uid="uid://d2g36s2i8bc5p" path="res://ui/city/city_jobs.tscn" id="7_udedg"]
+[ext_resource type="PackedScene" uid="uid://cjkx708uja6xu" path="res://ui/system/outliner.tscn" id="8_be2bc"]
 
-[node name="RegionUI" type="Control"]
+[node name="RegionUI" type="Control" unique_id=1112433943]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,34 +18,35 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_j578s")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=942318506]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer" unique_id=355022912]
 layout_mode = 2
 
-[node name="CloseButton" type="Button" parent="PanelContainer/HBoxContainer"]
+[node name="CloseButton" type="Button" parent="PanelContainer/HBoxContainer" unique_id=1838413533]
 layout_mode = 2
 text = "Close"
 
-[node name="InfoButton" type="Button" parent="PanelContainer/HBoxContainer"]
+[node name="InfoButton" type="Button" parent="PanelContainer/HBoxContainer" unique_id=2131119859]
 layout_mode = 2
 toggle_mode = true
 text = "Info"
 
-[node name="BuildButton" type="Button" parent="PanelContainer/HBoxContainer"]
+[node name="BuildButton" type="Button" parent="PanelContainer/HBoxContainer" unique_id=992694905]
 layout_mode = 2
 toggle_mode = true
 text = "Build"
 
-[node name="CityButton" type="Button" parent="PanelContainer/HBoxContainer"]
+[node name="CityButton" type="Button" parent="PanelContainer/HBoxContainer" unique_id=2092561419]
 layout_mode = 2
 text = "City"
 
-[node name="InfoTabContainer" type="TabContainer" parent="."]
+[node name="InfoTabContainer" type="TabContainer" parent="." unique_id=976039161]
+visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.062
@@ -56,51 +58,51 @@ grow_vertical = 2
 current_tab = 0
 script = ExtResource("2_itlrf")
 
-[node name="CellInfo" type="GridContainer" parent="InfoTabContainer"]
+[node name="CellInfo" type="GridContainer" parent="InfoTabContainer" unique_id=339102996]
 layout_mode = 2
 columns = 2
 script = ExtResource("3_swddy")
 metadata/_tab_index = 0
 
-[node name="Buildings" parent="InfoTabContainer" groups=["ui:region"] instance=ExtResource("4_0x70n")]
+[node name="Buildings" parent="InfoTabContainer" unique_id=681624507 groups=["ui:region"] instance=ExtResource("4_0x70n")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="Resources" type="GridContainer" parent="InfoTabContainer" groups=["ui:region"]]
+[node name="Resources" type="GridContainer" parent="InfoTabContainer" unique_id=124489143 groups=["ui:region"]]
 visible = false
 layout_mode = 2
 columns = 2
 script = ExtResource("5_wjejd")
 metadata/_tab_index = 2
 
-[node name="Name" type="Label" parent="InfoTabContainer/Resources"]
+[node name="Name" type="Label" parent="InfoTabContainer/Resources" unique_id=144789350]
 layout_mode = 2
 text = "wood"
 
-[node name="Number" type="Label" parent="InfoTabContainer/Resources"]
+[node name="Number" type="Label" parent="InfoTabContainer/Resources" unique_id=737997426]
 layout_mode = 2
 text = "0"
 
-[node name="Name2" type="Label" parent="InfoTabContainer/Resources"]
+[node name="Name2" type="Label" parent="InfoTabContainer/Resources" unique_id=1927646663]
 layout_mode = 2
 text = "long resource name"
 
-[node name="Number2" type="Label" parent="InfoTabContainer/Resources"]
+[node name="Number2" type="Label" parent="InfoTabContainer/Resources" unique_id=273385838]
 layout_mode = 2
 text = "100983"
 
-[node name="Projects" parent="InfoTabContainer" groups=["ui:region"] instance=ExtResource("6_uhseh")]
+[node name="Projects" parent="InfoTabContainer" unique_id=640551982 groups=["ui:region"] instance=ExtResource("6_uhseh")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 3
 
-[node name="Jobs" parent="InfoTabContainer" groups=["ui:region"] instance=ExtResource("7_udedg")]
+[node name="Jobs" parent="InfoTabContainer" unique_id=1979512348 groups=["ui:region"] instance=ExtResource("7_udedg")]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 4
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1345620260]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -113,14 +115,14 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer" unique_id=298811265]
 layout_mode = 2
 
-[node name="BuildingList" parent="ScrollContainer/VBoxContainer" groups=["ui:region"] instance=ExtResource("4_0x70n")]
+[node name="BuildingList" parent="ScrollContainer/VBoxContainer" unique_id=132642424 groups=["ui:region"] instance=ExtResource("4_0x70n")]
 custom_minimum_size = Vector2(200, 200)
 layout_mode = 2
 
-[node name="CityNameLabel" type="Label" parent="."]
+[node name="CityNameLabel" type="Label" parent="." unique_id=1873449805]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
@@ -130,6 +132,15 @@ offset_top = 38.0
 offset_right = -474.0
 offset_bottom = 31.84
 text = "Sample text"
+
+[node name="Outliner" parent="." unique_id=836447073 instance=ExtResource("8_be2bc")]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.1
+anchor_right = 0.0
+anchor_bottom = 0.9
+offset_right = 300.0
+outliner_position = 0
 
 [connection signal="region_cell_selected" from="." to="InfoTabContainer/CellInfo" method="_on_region_cell_selected"]
 [connection signal="pressed" from="PanelContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]

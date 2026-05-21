@@ -44,6 +44,8 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
   std::expected<void, ErrorCode> AddImprovement(int slot, const ScopePtr& improvement);
   StringId GetImprovementId(int slot) const;
 
+  void VisitScopes(this auto&& self, auto&& visitor);
+
  private:
   friend Region<BaseTypes>;
   friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source, proto::region::Cell &to);

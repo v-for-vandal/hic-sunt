@@ -51,18 +51,18 @@ func load_world(world : World) -> void:
 	_switch_to_world()
 
 
-func _on_world_map_show_region_request(plane:  WorldPlane, qr_position: Vector2i) -> void:
+func _on_world_map_show_region_request(region: RegionObject) -> void:
 	#assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	assert(_region_map != null, "_region_map is somehow null")
-	var region_obj := plane.plane_object.get_region(qr_position);
+
 	
-	if region_obj == null:
-		print("region is absent")
+	if region == null:
+		push_error("region is absent")
 		return
 		
 	# We need to add scene to the tree before we can call load_region
 	_switch_to_region()
-	_region_map.load_region(region_obj)
+	_region_map.load_region(region)
 	
 	
 func _switch(from: Node, to: Node) -> void:

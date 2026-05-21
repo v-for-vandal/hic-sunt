@@ -20,6 +20,7 @@ class ScopeObject : public RefCounted {
  public:
   float get_numeric_value(const StringName& variable);
   StringName get_string_value(const StringName& variable);
+  Variant get_variant_value(const StringName& variable);
   int get_modification_time(const StringName& variable) const;
 
   bool add_numeric_modifier(const StringName& variable, const StringName& key, float add,

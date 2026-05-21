@@ -17,7 +17,10 @@ func _register_dev_console_commands()-> void:
 	
 func _dev_build(improvement_id : Variant = null) -> void:
 	var resolved_improvment_id : String
-	if improvement_id == null:
+	if improvement_id is String:
+		improvement_id = (improvement_id as String).remove_chars('"')
+		
+	if improvement_id == null or ( improvement_id is String and (improvement_id as String).length() == 0):
 		# create a popup
 		var popup_menu := PopupMenu.new()
 		var ruleset : RulesetObject = CurrentGame.current_game.ruleset
@@ -40,10 +43,11 @@ func _dev_build(improvement_id : Variant = null) -> void:
 		
 	var new_build_interaction := DevSelectAndBuildInteraction.new(resolved_improvment_id)
 	CurrentGame.event_bus.set_main_interaction(new_build_interaction)
+	Console.print("Click on the cell to build improvement")
 	
 func _dump_statistics(statistics_type: String) -> void:
 	if statistics_type not in _stats_dumpers:
-		Console.print_line("Unknown statistics %s. Valid statistics are: %s" % [statistics_type, _stats_dumpers.keys()])
+		Console.print("Unknown statistics %s. Valid statistics are: %s" % [statistics_type, _stats_dumpers.keys()])
 		return
 		
 	var stat_group := CurrentGame.current_game.debug_control.add_group("statistics#%s/effects" % CurrentGame.current_game.get_current_turn())
@@ -61,11 +65,11 @@ func _dump_statistics_effects(debug_node: DebugTree.TreeControl) -> void:
 func _reload_ruleset() -> void:
 	var new_ruleset := CentralSystem.load_ruleset()
 	if new_ruleset == null:
-		Console.print_line("Ruleset can not be loaded, aborting")
+		Console.print("Ruleset can not be loaded, aborting")
 		return
 		
 	CurrentGame.replace_ruleset(new_ruleset)
-	Console.print_line("Ruleset replaced")
+	Console.print("Ruleset replaced")
 	
 	
 func _input(event: InputEvent) -> void:

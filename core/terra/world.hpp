@@ -73,6 +73,8 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   // Creates next integer, always unique
   auto GetNextId() const { return control_object_->GetNextId(); }
 
+  void VisitScopes(this auto&& self, auto&& visitor);
+
   bool operator==(const World &other) const;
   bool operator!=(const World &other) const { return !(*this == other); }
 

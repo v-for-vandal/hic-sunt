@@ -56,6 +56,7 @@ func update_cell(qr_coords: Vector2i, _region: RegionObject) -> void:
 	# convert to xy dimensions
 	var xy_coords := axial_to_map(qr_coords)
 	
+	# This is scene-based tilemaplayer. All drawing happens in scene
 	$biomes.set_cell(xy_coords, 0, Vector2i.ZERO, 1)
 	pass
 	

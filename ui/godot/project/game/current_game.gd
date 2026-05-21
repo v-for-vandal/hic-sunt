@@ -4,6 +4,11 @@ extends Node
 var current_game: Game
 var event_bus : UiEventBus = UiEventBus.new()
 
+# just an alias
+var game: Game:
+	get:
+		return current_game
+
 func init_game(world: World, ruleset: RulesetObject) -> void:
 	_cleanup_nodes()
 	

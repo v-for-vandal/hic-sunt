@@ -33,29 +33,12 @@ func _update_highlighting() -> void:
 		return
 		
 	var cell := region.get_cell(qr_coords)
-	var highlighter := surface.highlighter
-	var input_description = highlighter.get_input_description()
-	var input : Dictionary[StringName, Variant] = {}
-	for variable in input_description.variables:
-		# Note: there is in fact no guarantee that this variable is numeric, we should
-		# check it via Ruleset
-		# TODO: Fix note above
-		input[variable] = cell.get_scope().get_numeric_value(variable)
+	var variable_getter := func(varname: StringName) -> Variant:
+		return cell.get_scope().get_variant_value(varname)
 		
-	$Highlight.modulate = surface.highlighter.get_color(input)
-	$Highlight.visible = true
+	do_update_highlighting($Highlight, variable_getter)
 		
-	
 func _update_debug_display_variable_or_modifier(options: DebugDisplayOptions) -> void:
-	if options.target_variable_modifier_on_cell == null or not options.display_selected_variable_modifier_on_cell:
-		$ScopeVarDisplay.visible = false
-		return
-		
-	var target_variable := options.target_variable_modifier_on_cell.variable
-	if target_variable.is_empty():
-		$ScopeVarDisplay.visible = false
-		return
-
 	var surface := self.get_surface()
 	if surface == null:
 		push_error("cell does not belong to any surface")
@@ -72,14 +55,14 @@ func _update_debug_display_variable_or_modifier(options: DebugDisplayOptions) ->
 		$ScopeVarDisplay.visible = false
 		return
 		
-	if region.get_scope().is_string_variable(target_variable):
-		var value := cell.get_scope().get_string_value(target_variable)
-		$ScopeVarDisplay.text = "%s" % value
-	else:
-		var value := cell.get_scope().get_numeric_value(target_variable)
-		$ScopeVarDisplay.text = "%f" % value
+	var variable_getter := func(varname: StringName) -> Variant:
+		if cell.get_scope().is_string_variable(varname):
+			return cell.get_scope().get_string_value(varname)
+		else:
+			return cell.get_scope().get_numeric_value(varname)
 		
-	$ScopeVarDisplay.visible = true
+	do_update_debug_display_variable_or_modifier($ScopeVarDisplay, variable_getter, options)
+
 
 
 func _on_mouse_entered() -> void:

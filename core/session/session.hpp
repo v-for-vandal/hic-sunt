@@ -60,6 +60,9 @@ class Session {
   // It does not place the improvement on the map - it only creates scope.
   std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, StringId improvement_class);
 
+  // This function creates and registers new civilization with given id
+  std::expected<CivilizationPtr, ErrorCode> CreateCivilization(StringId civ_id);
+
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
   auto& GetEffects() noexcept { return effects_; }

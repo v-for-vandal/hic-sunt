@@ -44,7 +44,7 @@ abseil = dependency('absl_flat_hash_set')
 
 lua_dep = dependency('lua')
 
-gtest_dep = dependency('gtest')
+gtest_dep = [dependency('gtest'), dependency('gmock')]
 
 # Move to sol2 wrap after merging it into upstream
 # Expose standard dependency. Library is header-only

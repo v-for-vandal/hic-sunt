@@ -278,6 +278,27 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCivilization(StringId civ_id) -> std::expected<CivilizationPtr, ErrorCode>
+{
+    if(!world_) {
+        return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);
+    }
+
+    if(BaseTypes::IsNullToken(civ_id)) {
+        spdlog::warn("Null token passed as civ_id");
+        return std::unexpected(ERR_NULL_ID);
+    }
+    // Find civilization
+    if (world_->HasCivilization(civ_id)) {
+        spdlog::warn("Civilization already exists: {}", civ_id);
+        return std::unexpected(ERR_SCOPE_ALREADY_EXISTS);
+    }
+    auto civ = world_->GetOrCreateCivilization(civ_id);
+
+    return civ;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementClassScope(const CivilizationPtr& civ, StringId improvement_class) -> std::expected<ScopePtr, ErrorCode> {
 
     const auto& civ_id = civ->GetId();

@@ -11,6 +11,7 @@ static constexpr const char* ERR_MSG_SCOPE_IS_NULL = "null-containing scope obje
 void ScopeObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_numeric_value"), &ScopeObject::get_numeric_value);
   ClassDB::bind_method(D_METHOD("get_string_value"), &ScopeObject::get_string_value);
+  ClassDB::bind_method(D_METHOD("get_variant_value"), &ScopeObject::get_variant_value);
   ClassDB::bind_method(D_METHOD("get_modification_time", "variable"),
                        &ScopeObject::get_modification_time);
   ClassDB::bind_method(D_METHOD("add_numeric_modifier", "variable", "key", "add", "mult"),
@@ -49,6 +50,29 @@ StringName ScopeObject::get_string_value(const StringName& variable) {
   }
 
   return *value;
+}
+
+Variant ScopeObject::get_variant_value(const StringName& variable) {
+  ERR_FAIL_NULL_SCOPE(Variant{});
+
+  if (scope_->IsStringVariable(variable)) {
+      auto value = scope_->GetStringValue(variable);
+      if (!value) {
+          return StringName{};
+      }
+      return *value;
+  }
+
+  if (scope_->IsNumericVariable(variable)) {
+      auto value = scope_->GetNumericValue(variable);
+      if (!value) {
+        return 0.0;
+      }
+
+      return *value;
+  }
+
+  return Variant{};
 }
 
 int ScopeObject::get_modification_time(const StringName& variable) const {

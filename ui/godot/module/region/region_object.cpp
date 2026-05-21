@@ -127,7 +127,7 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
     return {};
   }
 
-  auto& cell = region_->GetSurface().GetCell(qrs_coords);
+  //auto& cell = region_->GetSurface().GetCell(qrs_coords);
 
   // Fill result
   Dictionary result;

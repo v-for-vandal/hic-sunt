@@ -28,9 +28,6 @@ func _update_highlighting() -> void:
 	if surface == null:
 		push_error("cell does not belong to any surface")
 		return
-	if surface.highlighter == null:
-		$Highlight.visible = false
-		return
 		
 	var plane : PlaneObject = surface.get_plane().plane_object
 	assert(plane != null)
@@ -39,28 +36,18 @@ func _update_highlighting() -> void:
 		return
 		
 	var region := plane.get_region(qr_coords)
-	var highlighter := surface.highlighter
-	var input_description := highlighter.get_input_description()
-	var input : Dictionary[StringName, Variant] = {}
-	for variable in input_description.variables:
+	
+	var variable_getter := func(varname: StringName) -> Variant:
 		# Note: there is in fact no guarantee that this variable is numeric, we should
 		# check it via Ruleset
 		# TODO: Fix note above
-		input[variable] = region.get_numeric_value_aggregates(variable).avg
+		return region.get_numeric_value_aggregates(varname).avg
 		
-	$Highlight.modulate = surface.highlighter.get_color(input)
-	$Highlight.visible = true
+	
+	do_update_highlighting($Highlight, variable_getter)
+
 	
 func _update_debug_display_variable_or_modifier(options: DebugDisplayOptions) -> void:
-	if options.target_variable_modifier_on_cell == null or not options.display_selected_variable_modifier_on_cell:
-		$ScopeVarDisplay.visible = false
-		return
-		
-	var target_variable := options.target_variable_modifier_on_cell.variable
-	if target_variable.is_empty():
-		$ScopeVarDisplay.visible = false
-		return
-
 	var surface := self.get_surface()
 	if surface == null:
 		push_error("cell does not belong to any surface")
@@ -73,14 +60,18 @@ func _update_debug_display_variable_or_modifier(options: DebugDisplayOptions) ->
 		return
 		
 	var region := plane.get_region(qr_coords)
-	if region.get_scope().is_string_variable(target_variable):
-		var value := region.get_scope().get_string_value(target_variable)
-		$ScopeVarDisplay.text = "%s" % value
-	else:
-		var value := region.get_scope().get_numeric_value(target_variable)
-		$ScopeVarDisplay.text = "%f" % value
+	if region == null:
+		$ScopeVarDisplay.visible = false
+		return
 		
-	$ScopeVarDisplay.visible = true
+		
+	var variable_getter := func(varname: StringName) -> Variant:
+		if region.get_scope().is_string_variable(varname):
+			return region.get_scope().get_string_value(varname)
+		else:
+			return region.get_scope().get_numeric_value(varname)
+			
+	do_update_debug_display_variable_or_modifier($ScopeVarDisplay, variable_getter, options)
 
 func _on_mouse_entered() -> void:
 	pass

@@ -101,6 +101,8 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
 
   int GetExternalRadius() const { return external_region_radius_; }
 
+  void VisitScopes(this auto&& self, auto&& visitor);
+
  private:
   friend void SerializeTo<BaseTypes>(const Plane &source, proto::terra::Plane &target);
   friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane &world, serialize::To<Plane>);

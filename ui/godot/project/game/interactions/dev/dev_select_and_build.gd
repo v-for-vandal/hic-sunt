@@ -49,14 +49,13 @@ func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 
 	# stop receiving other events
 	CurrentGame.event_bus.remove_main_interaction(self)
-	# send city command to build improvement
-	var city_id: String = region.get_city_id()
-	if city_id.is_empty():
-		# TODO: Actually, we should be able to build improvement in region
-		# without city
-		push_error("Dev mode: warning: building improvement without any city")
-
-	region.set_improvement(qr_coords, _improvement_id)
+	var cell := region.get_cell(qr_coords)
+	
+	# TODO: Detect civilization id
+	var civ_id := WorldConstants.UNOWNED_CIV
+	var success : bool = CurrentGame.current_game.session.add_improvement(cell, civ_id, _improvement_id)
+	if not success:
+		push_error("Failed to build improvement")
 
 	# cleanup
 	cleanup()

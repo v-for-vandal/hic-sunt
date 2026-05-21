@@ -6,6 +6,19 @@
 namespace hs::terra {
 
 template <typename BaseTypes>
+void Plane<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
+  visitor(self.GetScope());
+
+  self.GetSurface().Foreach([&visitor](auto, auto& cell) {
+    cell.GetRegionPtr()->VisitScopes(visitor);
+  });
+
+  for (auto& cell : self.off_surface_) {
+    cell.GetRegionPtr()->VisitScopes(visitor);
+  }
+}
+
+template <typename BaseTypes>
 Plane<BaseTypes>::Plane(ControlObjectPtr control_object, StringId plane_id,
                         QRSBox box, int region_radius,
                         int external_region_radius)

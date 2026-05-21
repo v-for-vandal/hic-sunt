@@ -43,6 +43,8 @@ func _init(world_: World, ruleset_: RulesetObject) -> void:
 	_ruleset = ruleset_
 	assert(_world)
 	assert(_ruleset)
+	# create civilization for attaching unowned buildings
+	assert(session.create_civilization(WorldConstants.UNOWNED_CIV))
 	_current_player_civ = Civilisation.create_civilisation(get_new_id())
 # TODO: we must do something with current_turn and next_id
 

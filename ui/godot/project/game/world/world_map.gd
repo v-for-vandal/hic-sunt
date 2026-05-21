@@ -63,13 +63,5 @@ func on_ui_event(event: UiEventBus.UIEvent) -> void:
 			event.accept()
 			return
 
-
-
-#func _on_world_surface_enter_region(world_object: WorldObject, qr_position: Vector2i):
-	#print("emiting enter region request")
-	#show_region_request.emit(world_object, qr_position)
-
-
-
 func _on_world_ui_next_turn_requested() -> void:
 	CurrentGame.next_turn()

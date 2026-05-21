@@ -10,6 +10,15 @@
 namespace hs::region {
 
 template <typename BaseTypes>
+void Cell<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
+  visitor(self.GetScope());
+
+  for (auto& [_, improvement] : self.improvements_) {
+    visitor(improvement);
+  }
+}
+
+template <typename BaseTypes>
 bool Cell<BaseTypes>::operator==(const Cell<BaseTypes> &other) const {
   if (!google::protobuf::util::MessageDifferencer::Equals(improvement_,
                                                           other.improvement_)) {

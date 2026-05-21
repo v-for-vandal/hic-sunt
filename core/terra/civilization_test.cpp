@@ -1,6 +1,7 @@
 #include "civilization.hpp"
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <core/types/error_code.hpp>
 #include <core/types/scope_type.hpp>
@@ -144,6 +145,28 @@ TEST(StdCivilization, GetChildScopeReturnsAdHocScopeForMissingObject) {
 
   EXPECT_NE(missing_scope, nullptr);
   EXPECT_EQ(missing_scope->GetParent(), nullptr);
+}
+
+TEST(StdCivilization, VisitScopesVisitsOwnScopeThenChildScopes) {
+  StdCivilization civilization{"civ.test"};
+  auto city_scope = civilization.CreateChildScope(ScopeType::SCOPE_TYPE_CITY, "city.alpha");
+  auto character_scope = civilization.CreateChildScope(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, "character.alpha");
+
+  ASSERT_TRUE(city_scope.has_value());
+  ASSERT_TRUE(character_scope.has_value());
+
+  std::vector<std::string> scope_ids;
+  civilization.VisitScopes([&scope_ids](const auto& scope_ptr) {
+    ASSERT_NE(scope_ptr, nullptr);
+    scope_ids.push_back(std::string{scope_ptr->GetId()});
+  });
+
+  ASSERT_EQ(scope_ids.size(), 3);
+  EXPECT_EQ(scope_ids.front(), civilization.GetScope()->GetId());
+  EXPECT_THAT(scope_ids, ::testing::UnorderedElementsAre(
+                              std::string{civilization.GetScope()->GetId()},
+                              std::string{"city.alpha"},
+                              std::string{"character.alpha"}));
 }
 
 }  // namespace hs::terra
