@@ -9,6 +9,7 @@ namespace hs::godot {
 void WorldObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("save", "filename"), &WorldObject::save);
   ClassDB::bind_method(D_METHOD("load", "filename"), &WorldObject::load);
+  ClassDB::bind_method(D_METHOD("get_next_id"), &WorldObject::get_next_id);
   ClassDB::bind_method(
       D_METHOD("create_plane", "plane_id", "box", "region_radius", "region_external_radius"),
       &WorldObject::create_plane);
@@ -54,6 +55,8 @@ Error WorldObject::load(String filename) {
 
   return OK;
 }
+
+uint64_t WorldObject::get_next_id() const { return data_.GetNextId(); }
 
 Dictionary WorldObject::create_error(const char* error) {
   Dictionary result;

@@ -58,13 +58,14 @@ func ask_confirm(message: String) -> bool:
 
 
 func load_ruleset() -> RulesetObject:
-	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/v1.0')
+	var core_ruleset_path := ProjectSettings.globalize_path('res://gamedata/core')
+	var main_ruleset_path := ProjectSettings.globalize_path('res://gamedata/v1.0')
 	
 	# get paths to all mods
 	var active_mods := _pimpl.get_active_mods()
-	var all_paths := [core_ruleset_path]
+	var all_paths := [core_ruleset_path, main_ruleset_path]
 	
-	for mod_path in  active_mods.keys():
+	for mod_path : String in  active_mods.keys():
 		all_paths.append(ProjectSettings.globalize_path(mod_path))
 	
 	

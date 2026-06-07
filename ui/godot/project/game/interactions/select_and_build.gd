@@ -62,7 +62,7 @@ func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 			push_error("Can't find specified city: ", city_id)
 		else:
 			var construction_project := ConstructionProject.create_construction_project(
-				improvement_id, region, qr_coords)
+				CurrentGame.get_current_player_civ().get_id(), improvement_id, region, qr_coords)
 			if construction_project == null:
 				push_error("Failed to create construction project")
 			else:

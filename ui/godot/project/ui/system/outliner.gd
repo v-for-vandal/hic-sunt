@@ -37,19 +37,14 @@ func _ready() -> void:
 func open_outliner() -> void:
 	%OpenCloseButton.icon = close_icon if outliner_position == OutlinerPosition.Right else open_icon
 	$Control/TabBar.visible = true
-	$PanelContainer.visible = true
+	$ScrollContainer.visible = true
 	_is_open = true
 	
 func close_outliner() -> void:
 	%OpenCloseButton.icon = open_icon if outliner_position == OutlinerPosition.Right else close_icon
 	_is_open = false
 	$Control/TabBar.visible = false
-	$PanelContainer.visible = false
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
-
+	$ScrollContainer.visible = false
 
 func _on_open_close_button_pressed() -> void:
 	if _is_open:
@@ -58,23 +53,28 @@ func _on_open_close_button_pressed() -> void:
 		open_outliner()
 		
 func on_region_selected(region: RegionObject) -> void:
+	%DebugTab.on_region_selected(region)
 	# Selecting region  is not the same as loading it. Region is selected when we are
 	# in world ui. We should only display informatino about region
 	if region != null:
-		%ScopeEditor.set_scope(region.get_scope())
 		%BuildingList.load_region(region)
 	else:
-		%ScopeEditor.clear()
-		
-func on_cell_selected(cell: CellObject) -> void:
-	if cell != null:
-		%ScopeEditor.set_scope(cell.get_scope())
-	else:
-		%ScopeEditor.clear()
+		%BuildingList.clear()
 	
 func on_region_loaded(region: RegionObject) -> void:
+	%DebugTab.on_region_loaded(region)
 	# This method is called when we load region and open region UI
 	%BuildingList.load_region(region)
+	
+func on_region_changed(region: RegionObject) -> void:
+	%DebugTab.on_region_changed(region)
+	%BuildingList.on_region_changed(region)
+
+func on_cell_changed(cell: CellObject) -> void:
+	%DebugTab.on_cell_changed(cell)
+	
+func on_cell_selected(cell: CellObject) -> void:
+	%DebugTab.on_cell_selected(cell)
 
 
 func _on_tab_bar_tab_changed(tab: int) -> void:

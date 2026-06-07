@@ -1,6 +1,14 @@
 # Global state that manages current game and its logic
 extends Node
 
+## Signal for UI that some region has changed and ui must be refreshed. These signals are unsuitable
+## for game logic. There is no guarantee that every change made will invoke this signal.
+signal ui_region_changed(region: RegionObject)
+
+## Signal for UI that some cell has changed and ui must be refreshed. These signals are unsuitable
+## for game logic. There is no guarantee that every change made will invoke this signal.
+signal ui_cell_changed(cell: CellObject)
+
 var current_game: Game
 var event_bus : UiEventBus = UiEventBus.new()
 
@@ -40,6 +48,7 @@ func save_game(save_location: DirAccess) -> Error:
 	
 
 
+
 func load_game(save_location: DirAccess, ruleset: RulesetObject) -> Error:
 	_cleanup_nodes()
 	event_bus = UiEventBus.new()
@@ -64,3 +73,17 @@ func _setup_nodes() -> void:
 	assert (event_bus != null)
 	add_child(current_game)
 	add_child(event_bus)
+	current_game.session.region_changed.connect(_propogate_ui_region_changed)
+	current_game.session.cell_changed.connect(_propogate_ui_cell_changed)
+	
+	
+# Signals propogator
+func _propogate_ui_region_changed(region_id: StringName) -> void:
+	if current_game == null:
+		push_error("unexpected signal with game uninitialized")
+		return
+	var region := current_game.world.world_object.get_region_by_id(region_id)
+	ui_region_changed.emit(region)
+	
+func _propogate_ui_cell_changed(cell: CellObject) -> void:
+	ui_cell_changed.emit(cell)

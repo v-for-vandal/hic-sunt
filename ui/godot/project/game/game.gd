@@ -28,11 +28,6 @@ var session: SessionObject:
 
 # TODO: Move to World
 var _current_player_civ: Civilisation
-# var _current_turn := 1
-
-var _next_id := 0
-
-
 
 
 func _init(world_: World, ruleset_: RulesetObject) -> void:
@@ -45,7 +40,7 @@ func _init(world_: World, ruleset_: RulesetObject) -> void:
 	assert(_ruleset)
 	# create civilization for attaching unowned buildings
 	assert(session.create_civilization(WorldConstants.UNOWNED_CIV))
-	_current_player_civ = Civilisation.create_civilisation(get_new_id())
+	_current_player_civ = Civilisation.create_civilisation("player_0")
 # TODO: we must do something with current_turn and next_id
 
 func _ready() -> void:
@@ -72,6 +67,9 @@ func get_current_world() -> World:
 func get_current_turn() -> int:
 	return _session.get_current_turn()
 
+## Returns new, globally unique id.
+func get_new_id() -> int:
+	return _world.world_object.get_next_id()
 
 
 # TODO: REname it as end_turn
@@ -85,13 +83,6 @@ func next_turn() -> void:
 # TODO: move to ruleset?
 func can_build(_improvement_id: String) -> bool:
 	return true
-
-
-func get_new_id() -> int:
-	# returns new unique id. This id is globaly unique for whole game
-	var result: int = _next_id
-	_next_id += 1
-	return result
 
 
 static func _game_file_path(save_location: DirAccess) -> String:

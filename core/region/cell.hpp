@@ -24,9 +24,9 @@ template <typename BaseTypes>
 class Cell;
 
 template <typename BaseTypes>
-void SerializeTo(const Cell<BaseTypes> &source, proto::region::Cell &to);
+void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to);
 template <typename BaseTypes>
-Cell<BaseTypes> ParseFrom(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
+Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
 
 /// One cell in region map
 template <typename BaseTypes = StdBaseTypes>
@@ -38,24 +38,26 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
 
   Cell() = default;
 
-  bool operator==(const Cell &) const;
+  bool operator==(const Cell&) const;
 
   bool HasImprovement(int slot) const;
   std::expected<void, ErrorCode> AddImprovement(int slot, const ScopePtr& improvement);
   StringId GetImprovementId(int slot) const;
+  ScopePtr GetImprovement(int slot) const;
+  const auto& GetImprovements() const { return improvements_; }
 
   void VisitScopes(this auto&& self, auto&& visitor);
 
  private:
   friend Region<BaseTypes>;
-  friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source, proto::region::Cell &to);
-  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
+  friend void SerializeTo<BaseTypes>(const Cell<BaseTypes>& source, proto::region::Cell& to);
+  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
 
  private:
-     // map slot -> improvement in this slot
-     absl::flat_hash_map<int, ScopePtr> improvements_;
+  // map slot -> improvement in this slot
+  absl::flat_hash_map<int, ScopePtr> improvements_;
 
-     // TODO: RM
+  // TODO: RM
   proto::region::Improvement improvement_;
 };
 

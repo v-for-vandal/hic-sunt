@@ -1,11 +1,11 @@
 #pragma once
 
-#include "cell.hpp"
-
 #include <google/protobuf/util/message_differencer.h>
 
 #include <core/utils/serialize.hpp>
 #include <core/utils/serialize_containers.hpp>
+
+#include "cell.hpp"
 
 namespace hs::region {
 
@@ -19,9 +19,8 @@ void Cell<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
 }
 
 template <typename BaseTypes>
-bool Cell<BaseTypes>::operator==(const Cell<BaseTypes> &other) const {
-  if (!google::protobuf::util::MessageDifferencer::Equals(improvement_,
-                                                          other.improvement_)) {
+bool Cell<BaseTypes>::operator==(const Cell<BaseTypes>& other) const {
+  if (!google::protobuf::util::MessageDifferencer::Equals(improvement_, other.improvement_)) {
     return false;
   }
 
@@ -39,8 +38,8 @@ bool Cell<BaseTypes>::HasImprovement(int slot) const {
 }
 
 template <typename BaseTypes>
-std::expected<void, ErrorCode> Cell<BaseTypes>::AddImprovement(
-    int slot, const ScopePtr& improvement) {
+std::expected<void, ErrorCode> Cell<BaseTypes>::AddImprovement(int slot,
+                                                               const ScopePtr& improvement) {
   if (!improvement->IsOrphaned()) {
     return std::unexpected(ErrorCode::ERR_IMPROVEMENT_SCOPE_ALREADY_HAS_PARENT);
   }
@@ -49,8 +48,8 @@ std::expected<void, ErrorCode> Cell<BaseTypes>::AddImprovement(
     return std::unexpected(ErrorCode::ERR_IMPROVEMENT_SLOT_OCCUPIED);
   }
 
-  if(auto success = improvement->SetParent(this->GetScope()); !success) {
-      return std::unexpected(success.error());
+  if (auto success = improvement->SetParent(this->GetScope()); !success) {
+    return std::unexpected(success.error());
   }
   improvements_[slot] = improvement;
   return {};
@@ -67,18 +66,26 @@ typename Cell<BaseTypes>::StringId Cell<BaseTypes>::GetImprovementId(int slot) c
 }
 
 template <typename BaseTypes>
-void SerializeTo(const Cell<BaseTypes> &source, proto::region::Cell &to) {
+auto Cell<BaseTypes>::GetImprovement(int slot) const -> ScopePtr {
+  const auto it = improvements_.find(slot);
+  if (it == improvements_.end()) {
+    return {};
+  }
+
+  return it->second;
+}
+
+template <typename BaseTypes>
+void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to) {
   to.Clear();
   /*
   auto improvement_ptr = to.mutable_improvements()->Add();
   *improvement_ptr = source.GetImprovement();
   */
-
 }
 
 template <typename BaseTypes>
-Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
-                          serialize::To<Cell<BaseTypes>>) {
+Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>) {
   Cell<BaseTypes> result;
   /*
   if (from.improvements_size() > 0) {
@@ -89,4 +96,4 @@ Cell<BaseTypes> ParseFrom(const proto::region::Cell &from,
   return result;
 }
 
-} // namespace hs::region
+}  // namespace hs::region

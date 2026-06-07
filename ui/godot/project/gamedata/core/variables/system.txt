@@ -1,0 +1,10 @@
+variables : [
+{
+  id: "core.turn",
+  numeric : {}
+},
+{
+  id: "core.class",
+  string : {}
+},
+]

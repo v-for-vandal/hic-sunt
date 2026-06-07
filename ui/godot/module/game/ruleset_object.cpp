@@ -176,7 +176,7 @@ Dictionary RulesetObject::get_improvement_info(String id) const {
   const auto* improvement = ruleset_.FindRegionImprovementByType(ascii_id.get_data());
 
   if (improvement == nullptr) {
-    spdlog::error("Can't find improvement with id {}", ascii_id.get_data());
+    SPDLOG_ERROR("Can't find improvement with id {}", ascii_id.get_data());
     return {};
   }
 

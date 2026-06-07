@@ -15,6 +15,9 @@ func load_region(_region: RegionObject) -> void:
 	clear()
 	for bld : Variant in available_buildings:
 		add_building(bld.id)
+		
+func on_region_changed(_region: RegionObject) -> void:
+	load_region(_region)
 
 func _on_item_activated(index: int) -> void:
 	building_selected.emit(get_item_metadata(index))

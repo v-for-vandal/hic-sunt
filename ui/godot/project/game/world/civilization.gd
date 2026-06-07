@@ -2,13 +2,13 @@ extends RefCounted
 
 class_name Civilisation
 
-var _id: int
+var _id: StringName
 var _cities_by_id: Dictionary
 var _cities_by_region_id: Dictionary
 
 var _serializable_properties: Array[StringName] = ["_id",]
 
-func id() -> int:
+func id() -> StringName:
 	return _id
 	
 func create_city(region_id: String) -> City:
@@ -16,7 +16,7 @@ func create_city(region_id: String) -> City:
 	assert(can_create_city(region_id))
 	if not can_create_city(region_id):
 		return null
-	var city_id : String = "city_%s" % CurrentGame.get_new_id()
+	var city_id : String = "city_%s" % CurrentGame.game.get_new_id()
 	var result : City = City.create_new_city(city_id, region_id)
 	assert(result != null)
 	assert(not (city_id in _cities_by_id))
@@ -51,7 +51,7 @@ func next_turn() -> void:
 	for city_id : String in _cities_by_id:
 		_cities_by_id[city_id].next_turn()
 	
-static func create_civilisation(civ_id: int) -> Civilisation:
+static func create_civilisation(civ_id: StringName) -> Civilisation:
 	var result := Civilisation.new()
 	result._id = civ_id
 	

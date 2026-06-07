@@ -10,7 +10,7 @@ enum ErrorCode {
   NO_ERROR = 0,
 
   // Common errors
-  ERR_NULL_ID, // returned when give id is empty string
+  ERR_NULL_ID,  // returned when give id is empty string
   // Session errors
   ERR_REPLACING_RULESET_FORBIDDEN,
   ERR_RULESET_MUST_BE_SET_FIRST,

@@ -14,6 +14,12 @@ func _ready() -> void:
 		# Get texture for this biome
 		var texture := GfxRegistry.get_biome_texture(biome)
 		$Biome.texture = texture
+		
+		var improvement_scope : ScopeObject = cell.get_improvement(0) # slot 0
+		if improvement_scope:
+			var improvement_class := improvement_scope.get_string_value(WorldConstants.CLASS_VARIABLE)
+			$Improvement0.texture = GfxRegistry.get_improvement_texture(improvement_class)
+			$Improvement0.visible = true
 	_update_highlighting()
 	
 	# connect to debugging nodes

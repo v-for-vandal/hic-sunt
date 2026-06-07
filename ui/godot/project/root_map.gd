@@ -42,11 +42,6 @@ func _ready() -> void:
 func load_world(world : World) -> void:
 	#assert(_loaded, "You can't call methods on root-map before it is fully loaded")
 	assert(world != null)
-	# TODO: Don't set up terrain mapping, instead use it as global class
-	# TODO: RM terrain mapping
-	# var terrain_mapping : Dictionary = CurrentGame.get_atlas_visualization()
-	# _world_map.set_terrain_visualization(terrain_mapping)
-	# _region_map.set_visualization(terrain_mapping)
 	_world_map.load_world(world)
 	_switch_to_world()
 
@@ -90,7 +85,6 @@ func _on_region_map_exit_reqion_request() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action("ui_cancel"):
 		if event.is_action_released("ui_cancel"):
-			#print("sending cancellation event")
 			CurrentGame.event_bus.emit_cancellation()
 		get_viewport().set_input_as_handled()
 		

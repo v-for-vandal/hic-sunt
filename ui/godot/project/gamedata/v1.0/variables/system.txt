@@ -1,6 +1,0 @@
-variables : [
-{
-  id: "core.turn",
-  numeric : {}
-}
-]

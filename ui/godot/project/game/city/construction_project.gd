@@ -17,7 +17,8 @@ class_name ConstructionProject
 
 # private variables
 var _id: int
-var _improvement_id: String
+var _improvement_id: StringName
+var _civ_id : StringName
 
 var _turns_without_progress := 0
 var _is_ready := false
@@ -57,6 +58,7 @@ var _total_required_resources := 0 # sum of all resources required for completit
 
 
 static func create_construction_project(
+		civ_id: StringName,
 		improvement_id: StringName,
 		region: RegionObject,
 		region_coords: Vector2i,
@@ -69,19 +71,20 @@ static func create_construction_project(
 
 	var result := ConstructionProject.new()
 	result._improvement_id = improvement_id
-	var improvement_info: Dictionary = CurrentGame.get_ruleset().get_improvement_info(improvement_id)
+	result._civ_id = civ_id
+	var improvement_info: Dictionary = CurrentGame.game.ruleset.get_improvement_info(improvement_id)
 	if improvement_info.is_empty():
 		push_error("No information for improvement: ", improvement_id)
 		return null
 
 	result._resources_cost = improvement_info.cost
-	result._id = CurrentGame.get_new_id()
+	result._id = CurrentGame.game.get_new_id()
 	result._region = region
 	result._region_coords = region_coords
 	result._total_required_resources = _calc_total_required(result._resources_cost)
 
 	# setup accumulated resources with zeroes
-	for resource_id in result._resources_cost:
+	for resource_id : StringName in result._resources_cost:
 		result._accumulated_resources[resource_id] = 0
 	result._accumulated_resources[CityConstants.WORKFORCE_RESOURCE] = 0
 
@@ -242,7 +245,8 @@ func is_possible() -> bool:
 
 
 func execute_finisher() -> bool:
-	if not _region.set_improvement(_region_coords, _improvement_id):
+	
+	if not CurrentGame.game.session.add_improvement(_region.get_cell(_region_coords), _civ_id, _improvement_id):
 		push_error("Failed to set improvement at region ", _region.get_region_id())
 		return false
 	return true
@@ -253,7 +257,7 @@ func execute_skipped() -> bool:
 	return true
 
 
-func _clear():
+func _clear() -> void:
 	_id = 0
 	_improvement_id = ""
 

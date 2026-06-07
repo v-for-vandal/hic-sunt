@@ -10,6 +10,8 @@ func _init() -> void:
 	pass
 	
 func _ready() -> void:
+	# Connect to current_game signals
+	CurrentGame.ui_region_changed.connect(_on_region_changed)
 	pass
 
 func on_region_cell_clicked_forward(region_object: RegionObject, qr: Vector2i) -> void:
@@ -18,6 +20,7 @@ func on_region_cell_clicked_forward(region_object: RegionObject, qr: Vector2i) -
 func load_region(region_object: RegionObject) -> void:
 	assert(region_object != null)
 	_region = region_object
+	$Outliner.on_region_loaded(_region)
 	_update_region()
 	
 func _update_region() -> void:
@@ -36,15 +39,8 @@ func _update_region() -> void:
 		print("Got city: ", city_id_opt)
 		$CityNameLabel.visible = true
 		$CityNameLabel.text = city_id_opt
-		
-	# The call load_region is performed via call_group. All nodes
-	# that require such call will receive them.
-	#$InfoTabContainer/Buildings.load_region(_region)
-	#$InfoTabContainer/Resources.load_region(_region)
-	#$InfoTabContainer/Projects.load_region(_region)
-	#$InfoTabContainer/Jobs.load_region(_region)
-	#$ScrollContainer/VBoxContainer/BuildingList.load_region(_region)
-	$Outliner.on_region_loaded(_region)
+
+	$Outliner.on_region_changed(_region)
 	
 func _on_close_button_pressed() -> void:
 	close_requested.emit()
@@ -78,8 +74,20 @@ func on_cell_selected(cell: CellObject) -> void:
 	$Outliner.on_cell_selected(cell)
 
 # This function is called by parent class when something inside region has changed
-func _on_region_changed(_area: Rect2i, flags: int) -> void:
+func _on_region_changed(region: RegionObject) -> void:
 	if _region == null:
+		return
+	if region == null:
+		return
+	if region.get_id() != _region.get_id():
 		return
 		
 	_update_region()
+	
+func _on_cell_changed(cell: CellObject) -> void:
+	if cell == null:
+		return
+	if cell.get_region_id() != _region.get_id():
+		return
+		
+	$Outliner.on_cell_changed(cell)
