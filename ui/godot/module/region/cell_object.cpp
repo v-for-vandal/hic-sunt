@@ -65,7 +65,7 @@ Ref<ScopeObject> CellObject::get_improvement(int slot) {
 }
 
 auto CellObject::get_improvements() -> TypedDictionary<int, ScopeObject> {
-  TypedDictionary<StringName, ScopeObject> result;
+  TypedDictionary<int, ScopeObject> result;
   ERR_FAIL_NULL_REGION(result);
   ERR_FAIL_REGION_NO_CELL(result);
 

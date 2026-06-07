@@ -32,4 +32,6 @@ title = "Cell"
 [node name="CellInfo" type="Tree" parent="CellContainer" unique_id=1152103348]
 unique_name_in_owner = true
 layout_mode = 2
+columns = 2
+hide_root = true
 scroll_vertical_enabled = false

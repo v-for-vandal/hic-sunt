@@ -9,7 +9,7 @@ func setup(project: ConstructionProject) -> void:
 	$%Name.text = improvement_id
 	project.changed.connect(_on_update_progress)
 	
-func _on_update_progress():
+func _on_update_progress() -> void:
 	var estimate := _project.progress_estimate()
 	$%ProgressBar.value = estimate.progress
 	

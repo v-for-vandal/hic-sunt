@@ -4,8 +4,8 @@
 
 #include <core/ruleset/ruleset.hpp>
 #include <core/scope/scope.hpp>
-#include <core/terra/world.hpp>
 #include <core/terra/types.hpp>
+#include <core/terra/world.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/scope_type.hpp>
 #include <expected>
@@ -56,9 +56,10 @@ class Session {
   // Return current turn
   size_t GetCurrentTurn() const { return current_turn_; }
 
-  // This function creates and registers new improvement scope (and also all realated class and tag scopes)
-  // It does not place the improvement on the map - it only creates scope.
-  std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id, StringId improvement_class);
+  // This function creates and registers new improvement scope (and also all realated class and tag
+  // scopes) It does not place the improvement on the map - it only creates scope.
+  std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id,
+                                                            StringId improvement_class);
 
   // This function creates and registers new civilization with given id
   std::expected<CivilizationPtr, ErrorCode> CreateCivilization(StringId civ_id);
@@ -75,13 +76,15 @@ class Session {
   }
 
  private:
+  [[nodiscard]] bool ValidateCoreVariablesInRuleSet(const RuleSet& ruleset) const;
   void Prepare();
 
  private:
   friend class EffectExecutor<BaseTypes>;
 
   // This function will create improvement class scope and propertly initialize it
-  std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(const CivilizationPtr& civ, StringId improvement_class);
+  std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(const CivilizationPtr& civ,
+                                                                 StringId improvement_class);
 
   RuleSetPtr ruleset_;
   WorldPtr world_;

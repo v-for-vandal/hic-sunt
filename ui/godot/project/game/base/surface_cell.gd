@@ -48,7 +48,7 @@ func get_offset_coordinates() -> Vector2i:
 func _get_qr_coordinates() -> Vector2i:
 	return  _qr_coords
 	
-func _on_input_event(_viewport: Node, event: InputEvent, shape_idx: int) -> void:
+func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	input_event.emit(qr_coords, event)
 	
 func _on_display_settings_changed() -> void:

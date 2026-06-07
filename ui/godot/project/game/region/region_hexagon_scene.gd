@@ -1,7 +1,19 @@
 extends GameTile
 
+var _cell_id : StringName
+
 func _ready() -> void:
 	super()
+	_load_cell()
+
+	# connect to global cell changed signal
+	CurrentGame.ui_cell_changed.connect(_on_some_cell_changed)
+	
+	# connect to debugging nodes
+	if DebugRoot.is_debug_enabled():
+		DebugRoot.get_debug_display_options().changed.connect(self.on_debug_display_settings_changed)
+	
+func _load_cell() -> void:
 	# Get parent
 	var surface := get_surface()
 	assert(surface != null)	
@@ -10,6 +22,7 @@ func _ready() -> void:
 	assert(region != null)
 	if region != null:
 		var cell := region.get_cell(qr_coords)
+		_cell_id = cell.get_id()
 		var biome := cell.get_scope().get_string_value(Modifiers.ECOSYSTEM_BIOME)
 		# Get texture for this biome
 		var texture := GfxRegistry.get_biome_texture(biome)
@@ -21,10 +34,7 @@ func _ready() -> void:
 			$Improvement0.texture = GfxRegistry.get_improvement_texture(improvement_class)
 			$Improvement0.visible = true
 	_update_highlighting()
-	
-	# connect to debugging nodes
-	if DebugRoot.is_debug_enabled():
-		DebugRoot.get_debug_display_options().changed.connect(self.on_debug_display_settings_changed)
+
 
 		
 func _update_highlighting() -> void:
@@ -77,8 +87,19 @@ func _on_mouse_entered() -> void:
 
 func _on_mouse_exited() -> void:
 	pass # Replace with function body.
+	
+# This method will be called when some cell has changed. Not necesserilly our cell
+func _on_some_cell_changed(cell: CellObject) -> void:
+	if cell == null:
+		return
+		
+	if cell.get_id() != _cell_id:
+		return
+		
+	# Otherwise reload self
+	_load_cell()
 
-func _on_display_settings_changed():
+func _on_display_settings_changed() -> void:
 	_update_highlighting()
 	
 func on_debug_display_settings_changed(options: DebugDisplayOptions) -> void:

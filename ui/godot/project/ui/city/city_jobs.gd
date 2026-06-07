@@ -16,8 +16,8 @@ func _clear_widgets() -> void:
 		child.queue_free()
 		
 		
-func _add_job_widget(job_id: String, job_count: int):
-	var name_label = RichTextLabel.new()
+func _add_job_widget(job_id: String, job_count: int) -> void:
+	var name_label := RichTextLabel.new()
 	name_label.autowrap_mode =TextServer.AUTOWRAP_OFF
 	name_label.fit_content = true
 	name_label.bbcode_enabled = true

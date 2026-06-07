@@ -43,6 +43,7 @@ func test_creation_failure_invalid_improvement_id() -> void:
 		zero_region, coords)
 	assert_null(result, "Creating project for non-existend improvement id should have failed")
 	assert_push_error_count(1)
+	assert_engine_error_count(1)
 
 func test_progress() -> void:
 	var coords := Vector2i(2,1)

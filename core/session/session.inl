@@ -11,10 +11,33 @@
 namespace hs::session {
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+bool Session<BaseTypes, WorldPtr, RuleSetPtr>::ValidateCoreVariablesInRuleSet(
+    const RuleSet& ruleset) const {
+  bool valid = true;
+  const auto& variable_definitions = ruleset.GetVariableDefinitions();
+
+  if (!variable_definitions->IsNumericVariable(kCoreTurn)) {
+    SPDLOG_ERROR("Ruleset is missing required numeric variable {}", kCoreTurn);
+    valid = false;
+  }
+
+  if (!variable_definitions->IsStringVariable(kCoreClass)) {
+    SPDLOG_ERROR("Ruleset is missing required string variable {}", kCoreClass);
+    valid = false;
+  }
+
+  return valid;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::SetRuleSet(
     RuleSetPtr ruleset) {
   if (!ruleset) {
     spdlog::error("Trying to set ruleset to nullptr");
+    return std::unexpected(ErrorCode::ERR_INVALID_RULESET);
+  }
+
+  if (!ValidateCoreVariablesInRuleSet(*ruleset)) {
     return std::unexpected(ErrorCode::ERR_INVALID_RULESET);
   }
 

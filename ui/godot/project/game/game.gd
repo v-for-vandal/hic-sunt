@@ -32,8 +32,8 @@ var _current_player_civ: Civilisation
 
 func _init(world_: World, ruleset_: RulesetObject) -> void:
 	_session = SessionObject.new()
-	_session.set_world(world_.world_object)
-	_session.set_ruleset(ruleset_)
+	assert(_session.set_world(world_.world_object))
+	assert(_session.set_ruleset(ruleset_))
 	_world = world_
 	_ruleset = ruleset_
 	assert(_world)

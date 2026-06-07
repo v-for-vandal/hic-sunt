@@ -68,8 +68,6 @@ func _load_region_info(region : RegionObject) -> void:
 	%RegionInfo.clear()
 	if region != null:
 		var root : TreeItem = %RegionInfo.create_item()
-		
-		
 		var region_info := region.get_info()
 		for key : StringName in region_info:
 			var item : TreeItem = %RegionInfo.create_item(root)
@@ -79,11 +77,11 @@ func _load_region_info(region : RegionObject) -> void:
 func _load_cell_info(cell: CellObject) -> void:
 	%CellInfo.clear()
 	if cell != null:
-		var root : TreeItem = %RegionInfo.create_item()
+		var root : TreeItem = %CellInfo.create_item()
 		
 		var cell_improvements : Dictionary[int, ScopeObject] = cell.get_improvements()
 		for slot : int in cell_improvements:
-			var item : TreeItem = %RegionInfo.create_item(root)
+			var item : TreeItem = %CellInfo.create_item(root)
 			var scope := cell_improvements[slot]
 			item.set_text(0, "imprv_%d" % slot)
-			item.set_text(1, scope.GetId())
+			item.set_text(1, scope.get_id())

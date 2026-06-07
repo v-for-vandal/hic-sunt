@@ -6,5 +6,5 @@ variables : [
 {
   id: "core.class",
   string : {}
-},
+}
 ]
