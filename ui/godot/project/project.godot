@@ -21,7 +21,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Console="*uid://b3pl16ey42fku"
+Console="*uid://dc5wc5117h2vk"
 WorldBuilderRegistry="*res://system/world_builder/registry.gd"
 GfxRegistry="*res://system/gfx/registry.gd"
 CentralSystem="*res://system/central/central_system.gd"
@@ -45,7 +45,7 @@ window/subwindows/embed_subwindows=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/GDQuest_GDScript_formatter/plugin.cfg", "res://addons/biome_map_editor/plugin.cfg", "res://addons/debug-tree-view/plugin.cfg", "res://addons/dynamic_table/plugin.cfg", "res://addons/godot-console/plugin.cfg", "res://addons/gut/plugin.cfg")
+enabled=PackedStringArray("res://addons/GDQuest_GDScript_formatter/plugin.cfg", "res://addons/biome_map_editor/plugin.cfg", "res://addons/debug-tree-view/plugin.cfg", "res://addons/dynamic_table/plugin.cfg", "res://addons/godot-console/plugin.cfg", "res://addons/godot_state_charts/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [input]
 

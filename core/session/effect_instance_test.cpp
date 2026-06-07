@@ -111,19 +111,11 @@ TEST(StdEffectInstance, ExecuteUsesEffectIdAsModifierKey) {
   ASSERT_EQ(execute_result->size(), 1u);
   ASSERT_TRUE((*execute_result)[0].Apply(17));
 
-  struct NumericExplanation {
-    std::string scope_id;
-    std::string variable;
-    std::string modifier;
-    double add{0};
-    double mult{0};
-  };
-
-  std::vector<NumericExplanation> explanations;
+  std::vector<scope::test::NumericExplanation> explanations;
   scope->ExplainNumericVariable("numeric_var",
                                 [&explanations](const auto& scope_id, const auto& variable,
                                                 const auto& modifier, auto add, auto mult) {
-                                  explanations.push_back(NumericExplanation{
+                                  explanations.push_back(scope::test::NumericExplanation{
                                       .scope_id = scope_id,
                                       .variable = variable,
                                       .modifier = modifier,

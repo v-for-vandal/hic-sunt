@@ -8,17 +8,24 @@ namespace hs {
 
 enum ErrorCode {
   NO_ERROR = 0,
+
+  // Common errors
+  ERR_NULL_ID,  // returned when give id is empty string
   // Session errors
   ERR_REPLACING_RULESET_FORBIDDEN,
   ERR_RULESET_MUST_BE_SET_FIRST,
+  ERR_WORLD_MUST_BE_SET_FIRST,
 
   // variables errors
   ERR_EMPTY_MODIFIER_KEY,
   ERR_NO_SUCH_VARIABLE,
   ERR_INCORRECT_VARIABLE_TYPE,
 
-  // session errors
+  // scope errors (but ocasionally may be used in other context)
+  ERR_INCORRECT_SCOPE_TYPE,
   ERR_SCOPE_ALREADY_EXISTS,
+
+  // session errors
   ERR_SCOPE_TYPE_UNSPECIFIED,
   ERR_WORLD_ALREADY_SET,
   ERR_INVALID_RULESET,
@@ -27,7 +34,15 @@ enum ErrorCode {
   ERR_INVALID_EFFECT_VARIABLE_REFERENCE,
   ERR_INVALID_EFFECT_DEFINITION,
   ERR_EFFECT_LUA_RUNTIME_ERROR,
-  ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED
+  ERR_EFFECT_LUA_OPERATION_LIMIT_EXCEEDED,
+
+  // civ errors
+  ERR_INVALID_CIV_ID,
+  ERR_NO_SUCH_CIV,
+
+  // region/cell improvement errors
+  ERR_IMPROVEMENT_SCOPE_ALREADY_HAS_PARENT,
+  ERR_IMPROVEMENT_SLOT_OCCUPIED
 };
 
 class ErrorCategory final : public std::error_category {

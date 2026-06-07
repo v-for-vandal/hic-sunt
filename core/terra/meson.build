@@ -13,6 +13,7 @@ core_terra_lib = static_library(
     'core_terra_lib',
     sources: [
         'cell.cpp',
+        'civilization.cpp',
         'world.cpp',
         'plane.cpp',
         fbs_generated,
@@ -30,12 +31,14 @@ core_terra_tests = executable(
     'unit_tests',
     sources: [
         'test_main.cpp',
+        'civilization_test.cpp',
         'plane_test.cpp',
         'world_test.cpp',
     ],
     dependencies: [
         gtest_dep,
         core_terra_lib_dep,
+        core_scope_ut_lib_dep,
     ],
 )
 

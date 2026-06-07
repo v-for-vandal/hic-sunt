@@ -15,7 +15,8 @@ StdEffectDefinitionPtr MakeEffectDefinition(std::string id, std::string possible
                                             std::string effect_code);
 StdEffectDefinitionPtr MakeEffectDefinition(std::string id, hs::types::ScopeType scope_type,
                                             std::string possible, std::string effect_code);
-// Created definitions will contain 'numeric_var' and 'string_var'
+// Created definitions will contain 'numeric_var' and 'string_var',
+// as well as few system definitions like 'core.class'
 StdVariableDefinitionsConstPtr MakeSimpleVariableDefinitions();
 
 }  // namespace hs::ruleset::test

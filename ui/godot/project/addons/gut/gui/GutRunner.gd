@@ -210,7 +210,8 @@ func get_gut():
 func quit(exit_code):
 	# Sometimes quitting takes a few seconds.  This gives some indicator
 	# of what is going on.
-	_gui.set_title("Exiting")
+	if _gui.has_method('set_title'):
+		_gui.set_title("Exiting")
 
 	await get_tree().process_frame
 

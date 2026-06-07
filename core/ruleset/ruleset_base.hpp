@@ -6,7 +6,7 @@
 #include <ruleset/effect.pb.h>
 #include <ruleset/jobs.pb.h>
 #include <ruleset/projects.pb.h>
-#include <ruleset/region_improvements.pb.h>
+#include <ruleset/improvements.pb.h>
 #include <ruleset/resources.pb.h>
 #include <ruleset/variables.pb.h>
 
@@ -33,7 +33,7 @@ class RuleSetBase {
   auto& GetVariableDefinitions() const { return variable_definitions_; }
 
  protected:
-  proto::ruleset::RegionImprovements improvements_;
+  proto::ruleset::Improvements improvements_;
   proto::ruleset::Biomes biomes_;
   proto::ruleset::Resources resources_;
   proto::ruleset::Jobs jobs_;

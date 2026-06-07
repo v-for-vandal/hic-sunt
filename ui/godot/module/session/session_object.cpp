@@ -30,13 +30,23 @@ void SessionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_ruleset", "ruleset"), &SessionObject::set_ruleset);
   ClassDB::bind_method(D_METHOD("set_world", "world"), &SessionObject::set_world);
   ClassDB::bind_method(D_METHOD("add_scope", "scope"), &SessionObject::add_scope);
+  ClassDB::bind_method(D_METHOD("create_civilization", "civ_id"),
+                       &SessionObject::create_civilization);
   ClassDB::bind_method(D_METHOD("advance_next_turn"), &SessionObject::advance_next_turn);
+  ClassDB::bind_method(D_METHOD("add_improvement"), &SessionObject::add_improvement);
   ClassDB::bind_method(D_METHOD("set_current_turn"), &SessionObject::set_current_turn);
   ClassDB::bind_method(D_METHOD("get_current_turn"), &SessionObject::get_current_turn);
   ClassDB::bind_method(D_METHOD("get_last_effect_execution_statistics"),
                        &SessionObject::get_last_effect_execution_statistics);
   ClassDB::bind_method(D_METHOD("get_total_effect_execution_statistics"),
                        &SessionObject::get_total_effect_execution_statistics);
+
+  ADD_SIGNAL(
+      MethodInfo("region_changed", PropertyInfo(Variant::STRING_NAME, "region_id",
+                                                PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT)));
+  ADD_SIGNAL(
+      MethodInfo("cell_changed", PropertyInfo(Variant::OBJECT, "cell", PROPERTY_HINT_RESOURCE_TYPE,
+                                              "CellObject", PROPERTY_USAGE_DEFAULT)));
 }
 
 bool SessionObject::set_ruleset(const Ref<RulesetObject>& ruleset) {
@@ -66,11 +76,44 @@ bool SessionObject::add_scope(const Ref<ScopeObject>& scope) {
   return true;
 }
 
+Ref<ScopeObject> SessionObject::create_civilization(StringName civ_id) {
+  ERR_FAIL_COND_V_MSG(civ_id.length() == 0, Ref<ScopeObject>{}, "empty civ id is not allowed");
+
+  auto create_result = data_.CreateCivilization(civ_id);
+  ERR_FAIL_COND_V_MSG(!create_result, Ref<ScopeObject>{}, "failed to create civilization");
+
+  Ref<ScopeObject> result(memnew(ScopeObject((*create_result)->GetScope())));
+  ERR_FAIL_NULL_V_MSG(result.ptr(), Ref<ScopeObject>{}, "failed to create scope object");
+  return result;
+}
+
 void SessionObject::set_current_turn(int turn) { data_.SetCurrentTurn(turn); }
 
 int SessionObject::get_current_turn() const { return data_.GetCurrentTurn(); }
 
-void SessionObject::advance_next_turn() { data_.AdvanceNextTurn(); }
+bool SessionObject::advance_next_turn() { return static_cast<bool>(data_.AdvanceNextTurn()); }
+
+bool SessionObject::add_improvement(const Ref<CellObject>& cell, StringName civ_id,
+                                    StringName improvement_id) {
+  ERR_FAIL_NULL_V_MSG(cell.ptr(), false, "null-containing cell object");
+  ERR_FAIL_COND_V_MSG(!cell->IsValid(), false,
+                      "invalid cell object (no region or coords outside of region)");
+  ERR_FAIL_COND_V_MSG((civ_id.length() == 0), false, "empty civ id is not allowed");
+  // Create scope for new improvement
+  auto create_scope_result = data_.CreateImprovementScope(civ_id, improvement_id);
+  if (!create_scope_result) {
+    return false;
+  }
+
+  // place it onto the map
+  auto add_result = cell->GetCell().AddImprovement(0, *create_scope_result);
+  ERR_FAIL_COND_V_MSG(!add_result, false, "failed to add improvement on the map");
+
+  emit_signal("cell_changed", cell);
+  emit_signal("region_changed", cell->GetRegion()->GetId());
+
+  return true;
+}
 
 Dictionary SessionObject::get_last_effect_execution_statistics() const {
   return MakeEffectExecutionStatisticsDictionary(data_.GetLastEffectExecutionStatistics());

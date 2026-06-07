@@ -20,8 +20,10 @@ class RuleSet : public RuleSetBase {
   // Adds data to ruleset
   bool Load(const std::vector<std::filesystem::path> &paths, ErrorsCollection &errors);
 
-  const proto::ruleset::RegionImprovement *FindRegionImprovementByType(
+  const proto::ruleset::Improvement *FindRegionImprovementByType(
       const StringId &improvement_type_id) const;
+
+  const proto::ruleset::Resource *FindResourceByType(const StringId &resource_type_id) const;
 
   const proto::ruleset::Job *FindJobByType(const StringId &job_type_id) const;
 
@@ -33,8 +35,23 @@ class RuleSet : public RuleSetBase {
 
   const auto &GetAllEffectDefinitions() const noexcept { return effect_definitions_; }
 
+  // Functions that generates fixed scope id
+
+  /* \brief Returns scope id for scope SCOPE_TYPE_IMPROVEMENT_CLASS for improvement id and civ id
+   *
+   */
+  static StringId ImprovementClassScopeId(StringId civ_id, StringId job_type_id);
+
  private:
+  bool LoadImprovements([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadResources([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadJobs([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadProjects([[maybe_unused]] ErrorsCollection &errors);
+  bool LoadEffects(ErrorsCollection &errors);
+  bool LoadVariableDefinitions(ErrorsCollection &errors);
+
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
+  absl::flat_hash_map<StringId, size_t> resources_by_id_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
 

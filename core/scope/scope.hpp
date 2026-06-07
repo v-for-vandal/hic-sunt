@@ -1,14 +1,17 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
 #include <scope/scope.pb.h>
 
 #include <core/scope/numeric_variable.hpp>
 #include <core/scope/string_variable.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
+#include <expected>
 
 #include "core/ruleset/variable_definition.hpp"
+#include "core/types/error_code.hpp"
 #include "core/types/scope_type.hpp"
 // #include <core/scope/variable_definition.hpp>
 
@@ -41,6 +44,9 @@ class Scope {
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
   using ScopeType = types::ScopeType;
   using VariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<BaseTypes>;
+  using VariableDefinitionBase = hs::ruleset::VariableDefinitionBase<BaseTypes>;
+  using NumericVariableDefinition = hs::ruleset::NumericVariableDefinition<BaseTypes>;
+  using StringVariableDefinition = hs::ruleset::StringVariableDefinition<BaseTypes>;
 
   /** \brief Create new scope with given id and given variable definitions
    *
@@ -64,11 +70,29 @@ class Scope {
   ScopeType GetType() const noexcept { return scope_type_; }
 
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
-  void SetParent(const std::shared_ptr<Scope>& parent) { parent_ = parent; }
+
+  [[nodiscard]] std::expected<void, ErrorCode> SetParent(const std::shared_ptr<Scope>& parent) {
+     if(parent) {
+        if( !hs::types::CanLinkScopes(scope_type_, parent->scope_type_)) {
+            spdlog::warn("Scope of type {} can not be child of scope of type {}",
+                scope_type_, parent->scope_type_);
+            return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+        }
+     }
+      parent_ = parent;
+
+      return {};
+  }
+
+  // Every scope except SCOPE_TYPE_WORLD should have a parent. Scopes without parent are valid,
+  // for example that could be temporary scopes to show effects and so on. However, generally
+  // they should not participate in effects calculation
+  bool IsOrphaned() const noexcept { return parent_ == nullptr && scope_type_ != types::ScopeType::SCOPE_TYPE_WORLD; }
 
   // You can and should do it only on one root scope. All other scopes will
   // fetch it automatically
   void SetVariableDefinitions(const VariableDefinitionsConstPtr& definitions);
+  const VariableDefinitionsConstPtr& GetVariableDefinitions() const;
 
   // const VariableDefinitions *Definitions() const;
 
@@ -111,6 +135,8 @@ class Scope {
   // Returns abstract token that represents when this variable was last modified
   std::expected<size_t, ErrorCode> GetModificationTime(const StringId& variable) const;
 
+  std::expected<void, ErrorCode> AddTagLink(const StringId& tag_name, const ScopePtr& tag_scope);
+
   void ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
   void ExplainStringVariable(const StringId& variable, auto&& collect_fn);
   void ExplainAllVariables(auto&& collect_fn);
@@ -121,11 +147,28 @@ class Scope {
   void ClearCache();
 
  private:
-  void FillNumericModifiers(const StringId& variable, NumericValue& add, NumericValue& mult) const;
+  using VisitedScopes = absl::flat_hash_set<const Scope*>;
 
-  void FillStringModifiers(const StringId& variable, StringId& value, NumericValue& level);
+  void FillNumericModifiers(const NumericVariableDefinition& variable_definition,
+                            NumericValue& add, NumericValue& mult,
+                            VisitedScopes& visited) const;
 
-  const VariableDefinitionsConstPtr& GetVariableDefinitions() const;
+  void FillStringModifiers(const StringVariableDefinition& variable_definition, StringId& value,
+                           NumericValue& level, VisitedScopes& visited);
+
+  size_t DoGetModificationTime(
+      const VariableDefinitionBase& variable_definition, VisitedScopes& visited) const;
+
+  template <typename CollectFn>
+  void DoExplainNumericVariable(const StringId& variable, CollectFn&& collect_fn,
+                                VisitedScopes& visited);
+
+  template <typename CollectFn>
+  void DoExplainStringVariable(const StringId& variable, CollectFn&& collect_fn,
+                               VisitedScopes& visited);
+
+  template <typename CollectFn>
+  void DoExplainAllVariables(CollectFn&& collect_fn, VisitedScopes& visited);
 
  private:
   StringId id_;

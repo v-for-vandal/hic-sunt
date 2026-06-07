@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/scope/scope.hpp>
+#include <string_view>
 
 namespace hs::scope::test {
 
@@ -11,11 +12,28 @@ using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using StdVariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
 using StdVariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<StdBaseTypes>;
 
+struct NumericExplanation {
+  std::string scope_id;
+  std::string variable;
+  std::string modifier;
+  double add{0};
+  double mult{0};
+};
+
+struct StringExplanation {
+  std::string scope_id;
+  std::string variable;
+  std::string modifier;
+  std::string value;
+  double level{0};
+};
+
 /*! This function returns a simple scope with two definitions - numeric_var and
- * string_var. You should use it as root scope, so that those definitions were
+ * string_var, in adition to some standard system one.
+ * You should use it as root scope, so that those definitions were
  * inherited
  */
-StdScopePtr MakeSimpleScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD);
+StdScopePtr MakeSimpleScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD, std::string_view scope_id = "test_scope");
 
 /*! This function will create Simple scope and will additionally seed variables
  * with predefined values:
@@ -24,6 +42,6 @@ StdScopePtr MakeSimpleScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD);
  * StringVariable { id = "string_var", key = "seed", value = "value", level
  * = 3.0}
  */
-StdScopePtr MakeSeededScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD);
+StdScopePtr MakeSeededScope(ScopeType type = ScopeType::SCOPE_TYPE_WORLD, std::string_view scope_id = "test_scope");
 
 }  // namespace hs::scope::test

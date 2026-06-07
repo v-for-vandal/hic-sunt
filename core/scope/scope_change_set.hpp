@@ -15,8 +15,10 @@ class ScopeChangeSet {
   using NumericValue = typename BaseTypes::NumericValue;
   using Scope = hs::scope::Scope<BaseTypes>;
   using ScopePtr = hs::scope::ScopePtr<BaseTypes>;
+  using VariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<BaseTypes>;
 
-  explicit ScopeChangeSet(const ScopePtr& target_scope) : target_scope_(target_scope) {}
+  explicit ScopeChangeSet(const ScopePtr& target_scope)
+      : target_scope_(target_scope), variable_definitions_(target_scope->GetVariableDefinitions()) {}
 
   std::expected<void, ErrorCode> SetNumericModifier(const StringId& variable, const StringId& key,
                                                     NumericValue add, NumericValue mult);
@@ -57,6 +59,7 @@ class ScopeChangeSet {
                                                         const StringId& key) const;
 
   ScopePtr target_scope_;
+  VariableDefinitionsConstPtr variable_definitions_;
   std::vector<Operation> operations_;
 };
 

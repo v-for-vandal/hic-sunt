@@ -16,7 +16,7 @@ static func _parse_region_object(data: Dictionary) -> RegionObject:
 		push_error("Region id is missing in serialized data")
 		return null
 
-	var region : RegionObject = CurrentGame.get_current_world().get_region_by_id(region_id)
+	var region : RegionObject = CurrentGame.game.world.world_object.get_region_by_id(region_id)
 	if region == null:
 		push_error("Region with id ", region_id, " is not present in current world")
 		

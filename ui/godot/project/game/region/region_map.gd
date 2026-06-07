@@ -4,6 +4,8 @@ signal exit_reqion_request()
 signal cell_selected(cell: CellObject)
 signal cell_deselected(cell: CellObject)
 
+signal improvement_selected(cell: CellObject, slot: int)
+
 var _region_object: RegionObject
 
 
@@ -39,6 +41,10 @@ func on_ui_event(event: UiEventBus.UIEvent) -> void:
 		event.surface.highlight(event.qr_coords, true)
 		
 	if event is UiEventBus.RegionUIActionEvent:
+		# Skip events intended for other regions. This shoud not normally happen
+		if _region_object != null and  event.surface.get_region().get_id() != _region_object.get_id():
+			return
+			
 		if event.action_type == UiEventBus.ActionType.PRIMARY:
 			if not event.surface.is_selected(event.qr_coords):
 				event.surface.clear_all_select()
@@ -62,9 +68,6 @@ func on_ui_event(event: UiEventBus.UIEvent) -> void:
 		event.accept()
 		return
 
-func set_visualization(vis_table: Dictionary) -> void:
-	$RegionSurface.visualization_data = vis_table
-	
 func _clear_old_region()->void:
 	if _region_object == null:
 		# no old region, exit
@@ -75,7 +78,6 @@ func _clear_old_region()->void:
 
 	
 func _on_region_ui_close_requested() -> void:
-	print("emiting exit region request") # TODO: RM
 	exit_reqion_request.emit()
 	
 func _connect_region_object(_region_object_: RegionObject) -> void:

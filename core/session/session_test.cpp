@@ -5,6 +5,7 @@
 
 #include <core/geometry/box.hpp>
 #include <core/geometry/coord_system.hpp>
+#include <core/ruleset/ruleset.hpp>
 #include <core/ruleset/variable_definition.hpp>
 #include <core/terra/world.hpp>
 #include <fstream>
@@ -151,10 +152,14 @@ TEST(StdSession, SetWorldCanOnlyBeCalledOnce) {
 TEST(StdSession, AdvanceNextTurnIncrementsTurnAndExecutesEffects) {
   using StdRuleSet = ruleset::RuleSet<StdBaseTypes>;
 
+  auto ruleset = std::make_shared<StdRuleSet>();
+  ASSERT_TRUE(ruleset->GetVariableDefinitions()->AddNumericDefinition("core.turn", {}).has_value());
+  ASSERT_TRUE(ruleset->GetVariableDefinitions()->AddStringDefinition("core.class", {}).has_value());
+
   StdSession session;
   auto world = MakeWorld();
   ASSERT_TRUE(session.SetWorld(world));
-  ASSERT_TRUE(session.SetRuleSet(std::make_shared<StdRuleSet>()));
+  ASSERT_TRUE(session.SetRuleSet(ruleset));
 
   auto scope = MakeEffectScope("scope.id", ScopeType::SCOPE_TYPE_REGION);
   ASSERT_TRUE(session.AddScope(scope));
@@ -166,7 +171,7 @@ TEST(StdSession, AdvanceNextTurnIncrementsTurnAndExecutesEffects) {
 
   ASSERT_TRUE(scope->SetNumericModifier("numeric_var", "seed", 3.0, 0.0, 1));
 
-  session.AdvanceNextTurn();
+  ASSERT_TRUE(session.AdvanceNextTurn());
 
   EXPECT_EQ(session.GetCurrentTurn(), 1u);
   auto numeric_value = scope->GetNumericValue("numeric_var");
@@ -181,10 +186,16 @@ TEST(StdSession, SetRuleSetBuildsEffectInstances) {
                     std::filesystem::path("hic_sunt_session_ruleset_test");
   std::filesystem::remove_all(root);
   std::filesystem::create_directories(root / "effects");
+  std::filesystem::create_directories(root / "variables");
   {
     std::ofstream out(root / "effects" / "effect.txt");
     out << "effects { id: \"effect.id\" possible { lua: \"return true\" } "
            "effect { lua: \"return\" } }\n";
+  }
+  {
+    std::ofstream out(root / "variables" / "core.txt");
+    out << "variables { id: \"core.turn\" numeric {} }\n"
+           "variables { id: \"core.class\" string {} }\n";
   }
 
   auto ruleset = std::make_shared<StdRuleSet>();
@@ -194,6 +205,31 @@ TEST(StdSession, SetRuleSetBuildsEffectInstances) {
   StdSession session;
   auto result = session.SetRuleSet(ruleset);
   ASSERT_TRUE(result.has_value());
+}
+
+TEST(StdSession, SetRuleSetRejectsRuleSetWithoutRequiredCoreVariables) {
+  using StdRuleSet = ruleset::RuleSet<StdBaseTypes>;
+
+  auto ruleset = std::make_shared<StdRuleSet>();
+
+  StdSession session;
+  auto result = session.SetRuleSet(ruleset);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_INVALID_RULESET);
+}
+
+TEST(StdSession, SetRuleSetRejectsRuleSetWithWrongCoreVariableTypes) {
+  using StdRuleSet = ruleset::RuleSet<StdBaseTypes>;
+
+  auto ruleset = std::make_shared<StdRuleSet>();
+  ASSERT_TRUE(ruleset->GetVariableDefinitions()->AddStringDefinition("core.turn", {}).has_value());
+  ASSERT_TRUE(
+      ruleset->GetVariableDefinitions()->AddNumericDefinition("core.class", {}).has_value());
+
+  StdSession session;
+  auto result = session.SetRuleSet(ruleset);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_INVALID_RULESET);
 }
 
 }  // namespace hs::session

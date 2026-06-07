@@ -8,7 +8,7 @@ var _planes : Dictionary[StringName, WorldPlane]
 var world_object: WorldObject:
 	get: return _world_object
 	
-func _init():
+func _init() -> void:
 	_world_object = WorldObject.new()
 
 func create_plane(name: StringName, world_size : Rect2i, region_radius : int, region_external_radius: int = -1) -> WorldPlane:

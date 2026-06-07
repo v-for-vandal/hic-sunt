@@ -3,9 +3,9 @@
 #include "effect_executor.hpp"
 
 #include <chrono>
-#include <system_error>
-#include <utility>
 #include <vector>
+
+#include <fmt/format.h>
 
 #include <spdlog/spdlog.h>
 
@@ -57,6 +57,7 @@ auto EffectExecutor<BaseTypes>::Execute(
   spdlog::debug("debug: starting execution");
   for (const auto& effect : session.effects_) {
       spdlog::info("viewing effect {}", effect->GetDefinition()->GetId());
+    const auto& effect_data = effect->GetDefinition()->GetData();
     const auto scope_type = effect->GetDefinition()->GetScopeType();
     const auto scopes_it = session.scopes_by_type_.find(scope_type);
     if (scopes_it == session.scopes_by_type_.end()) {
@@ -66,6 +67,41 @@ auto EffectExecutor<BaseTypes>::Execute(
 
     const auto& dependencies = effect->GetDefinition()->GetDependencies();
     for (const auto& scope : scopes_it->second) {
+      if (effect_data.has_selector()) {
+        const auto& selector = effect_data.selector();
+
+        // TODO: Optimize for effects with fixed scope_id. We can just pull
+        // scopes by this id.
+        if (!selector.scope_id().empty()) {
+          const auto selected_scope_id =
+              BaseTypes::StringIdFromStdString(selector.scope_id());
+          if (scope->GetId() != selected_scope_id) {
+            continue;
+          }
+        }
+
+        if (!selector.class_().empty()) {
+          const auto class_variable_id = session.kCoreClass;
+          const auto expected_class =
+              BaseTypes::StringIdFromStdString(selector.class_());
+          const auto actual_class = scope->GetStringValue(class_variable_id);
+          if (!actual_class) {
+            statistics.RecordFailure(effect->GetId());
+            spdlog::warn(
+                "Failed to get selector variable {} for effect {} on scope {}: {}",
+                class_variable_id,
+                effect->GetId(),
+                scope->GetId(),
+                make_error_code(actual_class.error()).message());
+            continue;
+          }
+
+          if (*actual_class != expected_class) {
+            continue;
+          }
+        }
+      }
+
       bool has_recent_dependency = false;
       for (const auto& dependency : dependencies) {
         auto modification_time = scope->GetModificationTime(dependency);

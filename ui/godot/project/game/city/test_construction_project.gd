@@ -3,7 +3,8 @@ extends GutTestEnviron
 func test_creation() -> void:
 	var coords := Vector2i(1,2)
 	assert_true(zero_region.contains(coords))
-	var result = ConstructionProject.create_construction_project(
+	var result: = ConstructionProject.create_construction_project(
+		&"test_civ",
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_not_null(result, "Failed to create construction project")
@@ -16,7 +17,8 @@ func test_creation() -> void:
 func test_serialization() -> void:
 	var coords := Vector2i(1,2)
 	assert_true(zero_region.contains(coords))
-	var target = ConstructionProject.create_construction_project(
+	var target: = ConstructionProject.create_construction_project(
+		&"test_civ",
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_not_null(target, "Failed to create construction project")
@@ -25,24 +27,32 @@ func test_serialization() -> void:
 func test_creation_failure_out_of_bounds() -> void:
 	var coords := Vector2i(1000, 1000)
 	assert_false(zero_region.contains(coords))
-	var result = ConstructionProject.create_construction_project(
+	var result := ConstructionProject.create_construction_project(
+		&"test_civ",
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_null(result, "Creating project in coords not present in region must have failed")
+	assert_push_error_count(1)
 	
 func test_creation_failure_invalid_improvement_id() -> void:
 	var coords := Vector2i(0, 0)
 	assert_true(zero_region.contains(coords))
-	var result = ConstructionProject.create_construction_project(
+	var result := ConstructionProject.create_construction_project(
+		&"test_civ",
 		&"nonexistent_id",
 		zero_region, coords)
 	assert_null(result, "Creating project for non-existend improvement id should have failed")
+	assert_push_error_count(1)
+	assert_engine_error_count(1)
 
 func test_progress() -> void:
 	var coords := Vector2i(2,1)
 	assert_true(zero_region.contains(coords))
-	assert_true(zero_region.get_cell_info(coords).improvement.is_empty(), "Should be no improvement at target coords")
-	var project = ConstructionProject.create_construction_project(
+	var cell := zero_region.get_cell(coords)
+	assert_true(cell.is_valid())
+	assert_null(cell.get_improvement(0), "Should be no improvement at target coords")
+	var project := ConstructionProject.create_construction_project(
+		&"test_civ",
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_not_null(project, "Failed to create construction project")
@@ -61,7 +71,7 @@ func test_progress() -> void:
 	# sanity check
 	assert_eq(ResourceEconomyLibrary.total_amount(resources), 20)
 	
-	var status = project.take_resources(resources)
+	var status := project.take_resources(resources)
 	assert_eq(ResourceEconomyLibrary.total_amount(resources), 0, "All resources should have been taken")
 	assert_true(status, "We should have made progress on this step")
 	assert_eq(project.progress_estimate().turns_without_progress, 0, "We made progress this turn, should have 0 here")
@@ -108,7 +118,10 @@ func test_progress() -> void:
 	assert_true(status, "We should have made progress this turn")
 	assert_true(project.is_finished(), "Project should have been finished")
 	assert_eq(project.progress_estimate().progress, 100, "Progress should be 100%")
-	project.execute_finisher()
-	assert_false(zero_region.get_cell_info(coords).improvement.is_empty(), "Should be an improvement at target coords")
-	assert_true(zero_region.get_cell_info(coords).improvement.type == &"test.improv.construction_1",
+	assert_true(project.execute_finisher())
+	var improvement := cell.get_improvement(0)
+	assert_not_null(improvement, "Should be an improvement at target coords")
+	if improvement == null:
+		return
+	assert_true(improvement.get_string_value(WorldConstants.CLASS_VARIABLE) == &"test.improv.construction_1",
 		"Finished project should have set an improvement on target cell")

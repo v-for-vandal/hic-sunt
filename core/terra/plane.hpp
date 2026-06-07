@@ -76,6 +76,8 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   const Surface &GetSurfaceObject() const { return surface_; }
 
   RegionPtr GetRegionById(const StringId &region_id) const;
+  const auto& GetRegions() const noexcept { return region_index_; }
+  auto& GetRegions() noexcept { return region_index_; }
   bool HasRegion(const StringId &region_id) const { return region_index_.contains(region_id); }
   void SetRegion(QRSCoords coords, Region region);
   RegionPtr GetRegion(QRSCoords coords) const;
@@ -99,6 +101,8 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
 
   int GetExternalRadius() const { return external_region_radius_; }
 
+  void VisitScopes(this auto&& self, auto&& visitor);
+
  private:
   friend void SerializeTo<BaseTypes>(const Plane &source, proto::terra::Plane &target);
   friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane &world, serialize::To<Plane>);
@@ -119,6 +123,7 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   int region_radius_{};
   // some regions are not really part of the surface. Like caves.
   std::vector<Cell> off_surface_;
+  // index of all regions in this plane, by id
   std::unordered_map<StringId, RegionPtr> region_index_;
 };
 

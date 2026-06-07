@@ -17,7 +17,7 @@ static func CreateBuildSite(improvement_id: String, region: RegionObject, region
 	var result := BuildSite.new()
 	result._improvement_id = improvement_id
 	result._cost = CurrentGame.get_ruleset().get_improvement_info(improvement_id).cost
-	result._id = CurrentGame.get_new_id()
+	result._id = CurrentGame.game.get_new_id()
 	result._region = region
 	result._region_coords = region_coords
 	

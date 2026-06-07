@@ -92,6 +92,16 @@ func load_mod_gfx(target_dir: String) -> void:
 				print("%s is not an Image instance. Did you forget to set up import settings properly?" % [image.resource_path])
 			GfxRegistry.register_biome_image(biome_name, image as Image)
 
+	# load improvements gfx
+	var improvements_dir_path := target_dir.path_join("improvements")
+	if DirAccess.dir_exists_absolute(improvements_dir_path):
+		var improvement_images := load_mod_images(improvements_dir_path)
+		for image in improvement_images:
+			var improvement_name: StringName = image.resource_path.get_basename().get_file()
+			if not (image is Image):
+				print("%s is not an Image instance. Did you forget to set up import settings properly?" % [image.resource_path])
+			GfxRegistry.register_improvement_image(improvement_name, image as Image)
+
 
 ## Load content of the module. Looks for appropriate files in appropriate
 ## locations and registers them.

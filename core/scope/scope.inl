@@ -33,31 +33,47 @@ void Scope<BaseTypes>::SetVariableDefinitions(const VariableDefinitionsConstPtr&
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::FillNumericModifiers(const StringId &variable,
-    NumericValue& add, NumericValue& mult) const
+void Scope<BaseTypes>::FillNumericModifiers(const NumericVariableDefinition& variable_definition,
+    NumericValue& add, NumericValue& mult, VisitedScopes& visited) const
 {
-  auto it = numeric_variables_.find(variable);
-  if (it != numeric_variables_.end()) {
+  if (!visited.insert(this).second) {
+    return;
+  }
+
+  if (auto it = numeric_variables_.find(variable_definition.id); it != numeric_variables_.end()) {
       it->second.CalculateModifiers(add, mult);
   }
 
   if(parent_ != nullptr) {
-      parent_->FillNumericModifiers(variable, add, mult);
+      parent_->FillNumericModifiers(variable_definition, add, mult, visited);
+  }
+
+  for (const auto& tag_scope : tag_scopes_) {
+      if (tag_scope != nullptr) {
+          tag_scope->FillNumericModifiers(variable_definition, add, mult, visited);
+      }
   }
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
-    StringId& value, NumericValue& level)
+void Scope<BaseTypes>::FillStringModifiers(const StringVariableDefinition& variable_definition,
+    StringId& value, NumericValue& level, VisitedScopes& visited)
 {
-    auto fit = string_variables_.find(variable);
-    if( fit != string_variables_.end()) {
+    if (!visited.insert(this).second) {
+        return;
+    }
+
+    if (auto fit = string_variables_.find(variable_definition.id); fit != string_variables_.end()) {
         fit->second.CalculateModifiers(value, level);
     }
 
     // get parent value
     if(parent_ != nullptr) {
-        parent_->FillStringModifiers(variable, value, level);
+        parent_->FillStringModifiers(variable_definition, value, level, visited);
+    }
+
+    for (const auto& tag_scope : tag_scopes_) {
+        tag_scope->FillStringModifiers(variable_definition, value, level, visited);
     }
 
 }
@@ -80,7 +96,8 @@ auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expecte
   NumericValue add{0};
   NumericValue mult{0};
 
-  FillNumericModifiers(variable, add, mult);
+  VisitedScopes visited;
+  FillNumericModifiers(*vardef, add, mult, visited);
 
   mult = 1 + mult;
   mult = std::max<NumericValue>(mult, 0);
@@ -94,15 +111,22 @@ auto Scope<BaseTypes>::GetNumericValue(const StringId &variable) -> std::expecte
 
 template <typename BaseTypes>
 auto Scope<BaseTypes>::GetStringValue(const StringId &variable) -> std::expected<Scope::StringId, ErrorCode> {
-    if (!IsStringVariable(variable)) {
-        spdlog::error("Variable {} is not of type string", variable);
+    if (const auto var_type = GetVariableDefinitions()->GetVariableType(variable);
+            var_type != ruleset::VariableDefinitions<BaseTypes>::VariableType::kString) {
+        spdlog::warn("variable {} must be string, but it is {}", variable, var_type);
         return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    }
+
+    auto vardef = GetVariableDefinitions()->FindStringVariable(variable);
+    if (!vardef) {
+        return std::unexpected(vardef.error());
     }
 
     NumericValue level{0};
     StringId result;
 
-    FillStringModifiers(variable, result, level);
+    VisitedScopes visited;
+    FillStringModifiers(*vardef, result, level, visited);
 
     return result;
 }
@@ -144,34 +168,53 @@ std::expected<void, ErrorCode> Scope<BaseTypes>::SetStringModifier(const StringI
 
 template <typename BaseTypes>
 std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(const StringId& variable) const  {
-   if (auto fit = numeric_variables_.find(variable); fit != numeric_variables_.end()) {
-       return fit->second.GetModificationTime();
+   auto vardef = GetVariableDefinitions()->FindVariable(variable);
+   if (!vardef) {
+       return std::unexpected(vardef.error());
    }
 
-   if (auto fit = string_variables_.find(variable); fit != string_variables_.end()) {
-       return fit->second.GetModificationTime();
+   VisitedScopes visited;
+   return DoGetModificationTime(*vardef, visited);
+}
+
+template <typename BaseTypes>
+size_t Scope<BaseTypes>::DoGetModificationTime(
+    const VariableDefinitionBase& variable_definition, VisitedScopes& visited) const {
+   if (!visited.insert(this).second) {
+       return 0;
+   }
+
+   size_t modification_time = 0;
+
+   if (auto fit = numeric_variables_.find(variable_definition.id); fit != numeric_variables_.end()) {
+       modification_time = std::max(modification_time, fit->second.GetModificationTime());
+   }
+
+   if (auto fit = string_variables_.find(variable_definition.id); fit != string_variables_.end()) {
+       modification_time = std::max(modification_time, fit->second.GetModificationTime());
    }
 
    if (parent_ != nullptr) {
-       return parent_->GetModificationTime(variable);
+       auto parent_modification_time = parent_->DoGetModificationTime(variable_definition, visited);
+       modification_time = std::max(modification_time, parent_modification_time);
    }
 
-   // parent is null, we are top level
-   const auto& definitions = GetVariableDefinitions();
-   if (!definitions->IsVariable(variable)) {
-       return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+   for (const auto& tag_scope : tag_scopes_) {
+       auto tag_modification_time = tag_scope->DoGetModificationTime(variable_definition, visited);
+       modification_time = std::max(modification_time, tag_modification_time);
    }
 
-   return 0;
+   return modification_time;
 }
 
 template <typename BaseTypes>
 auto Scope<BaseTypes>::GetVariableDefinitions() const ->const VariableDefinitionsConstPtr&
 {
-
     if (cached_definitions_->IsEmpty()) {
         if (parent_) {
             cached_definitions_ = parent_->GetVariableDefinitions();
+        } else {
+            spdlog::warn("Can not find non-empty variable definitions because scope {} has no parent", id_);
         }
     }
 
@@ -180,6 +223,18 @@ auto Scope<BaseTypes>::GetVariableDefinitions() const ->const VariableDefinition
 
 template <typename BaseTypes>
 void Scope<BaseTypes>::ExplainNumericVariable(const StringId& variable, auto&& collect_fn) {
+  VisitedScopes visited;
+  DoExplainNumericVariable(variable, std::forward<decltype(collect_fn)>(collect_fn), visited);
+}
+
+template <typename BaseTypes>
+template <typename CollectFn>
+void Scope<BaseTypes>::DoExplainNumericVariable(const StringId& variable, CollectFn&& collect_fn,
+    VisitedScopes& visited) {
+  if (!visited.insert(this).second) {
+      return;
+  }
+
   auto it = numeric_variables_.find(variable);
   if (it != numeric_variables_.end()) {
       it->second.ExplainModifiers([this, &collect_fn, &variable](const StringId& modifier,
@@ -190,13 +245,29 @@ void Scope<BaseTypes>::ExplainNumericVariable(const StringId& variable, auto&& c
   }
 
   if(parent_ != nullptr) {
-      parent_->ExplainNumericVariable(variable, collect_fn);
+      parent_->DoExplainNumericVariable(variable, std::forward<CollectFn>(collect_fn), visited);
+  }
+
+  for (const auto& tag_scope : tag_scopes_) {
+        tag_scope->DoExplainNumericVariable(variable, std::forward<CollectFn>(collect_fn), visited);
   }
 
 }
 
 template <typename BaseTypes>
 void Scope<BaseTypes>::ExplainStringVariable(const StringId& variable, auto&& collect_fn) {
+  VisitedScopes visited;
+  DoExplainStringVariable(variable, std::forward<decltype(collect_fn)>(collect_fn), visited);
+}
+
+template <typename BaseTypes>
+template <typename CollectFn>
+void Scope<BaseTypes>::DoExplainStringVariable(const StringId& variable, CollectFn&& collect_fn,
+    VisitedScopes& visited) {
+  if (!visited.insert(this).second) {
+      return;
+  }
+
   auto it = string_variables_.find(variable);
   if (it != string_variables_.end()) {
       it->second.ExplainModifiers([this, &collect_fn, &variable](const StringId& modifier,
@@ -207,7 +278,11 @@ void Scope<BaseTypes>::ExplainStringVariable(const StringId& variable, auto&& co
   }
 
   if(parent_ != nullptr) {
-      parent_->ExplainStringVariable(variable, collect_fn);
+      parent_->DoExplainStringVariable(variable, std::forward<CollectFn>(collect_fn), visited);
+  }
+
+  for (const auto& tag_scope : tag_scopes_) {
+        tag_scope->DoExplainStringVariable(variable, std::forward<CollectFn>(collect_fn), visited);
   }
 }
 
@@ -233,6 +308,26 @@ void Scope<BaseTypes>::ExplainAllVariables(auto&& collect_fn) {
 }
 
 template <typename BaseTypes>
+std::expected<void, ErrorCode> Scope<BaseTypes>::AddTagLink([[maybe_unused]] const StringId&  tag_name,
+    const ScopePtr& tag_scope) {
+        if( !hs::types::CanTagLinkScopes(scope_type_, tag_scope->scope_type_)) {
+            spdlog::warn("Scope of type {} can not be tag-linked to of scope of type {}",
+                scope_type_, tag_scope->scope_type_);
+            return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+        }
+
+    for (const auto& existing_scope : tag_scopes_) {
+        if (existing_scope->GetId() == tag_scope->GetId()) {
+            spdlog::error("Scope {} already has tag link to scope {}", id_, tag_scope->GetId());
+            return std::unexpected(ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
+        }
+    }
+
+    tag_scopes_.push_back(tag_scope);
+    return {};
+}
+
+template <typename BaseTypes>
 void Scope<BaseTypes>::ClearCache() {
     cached_definitions_.reset();
 }
@@ -242,6 +337,7 @@ void SerializeTo(const Scope<BaseTypes> &source,
                  proto::scope::Scope &target) {
   target.Clear();
   target.set_id(BaseTypes::ToProtoString(source.id_));
+  target.set_scope_type(source.scope_type_);
   // TODO: finish other serialization
 }
 
@@ -250,6 +346,7 @@ Scope<BaseTypes> ParseFrom(const proto::scope::Scope &scope,
                             serialize::To<Scope<BaseTypes>>) {
   Scope<BaseTypes> result;
   result.id_ = ParseFrom(scope.id(), serialize::To<typename BaseTypes::StringId>{});
+  result.scope_type_ = scope.scope_type();
 
   // TODO: Finish other serializations
 

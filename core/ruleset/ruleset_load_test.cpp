@@ -106,4 +106,90 @@ TEST(StdRuleSet, LoadIgnoresUnreadableOrInvalidFiles) {
   EXPECT_FALSE(ruleset.GetVariableDefinitions()->IsNumericVariable("var.one"));
 }
 
+TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
+  const auto root = MakeTempDir("job_variable_definitions");
+  WriteTextFile(root / "resources" / "resources.txt",
+                "resources { id: \"resource.wood\" }\n"
+                "resources { id: \"resource.tools\" }\n"
+                "resources { id: \"resource.food\" }\n");
+  WriteTextFile(root / "jobs" / "jobs.txt",
+                "jobs {\n"
+                "  id: \"job.one\"\n"
+                "  input { key: \"resource.wood\" value: 2 }\n"
+                "  output { key: \"resource.tools\" value: 1 }\n"
+                "}\n");
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({root}, errors));
+
+  const auto &definitions = ruleset.GetVariableDefinitions();
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/count"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.wood"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.tools"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.food"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.wood"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.tools"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.food"));
+
+  const auto count_definition = definitions->FindNumericVariable("job/job.one/count");
+  ASSERT_TRUE(count_definition.has_value());
+  EXPECT_EQ(count_definition->minimum, 0);
+  EXPECT_EQ(count_definition->maximum,
+            std::numeric_limits<StdBaseTypes::NumericValue>::max());
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
+
+  const auto produces_definition =
+      definitions->FindNumericVariable("job/job.one/produces/resource.food");
+  ASSERT_TRUE(produces_definition.has_value());
+  EXPECT_EQ(produces_definition->minimum, 0);
+  EXPECT_TRUE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_TRUE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
+
+  const auto consumes_definition =
+      definitions->FindNumericVariable("job/job.one/consumes/resource.food");
+  ASSERT_TRUE(consumes_definition.has_value());
+  EXPECT_EQ(consumes_definition->minimum, 0);
+  EXPECT_TRUE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_TRUE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
+}
+
+TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {
+  const auto root = MakeTempDir("inline_improvement_effects");
+  WriteTextFile(root / "improvements" / "improvements.txt",
+                "improvements {\n"
+                "  id: \"mill\"\n"
+                "  class_effect { lua: \"return VAR(mill.class.dep)\" }\n"
+                "  instance_effect { lua: \"return VAR(mill.instance.dep)\" }\n"
+                "}\n");
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({root}, errors));
+
+  const auto &effects = ruleset.GetAllEffectDefinitions();
+  ASSERT_EQ(effects.size(), 2u);
+
+  const auto &class_effect = effects[0];
+  EXPECT_EQ(class_effect->GetId(), "mill/class.effect");
+  EXPECT_EQ(class_effect->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
+  EXPECT_EQ(class_effect->GetData().selector().class_(), "mill");
+  EXPECT_FALSE(class_effect->GetData().has_possible());
+  EXPECT_TRUE(class_effect->GePossibleCode().has_value() == false);
+  EXPECT_EQ(class_effect->GetData().effect().lua(), "return VAR(mill.class.dep)");
+
+  const auto &instance_effect = effects[1];
+  EXPECT_EQ(instance_effect->GetId(), "mill/instance.effect");
+  EXPECT_EQ(instance_effect->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT);
+  EXPECT_EQ(instance_effect->GetData().selector().class_(), "mill");
+  EXPECT_TRUE(instance_effect->GetData().has_possible());
+  EXPECT_EQ(instance_effect->GetData().possible().lua(), "return true");
+  EXPECT_TRUE(instance_effect->GePossibleCode().has_value());
+  EXPECT_EQ(instance_effect->GetData().effect().lua(), "return VAR(mill.instance.dep)");
+}
+
 }  // namespace hs::ruleset

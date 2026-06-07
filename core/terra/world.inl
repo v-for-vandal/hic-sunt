@@ -7,12 +7,29 @@
 namespace hs::terra {
 
 template <typename BaseTypes>
+void World<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
+  visitor(self.GetScope());
+
+  for (auto& [_, plane] : self.planes_) {
+    plane->VisitScopes(visitor);
+  }
+
+  for (auto& [_, civilization] : self.civilizations_) {
+    civilization->VisitScopes(visitor);
+  }
+}
+
+template <typename BaseTypes>
 bool World<BaseTypes>::operator==(const World &other) const {
   if (this == &other) {
     return true;
   }
 
   if (planes_ != other.planes_) {
+    return false;
+  }
+
+  if (civilizations_ != other.civilizations_) {
     return false;
   }
 
@@ -51,10 +68,42 @@ auto World<BaseTypes>::AddPlane(const StringId &plane_id, QRSBox box,
   auto plane_ptr =
       std::make_shared<Plane>(control_object_, effective_plane_id, box,
                               region_radius, region_external_radius);
-  plane_ptr->GetScope()->SetParent(this->GetScope());
+  if(!plane_ptr->GetScope()->SetParent(this->GetScope())) {
+      throw std::runtime_error("Can't set world as parent to plane, unrecoverable error");
+  };
   planes_[effective_plane_id] = plane_ptr;
 
   return plane_ptr;
+}
+
+template <typename BaseTypes>
+auto World<BaseTypes>::GetOrCreateCivilization(const StringId &id) -> CivilizationPtr {
+  if (auto fit = civilizations_.find(id); fit != civilizations_.end()) {
+    return fit->second;
+  }
+
+  CivilizationPtr civilization{id};
+  if (!civilization->GetScope()->SetParent(this->GetScope())) {
+    throw std::runtime_error(
+        "Can't set world as parent to civilization, unrecoverable error");
+  }
+
+  auto [it, inserted] = civilizations_.emplace(id, civilization);
+  return it->second;
+}
+
+template <typename BaseTypes>
+bool World<BaseTypes>::HasCivilization(const StringId &id) const noexcept {
+  return civilizations_.contains(id);
+}
+
+template <typename BaseTypes>
+auto World<BaseTypes>::GetCivilization(const StringId& id) const noexcept -> CivilizationPtr {
+    if (auto fit = civilizations_.find(id); fit != civilizations_.end()) {
+      return fit->second;
+    }
+
+    return {};
 }
 
 template <typename BaseTypes>
@@ -117,7 +166,15 @@ template <typename BaseTypes> void World<BaseTypes>::InitNonpersistent() {
   // set control object
   for (auto &[_, plane_ptr] : planes_) {
     plane_ptr->SetControlObject(control_object_);
-    plane_ptr->GetScope()->SetParent(this->GetScope());
+    if(!plane_ptr->GetScope()->SetParent(this->GetScope())) {
+        throw std::runtime_error("Can't set up plane parent to self");
+    }
+  }
+
+  for (auto &[_, civilization_ptr] : civilizations_) {
+    if(!civilization_ptr->GetScope()->SetParent(this->GetScope())) {
+        throw std::runtime_error("Can't set up civilization parent to self");
+    }
   }
 
   // TODO: build region index

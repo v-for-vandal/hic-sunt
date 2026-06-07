@@ -43,11 +43,7 @@ func load_region(region_object : RegionObject) -> void:
 	_connect_region_object(region_object)
 	_region_object = region_object
 
-	
-	
-	var calc_xy_bounding_rect := func(region_q: int, region_r: int, region: RegionObject) -> void:
-		var offset_coords := axial_to_map(Vector2i(region_q, region_r))
-		
+
 	var update_cell_lambda := func(cell_q: int, cell_r: int)-> void:
 		update_cell(Vector2i(cell_q, cell_r))
 		
@@ -65,30 +61,11 @@ func clear()->void:
 	_disconnect_region_object(_region_object)
 	
 func update_cell(qr_coords: Vector2i) -> void:
-	var region_info : Dictionary = _region_object.get_cell_info(qr_coords)
-	
-
-		
 	# convert to xy dimensions
 	var xy_coords := axial_to_map(qr_coords)
 	
 	$biomes.set_cell(xy_coords, 0, Vector2i.ZERO, 1)
 
-	var improvement = region_info.improvement
-	if !improvement.is_empty():
-		var improvement_type = improvement.type
-		if improvement_type in visualization_data:
-			# put it into layer above
-			_IMPROVEMENT_LAYER.set_cell(xy_coords, visualization_data[improvement_type].source_id,
-				visualization_data[improvement_type].atlas_coords,0)
-		else:
-			# place pink object to indicate an error
-			push_error("Undefined visualization data for %s" % [improvement_type])
-			_IMPROVEMENT_LAYER.set_cell(xy_coords, 0, Vector2i.ZERO, 0)
-	else:
-		# no improvement
-		_IMPROVEMENT_LAYER.erase_cell(xy_coords)
-		
 func get_region() -> RegionObject:
 	return _region_object
 	
@@ -105,5 +82,5 @@ func _connect_region_object(region_object: RegionObject) -> void:
 func _disconnect_region_object(region_object: RegionObject) -> void:
 	region_object.region_changed.disconnect(_on_region_changed)
 	
-func _get_select_source_id():
+func _get_select_source_id() -> int:
 	return 5

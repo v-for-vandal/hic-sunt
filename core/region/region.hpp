@@ -56,10 +56,7 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   const StringId &GetId() const { return id_; }
   // void SetId(const StringId& id) { id_ = id; }
 
-  bool SetBiome(QRSCoords coords, const StringId &biome);
   std::vector<std::pair<StringId, int>> GetTopKBiomes(int k) const { return biome_count_.TopK(k); }
-
-  bool SetFeature(QRSCoords coords, const StringId &biome);
 
   bool SetImprovement(QRSCoords coords, const StringId &improvement_type);
 
@@ -91,6 +88,8 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
                               const StringId &value);
   bool HasDataString(QRSCoords coords, const StringId &key) const noexcept;
   */
+
+  void VisitScopes(this auto&& self, auto&& visitor);
 
   bool operator==(const Region &other) const;
   bool operator!=(const Region &other) const = default;

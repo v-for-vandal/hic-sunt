@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b0pemsm5wx2tm" path="res://root_map.gd" id="1_yul2b"]
 [ext_resource type="PackedScene" uid="uid://dyp7yp0fqe876" path="res://game/region/region_map.tscn" id="2_cosq6"]
 [ext_resource type="PackedScene" uid="uid://dxuoujwpadbf1" path="res://game/world/world_map.tscn" id="3_0mdmy"]
-[ext_resource type="Script" uid="uid://bttcgvhs133yy" path="res://addons/godot-console/scripts/console_container.gd" id="4_tawhk"]
+[ext_resource type="Script" uid="uid://p4inwor7gtoo" path="res://addons/godot-console/scripts/console_container.gd" id="4_tawhk"]
 [ext_resource type="Script" uid="uid://yg6oalpuarsg" path="res://ui/system/ConsoleHandler.gd" id="4_urerv"]
 
 [node name="RootMap" type="Node2D" unique_id=246326241]

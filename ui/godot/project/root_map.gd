@@ -42,27 +42,22 @@ func _ready() -> void:
 func load_world(world : World) -> void:
 	#assert(_loaded, "You can't call methods on root-map before it is fully loaded")
 	assert(world != null)
-	# TODO: Don't set up terrain mapping, instead use it as global class
-	# TODO: RM terrain mapping
-	# var terrain_mapping : Dictionary = CurrentGame.get_atlas_visualization()
-	# _world_map.set_terrain_visualization(terrain_mapping)
-	# _region_map.set_visualization(terrain_mapping)
 	_world_map.load_world(world)
 	_switch_to_world()
 
 
-func _on_world_map_show_region_request(plane:  WorldPlane, qr_position: Vector2i) -> void:
+func _on_world_map_show_region_request(region: RegionObject) -> void:
 	#assert(_loaded, "THis instance can't react to signals before it is fully loaded")
 	assert(_region_map != null, "_region_map is somehow null")
-	var region_obj := plane.plane_object.get_region(qr_position);
+
 	
-	if region_obj == null:
-		print("region is absent")
+	if region == null:
+		push_error("region is absent")
 		return
 		
 	# We need to add scene to the tree before we can call load_region
 	_switch_to_region()
-	_region_map.load_region(region_obj)
+	_region_map.load_region(region)
 	
 	
 func _switch(from: Node, to: Node) -> void:
@@ -90,7 +85,6 @@ func _on_region_map_exit_reqion_request() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action("ui_cancel"):
 		if event.is_action_released("ui_cancel"):
-			#print("sending cancellation event")
 			CurrentGame.event_bus.emit_cancellation()
 		get_viewport().set_input_as_handled()
 		

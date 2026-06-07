@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://fc2doj1a5e5g"]
+
+[ext_resource type="Script" uid="uid://yr4kstk1p62t" path="res://ui/system/debug/debug_tab.gd" id="1_3h0xs"]
+[ext_resource type="PackedScene" uid="uid://cb5s3dxd63nmp" path="res://ui/system/debug/ScopeEditor.tscn" id="1_4c4b5"]
+
+[node name="DebugTab" type="VBoxContainer" unique_id=57330761]
+script = ExtResource("1_3h0xs")
+
+[node name="ScopeContainer" type="FoldableContainer" parent="." unique_id=406014918]
+layout_mode = 2
+title = "Scope"
+
+[node name="ScopeEditor" parent="ScopeContainer" unique_id=1437484229 instance=ExtResource("1_4c4b5")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RegionContainer" type="FoldableContainer" parent="." unique_id=383916442]
+layout_mode = 2
+title = "Region"
+
+[node name="RegionInfo" type="Tree" parent="RegionContainer" unique_id=1128855370]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 2
+hide_root = true
+scroll_vertical_enabled = false
+
+[node name="CellContainer" type="FoldableContainer" parent="." unique_id=99663273]
+layout_mode = 2
+title = "Cell"
+
+[node name="CellInfo" type="Tree" parent="CellContainer" unique_id=1152103348]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 2
+hide_root = true
+scroll_vertical_enabled = false

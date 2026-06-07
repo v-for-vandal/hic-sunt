@@ -7,6 +7,15 @@
 
 namespace hs::region {
 
+template <typename BaseTypes>
+void Region<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
+  visitor(self.GetScope());
+
+  self.GetSurface().Foreach([&visitor](auto, auto& cell) {
+    cell.VisitScopes(visitor);
+  });
+}
+
 template <typename BaseTypes> Region<BaseTypes>::Region() : Region("", 1) {}
 
 template <typename BaseTypes>
@@ -51,37 +60,7 @@ bool Region<BaseTypes>::operator==(const Region &other) const {
   return true;
 }
 
-template <typename BaseTypes>
-bool Region<BaseTypes>::SetBiome(QRSCoords coords, const StringId &biome) {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  if (BaseTypes::IsNullToken(biome)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  if (!BaseTypes::IsNullToken(cell.GetBiome())) {
-    biome_count_.Remove(cell.GetBiome());
-  }
-  cell.SetBiome(biome);
-  biome_count_.Add(biome);
-
-  return true;
-}
-
-template <typename BaseTypes>
-bool Region<BaseTypes>::SetFeature(QRSCoords coords, const StringId &feature) {
-  if (!surface_.Contains(coords)) {
-    return false;
-  }
-
-  auto &cell = surface_.GetCell(coords);
-  cell.SetFeature(feature);
-  return true;
-}
-
+#if 0
 template <typename BaseTypes>
 bool Region<BaseTypes>::SetImprovement(QRSCoords coords,
                                        const StringId &improvement_type) {
@@ -106,6 +85,7 @@ bool Region<BaseTypes>::SetImprovement(QRSCoords coords,
 
   return true;
 }
+#endif
 
 template <typename BaseTypes>
 bool Region<BaseTypes>::SetCityId(const StringId &city_id) {
@@ -124,9 +104,12 @@ template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
   cells_with_improvements_.clear();
   GetSurface().Foreach([this](QRSCoords coords, Cell<BaseTypes>& cell) {
         // Set parent scope for cell
-        cell.GetScope()->SetParent(this->GetScope());
-        feature_count_[cell.GetFeature()]++;
-        if (cell.HasImprovement()) {
+        if(!cell.GetScope()->SetParent(this->GetScope())) {
+            throw std::runtime_error("Can't set cell parent to self");
+        };
+        //feature_count_[cell.GetFeature()]++;
+        // TODO: Fix it, check all slots
+        if (cell.HasImprovement(0)) {
           cells_with_improvements_.insert(coords);
         }
       }
@@ -157,7 +140,7 @@ auto Region<BaseTypes>::BuildPnlStatement(
     auto& improvement = cell.GetImprovement();
 
     // Get its type
-    const proto::ruleset::RegionImprovement* improvement_ruleset =
+    const proto::ruleset::Improvement* improvement_ruleset =
       ruleset.FindRegionImprovementByType(improvement.type());
 
     if(improvement_ruleset == nullptr) {

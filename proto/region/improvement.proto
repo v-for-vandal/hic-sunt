@@ -7,9 +7,8 @@ message Improvement {
   // TODO: globally ? or per-region ?
   int64 id = 1;
 
-  // type of improvement, one of ruleset::RegionImprovement ids
+  // type of improvement, one of ruleset::Improvement ids
   string type = 2;
 
   // modules, modifications etc
 }
-

@@ -11,6 +11,7 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/minmax.hpp>
 #include <core/utils/serialize.hpp>
+#include <expected>
 #include <string>
 #include <string_view>
 
@@ -23,9 +24,9 @@ template <typename BaseTypes>
 class Cell;
 
 template <typename BaseTypes>
-void SerializeTo(const Cell<BaseTypes> &source, proto::region::Cell &to);
+void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to);
 template <typename BaseTypes>
-Cell<BaseTypes> ParseFrom(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
+Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
 
 /// One cell in region map
 template <typename BaseTypes = StdBaseTypes>
@@ -33,56 +34,31 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
  public:
   using StringId = typename BaseTypes::StringId;
   using String = typename BaseTypes::String;
+  using ScopePtr = scope::ScopePtr<BaseTypes>;
 
   Cell() = default;
 
-  StringId GetBiome() const { return biome_; }
-  StringId GetFeature() const { return feature_; }
+  bool operator==(const Cell&) const;
 
-  bool HasImprovement() const { return !improvement_.type().empty(); }
-  const proto::region::Improvement &GetImprovement() const { return improvement_; }
+  bool HasImprovement(int slot) const;
+  std::expected<void, ErrorCode> AddImprovement(int slot, const ScopePtr& improvement);
+  StringId GetImprovementId(int slot) const;
+  ScopePtr GetImprovement(int slot) const;
+  const auto& GetImprovements() const { return improvements_; }
 
-  bool operator==(const Cell &) const;
+  void VisitScopes(this auto&& self, auto&& visitor);
 
  private:
   friend Region<BaseTypes>;
-  friend void SerializeTo<BaseTypes>(const Cell<BaseTypes> &source, proto::region::Cell &to);
-  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell &from, serialize::To<Cell<BaseTypes>>);
-  // Using this method is not recommended - instead use Region::SetBiome
-  // because region tracks some aggregated information about cells
-  void SetBiome(StringId biome) { biome_ = biome; }
-  void SetFeature(StringId feature) { feature_ = feature; }
-  void SetImprovement(proto::region::Improvement improvement) { improvement_ = improvement; }
-  /* TODO: REMOVE?
-  void SetHeight(double value) noexcept {
-    height_ = value;
-  }
-  */
-  /* TODO: REMOVE, replaced with modifiers
-  void SetTemperature(double value) noexcept { temperature_ = value; }
-  void SetPrecipitation(double value) noexcept { precipitation_ = value; }
-  */
+  friend void SerializeTo<BaseTypes>(const Cell<BaseTypes>& source, proto::region::Cell& to);
+  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
 
  private:
-  // Note: ScopePtr scope_ will be inherited from ScopedObject
+  // map slot -> improvement in this slot
+  absl::flat_hash_map<int, ScopePtr> improvements_;
 
-  StringId biome_;
-  StringId feature_;
-
-  /* TODO: REMOVE
-  // height, in meters, above/under sea level (whatever sea this may be)
-  // negative is under sea level, positive is above sea level
-  double height_{0};
-  // temperature, in celsius
-  double temperature_{0};
-  // precipitation, in millimeters
-  double precipitation_{0};
-  */
-
+  // TODO: RM
   proto::region::Improvement improvement_;
-
-  absl::flat_hash_map<StringId, double> user_data_numeric_;
-  absl::flat_hash_map<StringId, String> user_data_string_;
 };
 
 }  // namespace hs::region
