@@ -69,13 +69,17 @@ class Session {
   // Return current turn
   size_t GetCurrentTurn() const { return current_turn_; }
 
-  // This function creates and registers new improvement scope (and also all realated class and tag
+  // This function creates new improvement scope (and also all realated class and tag
   // scopes) It does not place the improvement on the map - it only creates scope.
+  // Created scope is orphaned. After placing it on the map, it must be registered with session
   std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id,
                                                             StringId improvement_class);
 
   // This function creates and registers new civilization with given id
   std::expected<CivilizationPtr, ErrorCode> CreateCivilization(StringId civ_id);
+
+  // This function creates new city scope and registers it with session
+  std::expected<ScopePtr, ErrorCode> CreateCity(StringId civ_id);
 
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }

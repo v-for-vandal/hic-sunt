@@ -32,6 +32,7 @@ void SessionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("add_scope", "scope"), &SessionObject::add_scope);
   ClassDB::bind_method(D_METHOD("create_civilization", "civ_id"),
                        &SessionObject::create_civilization);
+  ClassDB::bind_method(D_METHOD("create_city", "civ_id"), &SessionObject::create_city);
   ClassDB::bind_method(D_METHOD("advance_next_turn"), &SessionObject::advance_next_turn);
   ClassDB::bind_method(D_METHOD("add_improvement"), &SessionObject::add_improvement);
   ClassDB::bind_method(D_METHOD("set_current_turn"), &SessionObject::set_current_turn);
@@ -87,6 +88,17 @@ Ref<ScopeObject> SessionObject::create_civilization(StringName civ_id) {
   return result;
 }
 
+Ref<ScopeObject> SessionObject::create_city(StringName civ_id) {
+  ERR_FAIL_COND_V_MSG(civ_id.length() == 0, Ref<ScopeObject>{}, "empty civ id is not allowed");
+
+  auto create_result = data_.CreateCity(civ_id);
+  ERR_FAIL_COND_V_MSG(!create_result, Ref<ScopeObject>{}, "failed to create city");
+
+  Ref<ScopeObject> result(memnew(ScopeObject(*create_result)));
+  ERR_FAIL_NULL_V_MSG(result.ptr(), Ref<ScopeObject>{}, "failed to create scope object");
+  return result;
+}
+
 void SessionObject::set_current_turn(int turn) { data_.SetCurrentTurn(turn); }
 
 int SessionObject::get_current_turn() const { return data_.GetCurrentTurn(); }
@@ -106,9 +118,15 @@ bool SessionObject::add_improvement(const Ref<CellObject>& cell, StringName civ_
   }
 
   // place it onto the map
-  auto add_result = cell->GetCell().AddImprovement(0, *create_scope_result);
-  ERR_FAIL_COND_V_MSG(!add_result, false, "failed to add improvement on the map");
-
+  {
+    auto add_result = cell->GetCell().AddImprovement(0, *create_scope_result);
+    ERR_FAIL_COND_V_MSG(!add_result, false, "failed to add improvement on the map");
+  }
+  // register with session
+  {
+    auto add_result = data_.AddScope(*create_scope_result);
+    ERR_FAIL_COND_V_MSG(!add_result, false, "failed to register improvement with session");
+  }
   emit_signal("cell_changed", cell);
   emit_signal("region_changed", cell->GetRegion()->GetId());
 

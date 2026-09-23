@@ -252,6 +252,50 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCity(StringId civ_id)
+    -> std::expected<ScopePtr, ErrorCode> {
+  if (!world_) {
+    return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);
+  }
+
+  if (BaseTypes::IsNullToken(civ_id)) {
+    SPDLOG_WARN("Null token passed as civ_id");
+    return std::unexpected(ERR_NULL_ID);
+  }
+
+  auto next_int = world_->GetNextId();
+  auto scope_id = BaseTypes::StringIdFromStdString(fmt::format("city/{}", next_int));
+
+  ScopePtr result{scope_id, types::ScopeType::SCOPE_TYPE_CITY};
+
+  auto success = result->SetStringModifier(kCoreClass, kCoreClass, "core.city", 1, current_turn_);
+  if (!success) {
+    // This one can not happen and is unrecoverable
+    throw std::runtime_error(fmt::format(
+        "Failed to set class for this city {}, original error is {}", scope_id, success.error()));
+  }
+
+  // Find civilization
+  if (!world_->HasCivilization(civ_id)) {
+    spdlog::warn("No such civilization: {}", civ_id);
+    return std::unexpected(ERR_NO_SUCH_CIV);
+  }
+  auto civ = world_->GetCivilization(civ_id);
+  if (auto success = civ->AddChildScope(result); !success) {
+    SPDLOG_WARN("Failed to add newly created city to civilization, reason: {}", success.error());
+    return std::unexpected(success.error());
+  }
+
+  // register with session
+  auto add_scope_result = AddScope(result);
+  if (!add_scope_result) {
+    spdlog::warn("Failed to register newly created city, reasion: {}", add_scope_result.error());
+    return std::unexpected(add_scope_result.error());
+  }
+  return result;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCivilization(StringId civ_id)
     -> std::expected<CivilizationPtr, ErrorCode> {
   if (!world_) {
