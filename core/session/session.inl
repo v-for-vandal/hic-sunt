@@ -321,6 +321,23 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCityScope(StringId civ_id)
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCity(StringId civ_id)
+    -> std::expected<ScopePtr, ErrorCode> {
+  auto city_result = CreateCityScope(civ_id);
+  if (!city_result) {
+    return std::unexpected(city_result.error());
+  }
+
+  auto add_scope_result = AddScope(*city_result);
+  if (!add_scope_result) {
+    spdlog::warn("Failed to register newly created city, reason: {}", add_scope_result.error());
+    return std::unexpected(add_scope_result.error());
+  }
+
+  return *city_result;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCivilizationScope(StringId civ_id)
     -> std::expected<CivilizationPtr, ErrorCode> {
   if (!world_) {

@@ -81,6 +81,9 @@ class Session {
   // This function creates new city scope and registers it with session
   std::expected<ScopePtr, ErrorCode> CreateCityScope(StringId civ_id);
 
+  // This function creates new city scope and registers it with session
+  std::expected<ScopePtr, ErrorCode> CreateCity(StringId civ_id);
+
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
   auto& GetEffects() noexcept { return effects_; }

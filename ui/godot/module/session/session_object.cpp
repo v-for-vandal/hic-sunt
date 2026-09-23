@@ -34,6 +34,7 @@ void SessionObject::_bind_methods() {
                        &SessionObject::create_civilization_scope);
   ClassDB::bind_method(D_METHOD("create_city_scope", "civ_id"), &SessionObject::create_city_scope);
   ClassDB::bind_method(D_METHOD("add_city", "civ_id"), &SessionObject::add_city);
+  ClassDB::bind_method(D_METHOD("create_city", "civ_id"), &SessionObject::create_city);
   ClassDB::bind_method(D_METHOD("advance_next_turn"), &SessionObject::advance_next_turn);
   ClassDB::bind_method(D_METHOD("add_improvement"), &SessionObject::add_improvement);
   ClassDB::bind_method(D_METHOD("set_current_turn"), &SessionObject::set_current_turn);
@@ -105,26 +106,20 @@ Ref<ScopeObject> SessionObject::create_city_scope(StringName civ_id) {
 }
 
 Ref<ScopeObject> SessionObject::add_city(StringName civ_id) {
-  // validate civ id
   ERR_FAIL_COND_V_MSG(civ_id.length() == 0, Ref<ScopeObject>{}, "empty civ id is not allowed");
 
-  // create the city scope (reuse the session API directly, similar to create_city_scope)
-  auto create_result = data_.CreateCityScope(civ_id);
+  auto create_result = data_.CreateCity(civ_id);
   ERR_FAIL_COND_V_MSG(!create_result, Ref<ScopeObject>{}, "failed to create city");
 
-  // wrap into a Godot ScopeObject
   Ref<ScopeObject> result(memnew(ScopeObject(*create_result)));
   ERR_FAIL_NULL_V_MSG(result.ptr(), Ref<ScopeObject>{}, "failed to create scope object");
 
-  // register the new scope with the session
-  auto add_result = data_.AddScope(*create_result);
-  ERR_FAIL_COND_V_MSG(!add_result, Ref<ScopeObject>{}, "failed to register city with session");
-
-  // emit signal to notify about created city
   emit_signal("city_created", result);
 
   return result;
 }
+
+Ref<ScopeObject> SessionObject::create_city(StringName civ_id) { return add_city(civ_id); }
 
 void SessionObject::set_current_turn(int turn) { data_.SetCurrentTurn(turn); }
 

@@ -76,7 +76,7 @@ auto Cell<BaseTypes>::GetImprovement(int slot) const -> ScopePtr {
 }
 
 template <typename BaseTypes>
-void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to) {
+void SerializeTo(const Cell<BaseTypes>& /*source*/, proto::region::Cell& to) {
   to.Clear();
   to.set_scope_id(BaseTypes::ToProtoString(source.scope_->GetId()));
 
