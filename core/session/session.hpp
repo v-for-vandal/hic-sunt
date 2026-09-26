@@ -78,10 +78,10 @@ class Session {
   // This function creates and registers new civilization with given id
   std::expected<CivilizationPtr, ErrorCode> CreateCivilizationScope(StringId civ_id);
 
-  // This function creates new city scope and registers it with session
+  // This function creates a new city scope without registering it with session.
   std::expected<ScopePtr, ErrorCode> CreateCityScope(StringId civ_id);
 
-  // This function creates new city scope and registers it with session
+  // This function creates a new city scope and registers it with session.
   std::expected<ScopePtr, ErrorCode> CreateCity(StringId civ_id);
 
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
