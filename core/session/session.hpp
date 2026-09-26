@@ -64,22 +64,22 @@ class Session {
   // This function will change internal turn counter without any logic. Its
   // primary use is to set current turn when loading game. Changing turn
   // to earlier value is forbidden because it messes up caches.
-  void SetCurrentTurn(size_t value);
+  void SetCurrentTurn(std::size_t value);
 
   // Return current turn
-  size_t GetCurrentTurn() const { return current_turn_; }
+  std::size_t GetCurrentTurn() const { return current_turn_; }
 
-  // This function creates new improvement scope (and also all realated class and tag
-  // scopes) It does not place the improvement on the map - it only creates scope.
-  // Created scope is orphaned. After placing it on the map, it must be registered with session
-  std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId civ_id,
+  // This function creates a new improvement scope (and its class scope when needed).
+  // The improvement is tag-linked to the specified city and its improvement class. It is not
+  // placed on the map; after placement, it must be registered with the session.
+  std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId city_id,
                                                             StringId improvement_class);
 
   // This function creates and registers new civilization with given id
-  std::expected<CivilizationPtr, ErrorCode> CreateCivilization(StringId civ_id);
+  std::expected<CivilizationPtr, ErrorCode> CreateCivilizationScope(StringId civ_id);
 
   // This function creates new city scope and registers it with session
-  std::expected<ScopePtr, ErrorCode> CreateCity(StringId civ_id);
+  std::expected<ScopePtr, ErrorCode> CreateCityScope(StringId civ_id);
 
   const auto& GetScopesById() const noexcept { return scopes_by_id_; }
   const auto& GetScopesByType() const noexcept { return scopes_by_type_; }
@@ -120,6 +120,7 @@ class Session {
   // runtime being active.
   StringId kCoreTurn{"core.turn"};
   StringId kCoreClass{"core.class"};
+  StringId kCoreOwner{"owner"};
 };
 
 }  // namespace hs::session

@@ -171,21 +171,37 @@ std::expected<void, ErrorCode> Session<BaseTypes, WorldPtr, RuleSetPtr>::AddScop
     return {};
   }
 
+  // Before registering scope in session, if this is a city scope and it already has a
+  // parent that is a civilization scope, register it as a child of that civilization.
+  if (scope->GetType() == ScopeType::SCOPE_TYPE_CITY) {
+    const auto& parent = scope->GetParent();
+    if (parent && parent->GetType() == ScopeType::SCOPE_TYPE_CIV && world_) {
+      if (world_->HasCivilization(parent->GetId())) {
+        auto civ = world_->GetCivilization(parent->GetId());
+        if (auto add_child_result = civ->AddChildScope(scope); !add_child_result) {
+          spdlog::warn("Failed to register city {} into civilization {}, reason: {}",
+                       scope->GetId(), civ->GetId(), add_child_result.error());
+          return std::unexpected(add_child_result.error());
+        }
+      }
+    }
+  }
+
   scopes_by_id_.emplace(id, scope);
   scopes_by_type_[scope->GetType()].push_back(scope);
   return {};
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
-auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId civ_id,
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId city_id,
                                                                       StringId improvement_class)
     -> std::expected<ScopePtr, ErrorCode> {
   if (!world_) {
     return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);
   }
 
-  if (BaseTypes::IsNullToken(civ_id)) {
-    SPDLOG_WARN("Null token passed as civ_id");
+  if (BaseTypes::IsNullToken(city_id)) {
+    SPDLOG_WARN("Null token passed as city_id");
     return std::unexpected(ERR_NULL_ID);
   }
 
@@ -193,6 +209,26 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
     spdlog::warn("Null token passed as improvement_class");
     return std::unexpected(ERR_NULL_ID);
   }
+
+  const auto city_it = scopes_by_id_.find(city_id);
+  if (city_it == scopes_by_id_.end() || city_it->second->GetType() != ScopeType::SCOPE_TYPE_CITY) {
+    spdlog::warn("No such city: {}", city_id);
+    return std::unexpected(ERR_NO_SUCH_CITY);
+  }
+  const auto& city = city_it->second;
+
+  const auto& civ_scope = city->GetParent();
+  if (!civ_scope || civ_scope->GetType() != ScopeType::SCOPE_TYPE_CIV ||
+      !world_->HasCivilization(civ_scope->GetId())) {
+    spdlog::warn("City {} is not connected to a civilization", city_id);
+    return std::unexpected(ERR_INVALID_CITY);
+  }
+  auto civ = world_->GetCivilization(civ_scope->GetId());
+  if (civ->GetScope() != civ_scope) {
+    spdlog::warn("City {} is connected to an unknown civilization scope", city_id);
+    return std::unexpected(ERR_INVALID_CITY);
+  }
+  const auto civ_id = civ->GetId();
 
   auto next_int = world_->GetNextId();
   auto scope_id = BaseTypes::StringIdFromStdString(fmt::format("imprv/{}", next_int));
@@ -207,13 +243,6 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
         fmt::format("Failed to set class for new scope of class {}, original error is {}",
                     improvement_class, success.error()));
   }
-
-  // Find civilization
-  if (!world_->HasCivilization(civ_id)) {
-    spdlog::warn("No such civilization: {}", civ_id);
-    return std::unexpected(ERR_NO_SUCH_CIV);
-  }
-  auto civ = world_->GetCivilization(civ_id);
 
   // Find improvement class for this civilization. If it is not present,
   // create one. No-civ (empty civ_id) is handled inside this method.
@@ -232,27 +261,24 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
                                                  improvement_class_scope_id);
   }
 
-  // set it as a tag
-  auto add_tag_link_result = result->AddTagLink(kCoreClass, improvement_class_scope);
-  if (!add_tag_link_result) {
+  if (auto add_tag_link_result = result->AddTagLink(kCoreOwner, city); !add_tag_link_result) {
+    spdlog::warn("Failed to link improvement with its city: reason {}",
+                 add_tag_link_result.error());
+    return std::unexpected(add_tag_link_result.error());
+  }
+
+  if (auto add_tag_link_result = result->AddTagLink(kCoreClass, improvement_class_scope);
+      !add_tag_link_result) {
     spdlog::warn("Failed to link improvement with its class: reason {}",
                  add_tag_link_result.error());
     return std::unexpected(add_tag_link_result.error());
   }
 
-  /* Because this scope orphaned (no parent), we should not register it within session
-  auto add_scope_result = AddScope(result);
-  if(!add_scope_result) {
-      spdlog::warn("Failed to register newly created improvement, reasion: {}",
-  add_scope_result.error()); return std::unexpected(add_scope_result.error());
-  }
-  */
-
   return result;
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
-auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCity(StringId civ_id)
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCityScope(StringId civ_id)
     -> std::expected<ScopePtr, ErrorCode> {
   if (!world_) {
     return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);
@@ -281,22 +307,21 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCity(StringId civ_id)
     return std::unexpected(ERR_NO_SUCH_CIV);
   }
   auto civ = world_->GetCivilization(civ_id);
-  if (auto success = civ->AddChildScope(result); !success) {
-    SPDLOG_WARN("Failed to add newly created city to civilization, reason: {}", success.error());
-    return std::unexpected(success.error());
+
+  // Set parent to civilization scope but DO NOT register scope in session or in civ's
+  // child maps. Registration (including adding to civ children) will be performed by
+  // Session::AddScope.
+  if (auto set_parent_result = result->SetParent(civ->GetScope()); !set_parent_result) {
+    spdlog::warn("Failed to set parent for newly created city {}, reason: {}", scope_id,
+                 set_parent_result.error());
+    return std::unexpected(set_parent_result.error());
   }
 
-  // register with session
-  auto add_scope_result = AddScope(result);
-  if (!add_scope_result) {
-    spdlog::warn("Failed to register newly created city, reasion: {}", add_scope_result.error());
-    return std::unexpected(add_scope_result.error());
-  }
   return result;
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
-auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCivilization(StringId civ_id)
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCivilizationScope(StringId civ_id)
     -> std::expected<CivilizationPtr, ErrorCode> {
   if (!world_) {
     return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);

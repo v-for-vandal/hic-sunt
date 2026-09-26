@@ -30,6 +30,10 @@ std::string ErrorCategory::message(int ev) const {
       return "effect definition is not valid (most likely lua code)";
     case ERR_INVALID_RULESET:
       return "invalid or null ruleset object";
+    case ERR_NO_SUCH_CITY:
+      return "no such city";
+    case ERR_INVALID_CITY:
+      return "city is not connected to a civilization";
     default:
       return "unknown hs error";
   }

@@ -30,9 +30,10 @@ void SessionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_ruleset", "ruleset"), &SessionObject::set_ruleset);
   ClassDB::bind_method(D_METHOD("set_world", "world"), &SessionObject::set_world);
   ClassDB::bind_method(D_METHOD("add_scope", "scope"), &SessionObject::add_scope);
-  ClassDB::bind_method(D_METHOD("create_civilization", "civ_id"),
-                       &SessionObject::create_civilization);
-  ClassDB::bind_method(D_METHOD("create_city", "civ_id"), &SessionObject::create_city);
+  ClassDB::bind_method(D_METHOD("create_civilization_scope", "civ_id"),
+                       &SessionObject::create_civilization_scope);
+  ClassDB::bind_method(D_METHOD("create_city_scope", "civ_id"), &SessionObject::create_city_scope);
+  ClassDB::bind_method(D_METHOD("add_city", "civ_id"), &SessionObject::add_city);
   ClassDB::bind_method(D_METHOD("advance_next_turn"), &SessionObject::advance_next_turn);
   ClassDB::bind_method(D_METHOD("add_improvement"), &SessionObject::add_improvement);
   ClassDB::bind_method(D_METHOD("set_current_turn"), &SessionObject::set_current_turn);
@@ -42,12 +43,16 @@ void SessionObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_total_effect_execution_statistics"),
                        &SessionObject::get_total_effect_execution_statistics);
 
-  ADD_SIGNAL(
-      MethodInfo("region_changed", PropertyInfo(Variant::STRING_NAME, "region_id",
-                                                PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT)));
+  ADD_SIGNAL(MethodInfo("region_changed",
+                        PropertyInfo(Variant::OBJECT, "region", PROPERTY_HINT_RESOURCE_TYPE,
+                                     "RegionObject", PROPERTY_USAGE_DEFAULT)));
   ADD_SIGNAL(
       MethodInfo("cell_changed", PropertyInfo(Variant::OBJECT, "cell", PROPERTY_HINT_RESOURCE_TYPE,
                                               "CellObject", PROPERTY_USAGE_DEFAULT)));
+
+  ADD_SIGNAL(
+      MethodInfo("city_created", PropertyInfo(Variant::OBJECT, "city", PROPERTY_HINT_RESOURCE_TYPE,
+                                              "ScopeObject", PROPERTY_USAGE_DEFAULT)));
 }
 
 bool SessionObject::set_ruleset(const Ref<RulesetObject>& ruleset) {
@@ -77,10 +82,10 @@ bool SessionObject::add_scope(const Ref<ScopeObject>& scope) {
   return true;
 }
 
-Ref<ScopeObject> SessionObject::create_civilization(StringName civ_id) {
+Ref<ScopeObject> SessionObject::create_civilization_scope(StringName civ_id) {
   ERR_FAIL_COND_V_MSG(civ_id.length() == 0, Ref<ScopeObject>{}, "empty civ id is not allowed");
 
-  auto create_result = data_.CreateCivilization(civ_id);
+  auto create_result = data_.CreateCivilizationScope(civ_id);
   ERR_FAIL_COND_V_MSG(!create_result, Ref<ScopeObject>{}, "failed to create civilization");
 
   Ref<ScopeObject> result(memnew(ScopeObject((*create_result)->GetScope())));
@@ -88,14 +93,36 @@ Ref<ScopeObject> SessionObject::create_civilization(StringName civ_id) {
   return result;
 }
 
-Ref<ScopeObject> SessionObject::create_city(StringName civ_id) {
+Ref<ScopeObject> SessionObject::create_city_scope(StringName civ_id) {
   ERR_FAIL_COND_V_MSG(civ_id.length() == 0, Ref<ScopeObject>{}, "empty civ id is not allowed");
 
-  auto create_result = data_.CreateCity(civ_id);
+  auto create_result = data_.CreateCityScope(civ_id);
   ERR_FAIL_COND_V_MSG(!create_result, Ref<ScopeObject>{}, "failed to create city");
 
   Ref<ScopeObject> result(memnew(ScopeObject(*create_result)));
   ERR_FAIL_NULL_V_MSG(result.ptr(), Ref<ScopeObject>{}, "failed to create scope object");
+  return result;
+}
+
+Ref<ScopeObject> SessionObject::add_city(StringName civ_id) {
+  // validate civ id
+  ERR_FAIL_COND_V_MSG(civ_id.length() == 0, Ref<ScopeObject>{}, "empty civ id is not allowed");
+
+  // create the city scope (reuse the session API directly, similar to create_city_scope)
+  auto create_result = data_.CreateCityScope(civ_id);
+  ERR_FAIL_COND_V_MSG(!create_result, Ref<ScopeObject>{}, "failed to create city");
+
+  // wrap into a Godot ScopeObject
+  Ref<ScopeObject> result(memnew(ScopeObject(*create_result)));
+  ERR_FAIL_NULL_V_MSG(result.ptr(), Ref<ScopeObject>{}, "failed to create scope object");
+
+  // register the new scope with the session
+  auto add_result = data_.AddScope(*create_result);
+  ERR_FAIL_COND_V_MSG(!add_result, Ref<ScopeObject>{}, "failed to register city with session");
+
+  // emit signal to notify about created city
+  emit_signal("city_created", result);
+
   return result;
 }
 
@@ -128,7 +155,7 @@ bool SessionObject::add_improvement(const Ref<CellObject>& cell, StringName civ_
     ERR_FAIL_COND_V_MSG(!add_result, false, "failed to register improvement with session");
   }
   emit_signal("cell_changed", cell);
-  emit_signal("region_changed", cell->GetRegion()->GetId());
+  emit_signal("region_changed", cell->get_region());
 
   return true;
 }

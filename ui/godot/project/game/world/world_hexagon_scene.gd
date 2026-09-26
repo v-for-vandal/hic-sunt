@@ -1,7 +1,18 @@
 extends GameTile
 
+var _region: RegionObject
+
 func _ready() -> void:
 	super()
+	_load_cell()
+	
+	CurrentGame.ui_city_created.connect(self.on_some_city_created)
+	# connect to debugging nodes
+	if DebugRoot.is_debug_enabled():
+		DebugRoot.get_debug_display_options().changed.connect(self.on_debug_display_settings_changed)
+	
+
+func _load_cell() -> void:
 	# Get parent
 	var surface := get_surface()
 	
@@ -9,8 +20,9 @@ func _ready() -> void:
 	var plane : PlaneObject = surface.get_plane().plane_object
 	assert(plane != null)
 	if plane != null:
-		var region := plane.get_region(qr_coords)
-		var topBiomes := region.get_string_value_topn(Modifiers.ECOSYSTEM_BIOME, 1)
+		_region = plane.get_region(qr_coords)
+		assert(_region != null)
+		var topBiomes := _region.get_string_value_topn(Modifiers.ECOSYSTEM_BIOME, 1)
 		if topBiomes.is_empty():
 			push_error("No biome at all in region at: ", qr_coords)
 		else:
@@ -19,9 +31,16 @@ func _ready() -> void:
 			var texture := GfxRegistry.get_biome_texture(biome)
 			$Biome.texture = texture
 			
-	# connect to debugging nodes
-	if DebugRoot.is_debug_enabled():
-		DebugRoot.get_debug_display_options().changed.connect(self.on_debug_display_settings_changed)
+		var city := CurrentGame.game.world.find_city_by_region_id(_region.get_id())
+		if city != null:
+			# TODO: Improvement name is hardcoded, it should not be so. In fact,
+			# we should use some UI element for that.
+			var city_texture := GfxRegistry.get_improvement_texture("city.hall")
+			$GlobalImprovement.texture = city_texture
+			$GlobalImprovement.visible = true
+		else:
+			$GlobalImprovement.visible = false
+
 			
 func _update_highlighting() -> void:
 	var surface := self.get_surface()
@@ -84,6 +103,12 @@ func _on_display_settings_changed() -> void:
 
 func on_debug_display_settings_changed(options: DebugDisplayOptions) -> void:
 	_update_debug_display_variable_or_modifier(options)
+	
+func on_some_city_created(city: City) -> void:
+	if not _region:
+		return
+	if city.get_primary_region_id() == _region.get_id():
+		_load_cell()
 	
 	
 

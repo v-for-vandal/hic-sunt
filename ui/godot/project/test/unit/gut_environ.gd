@@ -54,7 +54,7 @@ func before_each() -> void:
 	zero_region = plane.plane_object.get_region(Vector2i(0, 0))
 	assert_not_null(zero_region, "Failed to get (0,0) region")
 	CurrentGame.init_game(world, ruleset)
-	CurrentGame.game.session.create_civilization(&"test_civ")
+	CurrentGame.game.session.create_civilization_scope(&"test_civ")
 
 # == helper methods for descendants
 

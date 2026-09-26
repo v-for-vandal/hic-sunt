@@ -5,11 +5,19 @@ class_name World
 var _world_object: WorldObject
 var _planes : Dictionary[StringName, WorldPlane]
 
+# Indices
+var _cities_by_region_id: Dictionary[StringName, City]
+var _cities_by_id: Dictionary[StringName, City]
+var _civilisations_by_id: Dictionary[StringName, Civilisation]
+
 var world_object: WorldObject:
 	get: return _world_object
 	
 func _init() -> void:
 	_world_object = WorldObject.new()
+	_cities_by_region_id = {}
+	_cities_by_id = {}
+	_civilisations_by_id = {}
 
 func create_plane(name: StringName, world_size : Rect2i, region_radius : int, region_external_radius: int = -1) -> WorldPlane:
 	var plane_object :=  _world_object.create_plane(name, world_size, region_radius, region_external_radius)
@@ -20,7 +28,7 @@ func create_plane(name: StringName, world_size : Rect2i, region_radius : int, re
 	else:
 		push_error("failed to create Plane")
 		return null
-		
+			
 func get_plane(plane_id: StringName) -> WorldPlane:
 	if plane_id in _planes:
 		return _planes[plane_id]
@@ -35,6 +43,25 @@ func get_plane(plane_id: StringName) -> WorldPlane:
 	
 func get_planes() -> Array[StringName]:
 	return _planes.keys()
+
+# --- Indices API ---
+func register_city(city_id: StringName, region_id: StringName, city: City) -> void:
+	assert(city != null)
+	_cities_by_id[city_id] = city
+	_cities_by_region_id[region_id] = city
+
+func register_civilisation(civ_id: StringName, civ: Civilisation) -> void:
+	assert(civ != null)
+	_civilisations_by_id[civ_id] = civ
+
+func find_city_by_region_id(region_id: StringName) -> City:
+	return _cities_by_region_id.get(region_id, null)
+
+func find_city_by_id(city_id: StringName) -> City:
+	return _cities_by_id.get(city_id, null)
+
+func find_civilisation_by_id(civ_id: StringName) -> Civilisation:
+	return _civilisations_by_id.get(civ_id, null)
 
 ## Saves world to given location
 func save(path: String) -> Error:

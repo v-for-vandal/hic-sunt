@@ -17,6 +17,8 @@ namespace hs::godot {
 
 using namespace ::godot;
 
+class RegionObject;  // forward declaration to avoid circular include
+
 class CellObject : public RefCounted, public ScopeMixin {
   GDCLASS(CellObject, RefCounted);
 
@@ -24,9 +26,8 @@ class CellObject : public RefCounted, public ScopeMixin {
   using QRSCoordinateSystem = World::QRSCoordinateSystem;
   using QRSCoords = World::QRSCoords;
 
-  CellObject() {}
-  CellObject(std::shared_ptr<Region> region, QRSCoords cell_coords)
-      : region_(std::move(region)), cell_coords_(cell_coords) {}
+  CellObject();
+  CellObject(std::shared_ptr<Region> region, QRSCoords cell_coords);
 
   void _init() {}
 
@@ -56,6 +57,7 @@ class CellObject : public RefCounted, public ScopeMixin {
   Ref<ScopeObject> get_improvement(int slot);
   TypedDictionary<int, ScopeObject> get_improvements();
   Ref<ScopeObject> get_scope() { return ScopeMixin::get_scope(); }
+  Ref<RegionObject> get_region();
   StringName get_region_id() const;
   StringName get_id() const { return GetScope()->GetId(); }
 
@@ -64,6 +66,7 @@ class CellObject : public RefCounted, public ScopeMixin {
   // and qrs coords of a cell
   std::shared_ptr<Region> region_;
   QRSCoords cell_coords_;
+  Ref<RegionObject> region_object_;
 
   static ScopePtr CreateInvalidCellScope();
 };

@@ -1,6 +1,7 @@
 extends Node
 
 var DevSelectAndBuildInteraction := preload("res://game/interactions/dev/dev_select_and_build.gd")
+var DevSelectAndCreateCityInteraction := preload("res://game/interactions/dev/dev_select_and_create_city.gd")
 
 var _stats_dumpers := {
 	'effects' : self._dump_statistics_effects
@@ -14,6 +15,7 @@ func _register_dev_console_commands()-> void:
 	Console.create_command("next_turn", CurrentGame.next_turn, "Start next turn")
 	Console.create_command("dump_statistics", self._dump_statistics, "Dump specified statistics to log. Statistics type: %s" % [_stats_dumpers.keys()])
 	Console.create_command("reload_ruleset", self._reload_ruleset, "Re-read ruleset files and replace current ruleset with new one")
+	Console.create_command("create_city", self._create_city, "Create city in given location")
 	
 func _dev_build(improvement_id : Variant = null) -> void:
 	var resolved_improvment_id : String
@@ -71,6 +73,10 @@ func _reload_ruleset() -> void:
 	CurrentGame.replace_ruleset(new_ruleset)
 	Console.print("Ruleset replaced")
 	
+func _create_city(city_name: String = "") -> void:
+	var new_create_city_interaction := DevSelectAndCreateCityInteraction.new()
+	CurrentGame.event_bus.set_main_interaction(new_create_city_interaction)
+	Console.print("Click on the cell to create city")
 	
 func _input(event: InputEvent) -> void:
 	# We have to catch this key before _gui_input, otherwise

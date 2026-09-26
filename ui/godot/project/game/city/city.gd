@@ -5,45 +5,40 @@ class_name City
 # signals
 
 # private variables
-var _region_id: String
-var _city_id: String
-var _player: int = 0
-var _city_finance: Dictionary = { }
+var _scope : ScopeObject
+var _primary_region_id: String
 var _territory: Dictionary = { } # dict [region_id -> whatever]
+
 var _projects_queue := CityProjectsQueue.new()
 
 var _serializable_properties: Array[StringName] = [
-	"_region_id",
-	"_city_id",
-	"_player",
-	"_city_finance",
+	"_primary_region_id",
 	"_territory",
 	"_projects_queue",
 ]
 
 
-func get_city_id() -> String:
-	return _city_id
+func git_id() -> String:
+	assert(_scope != null)
+	if _scope == null:
+		return "error"
+	return _scope.get_id()
 
 
-func get_region_id() -> String:
-	return _region_id
-
-
-func get_region_object() -> RegionObject:
-	return CurrentGame.get_current_world().get_region_by_id(_region_id)
-
+func get_primary_region_id() -> String:
+	return _primary_region_id
 
 # This constructor is used by civilization.gd. It is not supposed to be used
 # directly
-static func create_new_city(city_id: String, region_id: String) -> City:
-	assert(!city_id.is_empty())
-	assert(!region_id.is_empty())
+static func create_new_city(scope: ScopeObject, cell: CellObject) -> City:
+	assert(scope != null)
+	assert(cell != null)
+	assert(cell.is_valid())
+	
 	var result := City.new()
-	result._region_id = region_id
-	result._territory[region_id] = true
-	result._city_id = city_id
-	# TODO: Update region object itself
+	result._scope = scope
+	result._primary_region_id = cell.get_region_id()
+	result._territory[result._primary_region_id] = true
 	return result
 
 	#func add_to_build(improvement_id: String, region: RegionObject, region_qr: Vector2i) -> void:
@@ -71,7 +66,9 @@ func build_pnl() -> Dictionary:
 
 	var ruleset := CurrentGame.current_game.ruleset
 	# this is list of jobs
-	var region_jobs: Dictionary = get_region_object().get_jobs(ruleset)
+	# TODO: Uncomment and fix with proper getting of jobs
+	# var region_jobs: Dictionary = get_region_object().get_jobs(ruleset)
+	var region_jobs: Dictionary = {}
 	print("region jobs: ", region_jobs)
 	for job_id: String in region_jobs:
 		var job_count: int = region_jobs[job_id] # for now, assume that every job is occupied
@@ -106,16 +103,13 @@ func next_turn() -> void:
 	_projects_queue.process(total)
 
 	# Add to the city finance
-	var new_finance := ResourceEconomyLibrary.combine(_city_finance, total)
-	_city_finance = new_finance
+	# var new_finance := ResourceEconomyLibrary.combine(_city_finance, total)
+	# _city_finance = new_finance
 
 
 # This is internal method, we use it to clear object before parsing
 func _clear() -> void:
-	_region_id = ""
-	_city_id = ""
-	_player = 0
-	_city_finance = { }
+	_primary_region_id = ""
 	_territory = { } # dict [region_id -> whatever]
 	_projects_queue = CityProjectsQueue.new()
 

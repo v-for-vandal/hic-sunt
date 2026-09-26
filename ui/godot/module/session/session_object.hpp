@@ -24,8 +24,9 @@ class SessionObject : public RefCounted {
   bool set_ruleset(const Ref<RulesetObject>& ruleset);
   bool set_world(const Ref<WorldObject>& world);
   bool add_scope(const Ref<ScopeObject>& scope);
-  Ref<ScopeObject> create_civilization(StringName civ_id);
-  Ref<ScopeObject> create_city(StringName civ_id);
+  Ref<ScopeObject> add_city(StringName civ_id);
+  Ref<ScopeObject> create_civilization_scope(StringName civ_id);
+  Ref<ScopeObject> create_city_scope(StringName civ_id);
   bool add_improvement(const Ref<CellObject>& cell, StringName civ_id, StringName improvement_id);
   bool advance_next_turn();
   void set_current_turn(int turn);

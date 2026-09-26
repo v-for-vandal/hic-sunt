@@ -2,6 +2,7 @@
 
 #include <godot_cpp/core/object.hpp>
 #include <godot_cpp/variant/typed_dictionary.hpp>
+#include <ui/godot/module/region/region_object.hpp>
 #include <ui/godot/module/utils/cast_qrs.hpp>
 
 #define ERR_FAIL_REGION_NO_CELL(result)                                          \
@@ -17,6 +18,16 @@ static constexpr const char* ERR_MSG_REGION_IS_NULL = "null-containing region ob
 
 static constexpr const char* INVALID_CELL_ID = "invalid-cell";
 
+CellObject::CellObject() = default;
+
+CellObject::CellObject(std::shared_ptr<Region> region, QRSCoords cell_coords)
+    : region_(std::move(region)), cell_coords_(cell_coords) {
+  if (region_) {
+    Ref<RegionObject> wrapper(memnew(RegionObject(region_)));
+    region_object_ = wrapper;
+  }
+}
+
 void CellObject::_bind_methods() {
   ScopeMixin::_bind_methods<CellObject>();
   ClassDB::bind_method(D_METHOD("is_valid"), &CellObject::is_valid);
@@ -24,6 +35,7 @@ void CellObject::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_improvements"), &CellObject::get_improvements);
   ClassDB::bind_method(D_METHOD("get_id"), &CellObject::get_id);
   ClassDB::bind_method(D_METHOD("get_region_id"), &CellObject::get_region_id);
+  ClassDB::bind_method(D_METHOD("get_region"), &CellObject::get_region);
 }
 
 ScopePtr CellObject::CreateInvalidCellScope() {
@@ -81,6 +93,12 @@ auto CellObject::get_improvements() -> TypedDictionary<int, ScopeObject> {
   }
 
   return result;
+}
+
+Ref<RegionObject> CellObject::get_region() {
+  ERR_FAIL_NULL_REGION(Ref<RegionObject>{});
+
+  return region_object_;
 }
 
 StringName CellObject::get_region_id() const {
