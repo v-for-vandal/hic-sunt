@@ -71,7 +71,7 @@ TEST(StdVariableDefinitions, ParseStringVariableDefaultsAllowedScopesToAllScopeT
   variable.mutable_string();
 
   const ParsedVariableDefinition parsed = StdVariableDefinitions::ParseFromProto(variable);
-  const auto *definition = std::get_if<StringVariableDefinition<StdBaseTypes>>(&parsed);
+  const auto* definition = std::get_if<StringVariableDefinition<StdBaseTypes>>(&parsed);
   ASSERT_NE(definition, nullptr);
 
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
@@ -96,7 +96,7 @@ TEST(StdVariableDefinitions, ParseNumericVariableLoadsAllowedScopesFromFilter) {
   variable.mutable_allowed_scopes()->add_scope_types(proto::types::ScopeType::SCOPE_TYPE_CITY);
 
   const ParsedVariableDefinition parsed = StdVariableDefinitions::ParseFromProto(variable);
-  const auto *definition = std::get_if<NumericVariableDefinition<StdBaseTypes>>(&parsed);
+  const auto* definition = std::get_if<NumericVariableDefinition<StdBaseTypes>>(&parsed);
   ASSERT_NE(definition, nullptr);
 
   EXPECT_TRUE(definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
@@ -119,7 +119,7 @@ TEST(StdVariableDefinitions, ParseBooleanVariableAsNumericRange) {
   variable.mutable_boolean();
 
   const ParsedVariableDefinition parsed = StdVariableDefinitions::ParseFromProto(variable);
-  const auto *definition = std::get_if<NumericVariableDefinition<StdBaseTypes>>(&parsed);
+  const auto* definition = std::get_if<NumericVariableDefinition<StdBaseTypes>>(&parsed);
   ASSERT_NE(definition, nullptr);
   EXPECT_EQ(definition->minimum, 0);
   EXPECT_EQ(definition->maximum, 1);
@@ -130,7 +130,7 @@ TEST(StdVariableDefinitions, ParseVariableWithoutTypeReturnsError) {
   variable.set_id("var.invalid");
 
   const ParsedVariableDefinition parsed = StdVariableDefinitions::ParseFromProto(variable);
-  const auto *error = std::get_if<ErrorCode>(&parsed);
+  const auto* error = std::get_if<ErrorCode>(&parsed);
   ASSERT_NE(error, nullptr);
   EXPECT_EQ(*error, ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
 }

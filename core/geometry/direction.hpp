@@ -152,7 +152,7 @@ inline bool IsNegativeDirection(Direction direction) noexcept {
 
 template <>
 struct fmt::formatter<::hs::geometry::Direction> {
-  constexpr auto parse(format_parse_context &ctx) const -> decltype(ctx.begin()) {
+  constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin()) {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
     if (it != end && *it != '}') {
@@ -163,7 +163,7 @@ struct fmt::formatter<::hs::geometry::Direction> {
   }
 
   template <typename FormatCtx>
-  auto format(::hs::geometry::Direction direction, FormatCtx &ctx) {
+  auto format(::hs::geometry::Direction direction, FormatCtx& ctx) {
     // for some reason, constexpr doesn't work here
     return fmt::format_to(ctx.out(), fmt::runtime(ToString(direction)));
   }

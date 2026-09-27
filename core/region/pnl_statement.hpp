@@ -17,11 +17,11 @@ class PnlStatement {
   // negative means losses
   using ResourceFlow = absl::flat_hash_map<ResourceId, int>;
 
-  const auto &GetProfit() const { return profit_; }
-  const auto &GetLosses() const { return losses_; }
+  const auto& GetProfit() const { return profit_; }
+  const auto& GetLosses() const { return losses_; }
 
-  auto &GetProfit() { return profit_; }
-  auto &GetLosses() { return losses_; }
+  auto& GetProfit() { return profit_; }
+  auto& GetLosses() { return losses_; }
 
   ResourceFlow GetTotal() const;
 

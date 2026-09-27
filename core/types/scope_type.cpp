@@ -2,7 +2,7 @@
 
 namespace hs::types {
 
-ScopeTypeFilter ToScopeTypeFilter(const proto::types::ScopeTypeFilter &scope_type_filter) {
+ScopeTypeFilter ToScopeTypeFilter(const proto::types::ScopeTypeFilter& scope_type_filter) {
   ScopeTypeFilter result;
 
   for (const int scope_type_set : scope_type_filter.scope_type_sets()) {

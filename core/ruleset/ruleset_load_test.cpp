@@ -12,7 +12,7 @@ using StdRuleSet = RuleSet<StdBaseTypes>;
 
 namespace {
 
-std::filesystem::path MakeTempDir(const std::string &name) {
+std::filesystem::path MakeTempDir(const std::string& name) {
   const auto root = std::filesystem::temp_directory_path() /
                     std::filesystem::path("hic_sunt_ruleset_tests") / name;
   std::filesystem::remove_all(root);
@@ -20,7 +20,7 @@ std::filesystem::path MakeTempDir(const std::string &name) {
   return root;
 }
 
-void WriteTextFile(const std::filesystem::path &path, const std::string &content) {
+void WriteTextFile(const std::filesystem::path& path, const std::string& content) {
   std::filesystem::create_directories(path.parent_path());
   std::ofstream out(path);
   out << content;
@@ -123,7 +123,7 @@ TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
   utils::ErrorsCollection errors;
   ASSERT_TRUE(ruleset.Load({root}, errors));
 
-  const auto &definitions = ruleset.GetVariableDefinitions();
+  const auto& definitions = ruleset.GetVariableDefinitions();
   EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/count"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.wood"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.tools"));
@@ -170,10 +170,10 @@ TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {
   utils::ErrorsCollection errors;
   ASSERT_TRUE(ruleset.Load({root}, errors));
 
-  const auto &effects = ruleset.GetAllEffectDefinitions();
+  const auto& effects = ruleset.GetAllEffectDefinitions();
   ASSERT_EQ(effects.size(), 2u);
 
-  const auto &class_effect = effects[0];
+  const auto& class_effect = effects[0];
   EXPECT_EQ(class_effect->GetId(), "mill/class.effect");
   EXPECT_EQ(class_effect->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
   EXPECT_EQ(class_effect->GetData().selector().class_(), "mill");
@@ -181,7 +181,7 @@ TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {
   EXPECT_TRUE(class_effect->GePossibleCode().has_value() == false);
   EXPECT_EQ(class_effect->GetData().effect().lua(), "return VAR(mill.class.dep)");
 
-  const auto &instance_effect = effects[1];
+  const auto& instance_effect = effects[1];
   EXPECT_EQ(instance_effect->GetId(), "mill/instance.effect");
   EXPECT_EQ(instance_effect->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT);
   EXPECT_EQ(instance_effect->GetData().selector().class_(), "mill");

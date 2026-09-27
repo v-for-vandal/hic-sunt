@@ -35,7 +35,7 @@ StdVariableDefinitionsConstPtr MakeRestrictedVariableDefinitions() {
 }
 
 StdScopePtr MakeScopeWithDefinitions(types::ScopeType scope_type,
-                                     const StdVariableDefinitionsConstPtr &definitions) {
+                                     const StdVariableDefinitionsConstPtr& definitions) {
   StdScopePtr scope("test_scope", scope_type);
   scope->SetVariableDefinitions(definitions);
   return scope;

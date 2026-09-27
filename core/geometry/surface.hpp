@@ -33,28 +33,28 @@ class SurfaceView {
     s_start_(s_start),
     s_end_(s_end) {}
     */
-  SurfaceView(CellsArrayView<Cell> target, const SurfaceShape &shape)
+  SurfaceView(CellsArrayView<Cell> target, const SurfaceShape& shape)
       : target_(std::move(target)), shape_(shape), bounding_box_(shape.BoundingBox()) {}
 
-  SurfaceView(const SurfaceView &) = default;
-  SurfaceView(SurfaceView &&) = default;
-  SurfaceView &operator=(const SurfaceView &) = default;
-  SurfaceView &operator=(SurfaceView &&) = default;
+  SurfaceView(const SurfaceView&) = default;
+  SurfaceView(SurfaceView&&) = default;
+  SurfaceView& operator=(const SurfaceView&) = default;
+  SurfaceView& operator=(SurfaceView&&) = default;
 
-  const SurfaceShape &GetShape() const noexcept { return shape_; }
+  const SurfaceShape& GetShape() const noexcept { return shape_; }
 
-  Cell &GetCell(Coords coords) {
-    return const_cast<Cell &>(const_cast<const SurfaceView &>(*this).GetCell(coords));
+  Cell& GetCell(Coords coords) {
+    return const_cast<Cell&>(const_cast<const SurfaceView&>(*this).GetCell(coords));
   }
-  Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
+  Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
     return GetCell(Coords{q, r});
   }
 
-  const Cell &GetCell(Coords coords) const {
+  const Cell& GetCell(Coords coords) const {
     return target_[(coords.q() - q_start()).ToUnderlying(),
                    (coords.r() - r_start()).ToUnderlying()];
   }
-  const Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
+  const Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
     return GetCell(Coords{q, r});
   }
 
@@ -90,11 +90,11 @@ class SurfaceView {
     return Contains(Coords{q, r});
   }
 
-  bool operator==(const SurfaceView &other) const;
-  bool operator!=(const SurfaceView &other) const { return !(*this == other); }
+  bool operator==(const SurfaceView& other) const;
+  bool operator!=(const SurfaceView& other) const { return !(*this == other); }
 
   template <typename Callback>
-  void Foreach(Callback &&callback) {
+  void Foreach(Callback&& callback) {
     for (size_t idx = 0; idx < target_.size(); ++idx) {
       const auto coords = FromRawIndex(idx);
       if (Contains(coords)) [[likely]] {
@@ -124,8 +124,8 @@ class SurfaceView {
   }
 
   // idx is index in underlying array.
-  const Cell &GetCell(size_t idx) const { return target_.data_handle[idx]; }
-  Cell &GetCell(size_t idx) { return target_.data_handle[idx]; }
+  const Cell& GetCell(size_t idx) const { return target_.data_handle[idx]; }
+  Cell& GetCell(size_t idx) { return target_.data_handle[idx]; }
 
  private:
   CellsArrayView<Cell> target_;
@@ -150,10 +150,10 @@ class Surface {
 
   Surface() : Surface(SurfaceShape(geometry::RhombusSurface(Box::MakeOne()))) {};
   explicit Surface(SurfaceShape shape);
-  Surface(const Surface &) = delete;
-  Surface(Surface &&) = default;
-  Surface &operator=(const Surface &) = delete;
-  Surface &operator=(Surface &&) = default;
+  Surface(const Surface&) = delete;
+  Surface(Surface&&) = default;
+  Surface& operator=(const Surface&) = delete;
+  Surface& operator=(Surface&&) = default;
 
   View view() { return cells_; }
   View view() const { return cells_; }
@@ -166,8 +166,8 @@ class Surface {
   */
 
   size_t data_size() const { return data_size_; }
-  const Cell &GetCell(size_t idx) const { return data_storage_[idx]; }
-  Cell &GetCell(size_t idx) { return data_storage_[idx]; }
+  const Cell& GetCell(size_t idx) const { return data_storage_[idx]; }
+  Cell& GetCell(size_t idx) { return data_storage_[idx]; }
 
   auto q_size() const { return cells_.q_size(); }
   auto r_size() const { return cells_.r_size(); }
@@ -203,8 +203,8 @@ class Surface {
 #undef WRLD_REDIRECT_VIEW_FUNCTION
 #undef WRLD_REDIRECT_VIEW_CONST_FUNCTION
 
-  bool operator==(const Surface &other) const { return view() == other.view(); }
-  bool operator!=(const Surface &other) const { return !(*this == other); }
+  bool operator==(const Surface& other) const { return view() == other.view(); }
+  bool operator!=(const Surface& other) const { return !(*this == other); }
 
  private:
   SurfaceShape shape_;
@@ -214,7 +214,7 @@ class Surface {
   SurfaceView<Cell, CoordinateSystem> cells_;
 
  private:
-  static std::pair<size_t, size_t> GetAllocationSize(const SurfaceShape &shape) noexcept;
+  static std::pair<size_t, size_t> GetAllocationSize(const SurfaceShape& shape) noexcept;
 };
 
 }  // namespace hs::geometry

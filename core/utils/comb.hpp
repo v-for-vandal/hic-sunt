@@ -18,7 +18,7 @@ class Comb {
   using StringId = typename BaseTypes::StringId;
   Comb() = default;
 
-  void Add(const StringId &elem) {
+  void Add(const StringId& elem) {
     if (BaseTypes::IsNullToken(elem)) {
       return;
     }
@@ -28,7 +28,7 @@ class Comb {
     comb_[curr_count].insert(elem);
   }
 
-  void Remove(const StringId &elem) {
+  void Remove(const StringId& elem) {
     if (BaseTypes::IsNullToken(elem)) {
       return;
     }
@@ -38,7 +38,7 @@ class Comb {
     comb_[curr_count].insert(elem);
   }
 
-  int Count(const StringId &elem) const {
+  int Count(const StringId& elem) const {
     auto fit = count_.find(elem);
     if (fit != count_.end()) {
       return fit->second;
@@ -56,7 +56,7 @@ class Comb {
       if (it->first <= 0) {
         continue;
       }
-      for (const auto &elem : it->second) {
+      for (const auto& elem : it->second) {
         result.emplace_back(std::make_pair(elem, it->first));
         k--;
 
@@ -80,8 +80,8 @@ class Comb {
     count_.clear();
   }
 
-  bool operator==(const Comb &other) const noexcept;
-  bool operator!=(const Comb &other) const noexcept { return !(*this == other); }
+  bool operator==(const Comb& other) const noexcept;
+  bool operator!=(const Comb& other) const noexcept { return !(*this == other); }
 
  private:
   std::map<int, std::unordered_set<StringId>> comb_;

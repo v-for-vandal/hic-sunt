@@ -12,16 +12,16 @@ struct overloads : Ts... {
 
 }  // namespace
 
-HexagonSurface ParseFrom(const proto::geometry::HexagonSurface &source,
+HexagonSurface ParseFrom(const proto::geometry::HexagonSurface& source,
                          serialize::To<HexagonSurface>) {
   return HexagonSurface(source.radius());
 }
 
-void SerializeTo(const HexagonSurface &source, proto::geometry::HexagonSurface &target) {
+void SerializeTo(const HexagonSurface& source, proto::geometry::HexagonSurface& target) {
   target.set_radius(source.radius_);
 }
 
-RhombusSurface ParseFrom(const proto::geometry::RhombusSurface &source,
+RhombusSurface ParseFrom(const proto::geometry::RhombusSurface& source,
                          serialize::To<RhombusSurface>) {
   using Coords = RhombusSurface::Coords;
 
@@ -37,7 +37,7 @@ RhombusSurface ParseFrom(const proto::geometry::RhombusSurface &source,
   return RhombusSurface{RhombusSurface::Box{start, end}};
 }
 
-void SerializeTo(const RhombusSurface &source, proto::geometry::RhombusSurface &target) {
+void SerializeTo(const RhombusSurface& source, proto::geometry::RhombusSurface& target) {
   target.set_q_start(source.BoundingBox().start().q().ToUnderlying());
   target.set_r_start(source.BoundingBox().start().r().ToUnderlying());
   target.set_q_end(source.BoundingBox().end().q().ToUnderlying());
@@ -45,7 +45,7 @@ void SerializeTo(const RhombusSurface &source, proto::geometry::RhombusSurface &
 }
 
 SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(
-    const proto::geometry::SurfaceShape &source,
+    const proto::geometry::SurfaceShape& source,
     serialize::To<SurfaceShape<geometry::QRSCoordinateSystem>>) {
   if (source.has_hexagon()) {
     const HexagonSurface hexagon = ParseFrom(source.hexagon(), serialize::To<HexagonSurface>{});
@@ -58,11 +58,11 @@ SurfaceShape<geometry::QRSCoordinateSystem> ParseFrom(
   return {Box<geometry::QRSCoordinateSystem>::MakeOne()};
 }
 
-void SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem> &source,
-                 proto::geometry::SurfaceShape &target) {
+void SerializeTo(const SurfaceShape<geometry::QRSCoordinateSystem>& source,
+                 proto::geometry::SurfaceShape& target) {
   auto visitor = overloads{
-      [&target](const HexagonSurface &surface) { SerializeTo(surface, *target.mutable_hexagon()); },
-      [&target](const RhombusSurface &surface) {
+      [&target](const HexagonSurface& surface) { SerializeTo(surface, *target.mutable_hexagon()); },
+      [&target](const RhombusSurface& surface) {
         SerializeTo(surface, *target.mutable_rhombus());
       }};
 
