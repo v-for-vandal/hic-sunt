@@ -71,16 +71,16 @@ func before_each() -> void:
 	assert_not_null(zero_region, "Failed to get (0,0) region")
 	_fill_region_with_test_biome(zero_region)
 	CurrentGame.init_game(world, ruleset)
-		var test_civ := Civilisation.create_civilisation(&"test_civ")
-		assert_not_null(test_civ, "Failed to create test civilization")
-		test_city = null
-		test_city_id = &""
-		if test_civ != null:
-			var create_city_result := test_civ.create_city(zero_region.get_cell(Vector2i.ZERO))
-			assert_true(create_city_result.is_ok(), "Failed to create test city")
-			if create_city_result.is_ok():
-				test_city = create_city_result.city
-				test_city_id = StringName(test_city.get_id())
+	var test_civ := Civilisation.create_civilisation(&"test_civ")
+	assert_not_null(test_civ, "Failed to create test civilization")
+	test_city = null
+	test_city_id = &""
+	if test_civ != null:
+		var create_city_result := test_civ.create_city(zero_region.get_cell(Vector2i.ZERO))
+		assert_true(create_city_result.is_ok(), "Failed to create test city")
+		if create_city_result.is_ok():
+			test_city = create_city_result.city
+			test_city_id = StringName(test_city.get_id())
 
 # == helper methods for descendants
 
