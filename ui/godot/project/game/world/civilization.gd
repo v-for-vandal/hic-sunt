@@ -73,6 +73,20 @@ func create_city(cell: CellObject) -> CreateCityResult:
 	
 func find_city_by_id(city_id: String) -> City:
 	return _cities_by_id.get(city_id, null)
+
+
+func get_cities() -> Array[City]:
+	var result: Array[City] = []
+	for city_id: StringName in _cities_by_id:
+		result.append(_cities_by_id[city_id])
+	return result
+
+
+func get_city_ids() -> Array[StringName]:
+	var result: Array[StringName] = []
+	for city_id: StringName in _cities_by_id:
+		result.append(city_id)
+	return result
 	
 func can_create_city(cell: CellObject) -> bool:
 	# check that this region is not under another civ control

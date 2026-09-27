@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://fc2doj1a5e5g" path="res://ui/system/debug/debug_tab.tscn" id="4_c0mso"]
 [ext_resource type="Texture2D" uid="uid://0ax3aokw21sd" path="res://addons/plenticons/icons/64x-hidpi/2d/double-chevron-right-blue.png" id="4_g1hs8"]
 [ext_resource type="PackedScene" uid="uid://dcacdldp7pmxy" path="res://ui/region/buildings/building_list.tscn" id="7_u7o34"]
+[ext_resource type="PackedScene" path="res://ui/city/city_list.tscn" id="8_city_list"]
 
 [node name="Outliner" type="VBoxContainer" unique_id=836447073]
 anchors_preset = 15
@@ -53,6 +54,12 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="BuildingList" parent="ScrollContainer/PanelContainer" unique_id=1522093730 instance=ExtResource("7_u7o34")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CityList" parent="ScrollContainer/PanelContainer" unique_id=915621908 instance=ExtResource("8_city_list")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2

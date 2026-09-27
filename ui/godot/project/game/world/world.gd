@@ -63,6 +63,13 @@ func find_city_by_id(city_id: StringName) -> City:
 func find_civilisation_by_id(civ_id: StringName) -> Civilisation:
 	return _civilisations_by_id.get(civ_id, null)
 
+
+func get_civilisations() -> Array[Civilisation]:
+	var result: Array[Civilisation] = []
+	for civ_id: StringName in _civilisations_by_id:
+		result.append(_civilisations_by_id[civ_id])
+	return result
+
 ## Saves world to given location
 func save(path: String) -> Error:
 	return _world_object.save(path)

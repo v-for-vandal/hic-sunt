@@ -4,6 +4,7 @@ var open_icon := preload("res://addons/plenticons/icons/64x-hidpi/2d/double-chev
 var close_icon := preload("res://addons/plenticons/icons/64x-hidpi/2d/double-chevron-right-blue.png")
 var debug_icon := preload("res://addons/plenticons/icons/64x-hidpi/2d/diamond-blue.png")
 var build_icon := preload("res://addons/plenticons/icons/64x-hidpi/2d/plus-blue.png")
+var city_icon := preload("res://addons/plenticons/icons/64x-hidpi/2d/hexagon-blue.png")
 
 var _is_open := true
 
@@ -31,6 +32,12 @@ func _ready() -> void:
 
 	_tabs.append(%BuildingList)
 	$Control/TabBar.add_tab("", build_icon)
+
+	_tabs.append(%CityList)
+	$Control/TabBar.add_tab("", city_icon)
+
+	if not CurrentGame.ui_city_created.is_connected(_on_ui_city_created):
+		CurrentGame.ui_city_created.connect(_on_ui_city_created)
 	
 	_tabs[0].visible = true
 	
@@ -65,16 +72,22 @@ func on_region_loaded(region: RegionObject) -> void:
 	%DebugTab.on_region_loaded(region)
 	# This method is called when we load region and open region UI
 	%BuildingList.load_region(region)
+	%CityList.refresh()
 	
 func on_region_changed(region: RegionObject) -> void:
 	%DebugTab.on_region_changed(region)
 	%BuildingList.on_region_changed(region)
+	%CityList.refresh()
 
 func on_cell_changed(cell: CellObject) -> void:
 	%DebugTab.on_cell_changed(cell)
 	
 func on_cell_selected(cell: CellObject) -> void:
 	%DebugTab.on_cell_selected(cell)
+
+
+func _on_ui_city_created(_city: City) -> void:
+	%CityList.refresh()
 
 
 func _on_tab_bar_tab_changed(tab: int) -> void:

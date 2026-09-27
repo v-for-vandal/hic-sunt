@@ -25,7 +25,15 @@ func git_id() -> String:
 	return _scope.get_id()
 
 
+func get_id() -> String:
+	return git_id()
+
+
 func get_primary_region_id() -> String:
+	return _primary_region_id
+
+
+func get_region_id() -> String:
 	return _primary_region_id
 
 # This constructor is used by civilization.gd. It is not supposed to be used
