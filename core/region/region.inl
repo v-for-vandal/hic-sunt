@@ -1,9 +1,9 @@
 #pragma once
 
-#include "region.hpp"
-
 #include <spdlog/spdlog.h>
+
 #include "core/types/scope_type.hpp"
+#include "region.hpp"
 
 namespace hs::region {
 
@@ -11,23 +11,20 @@ template <typename BaseTypes>
 void Region<BaseTypes>::VisitScopes(this auto&& self, auto&& visitor) {
   visitor(self.GetScope());
 
-  self.GetSurface().Foreach([&visitor](auto, auto& cell) {
-    cell.VisitScopes(visitor);
-  });
+  self.GetSurface().Foreach([&visitor](auto, auto& cell) { cell.VisitScopes(visitor); });
 }
 
-template <typename BaseTypes> Region<BaseTypes>::Region() : Region("", 1) {}
+template <typename BaseTypes>
+Region<BaseTypes>::Region() : Region("", 1) {}
 
 template <typename BaseTypes>
-Region<BaseTypes>::Region(const StringId &region_id, int radius)
-    : Base(region_id),
-    id_(region_id),
-    surface_(geometry::HexagonSurface(radius)) {
+Region<BaseTypes>::Region(const StringId& region_id, int radius)
+    : Base(region_id), id_(region_id), surface_(geometry::HexagonSurface(radius)) {
   InitNonpersistent();
 }
 
 template <typename BaseTypes>
-bool Region<BaseTypes>::operator==(const Region &other) const {
+bool Region<BaseTypes>::operator==(const Region& other) const {
   if (this == &other) {
     return true;
   }
@@ -88,7 +85,7 @@ bool Region<BaseTypes>::SetImprovement(QRSCoords coords,
 #endif
 
 template <typename BaseTypes>
-bool Region<BaseTypes>::SetCityId(const StringId &city_id) {
+bool Region<BaseTypes>::SetCityId(const StringId& city_id) {
   if (IsCity() && !BaseTypes::IsNullToken(city_id)) {
     spdlog::error("Can't set city_id in region where city is already present");
     return false;
@@ -98,30 +95,29 @@ bool Region<BaseTypes>::SetCityId(const StringId &city_id) {
   return true;
 }
 
-template <typename BaseTypes> void Region<BaseTypes>::InitNonpersistent() {
+template <typename BaseTypes>
+void Region<BaseTypes>::InitNonpersistent() {
   biome_count_.clear();
   feature_count_.clear();
   cells_with_improvements_.clear();
   GetSurface().Foreach([this](QRSCoords coords, Cell<BaseTypes>& cell) {
-        // Set parent scope for cell
-        if(!cell.GetScope()->SetParent(this->GetScope())) {
-            throw std::runtime_error("Can't set cell parent to self");
-        };
-        //feature_count_[cell.GetFeature()]++;
-        // TODO: Fix it, check all slots
-        if (cell.HasImprovement(0)) {
-          cells_with_improvements_.insert(coords);
-        }
-      }
-  );
+    // Set parent scope for cell
+    if (!cell.GetScope()->SetParent(this->GetScope())) {
+      throw std::runtime_error("Can't set cell parent to self");
+    };
+    // feature_count_[cell.GetFeature()]++;
+    //  TODO: Fix it, check all slots
+    if (cell.HasImprovement(0)) {
+      cells_with_improvements_.insert(coords);
+    }
+  });
 
   ephemeral_ready_.set();
 }
 
 template <typename BaseTypes>
 auto Region<BaseTypes>::BuildPnlStatement(
-    [[maybe_unused]] const ruleset::RuleSet<BaseTypes> &ruleset) const
-    -> PnlStatement {
+    [[maybe_unused]] const ruleset::RuleSet<BaseTypes>& ruleset) const -> PnlStatement {
   PnlStatement result;
 
   // Go through every improvement
@@ -165,9 +161,8 @@ auto Region<BaseTypes>::BuildPnlStatement(
 }
 
 template <typename BaseTypes>
-auto Region<BaseTypes>::GetTopNStringValues(
-    StringId variable, int N) const -> std::vector<std::pair<size_t, StringId>>
-{
+auto Region<BaseTypes>::GetTopNStringValues(StringId variable, int N) const
+    -> std::vector<std::pair<size_t, StringId>> {
   std::unordered_map<StringId, size_t> count;
 
   std::vector<std::pair<size_t, StringId>> topN;
@@ -182,23 +177,21 @@ auto Region<BaseTypes>::GetTopNStringValues(
   topN.reserve(count.size());
 
   for (auto& [k, v] : count) {
-    if(!BaseTypes::IsNullToken(k)) {
+    if (!BaseTypes::IsNullToken(k)) {
       topN.push_back(std::make_pair(v, k));
     }
   }
 
   N = std::min<int>(N, topN.size());
-  std::ranges::partial_sort(topN.begin(), topN.begin() + N, topN.end(),
-    std::ranges::greater{});
+  std::ranges::partial_sort(topN.begin(), topN.begin() + N, topN.end(), std::ranges::greater{});
 
   topN.resize(N);
   return topN;
 }
 
 template <typename BaseTypes>
-auto Region<BaseTypes>::GetNumericValueAggregates(
-    StringId variable) const -> utils::NumericAggregationInfo<NumericValue>
-{
+auto Region<BaseTypes>::GetNumericValueAggregates(StringId variable) const
+    -> utils::NumericAggregationInfo<NumericValue> {
   utils::PercentileBuilder<NumericValue> builder;
 
   GetSurface().Foreach([&builder, variable](auto, auto& cell) {
@@ -212,31 +205,33 @@ auto Region<BaseTypes>::GetNumericValueAggregates(
 }
 
 template <typename BaseTypes>
-void SerializeTo(const Region<BaseTypes> &source,
-                 proto::region::Region &target) {
+void SerializeTo(const Region<BaseTypes>& source, proto::region::Region& target) {
   target.Clear();
   SerializeTo(source.surface_, *target.mutable_surface());
   target.set_id(BaseTypes::ToProtoString(source.id_));
   target.set_city_id(BaseTypes::ToProtoString(source.city_id_));
   target.set_unique_id_counter(source.next_unique_id_);
+  SerializeTo(*source.scope_, *target.mutable_scope());
 }
 
 template <typename BaseTypes>
-Region<BaseTypes> ParseFrom(const proto::region::Region &region,
-                            serialize::To<Region<BaseTypes>>) {
+Region<BaseTypes> ParseFrom(const proto::region::Region& region, serialize::To<Region<BaseTypes>>) {
   using StringId = typename BaseTypes::StringId;
   Region<BaseTypes> result;
   if (region.has_surface()) {
-    result.surface_ = ParseFrom(
-        region.surface(), serialize::To<typename Region<BaseTypes>::Surface>{});
+    result.surface_ =
+        ParseFrom(region.surface(), serialize::To<typename Region<BaseTypes>::Surface>{});
   }
   result.id_ = ParseFrom(region.id(), serialize::To<StringId>{});
   result.city_id_ = ParseFrom(region.city_id(), serialize::To<StringId>{});
   result.next_unique_id_ = region.unique_id_counter();
+  if (region.has_scope()) {
+    result.scope_ = ParseFrom(region.scope(), serialize::To<typename Region<BaseTypes>::Scope>{});
+  }
 
   // Restore non-persistent data
   result.InitNonpersistent();
 
   return result;
 }
-} // namespace hs::region
+}  // namespace hs::region

@@ -10,6 +10,9 @@ namespace hs::utils {
 template <typename T>
 class NonNullSharedPtr {
  private:
+  template <typename>
+  friend class NonNullSharedPtr;
+
   template <typename U>
   static constexpr bool kCompatibleSharedPtr = std::is_convertible_v<U*, T*>;
 
@@ -44,13 +47,14 @@ class NonNullSharedPtr {
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr(const NonNullSharedPtr<U>& other) {
-    value = std::static_pointer_cast<T>(static_cast<std::shared_ptr<U>>(other));
+    value = std::static_pointer_cast<T>(other.value);
   }
 
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr(NonNullSharedPtr<U>&& other) {
-    value = static_cast<std::shared_ptr<T>>(std::move(other));
+    value = std::static_pointer_cast<T>(std::move(other.value));
+    other.reset();
   }
 
   NonNullSharedPtr<T>& operator=(NonNullSharedPtr<T>&& other) {
@@ -94,15 +98,15 @@ class NonNullSharedPtr {
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr<T>& operator=(const NonNullSharedPtr<U>& other) {
-    // we can't get other.value directly, but we can call operator shared_ptr
-    value = std::static_pointer_cast<T>(static_cast<std::shared_ptr<U>>(other));
+    value = std::static_pointer_cast<T>(other.value);
     return *this;
   }
 
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
   NonNullSharedPtr<T>& operator=(NonNullSharedPtr<U>&& other) {
-    value = static_cast<std::shared_ptr<T>>(std::move(other));
+    value = std::static_pointer_cast<T>(std::move(other.value));
+    other.reset();
     return *this;
   }
 

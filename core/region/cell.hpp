@@ -1,7 +1,6 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
-#include <fbs/world_generated.h>
 #include <region/cell.pb.h>
 #include <region/improvement.pb.h>
 #include <spdlog/spdlog.h>

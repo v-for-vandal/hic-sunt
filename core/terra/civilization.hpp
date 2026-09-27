@@ -1,15 +1,27 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <terra/civilization.pb.h>
 
 #include <core/scope/scope.hpp>
 #include <core/scope/scoped_object.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/scope_type.hpp>
 #include <core/types/std_base_types.hpp>
+#include <core/utils/serialize.hpp>
 #include <expected>
 
 namespace hs::terra {
+
+template <typename BaseTypes>
+class Civilization;
+
+template <typename BaseTypes>
+void SerializeTo(const Civilization<BaseTypes>& source, proto::terra::Civilization& target);
+
+template <typename BaseTypes>
+Civilization<BaseTypes> ParseFrom(const proto::terra::Civilization& source,
+                                  serialize::To<Civilization<BaseTypes>>);
 
 /* \brief Class that incapsulates working with scope of type SCOPE_TYPE_CIV
  *
@@ -65,6 +77,11 @@ class Civilization : public scope::TypedScopedObject<BaseTypes, types::ScopeType
   */
 
  private:
+  friend void SerializeTo<BaseTypes>(const Civilization& source,
+                                     proto::terra::Civilization& target);
+  friend Civilization ParseFrom<BaseTypes>(const proto::terra::Civilization& source,
+                                           serialize::To<Civilization>);
+
   ScopedChildrenMap child_scopes_;
   ScopeMap all_child_scopes_;
 

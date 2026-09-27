@@ -78,20 +78,35 @@ auto Cell<BaseTypes>::GetImprovement(int slot) const -> ScopePtr {
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to) {
   to.Clear();
-  /*
-  auto improvement_ptr = to.mutable_improvements()->Add();
-  *improvement_ptr = source.GetImprovement();
-  */
+  SerializeTo(*source.scope_, *to.mutable_scope());
+
+  for (const auto& [slot, improvement] : source.improvements_) {
+    if (improvement == nullptr) {
+      continue;
+    }
+    auto* improvement_proto = to.add_improvements();
+    improvement_proto->set_slot(slot);
+    SerializeTo(*improvement, *improvement_proto->mutable_scope());
+  }
 }
 
 template <typename BaseTypes>
 Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>) {
   Cell<BaseTypes> result;
-  /*
-  if (from.improvements_size() > 0) {
-    result.SetImprovement(from.improvements(0));
+  if (from.has_scope()) {
+    result.scope_ = ParseFrom(from.scope(), serialize::To<typename Cell<BaseTypes>::Scope>{});
   }
-  */
+
+  for (const auto& improvement_proto : from.improvements()) {
+    auto improvement_scope = typename Cell<BaseTypes>::ScopePtr{
+        ParseFrom(improvement_proto.scope(), serialize::To<typename Cell<BaseTypes>::Scope>{})};
+    auto add_result = result.AddImprovement(improvement_proto.slot(), improvement_scope);
+    if (!add_result) {
+      spdlog::warn("Failed to restore improvement {} in slot {} for cell {}",
+                   improvement_scope->GetId(), improvement_proto.slot(),
+                   result.GetScope()->GetId());
+    }
+  }
 
   return result;
 }

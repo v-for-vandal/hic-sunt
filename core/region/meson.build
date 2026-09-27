@@ -29,7 +29,9 @@ core_region_tests = executable(
     'unit_tests',
     sources: [
         'test_main.cpp',
+        'cell_serialize_test.cpp',
         'region_test.cpp',
+        'region_serialize_test.cpp',
     ],
     dependencies: [
         common_deps,

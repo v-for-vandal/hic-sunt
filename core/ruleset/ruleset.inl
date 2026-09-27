@@ -1,20 +1,19 @@
 #pragma once
 
-#include "ruleset.hpp"
-
 #include <string>
 
+#include "ruleset.hpp"
 #include "spdlog/spdlog.h"
 namespace hs::ruleset {
 
 namespace {
 
-inline void AddWarning(utils::ErrorsCollection &errors, const std::string &message) {
+inline void AddWarning(utils::ErrorsCollection& errors, const std::string& message) {
   spdlog::warn(message);
   errors.AddError({message});
 }
 
-inline void AddError(utils::ErrorsCollection &errors, const std::string &message) {
+inline void AddError(utils::ErrorsCollection& errors, const std::string& message) {
   spdlog::error(message);
   errors.AddError({message});
 }
@@ -23,8 +22,7 @@ inline void AddError(utils::ErrorsCollection &errors, const std::string &message
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
-                              ErrorsCollection &errors) {
-
+                              ErrorsCollection& errors) {
   Clear();
 
   if (!RuleSetBase::Load(paths, errors)) {
@@ -43,9 +41,9 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection &errors) {
+bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection& errors) {
   for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
-    const auto &improvement = improvements_.improvements(idx);
+    const auto& improvement = improvements_.improvements(idx);
     improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
   }
 
@@ -53,9 +51,9 @@ bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection &err
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection &errors) {
+bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection& errors) {
   for (int idx = 0; idx < resources_.resources_size(); ++idx) {
-    const auto &resource = resources_.resources(idx);
+    const auto& resource = resources_.resources(idx);
     resources_by_id_.try_emplace(BaseTypes::StringIdFromStdString(resource.id()), idx);
   }
 
@@ -63,9 +61,9 @@ bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection &errors
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection &errors) {
+bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
-    const auto &job = jobs_.jobs(idx);
+    const auto& job = jobs_.jobs(idx);
     const auto job_id = BaseTypes::StringIdFromStdString(job.id());
     jobs_by_type_.try_emplace(job_id, idx);
 
@@ -73,7 +71,8 @@ bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection &errors) {
 
     NumericVariableDefinition<BaseTypes> count_definition;
     count_definition.allowed_scopes.reset();
-    count_definition.allowed_scopes |= types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
+    count_definition.allowed_scopes |=
+        types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
     count_definition.minimum = 0;
 
     auto count_variable_id = fmt::format("job/{}/count", job.id());
@@ -86,40 +85,42 @@ bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection &errors) {
     }
 
     spdlog::debug("Added variable {}", count_variable_id);
-    spdlog::debug("Is this variable numeric? {}", GetVariableDefinitions()->IsNumericVariable(BaseTypes::StringIdFromStdString(count_variable_id)));
+    spdlog::debug("Is this variable numeric? {}",
+                  GetVariableDefinitions()->IsNumericVariable(
+                      BaseTypes::StringIdFromStdString(count_variable_id)));
 
-    for (const auto &[resource_id, resource_idx] : resources_by_id_) {
+    for (const auto& [resource_id, resource_idx] : resources_by_id_) {
       (void)resource_idx;
 
       NumericVariableDefinition<BaseTypes> produces_definition;
       produces_definition.allowed_scopes.reset();
-      produces_definition.allowed_scopes |= types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
+      produces_definition.allowed_scopes |=
+          types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
       produces_definition.minimum = 0;
 
-      const auto produces_variable_id =
-          BaseTypes::StringIdFromStdString(fmt::format("job/{}/produces/{}", job.id(), resource_id));
+      const auto produces_variable_id = BaseTypes::StringIdFromStdString(
+          fmt::format("job/{}/produces/{}", job.id(), resource_id));
       add_result = parsed_variable_definitions_->AddNumericDefinition(produces_variable_id,
                                                                       produces_definition);
       if (!add_result) {
         AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition",
-                     produces_variable_id));
+                 fmt::format("Variable {} has conflicting type definition", produces_variable_id));
         return false;
       }
 
       NumericVariableDefinition<BaseTypes> consumes_definition;
       consumes_definition.allowed_scopes.reset();
-      consumes_definition.allowed_scopes |= types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
+      consumes_definition.allowed_scopes |=
+          types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
       consumes_definition.minimum = 0;
 
-      const auto consumes_variable_id =
-          BaseTypes::StringIdFromStdString(fmt::format("job/{}/consumes/{}", job.id(), resource_id));
+      const auto consumes_variable_id = BaseTypes::StringIdFromStdString(
+          fmt::format("job/{}/consumes/{}", job.id(), resource_id));
       add_result = parsed_variable_definitions_->AddNumericDefinition(consumes_variable_id,
                                                                       consumes_definition);
       if (!add_result) {
         AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition",
-                     consumes_variable_id));
+                 fmt::format("Variable {} has conflicting type definition", consumes_variable_id));
         return false;
       }
     }
@@ -129,9 +130,9 @@ bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection &errors) {
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadProjects([[maybe_unused]] ErrorsCollection &errors) {
+bool RuleSet<BaseTypes>::LoadProjects([[maybe_unused]] ErrorsCollection& errors) {
   for (int idx = 0; idx < projects_.projects_size(); ++idx) {
-    const auto &project = projects_.projects(idx);
+    const auto& project = projects_.projects(idx);
     projects_by_type_.try_emplace(BaseTypes::StringIdFromStdString(project.id()), idx);
   }
 
@@ -139,21 +140,21 @@ bool RuleSet<BaseTypes>::LoadProjects([[maybe_unused]] ErrorsCollection &errors)
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection &errors) {
+bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
   effect_definitions_.reserve(GetAllEffects().size() + 2 * improvements_by_type_.size());
 
-  const auto add_effect_definition =
-      [this, &errors](const proto::ruleset::effect::Effect& effect_proto) {
-        auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
-        if (definition->IsBroken()) {
-          AddWarning(errors, fmt::format("Failed to load effect {}", effect_proto.id()));
-          for (const auto& err : definition->GetLuaErrors()) {
-            AddWarning(errors, err);
-          }
-        }
-        effect_definitions_.push_back(
-            std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
-      };
+  const auto add_effect_definition = [this,
+                                      &errors](const proto::ruleset::effect::Effect& effect_proto) {
+    auto definition = std::make_shared<EffectDefinition<BaseTypes>>(effect_proto);
+    if (definition->IsBroken()) {
+      AddWarning(errors, fmt::format("Failed to load effect {}", effect_proto.id()));
+      for (const auto& err : definition->GetLuaErrors()) {
+        AddWarning(errors, err);
+      }
+    }
+    effect_definitions_.push_back(
+        std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
+  };
 
   for (const auto& effect_proto : GetAllEffects()) {
     add_effect_definition(effect_proto);
@@ -184,43 +185,43 @@ bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection &errors) {
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadVariableDefinitions(ErrorsCollection &errors) {
-  for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size();
-       ++idx) {
-    const auto &definition = RuleSetBase::GetVariableDefinitions().variables(idx);
-    const auto parsed_definition =
-        VariableDefinitions<BaseTypes>::ParseFromProto(definition);
+bool RuleSet<BaseTypes>::LoadVariableDefinitions(ErrorsCollection& errors) {
+  for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size(); ++idx) {
+    const auto& definition = RuleSetBase::GetVariableDefinitions().variables(idx);
+    const auto parsed_definition = VariableDefinitions<BaseTypes>::ParseFromProto(definition);
     const auto variable_id = BaseTypes::StringIdFromStdString(definition.id());
 
-    if (const auto *numeric_definition =
+    if (const auto* numeric_definition =
             std::get_if<NumericVariableDefinition<BaseTypes>>(&parsed_definition)) {
-      auto add_result = parsed_variable_definitions_->AddNumericDefinition(
-          variable_id, *numeric_definition);
+      auto add_result =
+          parsed_variable_definitions_->AddNumericDefinition(variable_id, *numeric_definition);
       if (!add_result) {
-        AddError(errors, fmt::format("Variable {} has conflicting type definition",
-                                     definition.id()));
+        AddError(errors,
+                 fmt::format("Variable {} has conflicting type definition", definition.id()));
         return false;
       }
-    } else if (const auto *string_definition =
+    } else if (const auto* string_definition =
                    std::get_if<StringVariableDefinition<BaseTypes>>(&parsed_definition)) {
-      auto add_result = parsed_variable_definitions_->AddStringDefinition(
-          variable_id, *string_definition);
+      auto add_result =
+          parsed_variable_definitions_->AddStringDefinition(variable_id, *string_definition);
       if (!add_result) {
-        AddError(errors, fmt::format("Variable {} has conflicting type definition",
-                                     definition.id()));
+        AddError(errors,
+                 fmt::format("Variable {} has conflicting type definition", definition.id()));
         return false;
       }
     } else {
-      AddError(errors,
-               fmt::format("Variable {} has undefined type. It is neither numeric, nor string, nor bool",
-                           definition.id()));
+      AddError(
+          errors,
+          fmt::format("Variable {} has undefined type. It is neither numeric, nor string, nor bool",
+                      definition.id()));
     }
   }
 
   return true;
 }
 
-template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
+template <typename BaseTypes>
+void RuleSet<BaseTypes>::Clear() {
   RuleSetBase::Clear();
   improvements_by_type_.clear();
   resources_by_id_.clear();
@@ -231,9 +232,8 @@ template <typename BaseTypes> void RuleSet<BaseTypes>::Clear() {
 }
 
 template <typename BaseTypes>
-const proto::ruleset::Improvement *
-RuleSet<BaseTypes>::FindRegionImprovementByType(
-    const StringId &improvement_type_id) const {
+const proto::ruleset::Improvement* RuleSet<BaseTypes>::FindRegionImprovementByType(
+    const StringId& improvement_type_id) const {
   auto fit = improvements_by_type_.find(improvement_type_id);
   if (fit != improvements_by_type_.end()) {
     const auto result_idx = fit->second;
@@ -244,8 +244,8 @@ RuleSet<BaseTypes>::FindRegionImprovementByType(
 }
 
 template <typename BaseTypes>
-const proto::ruleset::Resource *
-RuleSet<BaseTypes>::FindResourceByType(const StringId &resource_type_id) const {
+const proto::ruleset::Resource* RuleSet<BaseTypes>::FindResourceByType(
+    const StringId& resource_type_id) const {
   auto fit = resources_by_id_.find(resource_type_id);
   if (fit != resources_by_id_.end()) {
     const auto result_idx = fit->second;
@@ -256,8 +256,7 @@ RuleSet<BaseTypes>::FindResourceByType(const StringId &resource_type_id) const {
 }
 
 template <typename BaseTypes>
-const proto::ruleset::Job *
-RuleSet<BaseTypes>::FindJobByType(const StringId &job_type_id) const {
+const proto::ruleset::Job* RuleSet<BaseTypes>::FindJobByType(const StringId& job_type_id) const {
   auto fit = jobs_by_type_.find(job_type_id);
   if (fit != jobs_by_type_.end()) {
     const auto result_idx = fit->second;
@@ -268,8 +267,8 @@ RuleSet<BaseTypes>::FindJobByType(const StringId &job_type_id) const {
 }
 
 template <typename BaseTypes>
-const proto::ruleset::Project *
-RuleSet<BaseTypes>::FindProjectByType(const StringId &project_type_id) const {
+const proto::ruleset::Project* RuleSet<BaseTypes>::FindProjectByType(
+    const StringId& project_type_id) const {
   auto fit = projects_by_type_.find(project_type_id);
   if (fit != projects_by_type_.end()) {
     const auto result_idx = fit->second;
@@ -280,8 +279,56 @@ RuleSet<BaseTypes>::FindProjectByType(const StringId &project_type_id) const {
 }
 
 template <typename BaseTypes>
-auto RuleSet<BaseTypes>::ImprovementClassScopeId(StringId civ_id, StringId improvement_class) -> StringId {
-    return BaseTypes::StringIdFromStdString(fmt::format("civ/{}/iclass/{}", civ_id, improvement_class));
+auto RuleSet<BaseTypes>::ImprovementClassScopeId(StringId civ_id, StringId improvement_class)
+    -> StringId {
+  return BaseTypes::StringIdFromStdString(
+      fmt::format("civ/{}/iclass/{}", civ_id, improvement_class));
 }
 
-} // namespace hs::ruleset
+template <typename BaseTypes>
+void SerializeTo(const RuleSet<BaseTypes>& source, proto::ruleset::RuleSet& target) {
+  target.Clear();
+  *target.mutable_improvements() = source.improvements_;
+  *target.mutable_biomes() = source.biomes_;
+  *target.mutable_resources() = source.resources_;
+  *target.mutable_jobs() = source.jobs_;
+  *target.mutable_projects() = source.projects_;
+  *target.mutable_rendering() = source.rendering_;
+  *target.mutable_variables() = source.variable_definitions_;
+  for (const auto& effect : source.effects_) {
+    *target.add_effects() = effect;
+  }
+}
+
+template <typename BaseTypes>
+RuleSet<BaseTypes> ParseFrom(const proto::ruleset::RuleSet& source,
+                             serialize::To<RuleSet<BaseTypes>>) {
+  RuleSet<BaseTypes> result;
+  result.Clear();
+  result.improvements_ = source.improvements();
+  result.biomes_ = source.biomes();
+  result.resources_ = source.resources();
+  result.jobs_ = source.jobs();
+  result.projects_ = source.projects();
+  result.rendering_ = source.rendering();
+  result.variable_definitions_ = source.variables();
+  for (const auto& effect : source.effects()) {
+    result.effects_.push_back(effect);
+  }
+
+  typename RuleSet<BaseTypes>::ErrorsCollection errors;
+  bool success = true;
+  success &= result.LoadImprovements(errors);
+  success &= result.LoadResources(errors);
+  success &= result.LoadJobs(errors);
+  success &= result.LoadProjects(errors);
+  success &= result.LoadEffects(errors);
+  success &= result.LoadVariableDefinitions(errors);
+  if (!success) {
+    spdlog::warn("Failed to fully restore ruleset from serialized data");
+  }
+
+  return result;
+}
+
+}  // namespace hs::ruleset

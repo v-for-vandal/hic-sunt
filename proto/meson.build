@@ -33,8 +33,10 @@ hs_proto_schemas = [
     'region/region.proto',
     'l10n/localized_name.proto',
     'terra/cell.proto',
+    'terra/civilization.proto',
     'terra/world.proto',
     'terra/plane.proto',
+    'ruleset/ruleset.proto',
     'ruleset/improvements.proto',
     'ruleset/placement_rules.proto',
     'ruleset/biome.proto',
@@ -46,6 +48,7 @@ hs_proto_schemas = [
     'render/atlas.proto',
     'render/render.proto',
     'scope/scope.proto',
+    'session/session.proto',
     'types/control_object.proto',
     'types/scope_type.proto',
 ]

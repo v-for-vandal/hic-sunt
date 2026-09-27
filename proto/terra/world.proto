@@ -1,7 +1,9 @@
 syntax = "proto3";
 
 import "terra/plane.proto";
+import "terra/civilization.proto";
 import "types/control_object.proto";
+import "scope/scope.proto";
 
 package hs.proto.terra;
 
@@ -9,7 +11,6 @@ message World {
   string id = 1;
   repeated Plane planes = 2;
   hs.proto.types.ControlObject control_object = 3;
-
-
+  hs.proto.scope.Scope scope = 4;
+  repeated Civilization civilizations = 5;
 }
-

@@ -16,7 +16,6 @@ core_terra_lib = static_library(
         'civilization.cpp',
         'world.cpp',
         'plane.cpp',
-        fbs_generated,
     ],
     dependencies: _core_terra_lib_dependencies,
     include_directories: root_include,
@@ -32,8 +31,11 @@ core_terra_tests = executable(
     sources: [
         'test_main.cpp',
         'civilization_test.cpp',
+        'civilization_serialize_test.cpp',
         'plane_test.cpp',
+        'plane_serialize_test.cpp',
         'world_test.cpp',
+        'world_serialize_test.cpp',
     ],
     dependencies: [
         gtest_dep,

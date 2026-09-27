@@ -1,6 +1,7 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <session/session.pb.h>
 
 #include <core/ruleset/ruleset.hpp>
 #include <core/scope/scope.hpp>
@@ -8,6 +9,7 @@
 #include <core/terra/world.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/scope_type.hpp>
+#include <core/utils/serialize.hpp>
 #include <expected>
 #include <filesystem>
 #include <memory>
@@ -16,6 +18,17 @@
 #include "effect_instance.hpp"
 
 namespace hs::session {
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+class Session;
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+void SerializeTo(const Session<BaseTypes, WorldPtr, RuleSetPtr>& source,
+                 proto::session::Session& target);
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+Session<BaseTypes, WorldPtr, RuleSetPtr> ParseFrom(
+    const proto::session::Session& source, serialize::To<Session<BaseTypes, WorldPtr, RuleSetPtr>>);
 
 template <typename BaseTypes>
 class EffectExecutor;
@@ -81,6 +94,10 @@ class Session {
 
  private:
   friend class EffectExecutor<BaseTypes>;
+  friend void SerializeTo<BaseTypes, WorldPtr, RuleSetPtr>(const Session& source,
+                                                           proto::session::Session& target);
+  friend Session ParseFrom<BaseTypes, WorldPtr, RuleSetPtr>(const proto::session::Session& source,
+                                                            serialize::To<Session>);
 
   // This function will create improvement class scope and propertly initialize it
   std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(const CivilizationPtr& civ,
