@@ -49,6 +49,7 @@ core_scope_tests = executable(
         'test_main.cpp',
         'scope_test.cpp',
         'scope_change_set_test.cpp',
+        'scope_serialize_test.cpp',
     ],
     dependencies: [core_scope_ut_lib_dep],
 )

@@ -15,7 +15,6 @@ core_ruleset_lib = static_library(
         'effect.cpp',
         'ruleset.cpp',
         'ruleset_base.cpp',
-        fbs_generated,
     ],
     dependencies: _core_ruleset_lib_dependencies,
     link_with: [
@@ -50,6 +49,7 @@ core_ruleset_tests = executable(
         'test_main.cpp',
         'effect_test.cpp',
         'ruleset_load_test.cpp',
+        'ruleset_serialize_test.cpp',
         'variable_definition_test.cpp',
     ],
     dependencies: [

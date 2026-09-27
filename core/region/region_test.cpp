@@ -30,6 +30,20 @@ std::vector<std::string> CollectScopeIds(auto&& scoped_object) {
   return result;
 }
 
+scope::ScopeParseContext<StdBaseTypes> MakeScopeContext(StdRegion& source) {
+  scope::ScopeParseContext<StdBaseTypes> context;
+  source.VisitScopes([&context](const auto& scope_ptr) {
+    proto::scope::Scope proto_scope;
+    SerializeTo(*scope_ptr, proto_scope);
+    StdScopePtr parsed_scope{ParseFrom(proto_scope, serialize::To<StdScope>{})};
+    context.scopes_by_id.try_emplace(parsed_scope->GetId(), parsed_scope);
+  });
+  for (auto& [_, scope_ptr] : context.scopes_by_id) {
+    scope_ptr->RestoreTagLinks(context.scopes_by_id);
+  }
+  return context;
+}
+
 }  // namespace
 
 TEST(StdRegion, Serialize) {
@@ -44,7 +58,8 @@ TEST(StdRegion, Serialize) {
   proto::region::Region proto_read_region;
   ASSERT_TRUE(proto_read_region.ParseFromString(storage));
 
-  auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{});
+  auto context = MakeScopeContext(ref_region);
+  auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{}, context);
 
   EXPECT_EQ(ref_region, parse_region);
   EXPECT_EQ(ref_region.GetSurfaceObject().data_size(), parse_region.GetSurfaceObject().data_size());
@@ -62,7 +77,8 @@ TEST(StdRegion, SerializeDefaultConstructed) {
   proto::region::Region proto_read_region;
   ASSERT_TRUE(proto_read_region.ParseFromString(storage));
 
-  auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{});
+  auto context = MakeScopeContext(ref_region);
+  auto parse_region = ParseFrom(proto_read_region, serialize::To<StdRegion>{}, context);
 
   EXPECT_EQ(ref_region, parse_region);
   EXPECT_EQ(ref_region.GetSurfaceObject().data_size(), parse_region.GetSurfaceObject().data_size());

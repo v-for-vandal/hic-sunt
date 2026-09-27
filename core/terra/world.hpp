@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fbs/world_generated.h>
-#include <flatbuffers/flatbuffers.h>
 #include <terra/world.pb.h>
 
 #include <core/geometry/surface.hpp>
@@ -23,9 +21,9 @@ template <typename BaseTypes>
 class World;
 
 template <typename BaseTypes>
-void SerializeTo(const World<BaseTypes> &source, proto::terra::World &target);
+void SerializeTo(const World<BaseTypes>& source, proto::terra::World& target);
 template <typename BaseTypes>
-World<BaseTypes> ParseFrom(const proto::terra::World &world, serialize::To<World<BaseTypes>>);
+World<BaseTypes> ParseFrom(const proto::terra::World& world, serialize::To<World<BaseTypes>>);
 
 // World is a central object, that contains all planes, players, civilizations
 // and so on. Combined with ruleset, it constitutes game field.
@@ -47,40 +45,40 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   using String = BaseTypes::String;
 
   World() : Base("world.root") {}
-  World(const World &) = delete;
-  World(World &&) = default;
-  World &operator=(const World &) = delete;
-  World &operator=(World &&) = default;
+  World(const World&) = delete;
+  World(World&&) = default;
+  World& operator=(const World&) = delete;
+  World& operator=(World&&) = default;
 
-  PlanePtr GetPlane(const StringId &id) const;
-  PlanePtr AddPlane(const StringId &id, QRSBox box, int region_radius, int region_external_radius);
-  auto &GetPlanes() noexcept { return planes_; }
+  PlanePtr GetPlane(const StringId& id) const;
+  PlanePtr AddPlane(const StringId& id, QRSBox box, int region_radius, int region_external_radius);
+  auto& GetPlanes() noexcept { return planes_; }
 
-  CivilizationPtr GetOrCreateCivilization(const StringId &id);
-  bool HasCivilization(const StringId &id) const noexcept;
+  CivilizationPtr GetOrCreateCivilization(const StringId& id);
+  bool HasCivilization(const StringId& id) const noexcept;
   /* \brief Method will return civilization object.
    *
    * Please note that CivilizationPtr is non-nullable. If such civilization doesn't exist, a new
    * detached scope will be returned.
    */
-  CivilizationPtr GetCivilization(const StringId &id) const noexcept;
-  auto &GetCivilizations() noexcept { return civilizations_; }
-  const auto &GetCivilizations() const noexcept { return civilizations_; }
+  CivilizationPtr GetCivilization(const StringId& id) const noexcept;
+  auto& GetCivilizations() noexcept { return civilizations_; }
+  const auto& GetCivilizations() const noexcept { return civilizations_; }
 
-  RegionPtr GetRegionById(const StringId &region_id) const noexcept;
-  bool HasRegion(const StringId &region_id) const noexcept;
+  RegionPtr GetRegionById(const StringId& region_id) const noexcept;
+  bool HasRegion(const StringId& region_id) const noexcept;
 
   // Creates next integer, always unique
   auto GetNextId() const { return control_object_->GetNextId(); }
 
-  void VisitScopes(this auto &&self, auto &&visitor);
+  void VisitScopes(this auto&& self, auto&& visitor);
 
-  bool operator==(const World &other) const;
-  bool operator!=(const World &other) const { return !(*this == other); }
+  bool operator==(const World& other) const;
+  bool operator!=(const World& other) const { return !(*this == other); }
 
  private:
-  friend void SerializeTo<BaseTypes>(const World &source, proto::terra::World &target);
-  friend World ParseFrom<BaseTypes>(const proto::terra::World &world, serialize::To<World>);
+  friend void SerializeTo<BaseTypes>(const World& source, proto::terra::World& target);
+  friend World ParseFrom<BaseTypes>(const proto::terra::World& world, serialize::To<World>);
   void InitNonpersistent();
 
  private:

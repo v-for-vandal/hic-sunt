@@ -273,6 +273,45 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCivilization(StringId civ_i
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+void SerializeTo(const Session<BaseTypes, WorldPtr, RuleSetPtr>& source,
+                 proto::session::Session& target) {
+  target.Clear();
+  if (source.world_) {
+    SerializeTo(*source.world_, *target.mutable_world());
+  }
+  if (source.ruleset_) {
+    SerializeTo(*source.ruleset_, *target.mutable_ruleset());
+  }
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+Session<BaseTypes, WorldPtr, RuleSetPtr> ParseFrom(
+    const proto::session::Session& source,
+    serialize::To<Session<BaseTypes, WorldPtr, RuleSetPtr>>) {
+  Session<BaseTypes, WorldPtr, RuleSetPtr> result;
+
+  if (source.has_world()) {
+    auto world = std::make_shared<terra::World<BaseTypes>>(
+        ParseFrom(source.world(), serialize::To<terra::World<BaseTypes>>{}));
+    auto set_world_result = result.SetWorld(std::move(world));
+    if (!set_world_result) {
+      spdlog::warn("Failed to restore session world: {}", set_world_result.error());
+    }
+  }
+
+  if (source.has_ruleset()) {
+    auto ruleset = std::make_shared<ruleset::RuleSet<BaseTypes>>(
+        ParseFrom(source.ruleset(), serialize::To<ruleset::RuleSet<BaseTypes>>{}));
+    auto set_ruleset_result = result.SetRuleSet(std::move(ruleset));
+    if (!set_ruleset_result) {
+      spdlog::warn("Failed to restore session ruleset: {}", set_ruleset_result.error());
+    }
+  }
+
+  return result;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementClassScope(
     const CivilizationPtr& civ, StringId improvement_class) -> std::expected<ScopePtr, ErrorCode> {
   const auto& civ_id = civ->GetId();

@@ -35,6 +35,8 @@ core_session_ut_lib = static_library(
     dependencies: [
         common_deps,
         gtest_dep,
+        core_session_lib_dep,
+        core_terra_lib_dep,
         core_scope_lib_dep,
         core_ruleset_ut_lib_dep,
         core_scope_ut_lib_dep,
@@ -46,6 +48,8 @@ core_session_ut_lib_dep = declare_dependency(
     dependencies: [
         common_deps,
         gtest_dep,
+        core_session_lib_dep,
+        core_terra_lib_dep,
         core_scope_lib_dep,
         core_ruleset_ut_lib_dep,
         core_scope_ut_lib_dep,
@@ -61,6 +65,7 @@ core_session_tests = executable(
         'effect_executor_test.cpp',
         'effect_instance_test.cpp',
         'session_test.cpp',
+        'session_serialize_test.cpp',
         'create_improvement_scope_test.cpp',
     ],
     dependencies: [core_session_ut_lib_dep, sol2_dep, lua_dep],

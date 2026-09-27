@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hs.proto.ruleset;
+
+import "render/render.proto";
+import "ruleset/biome.proto";
+import "ruleset/effect.proto";
+import "ruleset/improvements.proto";
+import "ruleset/jobs.proto";
+import "ruleset/projects.proto";
+import "ruleset/resources.proto";
+import "ruleset/variables.proto";
+
+message RuleSet {
+  Improvements improvements = 1;
+  Biomes biomes = 2;
+  Resources resources = 3;
+  Jobs jobs = 4;
+  Projects projects = 5;
+  hs.proto.render.Rendering rendering = 6;
+  Variables variables = 7;
+  repeated effect.Effect effects = 8;
+}

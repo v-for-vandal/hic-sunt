@@ -4,33 +4,34 @@ package hs.proto.scope;
 
 import "types/scope_type.proto";
 
-message VariableDescriptor {
-  string name = 1;
-
-  double min = 2;
-  double max = 3;
+message NumericModifier {
+  string key = 1;
+  double add = 2;
+  double mult = 3;
 }
 
 message NumericVariable {
-  //double base_value = 1;
+  string id = 1;
+  repeated NumericModifier modifiers = 2;
+  uint64 modification_time = 3;
+}
 
-  map<string, double> additions = 2;
-  map<string, double> multipliers = 3;
+message StringModifier {
+  string key = 1;
+  string value = 2;
+  double level = 3;
 }
 
 message StringVariable {
-  string value = 1;
-
-  // ideas: repeated<{value, priority}> to allow overriding
+  string id = 1;
+  repeated StringModifier modifiers = 2;
+  uint64 modification_time = 3;
 }
 
 message Scope {
   string id = 1;
-  types.ScopeType scope_type = 4;
-  repeated NumericVariable numeric_variables = 2;
-  repeated StringVariable string_variables = 3;
-
-  // We probably don't need parent_scope_id other then for verification
-  //string parent_scope_id = 4;
+  types.ScopeType scope_type = 2;
+  repeated NumericVariable numeric_variables = 3;
+  repeated StringVariable string_variables = 4;
   repeated string tag_scope_ids = 5;
 }

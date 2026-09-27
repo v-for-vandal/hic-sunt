@@ -19,7 +19,6 @@ _core_lib_dependencies = [
 core_lib = static_library(
     'core_lib',
     'core.cpp',
-    fbs_generated,
     dependencies: _core_lib_dependencies,
     #link_with: [
     #  hs_proto_lib,

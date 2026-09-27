@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package hs.proto.terra;
+
+message Civilization {
+  string scope_id = 1;
+  repeated string child_scope_ids = 2;
+}

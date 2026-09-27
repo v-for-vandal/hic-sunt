@@ -37,8 +37,6 @@ fmt_dep = dependency('fmt', version: '>=9.1')
 
 spdlog_dep = dependency('spdlog')
 
-flatbuffer_dep = dependency('flatbuffers', static: true)
-
 #abseil = dependency('abseil-cpp', modules:['absl_flat_hash_set'])
 abseil = dependency('absl_flat_hash_set')
 
@@ -59,13 +57,11 @@ sol2_dep = declare_dependency(
 #  add_project_arguments('-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG', language:'cpp')
 #endif
 
-subdir('fbs')
 subdir('proto')
 
 root_include = include_directories(
     [
         '.',
-        'fbs',
         'submodules/mdspan/include/experimental',
     ],
 )
@@ -77,7 +73,6 @@ root_include_dep = declare_dependency(
 common_deps = [
     fmt_dep,
     spdlog_dep,
-    flatbuffer_dep,
     protobuf_dep,
     abseil,
     root_include_dep,

@@ -29,6 +29,12 @@ Scope<BaseTypes> ParseFrom(const proto::scope::Scope& from, serialize::To<Scope<
 template <typename BaseTypes>
 using ScopePtr = utils::NonNullSharedPtr<Scope<BaseTypes>>;
 
+template <typename BaseTypes>
+struct ScopeParseContext {
+  using StringId = typename BaseTypes::StringId;
+  absl::flat_hash_map<StringId, ScopePtr<BaseTypes>> scopes_by_id;
+};
+
 /** \brief Scope is a collection of variables (numeric and strings)
  *
  * It allows working with variables as 'set of changes to'
@@ -138,6 +144,7 @@ class Scope {
   std::expected<size_t, ErrorCode> GetModificationTime(const StringId& variable) const;
 
   std::expected<void, ErrorCode> AddTagLink(const StringId& tag_name, const ScopePtr& tag_scope);
+  void RestoreTagLinks(const absl::flat_hash_map<StringId, ScopePtr>& scopes_by_id);
 
   void ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
   void ExplainStringVariable(const StringId& variable, auto&& collect_fn);
@@ -184,6 +191,7 @@ class Scope {
   // All other 'parental' scopes are considered tag-scopes and are assigned
   // or removed as game progresses
   std::vector<ScopePtr> tag_scopes_;
+  std::vector<StringId> pending_tag_scope_ids_;
 
   absl::flat_hash_map<StringId, NumericVariable> numeric_variables_;
   absl::flat_hash_map<StringId, StringVariable> string_variables_;

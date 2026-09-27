@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package hs.proto.session;
+
+import "ruleset/ruleset.proto";
+import "terra/world.proto";
+
+message Session {
+  hs.proto.terra.World world = 1;
+  hs.proto.ruleset.RuleSet ruleset = 2;
+}

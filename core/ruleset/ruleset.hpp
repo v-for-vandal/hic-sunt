@@ -1,15 +1,27 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <ruleset/ruleset.pb.h>
 
 #include <core/ruleset/effect.hpp>
 #include <core/ruleset/ruleset_base.hpp>
 #include <core/ruleset/variable_definition.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/error_message.hpp>
+#include <core/utils/serialize.hpp>
 #include <filesystem>
 
 namespace hs::ruleset {
+
+template <typename BaseTypes>
+class RuleSet;
+
+template <typename BaseTypes>
+void SerializeTo(const RuleSet<BaseTypes>& source, proto::ruleset::RuleSet& target);
+
+template <typename BaseTypes>
+RuleSet<BaseTypes> ParseFrom(const proto::ruleset::RuleSet& source,
+                             serialize::To<RuleSet<BaseTypes>>);
 
 template <typename BaseTypes = StdBaseTypes>
 class RuleSet : public RuleSetBase {
@@ -18,22 +30,22 @@ class RuleSet : public RuleSetBase {
   using StringId = typename BaseTypes::StringId;
   void Clear();
   // Adds data to ruleset
-  bool Load(const std::vector<std::filesystem::path> &paths, ErrorsCollection &errors);
+  bool Load(const std::vector<std::filesystem::path>& paths, ErrorsCollection& errors);
 
-  const proto::ruleset::Improvement *FindRegionImprovementByType(
-      const StringId &improvement_type_id) const;
+  const proto::ruleset::Improvement* FindRegionImprovementByType(
+      const StringId& improvement_type_id) const;
 
-  const proto::ruleset::Resource *FindResourceByType(const StringId &resource_type_id) const;
+  const proto::ruleset::Resource* FindResourceByType(const StringId& resource_type_id) const;
 
-  const proto::ruleset::Job *FindJobByType(const StringId &job_type_id) const;
+  const proto::ruleset::Job* FindJobByType(const StringId& job_type_id) const;
 
-  const proto::ruleset::Project *FindProjectByType(const StringId &project_type_id) const;
+  const proto::ruleset::Project* FindProjectByType(const StringId& project_type_id) const;
 
-  const VariableDefinitionsPtr<BaseTypes> &GetVariableDefinitions() const {
+  const VariableDefinitionsPtr<BaseTypes>& GetVariableDefinitions() const {
     return parsed_variable_definitions_;
   }
 
-  const auto &GetAllEffectDefinitions() const noexcept { return effect_definitions_; }
+  const auto& GetAllEffectDefinitions() const noexcept { return effect_definitions_; }
 
   // Functions that generates fixed scope id
 
@@ -43,12 +55,16 @@ class RuleSet : public RuleSetBase {
   static StringId ImprovementClassScopeId(StringId civ_id, StringId job_type_id);
 
  private:
-  bool LoadImprovements([[maybe_unused]] ErrorsCollection &errors);
-  bool LoadResources([[maybe_unused]] ErrorsCollection &errors);
-  bool LoadJobs([[maybe_unused]] ErrorsCollection &errors);
-  bool LoadProjects([[maybe_unused]] ErrorsCollection &errors);
-  bool LoadEffects(ErrorsCollection &errors);
-  bool LoadVariableDefinitions(ErrorsCollection &errors);
+  friend void SerializeTo<BaseTypes>(const RuleSet& source, proto::ruleset::RuleSet& target);
+  friend RuleSet ParseFrom<BaseTypes>(const proto::ruleset::RuleSet& source,
+                                      serialize::To<RuleSet>);
+
+  bool LoadImprovements([[maybe_unused]] ErrorsCollection& errors);
+  bool LoadResources([[maybe_unused]] ErrorsCollection& errors);
+  bool LoadJobs([[maybe_unused]] ErrorsCollection& errors);
+  bool LoadProjects([[maybe_unused]] ErrorsCollection& errors);
+  bool LoadEffects(ErrorsCollection& errors);
+  bool LoadVariableDefinitions(ErrorsCollection& errors);
 
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
   absl::flat_hash_map<StringId, size_t> resources_by_id_;
