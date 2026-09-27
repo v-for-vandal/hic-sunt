@@ -8,6 +8,24 @@
 
 namespace hs::types {
 
+/*
+enum ScopeType {
+    SCOPE_TYPE_UNSPECIFIED = 0;
+    SCOPE_TYPE_WORLD = 1;
+    SCOPE_TYPE_PLANE = 2;
+    SCOPE_TYPE_REGION = 4;
+    SCOPE_TYPE_CELL = 5;
+    SCOPE_TYPE_CIV = 6;
+    SCOPE_TYPE_CITY = 7;
+    SCOPE_TYPE_IMPROVEMENT = 8;
+    SCOPE_TYPE_IMPROVEMENT_CLASS = 11;
+    SCOPE_TYPE_ARMY = 9;
+    SCOPE_TYPE_UNIT = 10;
+    SCOPE_TYPE_UNIT_CLASS = 12;
+    SCOPE_TYPE_JOB_CLASS = 13;
+    SCOPE_TYPE_JOB = 14;
+}
+*/
 using ScopeType = proto::types::ScopeType;
 using ScopeTypeSet = proto::types::ScopeTypeSet;
 using ScopeTypeFilter = utils::EnumBitset<ScopeType, proto::types::ScopeType_MAX + 1>;
@@ -27,24 +45,6 @@ ScopeTypeFilter ToScopeTypeFilter(const proto::types::ScopeTypeFilter& scope_typ
 
 constexpr ScopeTypeLinkTable BuildScopeTypeLinkTable() {
   ScopeTypeLinkTable table{};
-  /*
-  enum ScopeType {
-    SCOPE_TYPE_UNSPECIFIED = 0;
-    SCOPE_TYPE_WORLD = 1;
-    SCOPE_TYPE_PLANE = 2;
-    SCOPE_TYPE_REGION = 4;
-    SCOPE_TYPE_CELL = 5;
-    SCOPE_TYPE_CIV = 6;
-    SCOPE_TYPE_CITY = 7;
-    SCOPE_TYPE_IMPROVEMENT = 8;
-    SCOPE_TYPE_IMPROVEMENT_CLASS = 11;
-    SCOPE_TYPE_ARMY = 9;
-    SCOPE_TYPE_UNIT = 10;
-    SCOPE_TYPE_UNIT_CLASS = 12;
-    SCOPE_TYPE_JOB_CLASS = 13;
-    SCOPE_TYPE_JOB = 14;
-  }
-  */
   table[ScopeType::SCOPE_TYPE_PLANE] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_WORLD);
   table[ScopeType::SCOPE_TYPE_PLANE_CLASS] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_WORLD);
   table[ScopeType::SCOPE_TYPE_REGION] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_PLANE);
@@ -66,7 +66,7 @@ constexpr ScopeTypeLinkTable BuildScopeTypeTagLinkTable() {
   ScopeTypeLinkTable table{};
   table[ScopeType::SCOPE_TYPE_PLANE] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_PLANE_CLASS);
   table[ScopeType::SCOPE_TYPE_IMPROVEMENT] =
-      ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
+      ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, ScopeType::SCOPE_TYPE_CITY);
   table[ScopeType::SCOPE_TYPE_JOB] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_JOB_CLASS);
 
   return table;

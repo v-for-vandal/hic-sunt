@@ -45,7 +45,7 @@ func _update_region() -> void:
 		return
 		
 	# TODO: This will not permit displaying cities of other civs
-	var city : City = CurrentGame.get_current_player_civ().find_city_by_id(city_id_opt)
+	var city : City = CurrentGame.game.get_current_player_civ().find_city_by_id(city_id_opt)
 	# TODO: Replace with resources of this region
 	var resources : Dictionary = city.build_pnl().total
 	
@@ -57,11 +57,11 @@ func _update_region() -> void:
 		add_child(_create_resource_count_node(resources[res_id]))
 		pass
 		
-func _on_region_changed(area: Rect2i, flags: int) -> void:
+func _on_region_changed(_area: Rect2i, _flags: int) -> void:
 	_update_region()
 		
-func _connect_region_object(region_object: RegionObject) -> void:
+func _connect_region_object(_region_object_arg: RegionObject) -> void:
 	_region_object.region_changed.connect(_on_region_changed)
 	
-func _disconnect_region_object(region_object: RegionObject) -> void:
+func _disconnect_region_object(_region_object_arg: RegionObject) -> void:
 	_region_object.region_changed.disconnect(_on_region_changed)

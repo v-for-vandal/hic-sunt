@@ -11,7 +11,7 @@ func test_create_improvement() -> void:
 	assert_true(cell.is_valid())
 	assert_true(CurrentGame.game.session.add_improvement(
 		cell,
-		&"test_civ",
+		test_city_id,
 		_IMPROVEMENT_TYPE
 		))
 	var improvement := cell.get_improvement(0)

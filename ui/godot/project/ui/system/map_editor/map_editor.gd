@@ -144,7 +144,7 @@ func _on_back_button_pressed() -> void:
 	transition_back.emit()
 
 
-func _on_world_builder_report_progress(message: String, progress: int) -> void:
+func _on_world_builder_report_progress(_message: String, progress: int) -> void:
 	print("Received pogress signal ", progress)
 	$%GenerationProgressBar.value = progress
 
@@ -155,11 +155,11 @@ func _on_start_game_button_pressed() -> void:
 	_processing = true
 	print("Starting game")
 	var world := await _do_generate(false)
-	LoadManager.new_game(world)
+	LoadManager.new_game(world, _ruleset)
 	_processing = false
 
 
-func _on_select_generator_button_item_selected(index: int) -> void:
+func _on_select_generator_button_item_selected(_index: int) -> void:
 	pass # Replace with function body.
 
 
@@ -186,7 +186,6 @@ func on_ui_event(event: UiEventBus.UIEvent) -> void:
 					var region := plane.plane_object.get_region(event.qr_coords)
 					%InfoContainer.set_region(region, event.qr_coords)
 				elif event.surface.surface_type == GameTileSurface.SurfaceType.REGION_SURFACE:
-					var region: RegionObject = event.surface.get_region()
 					%InfoContainer.set_cell(event.qr_coords)
 			event.accept()
 			return

@@ -69,7 +69,7 @@ func update_cell(qr_coords: Vector2i) -> void:
 func get_region() -> RegionObject:
 	return _region_object
 	
-func _on_region_changed(area: Rect2i, flags: int) -> void:
+func _on_region_changed(area: Rect2i, _flags: int) -> void:
 	for q in range(area.position.x, area.end.x):
 		for r in range(area.position.y, area.end.y):
 			var qr_coords := Vector2i(q,r)

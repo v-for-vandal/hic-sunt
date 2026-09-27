@@ -13,7 +13,7 @@ var _is_ready:= false
 var _region: RegionObject
 var _region_coords: Vector2i
 
-static func CreateBuildSite(improvement_id: String, region: RegionObject, region_coords: Vector2i):
+static func CreateBuildSite(improvement_id: String, region: RegionObject, region_coords: Vector2i) -> BuildSite:
 	var result := BuildSite.new()
 	result._improvement_id = improvement_id
 	result._cost = CurrentGame.get_ruleset().get_improvement_info(improvement_id).cost
@@ -30,7 +30,7 @@ func get_improvement_id() -> String:
 	return _improvement_id
 	
 func _add_one_resource(resource_id: String, available_resources: Dictionary,
-	available_resource_flow: Dictionary):
+	_available_resource_flow: Dictionary) -> void:
 	if available_resources.get(resource_id, 0) <= 0:
 		# Either we don't have this resoruce, or we are in debt (negative
 		# value)
@@ -49,10 +49,10 @@ func _add_one_resource(resource_id: String, available_resources: Dictionary,
 			_made_progress_this_turn = true
 	
 func add_resources(available_resources: Dictionary,
-	available_resource_flow: Dictionary):
+	available_resource_flow: Dictionary) -> void:
 	# iterate over _cost
 
-	for resource_id in _cost:
+	for resource_id: String in _cost:
 		_add_one_resource(resource_id, available_resources, available_resource_flow)
 		
 	var ready := true

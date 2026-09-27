@@ -1,3 +1,5 @@
 {
-	"dirs":["res://"],
+	"dirs": ["res://test", "res://game", "res://system"],
+	"include_subdirs": true,
+	"failure_error_types": ["gut", "push_error"]
 }

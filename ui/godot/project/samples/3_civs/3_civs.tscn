@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bsljkymhiuw6b"]
+
+[ext_resource type="Script" uid="uid://pnruoafh7en3" path="res://samples/3_civs/3_civs.gd" id="1"]
+
+[node name="UIWorldMapSample" type="Node" unique_id=1670696735]
+script = ExtResource("1")

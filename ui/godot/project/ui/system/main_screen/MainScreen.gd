@@ -17,7 +17,7 @@ func _ready() -> void:
 	_current_scene.show()
 
 
-func _transition(new_scene) -> void:
+func _transition(new_scene: Control) -> void:
 	_current_scene.hide()
 	_history.push_back(_current_scene)
 	_current_scene = new_scene
@@ -30,7 +30,7 @@ func _transition_back() -> void:
 	if new_scene == null:
 		return
 
-	var old_scene = _current_scene
+	var old_scene := _current_scene
 	old_scene.hide()
 	new_scene.show()
 

@@ -13,5 +13,5 @@ func get_input_description() -> InputDescription:
 	return InputDescription.new()
 
 
-func get_color(input: Dictionary[StringName, Variant]) -> Color:
+func get_color(_input: Dictionary[StringName, Variant]) -> Color:
 	return Color.WHITE

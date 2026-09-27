@@ -109,12 +109,12 @@ func map_to_axial(xy_coords: Vector2i) -> Vector2i:
 	
 ## Overwrite this method if you need to change source id for atlas with selected
 ## overlays
-func _get_select_source_id():
+func _get_select_source_id() -> int:
 	return 1
 	
 ## Overwrite this method if you need to change source id for atlas with hightlighted
 ## overlays
-func _get_highlight_source_id():
+func _get_highlight_source_id() -> int:
 	return _get_select_source_id()
 	
 func select(qr_coords: Vector2i, good: bool) -> void:

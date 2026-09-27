@@ -11,7 +11,6 @@ func on_ui_event(event: UiEventBus.UIEvent) -> void:
 	if event is UiEventBus.RegionUIActionEvent:
 		if event.action_type == UiEventBus.ActionType.PRIMARY:
 			# TODO: Check that we can build here
-			var can_build := true
 			
 			# get current region
 			var region : RegionObject = event.surface.get_region()
@@ -57,12 +56,12 @@ func build_and_finish(region: RegionObject, qr_coords: Vector2i) -> void:
 		# without city
 		push_error("Incorrect attempt to build improvement without any city")
 	else:
-		var city : City = CurrentGame.get_current_player_civ().find_city_by_id(city_id)
+		var city : City = CurrentGame.game.get_current_player_civ().find_city_by_id(city_id)
 		if city == null:
 			push_error("Can't find specified city: ", city_id)
 		else:
 			var construction_project := ConstructionProject.create_construction_project(
-				CurrentGame.get_current_player_civ().get_id(), improvement_id, region, qr_coords)
+				CurrentGame.game.get_current_player_civ().get_id(), improvement_id, region, qr_coords)
 			if construction_project == null:
 				push_error("Failed to create construction project")
 			else:

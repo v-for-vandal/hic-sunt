@@ -3,8 +3,8 @@ extends GutTestEnviron
 func test_creation() -> void:
 	var coords := Vector2i(1,2)
 	assert_true(zero_region.contains(coords))
-	var result: = ConstructionProject.create_construction_project(
-		&"test_civ",
+	var result := ConstructionProject.create_construction_project(
+		test_city_id,
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_not_null(result, "Failed to create construction project")
@@ -17,8 +17,8 @@ func test_creation() -> void:
 func test_serialization() -> void:
 	var coords := Vector2i(1,2)
 	assert_true(zero_region.contains(coords))
-	var target: = ConstructionProject.create_construction_project(
-		&"test_civ",
+	var target := ConstructionProject.create_construction_project(
+		test_city_id,
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_not_null(target, "Failed to create construction project")
@@ -28,7 +28,7 @@ func test_creation_failure_out_of_bounds() -> void:
 	var coords := Vector2i(1000, 1000)
 	assert_false(zero_region.contains(coords))
 	var result := ConstructionProject.create_construction_project(
-		&"test_civ",
+		test_city_id,
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_null(result, "Creating project in coords not present in region must have failed")
@@ -38,7 +38,7 @@ func test_creation_failure_invalid_improvement_id() -> void:
 	var coords := Vector2i(0, 0)
 	assert_true(zero_region.contains(coords))
 	var result := ConstructionProject.create_construction_project(
-		&"test_civ",
+		test_city_id,
 		&"nonexistent_id",
 		zero_region, coords)
 	assert_null(result, "Creating project for non-existend improvement id should have failed")
@@ -52,7 +52,7 @@ func test_progress() -> void:
 	assert_true(cell.is_valid())
 	assert_null(cell.get_improvement(0), "Should be no improvement at target coords")
 	var project := ConstructionProject.create_construction_project(
-		&"test_civ",
+		test_city_id,
 		&"test.improv.construction_1",
 		zero_region, coords)
 	assert_not_null(project, "Failed to create construction project")

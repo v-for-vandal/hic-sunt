@@ -6,6 +6,8 @@ var ruleset: RulesetObject
 var world: World
 var plane: WorldPlane
 var zero_region: RegionObject # world.get_region(Vector2i(0,0)) - shortcut
+var test_city: City
+var test_city_id: StringName
 
 
 func _load_ruleset() -> RulesetObject:
@@ -45,6 +47,20 @@ func after_all() -> void:
 	ruleset = null
 
 
+func _fill_region_with_test_biome(region: RegionObject) -> void:
+	region.foreach(func(q: int, r: int) -> void:
+		var cell := region.get_cell(Vector2i(q, r))
+		assert_not_null(cell)
+		if cell != null:
+			assert_true(cell.get_scope().add_string_modifier(
+				Modifiers.ECOSYSTEM_BIOME,
+				&"gut.test.biome",
+				&"core.biome.grassland",
+				1.0
+			))
+	)
+
+
 func before_each() -> void:
 	# create new clean world
 	world = _create_world()
@@ -53,8 +69,18 @@ func before_each() -> void:
 	assert_not_null(plane, "Failed to create a plane")
 	zero_region = plane.plane_object.get_region(Vector2i(0, 0))
 	assert_not_null(zero_region, "Failed to get (0,0) region")
+	_fill_region_with_test_biome(zero_region)
 	CurrentGame.init_game(world, ruleset)
-	CurrentGame.game.session.create_civilization(&"test_civ")
+	var test_civ := Civilisation.create_civilisation(&"test_civ")
+	assert_not_null(test_civ, "Failed to create test civilization")
+	test_city = null
+	test_city_id = &""
+	if test_civ != null:
+		var create_city_result := test_civ.create_city(zero_region.get_cell(Vector2i.ZERO))
+		assert_true(create_city_result.is_ok(), "Failed to create test city")
+		if create_city_result.is_ok():
+			test_city = create_city_result.city
+			test_city_id = StringName(test_city.get_id())
 
 # == helper methods for descendants
 
@@ -65,7 +91,7 @@ func do_test_equal_by_serialization(target: Object) -> void:
 	var serialized :Variant = target.serialize_to_variant()
 
 	# now, load new object from variant
-	var new_object = (target as Object).get_script().new()
+	var new_object: Object = (target as Object).get_script().new()
 	new_object.parse_from_variant(serialized)
 
 	# save it again

@@ -9,6 +9,11 @@ signal ui_region_changed(region: RegionObject)
 ## for game logic. There is no guarantee that every change made will invoke this signal.
 signal ui_cell_changed(cell: CellObject)
 
+## Signal for UI that city was created.
+## These signals are unsuitable  for game logic. There is no guarantee that every change 
+## made will invoke this signal.
+signal ui_city_created(city: City)
+
 var current_game: Game
 var event_bus : UiEventBus = UiEventBus.new()
 
@@ -25,6 +30,8 @@ func init_game(world: World, ruleset: RulesetObject) -> void:
 	
 	_setup_nodes()
 	
+	current_game.setup()
+
 ## Replaces ruleset in running game. Potentialy dangerous operation
 func replace_ruleset(ruleset: RulesetObject) -> void:
 	if current_game == null:
@@ -76,14 +83,13 @@ func _setup_nodes() -> void:
 	current_game.session.region_changed.connect(_propogate_ui_region_changed)
 	current_game.session.cell_changed.connect(_propogate_ui_cell_changed)
 	
-	
 # Signals propogator
-func _propogate_ui_region_changed(region_id: StringName) -> void:
-	if current_game == null:
-		push_error("unexpected signal with game uninitialized")
-		return
-	var region := current_game.world.world_object.get_region_by_id(region_id)
+func _propogate_ui_region_changed(region: RegionObject) -> void:
 	ui_region_changed.emit(region)
-	
+		
 func _propogate_ui_cell_changed(cell: CellObject) -> void:
 	ui_cell_changed.emit(cell)
+	
+# This method is called by Civilization class to notify that city was created
+func civ_propogate_ui_city_created(city: City) -> void:
+	ui_city_created.emit(city)

@@ -54,13 +54,6 @@ func _on_build_button_toggled(toggled_on : bool) -> void:
 	$ScrollContainer.visible = toggled_on
 
 
-func _on_city_button_pressed() -> void:
-	if CurrentGame.get_current_player_civ().can_create_city(_region.get_region_id()):
-		CurrentGame.get_current_player_civ().create_city(_region.get_region_id())
-	#var city_build_interaction = SelectAndBuildInteraction.new()
-	#CurrentGame.event_bus.set_main_interaction(city_build_interaction)
-
-
 
 func _on_build_improvement(improvement_id: String) -> void:
 	if _interaction != null:

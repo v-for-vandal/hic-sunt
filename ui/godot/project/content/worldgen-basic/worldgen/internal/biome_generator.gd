@@ -53,7 +53,7 @@ func first_pass() -> void:
 	_plane.foreach_surface(region_lambda)
 
 
-func _region_first_pass(region: RegionObject, region_qr_coords: Vector2i) -> void:
+func _region_first_pass(region: RegionObject, _region_qr_coords: Vector2i) -> void:
 	var region_cell_lambda := func(cell_q: int, cell_r: int) -> void:
 		_cell_first_pass(region, Vector2i(cell_q, cell_r))
 

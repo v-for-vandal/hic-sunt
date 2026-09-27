@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/city/city_list.gd" id="1_city_list"]
+
+[node name="CityList" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_city_list")
+
+[node name="MyCitiesSection" type="FoldableContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+title = "My cities"
+
+[node name="MyCitiesContent" type="VBoxContainer" parent="MyCitiesSection"]
+layout_mode = 2
+
+[node name="MyCitiesEmptyLabel" type="Label" parent="MyCitiesSection/MyCitiesContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No cities"
+horizontal_alignment = 1
+
+[node name="MyCitiesRows" type="VBoxContainer" parent="MyCitiesSection/MyCitiesContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="VassalCitiesSection" type="FoldableContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+title = "Vassal cities"
+
+[node name="VassalCitiesContent" type="VBoxContainer" parent="VassalCitiesSection"]
+layout_mode = 2
+
+[node name="VassalCitiesEmptyLabel" type="Label" parent="VassalCitiesSection/VassalCitiesContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No vassal cities"
+horizontal_alignment = 1
+
+[node name="VassalCitiesRows" type="VBoxContainer" parent="VassalCitiesSection/VassalCitiesContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ForeignCitiesSection" type="FoldableContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+title = "Foreign cities"
+
+[node name="ForeignCitiesContent" type="VBoxContainer" parent="ForeignCitiesSection"]
+layout_mode = 2
+
+[node name="ForeignCitiesEmptyLabel" type="Label" parent="ForeignCitiesSection/ForeignCitiesContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No foreign cities"
+horizontal_alignment = 1
+
+[node name="ForeignCitiesRows" type="VBoxContainer" parent="ForeignCitiesSection/ForeignCitiesContent"]
+unique_name_in_owner = true
+layout_mode = 2

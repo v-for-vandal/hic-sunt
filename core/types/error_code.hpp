@@ -40,6 +40,10 @@ enum ErrorCode {
   ERR_INVALID_CIV_ID,
   ERR_NO_SUCH_CIV,
 
+  // city errors
+  ERR_NO_SUCH_CITY,
+  ERR_INVALID_CITY,
+
   // region/cell improvement errors
   ERR_IMPROVEMENT_SCOPE_ALREADY_HAS_PARENT,
   ERR_IMPROVEMENT_SLOT_OCCUPIED

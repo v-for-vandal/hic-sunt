@@ -45,6 +45,7 @@ StdSession MakePreparedSession() {
     std::ofstream out(root / "variables" / "core.txt");
     out << "variables { id: \"core.turn\" numeric {} }\n";
     out << "variables { id: \"core.class\" string {} }\n";
+    out << "variables { id: \"city.tag\" string {} }\n";
   }
 
   auto ruleset = std::make_shared<StdRuleSet>();
@@ -60,9 +61,18 @@ StdSession MakePreparedSession() {
   return session;
 }
 
+StdScopePtr CreateCityScope(StdSession& session) {
+  auto result = session.CreateCityScope("civ.id");
+  EXPECT_TRUE(result.has_value());
+  auto city = *result;
+  // register city in session so tests that expect city to be available can find it
+  EXPECT_TRUE(session.AddScope(city));
+  return city;
+}
+
 }  // namespace
 
-TEST(StdSessionCreateImprovementScope, RejectsNullCivilizationId) {
+TEST(StdSessionCreateImprovementScope, RejectsNullCityId) {
   auto session = MakePreparedSession();
 
   auto result = session.CreateImprovementScope("", "farm");
@@ -72,25 +82,66 @@ TEST(StdSessionCreateImprovementScope, RejectsNullCivilizationId) {
 
 TEST(StdSessionCreateImprovementScope, RejectsNullImprovementClass) {
   auto session = MakePreparedSession();
+  const auto city = CreateCityScope(session);
 
-  auto result = session.CreateImprovementScope("civ.id", "");
+  auto result = session.CreateImprovementScope(city->GetId(), "");
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_NULL_ID);
 }
 
-TEST(StdSessionCreateImprovementScope, RejectsUnknownCivilization) {
+TEST(StdSessionCreateImprovementScope, RejectsUnknownCity) {
   auto session = MakePreparedSession();
 
-  auto result = session.CreateImprovementScope("missing.civ", "farm");
+  auto result = session.CreateImprovementScope("missing.city", "farm");
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), ErrorCode::ERR_NO_SUCH_CIV);
+  EXPECT_EQ(result.error(), ErrorCode::ERR_NO_SUCH_CITY);
+}
+
+TEST(StdSessionCreateImprovementScope, RejectsCityWithoutCivilization) {
+  auto session = MakePreparedSession();
+  StdScopePtr city{"orphan.city", ScopeType::SCOPE_TYPE_CITY};
+  ASSERT_TRUE(session.AddScope(city));
+
+  auto result = session.CreateImprovementScope(city->GetId(), "farm");
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_INVALID_CITY);
+}
+
+TEST(StdSessionCreateImprovementScope, CreateImprovementScope_IsNotRegisteredUntilAddScope) {
+  auto session = MakePreparedSession();
+
+  // create city and register it so CreateImprovementScope can find it
+  auto city_result = session.CreateCityScope("civ.id");
+  ASSERT_TRUE(city_result.has_value());
+  auto city = *city_result;
+  ASSERT_TRUE(session.AddScope(city));
+
+  // create improvement scope (it should be almost-orphaned and not registered)
+  auto imp_result = session.CreateImprovementScope(city->GetId(), "farm");
+  ASSERT_TRUE(imp_result.has_value());
+  auto improvement = *imp_result;
+
+  // improvement should NOT be registered in session yet
+  EXPECT_EQ(session.GetScopesById().find(improvement->GetId()), session.GetScopesById().end());
+
+  // civ should NOT have this improvement as child
+  auto civ = session.GetWorld()->GetCivilization("civ.id");
+  ASSERT_NE(civ, nullptr);
+  EXPECT_FALSE(civ->HasChildScope(ScopeType::SCOPE_TYPE_IMPROVEMENT, improvement->GetId()));
+
+  // After AddScope, improvement should be registered in session. It is not expected
+  // to be added to civ children (only cities are promoted into civ in AddScope).
+  ASSERT_TRUE(session.AddScope(improvement));
+  EXPECT_NE(session.GetScopesById().find(improvement->GetId()), session.GetScopesById().end());
+  EXPECT_FALSE(civ->HasChildScope(ScopeType::SCOPE_TYPE_IMPROVEMENT, improvement->GetId()));
 }
 
 // Note: currently, created scope is not registered automatically, because it has no parent
 TEST(StdSessionCreateImprovementScope, DISABLED_RegistersImprovementAndClassScope) {
   auto session = MakePreparedSession();
+  const auto city = CreateCityScope(session);
 
-  auto result = session.CreateImprovementScope("civ.id", "farm");
+  auto result = session.CreateImprovementScope(city->GetId(), "farm");
   ASSERT_TRUE(result.has_value());
 
   const auto improvement_scope = *result;
@@ -109,11 +160,12 @@ TEST(StdSessionCreateImprovementScope, DISABLED_RegistersImprovementAndClassScop
 
 TEST(StdSessionCreateImprovementScope, ReusesExistingImprovementClassScope) {
   auto session = MakePreparedSession();
+  const auto city = CreateCityScope(session);
 
-  auto first_result = session.CreateImprovementScope("civ.id", "farm");
+  auto first_result = session.CreateImprovementScope(city->GetId(), "farm");
   ASSERT_TRUE(first_result.has_value());
 
-  auto second_result = session.CreateImprovementScope("civ.id", "farm");
+  auto second_result = session.CreateImprovementScope(city->GetId(), "farm");
   ASSERT_TRUE(second_result.has_value());
 
   auto by_type_it = session.GetScopesByType().find(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
@@ -121,10 +173,12 @@ TEST(StdSessionCreateImprovementScope, ReusesExistingImprovementClassScope) {
   EXPECT_EQ(by_type_it->second.size(), 1u);
 }
 
-TEST(StdSessionCreateImprovementScope, SetsCoreClassModifierAndClassTag) {
+TEST(StdSessionCreateImprovementScope, SetsCoreClassModifierAndCityAndClassTags) {
   auto session = MakePreparedSession();
+  const auto city = CreateCityScope(session);
+  ASSERT_TRUE(city->SetStringModifier("city.tag", "test", "city-value", 1, 0));
 
-  auto result = session.CreateImprovementScope("civ.id", "farm");
+  auto result = session.CreateImprovementScope(city->GetId(), "farm");
   ASSERT_TRUE(result.has_value());
 
   const auto improvement_scope = *result;
@@ -138,6 +192,10 @@ TEST(StdSessionCreateImprovementScope, SetsCoreClassModifierAndClassTag) {
   auto class_value = improvement_scope->GetStringValue("core.class");
   ASSERT_TRUE(class_value.has_value());
   EXPECT_EQ(*class_value, "farm");
+
+  auto city_tag_value = improvement_scope->GetStringValue("city.tag");
+  ASSERT_TRUE(city_tag_value.has_value());
+  EXPECT_EQ(*city_tag_value, "city-value");
 
   std::vector<scope::test::StringExplanation> explanations;
   improvement_scope->ExplainStringVariable(

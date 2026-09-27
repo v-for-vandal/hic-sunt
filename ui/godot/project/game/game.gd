@@ -29,7 +29,9 @@ var session: SessionObject:
 # TODO: Move to World
 var _current_player_civ: Civilisation
 
-
+## _init will create game object with rules and world. It will not, however,
+## create players and civilizations. Those are created either in world generation,
+## or in setup method
 func _init(world_: World, ruleset_: RulesetObject) -> void:
 	_session = SessionObject.new()
 	assert(_session.set_world(world_.world_object))
@@ -39,9 +41,15 @@ func _init(world_: World, ruleset_: RulesetObject) -> void:
 	assert(_world)
 	assert(_ruleset)
 	# create civilization for attaching unowned buildings
-	assert(session.create_civilization(WorldConstants.UNOWNED_CIV))
-	_current_player_civ = Civilisation.create_civilisation("player_0")
+	assert(session.create_civilization_scope(WorldConstants.UNOWNED_CIV))
 # TODO: we must do something with current_turn and next_id
+
+## setup game after initialization.
+## From the technical standpoint, this method contains operations that require
+## initialized game, namely proper access to session object
+# Method is currently not in final form and is a small stub 
+func setup() -> void:
+	_current_player_civ = Civilisation.create_civilisation("player_0")
 
 func _ready() -> void:
 	_debug_control = DebugRoot.get_debug_control().add_random_group("Game-")

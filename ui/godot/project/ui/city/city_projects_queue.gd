@@ -9,7 +9,7 @@ func _ready() -> void:
 	var root_container := $%RootContainer
 	print("Self: ", self)
 	print("Children: ", children)
-	print("Root container: ", $%RootContainer)
+	print("Root container: ", root_container)
 	print("get_node Root container", self.get_node("RootContainer"))
 	print("get_node as unique Root container", self.get_node("%RootContainer"))
 	assert($%RootContainer != null, "Something wrong, child is missing")
@@ -111,7 +111,7 @@ func load_region(region: RegionObject) -> void:
 		return
 		
 	# TODO: This will not permit displaying cities of other civs
-	var city : City = CurrentGame.get_current_player_civ().find_city_by_id(city_id_opt)
+	var city : City = CurrentGame.game.get_current_player_civ().find_city_by_id(city_id_opt)
 	
 	if city == null:
 		push_error("Can't fetch city with id: ", city_id_opt)
