@@ -22,7 +22,7 @@ class QRSCompact {
   RAxis r() const noexcept { return r_; }
   SAxis s() const noexcept { return SAxis{0 - q().ToUnderlying() - r().ToUnderlying()}; }
 
-  bool operator==(const QRSCompact &) const noexcept = default;
+  bool operator==(const QRSCompact&) const noexcept = default;
 
   QAxis q_{0};
   RAxis r_{0};
@@ -45,7 +45,7 @@ class DeltaCoords {
   RDelta r() const noexcept { return data_.r(); }
   SDelta s() const noexcept { return data_.s(); }
 
-  bool operator==(const DeltaCoords &) const noexcept = default;
+  bool operator==(const DeltaCoords&) const noexcept = default;
 
   /*
   static DeltaCoords GetUndefinedDelta();
@@ -109,15 +109,15 @@ class Coords {
   void SetUndefined() noexcept;
   */
 
-  bool operator==(const Coords &) const noexcept = default;
+  bool operator==(const Coords&) const noexcept = default;
 
   template <typename H>
-  friend H AbslHashValue(H h, const Coords &c) {
+  friend H AbslHashValue(H h, const Coords& c) {
     return H::combine(std::move(h), c.data_.q(), c.data_.r());
   }
 
 #define COORDS_CMP(op)                                               \
-  bool operator op(const Coords &other) const noexcept {             \
+  bool operator op(const Coords& other) const noexcept {             \
     return q() op other.q() && r() op other.r() && s() op other.s(); \
   }
 
@@ -126,8 +126,8 @@ class Coords {
   COORDS_CMP(>)
   COORDS_CMP(>=)
 
-  Coords operator+(const DeltaCoords &second) const noexcept;
-  DeltaCoords operator-(const Coords &second) const noexcept;
+  Coords operator+(const DeltaCoords& second) const noexcept;
+  DeltaCoords operator-(const Coords& second) const noexcept;
   Coords operator*(const int mult) const noexcept;
 
  private:
@@ -138,7 +138,7 @@ class Coords {
 
 template <typename T>
 struct fmt::formatter<hs::geometry::Coords<T>> {
-  constexpr auto parse(format_parse_context &ctx) const {
+  constexpr auto parse(format_parse_context& ctx) const {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
     if (it != end && *it != '}') {
@@ -149,7 +149,7 @@ struct fmt::formatter<hs::geometry::Coords<T>> {
   }
 
   template <typename FormatCtx>
-  auto format(const hs::geometry::Coords<T> &coords, FormatCtx &ctx) const {
+  auto format(const hs::geometry::Coords<T>& coords, FormatCtx& ctx) const {
     return fmt::format_to(ctx.out(), "({},{},{})", coords.q().ToUnderlying(),
                           coords.r().ToUnderlying(), coords.s().ToUnderlying());
   }

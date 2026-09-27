@@ -22,23 +22,23 @@ class SurfaceRectView {
     // calculate x_start, x_end, y_start, y_end
   }
 
-  SurfaceRectView(const SurfaceRectView &) = default;
-  SurfaceRectView(SurfaceRectView &&) = default;
-  SurfaceRectView &operator=(const SurfaceRectView &) = default;
-  SurfaceRectView &operator=(SurfaceRectView &&) = default;
+  SurfaceRectView(const SurfaceRectView&) = default;
+  SurfaceRectView(SurfaceRectView&&) = default;
+  SurfaceRectView& operator=(const SurfaceRectView&) = default;
+  SurfaceRectView& operator=(SurfaceRectView&&) = default;
 
-  Cell &GetCell(Coords coords) {
-    return const_cast<Cell &>(const_cast<const SurfaceRectView &>(*this).GetCell(coords));
+  Cell& GetCell(Coords coords) {
+    return const_cast<Cell&>(const_cast<const SurfaceRectView&>(*this).GetCell(coords));
   }
-  Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
+  Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
     return GetCell(Coords{q, r});
   }
 
-  const Cell &GetCell(Coords coords) const {
+  const Cell& GetCell(Coords coords) const {
     return target_((coords.q() - q_start()).ToUnderlying(),
                    (coords.r() - r_start()).ToUnderlying());
   }
-  const Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
+  const Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
     return GetCell(Coords{q, r});
   }
 
@@ -66,8 +66,8 @@ class SurfaceRectView {
     return Contains(Coords{q, r});
   }
 
-  bool operator==(const SurfaceRectView &other) const;
-  bool operator!=(const SurfaceRectView &other) const { return !(*this == other); }
+  bool operator==(const SurfaceRectView& other) const;
+  bool operator!=(const SurfaceRectView& other) const { return !(*this == other); }
 
   /*
   auto begin() { return target_.begin(); }

@@ -39,7 +39,7 @@ inline constexpr std::string_view ToString(Axis axis) {
 
 template <>
 struct fmt::formatter<::hs::geometry::Axis> {
-  constexpr auto parse(format_parse_context &ctx) const -> decltype(ctx.begin()) {
+  constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin()) {
     auto it = ctx.begin(), end = ctx.end();
     // Check if reached the end of the range:
     if (it != end && *it != '}') {
@@ -50,7 +50,7 @@ struct fmt::formatter<::hs::geometry::Axis> {
   }
 
   template <typename FormatCtx>
-  auto format(::hs::geometry::Axis axis, FormatCtx &ctx) {
+  auto format(::hs::geometry::Axis axis, FormatCtx& ctx) {
     // for some reason, constexpr doesn't work here
     return fmt::format_to(ctx.out(), fmt::runtime(ToString(axis)));
   }

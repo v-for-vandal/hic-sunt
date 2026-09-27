@@ -27,23 +27,23 @@ class SurfaceRawView {
                  typename Coords::RAxis r_start)
       : target_(std::move(target)), q_start_(q_start), r_start_(r_start) {}
 
-  SurfaceRawView(const SurfaceRawView &) = default;
-  SurfaceRawView(SurfaceRawView &&) = default;
-  SurfaceRawView &operator=(const SurfaceRawView &) = default;
-  SurfaceRawView &operator=(SurfaceRawView &&) = default;
+  SurfaceRawView(const SurfaceRawView&) = default;
+  SurfaceRawView(SurfaceRawView&&) = default;
+  SurfaceRawView& operator=(const SurfaceRawView&) = default;
+  SurfaceRawView& operator=(SurfaceRawView&&) = default;
 
-  Cell &GetCell(Coords coords) {
-    return const_cast<Cell &>(const_cast<const SurfaceRawView &>(*this).GetCell(coords));
+  Cell& GetCell(Coords coords) {
+    return const_cast<Cell&>(const_cast<const SurfaceRawView&>(*this).GetCell(coords));
   }
-  Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
+  Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) {
     return GetCell(Coords{q, r});
   }
 
-  const Cell &GetCell(Coords coords) const {
+  const Cell& GetCell(Coords coords) const {
     return target_((coords.q() - q_start()).ToUnderlying(),
                    (coords.r() - r_start()).ToUnderlying());
   }
-  const Cell &GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
+  const Cell& GetCell(typename Coords::QAxis q, typename Coords::RAxis r) const {
     return GetCell(Coords{q, r});
   }
 
@@ -69,8 +69,8 @@ class SurfaceRawView {
     return Contains(Coords{q, r});
   }
 
-  bool operator==(const SurfaceRawView &other) const;
-  bool operator!=(const SurfaceRawView &other) const { return !(*this == other); }
+  bool operator==(const SurfaceRawView& other) const;
+  bool operator!=(const SurfaceRawView& other) const { return !(*this == other); }
 
   /*
   auto begin() { return target_.begin(); }

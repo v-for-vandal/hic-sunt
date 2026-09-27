@@ -34,7 +34,7 @@ TEST(Surface, RhombusForEach) {
 
   absl::flat_hash_set<typename SurfaceT::Coords> visited;
 
-  auto visitor = [&visited](auto &coords, auto &) {
+  auto visitor = [&visited](auto& coords, auto&) {
     EXPECT_FALSE(visited.contains(coords));
     visited.insert(coords);
   };
@@ -67,7 +67,7 @@ TEST(Surface, HexagonForEach) {
 
   absl::flat_hash_set<CoordsT> visited;
 
-  auto visitor = [&visited](auto &coords, auto &) {
+  auto visitor = [&visited](auto& coords, auto&) {
     EXPECT_FALSE(visited.contains(coords));
     visited.insert(coords);
   };
