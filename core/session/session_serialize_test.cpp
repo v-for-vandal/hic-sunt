@@ -10,7 +10,7 @@ namespace hs::session {
 
 TEST(StdSessionSerialize, RoundTripPreservesWorldRulesetAndIndexes) {
   auto source = test::MakePreparedSession();
-  ASSERT_TRUE(source.CreateCivilization("civ.serialize").has_value());
+  ASSERT_TRUE(source.CreateCivilizationScope("civ.serialize").has_value());
   source.SetCurrentTurn(5);
 
   proto::session::Session proto_session;
