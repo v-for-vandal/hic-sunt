@@ -78,7 +78,7 @@ auto Cell<BaseTypes>::GetImprovement(int slot) const -> ScopePtr {
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to) {
   to.Clear();
-  SerializeTo(*source.scope_, *to.mutable_scope());
+  to.set_scope_id(BaseTypes::ToProtoString(source.scope_->GetId()));
 
   for (const auto& [slot, improvement] : source.improvements_) {
     if (improvement == nullptr) {
@@ -86,24 +86,35 @@ void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to) {
     }
     auto* improvement_proto = to.add_improvements();
     improvement_proto->set_slot(slot);
-    SerializeTo(*improvement, *improvement_proto->mutable_scope());
+    improvement_proto->set_scope_id(BaseTypes::ToProtoString(improvement->GetId()));
   }
 }
 
 template <typename BaseTypes>
-Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>) {
+Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>,
+                          const scope::ScopeParseContext<BaseTypes>& context) {
+  using StringId = typename BaseTypes::StringId;
   Cell<BaseTypes> result;
-  if (from.has_scope()) {
-    result.scope_ = ParseFrom(from.scope(), serialize::To<typename Cell<BaseTypes>::Scope>{});
+  const auto scope_id = ParseFrom(from.scope_id(), serialize::To<StringId>{});
+  if (auto scope_it = context.scopes_by_id.find(scope_id); scope_it != context.scopes_by_id.end()) {
+    result.scope_ = scope_it->second;
+  } else {
+    spdlog::warn("Failed to restore cell scope {}", scope_id);
   }
 
   for (const auto& improvement_proto : from.improvements()) {
-    auto improvement_scope = typename Cell<BaseTypes>::ScopePtr{
-        ParseFrom(improvement_proto.scope(), serialize::To<typename Cell<BaseTypes>::Scope>{})};
-    auto add_result = result.AddImprovement(improvement_proto.slot(), improvement_scope);
+    const auto improvement_scope_id =
+        ParseFrom(improvement_proto.scope_id(), serialize::To<StringId>{});
+    auto improvement_scope_it = context.scopes_by_id.find(improvement_scope_id);
+    if (improvement_scope_it == context.scopes_by_id.end()) {
+      spdlog::warn("Failed to restore improvement {} in slot {} for cell {}", improvement_scope_id,
+                   improvement_proto.slot(), result.GetScope()->GetId());
+      continue;
+    }
+    auto add_result = result.AddImprovement(improvement_proto.slot(), improvement_scope_it->second);
     if (!add_result) {
       spdlog::warn("Failed to restore improvement {} in slot {} for cell {}",
-                   improvement_scope->GetId(), improvement_proto.slot(),
+                   improvement_scope_it->second->GetId(), improvement_proto.slot(),
                    result.GetScope()->GetId());
     }
   }

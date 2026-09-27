@@ -195,27 +195,31 @@ void SerializeTo(const Plane<BaseTypes>& source, proto::terra::Plane& target) {
   target.set_id(BaseTypes::ToProtoString(source.plane_id_));
   target.set_external_region_radius(source.external_region_radius_);
   SerializeTo(source.surface_, *target.mutable_surface());
-  SerializeTo(*source.scope_, *target.mutable_scope());
+  target.set_scope_id(BaseTypes::ToProtoString(source.scope_->GetId()));
   hs::SerializeTo(source.off_surface_, *target.mutable_off_surface());
 }
 
 template <typename BaseTypes>
-Plane<BaseTypes> ParseFrom(const proto::terra::Plane& source, serialize::To<Plane<BaseTypes>>) {
+Plane<BaseTypes> ParseFrom(const proto::terra::Plane& source, serialize::To<Plane<BaseTypes>>,
+                           const scope::ScopeParseContext<BaseTypes>& context) {
   using StringId = typename BaseTypes::StringId;
   Plane<BaseTypes> result;
   result.plane_id_ = ParseFrom(source.id(), serialize::To<StringId>{});
   result.external_region_radius_ = source.external_region_radius();
   if (source.has_surface()) {
     result.surface_ =
-        ParseFrom(source.surface(), serialize::To<typename Plane<BaseTypes>::Surface>{});
+        ParseFrom(source.surface(), serialize::To<typename Plane<BaseTypes>::Surface>{}, context);
   }
-  if (source.has_scope()) {
-    result.scope_ = ParseFrom(source.scope(), serialize::To<typename Plane<BaseTypes>::Scope>{});
+  const auto scope_id = ParseFrom(source.scope_id(), serialize::To<StringId>{});
+  if (auto scope_it = context.scopes_by_id.find(scope_id); scope_it != context.scopes_by_id.end()) {
+    result.scope_ = scope_it->second;
+  } else {
+    spdlog::warn("Failed to restore plane scope {}", scope_id);
   }
   result.off_surface_.clear();
   result.off_surface_.reserve(source.off_surface_size());
   for (const auto& cell_proto : source.off_surface()) {
-    result.off_surface_.push_back(ParseFrom(cell_proto, serialize::To<Cell<BaseTypes>>{}));
+    result.off_surface_.push_back(ParseFrom(cell_proto, serialize::To<Cell<BaseTypes>>{}, context));
   }
   result.InitNonpersistent();
   return result;

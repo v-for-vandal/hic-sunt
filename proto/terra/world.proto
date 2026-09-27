@@ -11,6 +11,7 @@ message World {
   string id = 1;
   repeated Plane planes = 2;
   hs.proto.types.ControlObject control_object = 3;
-  hs.proto.scope.Scope scope = 4;
+  string scope_id = 4;
   repeated Civilization civilizations = 5;
+  repeated hs.proto.scope.Scope scopes = 6;
 }

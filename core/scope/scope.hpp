@@ -29,6 +29,12 @@ Scope<BaseTypes> ParseFrom(const proto::scope::Scope& from, serialize::To<Scope<
 template <typename BaseTypes>
 using ScopePtr = utils::NonNullSharedPtr<Scope<BaseTypes>>;
 
+template <typename BaseTypes>
+struct ScopeParseContext {
+  using StringId = typename BaseTypes::StringId;
+  absl::flat_hash_map<StringId, ScopePtr<BaseTypes>> scopes_by_id;
+};
+
 /** \brief Scope is a collection of variables (numeric and strings)
  *
  * It allows working with variables as 'set of changes to'

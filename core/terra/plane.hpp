@@ -25,9 +25,10 @@ template <typename BaseTypes>
 class World;
 
 template <typename BaseTypes>
-void SerializeTo(const Plane<BaseTypes> &source, proto::terra::Plane &target);
+void SerializeTo(const Plane<BaseTypes>& source, proto::terra::Plane& target);
 template <typename BaseTypes>
-Plane<BaseTypes> ParseFrom(const proto::terra::Plane &world, serialize::To<Plane<BaseTypes>>);
+Plane<BaseTypes> ParseFrom(const proto::terra::Plane& world, serialize::To<Plane<BaseTypes>>,
+                           const scope::ScopeParseContext<BaseTypes>& context);
 
 // Plane is essentially one playable map that consists of multiple regions
 template <typename BaseTypes = StdBaseTypes>
@@ -48,10 +49,10 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   using String = BaseTypes::String;
 
   Plane() = default;
-  Plane(const Plane &) = delete;
-  Plane(Plane &&) = default;
-  Plane &operator=(const Plane &) = delete;
-  Plane &operator=(Plane &&) = default;
+  Plane(const Plane&) = delete;
+  Plane(Plane&&) = default;
+  Plane& operator=(const Plane&) = delete;
+  Plane& operator=(Plane&&) = default;
 
   Plane(ControlObjectPtr control_object, StringId plane_id, QRSBox box,
         // region_radius is the radius of playable region zone
@@ -68,22 +69,22 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
         // off-surface regions
         int external_region_radius = -1);
 
-  const StringId &GetPlaneId() const { return plane_id_; }
+  const StringId& GetPlaneId() const { return plane_id_; }
 
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
 
-  const Surface &GetSurfaceObject() const { return surface_; }
+  const Surface& GetSurfaceObject() const { return surface_; }
 
-  RegionPtr GetRegionById(const StringId &region_id) const;
-  const auto &GetRegions() const noexcept { return region_index_; }
-  auto &GetRegions() noexcept { return region_index_; }
-  bool HasRegion(const StringId &region_id) const { return region_index_.contains(region_id); }
+  RegionPtr GetRegionById(const StringId& region_id) const;
+  const auto& GetRegions() const noexcept { return region_index_; }
+  auto& GetRegions() noexcept { return region_index_; }
+  bool HasRegion(const StringId& region_id) const { return region_index_.contains(region_id); }
   void SetRegion(QRSCoords coords, Region region);
   RegionPtr GetRegion(QRSCoords coords) const;
 
-  bool operator==(const Plane &other) const;
-  bool operator!=(const Plane &other) const { return !(*this == other); }
+  bool operator==(const Plane& other) const;
+  bool operator!=(const Plane& other) const { return !(*this == other); }
 
   // == Plane-related functions
 
@@ -101,16 +102,17 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
 
   int GetExternalRadius() const { return external_region_radius_; }
 
-  void VisitScopes(this auto &&self, auto &&visitor);
+  void VisitScopes(this auto&& self, auto&& visitor);
 
  private:
-  friend void SerializeTo<BaseTypes>(const Plane &source, proto::terra::Plane &target);
-  friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane &world, serialize::To<Plane>);
+  friend void SerializeTo<BaseTypes>(const Plane& source, proto::terra::Plane& target);
+  friend Plane ParseFrom<BaseTypes>(const proto::terra::Plane& world, serialize::To<Plane>,
+                                    const scope::ScopeParseContext<BaseTypes>& context);
   friend class World<BaseTypes>;
 
   void InitNonpersistent();
 
-  void SetControlObject(const ControlObjectPtr &control_object) {
+  void SetControlObject(const ControlObjectPtr& control_object) {
     control_object_ = control_object;
   }
 

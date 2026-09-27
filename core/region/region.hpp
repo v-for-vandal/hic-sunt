@@ -19,10 +19,11 @@
 namespace hs::region {
 
 template <typename BaseTypes>
-void SerializeTo(const Region<BaseTypes> &source, proto::region::Region &to);
+void SerializeTo(const Region<BaseTypes>& source, proto::region::Region& to);
 
 template <typename BaseTypes>
-Region<BaseTypes> ParseFrom(const proto::region::Region &from, serialize::To<Region<BaseTypes>>);
+Region<BaseTypes> ParseFrom(const proto::region::Region& from, serialize::To<Region<BaseTypes>>,
+                            const scope::ScopeParseContext<BaseTypes>& context);
 
 template <typename BaseTypes = StdBaseTypes>
 class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_REGION> {
@@ -40,35 +41,35 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   using PnlStatement = PnlStatement<BaseTypes>;
 
   Region();
-  Region(const Region &) = delete;
-  Region(Region &&) = default;
-  Region &operator=(const Region &) = delete;
-  Region &operator=(Region &&) = default;
+  Region(const Region&) = delete;
+  Region(Region&&) = default;
+  Region& operator=(const Region&) = delete;
+  Region& operator=(Region&&) = default;
 
   // Create hexagonal region. Regions are always centered around
   // (0,0,0) point and has given radius
-  explicit Region(const StringId &region_id, int radius);
+  explicit Region(const StringId& region_id, int radius);
 
   SurfaceView GetSurface() const { return surface_.view(); }
   SurfaceView GetSurface() { return surface_.view(); }
-  const auto &GetSurfaceObject() const { return surface_; }
+  const auto& GetSurfaceObject() const { return surface_; }
 
-  const StringId &GetId() const { return id_; }
+  const StringId& GetId() const { return id_; }
   // void SetId(const StringId& id) { id_ = id; }
 
   std::vector<std::pair<StringId, int>> GetTopKBiomes(int k) const { return biome_count_.TopK(k); }
 
-  bool SetImprovement(QRSCoords coords, const StringId &improvement_type);
+  bool SetImprovement(QRSCoords coords, const StringId& improvement_type);
 
-  bool SetCityId(const StringId &city_id);
+  bool SetCityId(const StringId& city_id);
   bool IsCity() const { return !BaseTypes::IsNullToken(city_id_); }
-  const StringId &GetCityId() const { return city_id_; }
+  const StringId& GetCityId() const { return city_id_; }
 
   // Returns container with coordinates of all improved cells
-  const auto &GetImprovedCells() const { return cells_with_improvements_; }
+  const auto& GetImprovedCells() const { return cells_with_improvements_; }
 
   // TODO: Perhaphs this method should not be inside region?
-  PnlStatement BuildPnlStatement(const ruleset::RuleSet<BaseTypes> &ruleset) const;
+  PnlStatement BuildPnlStatement(const ruleset::RuleSet<BaseTypes>& ruleset) const;
 
   // Auxilary methods for aggregation over cells
   std::vector<std::pair<size_t, StringId>> GetTopNStringValues(StringId variable, int N) const;
@@ -91,8 +92,8 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
 
   void VisitScopes(this auto &&self, auto &&visitor);
 
-  bool operator==(const Region &other) const;
-  bool operator!=(const Region &other) const = default;
+  bool operator==(const Region& other) const;
+  bool operator!=(const Region& other) const = default;
 
  private:
   // === persistent data
@@ -124,8 +125,9 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   void InitNonpersistent();
 
  private:
-  friend void SerializeTo<BaseTypes>(const Region &source, proto::region::Region &to);
-  friend Region ParseFrom<BaseTypes>(const proto::region::Region &from, serialize::To<Region>);
+  friend void SerializeTo<BaseTypes>(const Region& source, proto::region::Region& to);
+  friend Region ParseFrom<BaseTypes>(const proto::region::Region& from, serialize::To<Region>,
+                                     const scope::ScopeParseContext<BaseTypes>& context);
 };
 
 }  // namespace hs::region

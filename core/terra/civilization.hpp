@@ -21,7 +21,8 @@ void SerializeTo(const Civilization<BaseTypes>& source, proto::terra::Civilizati
 
 template <typename BaseTypes>
 Civilization<BaseTypes> ParseFrom(const proto::terra::Civilization& source,
-                                  serialize::To<Civilization<BaseTypes>>);
+                                  serialize::To<Civilization<BaseTypes>>,
+                                  const scope::ScopeParseContext<BaseTypes>& context);
 
 /* \brief Class that incapsulates working with scope of type SCOPE_TYPE_CIV
  *
@@ -80,7 +81,8 @@ class Civilization : public scope::TypedScopedObject<BaseTypes, types::ScopeType
   friend void SerializeTo<BaseTypes>(const Civilization& source,
                                      proto::terra::Civilization& target);
   friend Civilization ParseFrom<BaseTypes>(const proto::terra::Civilization& source,
-                                           serialize::To<Civilization>);
+                                           serialize::To<Civilization>,
+                                           const scope::ScopeParseContext<BaseTypes>& context);
 
   ScopedChildrenMap child_scopes_;
   ScopeMap all_child_scopes_;

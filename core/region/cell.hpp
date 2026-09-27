@@ -25,7 +25,8 @@ class Cell;
 template <typename BaseTypes>
 void SerializeTo(const Cell<BaseTypes>& source, proto::region::Cell& to);
 template <typename BaseTypes>
-Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
+Cell<BaseTypes> ParseFrom(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>,
+                          const scope::ScopeParseContext<BaseTypes>& context);
 
 /// One cell in region map
 template <typename BaseTypes = StdBaseTypes>
@@ -50,7 +51,8 @@ class Cell : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_
  private:
   friend Region<BaseTypes>;
   friend void SerializeTo<BaseTypes>(const Cell<BaseTypes>& source, proto::region::Cell& to);
-  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>);
+  friend Cell ParseFrom<BaseTypes>(const proto::region::Cell& from, serialize::To<Cell<BaseTypes>>,
+                                   const scope::ScopeParseContext<BaseTypes>& context);
 
  private:
   // map slot -> improvement in this slot

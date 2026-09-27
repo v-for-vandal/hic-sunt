@@ -211,22 +211,26 @@ void SerializeTo(const Region<BaseTypes>& source, proto::region::Region& target)
   target.set_id(BaseTypes::ToProtoString(source.id_));
   target.set_city_id(BaseTypes::ToProtoString(source.city_id_));
   target.set_unique_id_counter(source.next_unique_id_);
-  SerializeTo(*source.scope_, *target.mutable_scope());
+  target.set_scope_id(BaseTypes::ToProtoString(source.scope_->GetId()));
 }
 
 template <typename BaseTypes>
-Region<BaseTypes> ParseFrom(const proto::region::Region& region, serialize::To<Region<BaseTypes>>) {
+Region<BaseTypes> ParseFrom(const proto::region::Region& region, serialize::To<Region<BaseTypes>>,
+                            const scope::ScopeParseContext<BaseTypes>& context) {
   using StringId = typename BaseTypes::StringId;
   Region<BaseTypes> result;
   if (region.has_surface()) {
     result.surface_ =
-        ParseFrom(region.surface(), serialize::To<typename Region<BaseTypes>::Surface>{});
+        ParseFrom(region.surface(), serialize::To<typename Region<BaseTypes>::Surface>{}, context);
   }
   result.id_ = ParseFrom(region.id(), serialize::To<StringId>{});
   result.city_id_ = ParseFrom(region.city_id(), serialize::To<StringId>{});
   result.next_unique_id_ = region.unique_id_counter();
-  if (region.has_scope()) {
-    result.scope_ = ParseFrom(region.scope(), serialize::To<typename Region<BaseTypes>::Scope>{});
+  const auto scope_id = ParseFrom(region.scope_id(), serialize::To<StringId>{});
+  if (auto scope_it = context.scopes_by_id.find(scope_id); scope_it != context.scopes_by_id.end()) {
+    result.scope_ = scope_it->second;
+  } else {
+    spdlog::warn("Failed to restore region scope {}", scope_id);
   }
 
   // Restore non-persistent data
@@ -234,4 +238,5 @@ Region<BaseTypes> ParseFrom(const proto::region::Region& region, serialize::To<R
 
   return result;
 }
+
 }  // namespace hs::region

@@ -2,14 +2,12 @@ syntax = "proto3";
 
 package hs.proto.region;
 
-import "scope/scope.proto";
-
 message ImprovementSlot {
   int32 slot = 1;
-  scope.Scope scope = 2;
+  string scope_id = 2;
 }
 
 message Cell {
-  scope.Scope scope = 1;
+  string scope_id = 1;
   repeated ImprovementSlot improvements = 2;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <absl/container/flat_hash_set.h>
+
 #include <core/utils/serialize.hpp>
 
 #include "world.hpp"
@@ -130,7 +132,16 @@ template <typename BaseTypes>
 void SerializeTo(const World<BaseTypes>& source, proto::terra::World& target) {
   target.Clear();
   target.set_id("world");
-  SerializeTo(*source.scope_, *target.mutable_scope());
+  target.set_scope_id(BaseTypes::ToProtoString(source.scope_->GetId()));
+
+  absl::flat_hash_set<typename BaseTypes::StringId> serialized_scope_ids;
+  source.VisitScopes([&target, &serialized_scope_ids](const auto& scope_ptr) {
+    if (!serialized_scope_ids.insert(scope_ptr->GetId()).second) {
+      return;
+    }
+    SerializeTo(*scope_ptr, *target.add_scopes());
+  });
+
   for (auto& [k, v] : source.planes_) {
     if (v == nullptr) {
       continue;
@@ -152,19 +163,39 @@ void SerializeTo(const World<BaseTypes>& source, proto::terra::World& target) {
 
 template <typename BaseTypes>
 World<BaseTypes> ParseFrom(const proto::terra::World& source, serialize::To<World<BaseTypes>>) {
+  using StringId = typename BaseTypes::StringId;
   World<BaseTypes> result;
-  if (source.has_scope()) {
-    result.scope_ = ParseFrom(source.scope(), serialize::To<typename World<BaseTypes>::Scope>{});
+  scope::ScopeParseContext<BaseTypes> context;
+
+  for (const auto& scope_proto : source.scopes()) {
+    typename World<BaseTypes>::ScopePtr scope_ptr{
+        ParseFrom(scope_proto, serialize::To<typename World<BaseTypes>::Scope>{})};
+    const auto& scope_id = scope_ptr->GetId();
+    if (auto [_, inserted] = context.scopes_by_id.try_emplace(scope_id, scope_ptr); !inserted) {
+      spdlog::warn("Duplicate scope {} in serialized world", scope_id);
+    }
   }
+
+  for (auto& [_, scope_ptr] : context.scopes_by_id) {
+    scope_ptr->RestoreTagLinks(context.scopes_by_id);
+  }
+
+  const auto scope_id = ParseFrom(source.scope_id(), serialize::To<StringId>{});
+  if (auto scope_it = context.scopes_by_id.find(scope_id); scope_it != context.scopes_by_id.end()) {
+    result.scope_ = scope_it->second;
+  } else {
+    spdlog::warn("Failed to restore world scope {}", scope_id);
+  }
+
   for (const auto& plane : source.planes()) {
-    PlanePtr<BaseTypes> plane_obj =
-        std::make_shared<Plane<BaseTypes>>(ParseFrom(plane, serialize::To<Plane<BaseTypes>>{}));
+    PlanePtr<BaseTypes> plane_obj = std::make_shared<Plane<BaseTypes>>(
+        ParseFrom(plane, serialize::To<Plane<BaseTypes>>{}, context));
     const auto plane_id = plane_obj->GetPlaneId();
     result.planes_[plane_id] = plane_obj;
   }
   for (const auto& civilization_proto : source.civilizations()) {
     CivilizationPtr<BaseTypes> civilization_obj = std::make_shared<Civilization<BaseTypes>>(
-        ParseFrom(civilization_proto, serialize::To<Civilization<BaseTypes>>{}));
+        ParseFrom(civilization_proto, serialize::To<Civilization<BaseTypes>>{}, context));
     result.civilizations_[civilization_obj->GetId()] = civilization_obj;
   }
 

@@ -139,30 +139,39 @@ const typename Civilization<BaseTypes>::ScopeMap* Civilization<BaseTypes>::FindS
 template <typename BaseTypes>
 void SerializeTo(const Civilization<BaseTypes>& source, proto::terra::Civilization& target) {
   target.Clear();
-  SerializeTo(*source.scope_, *target.mutable_scope());
+  target.set_scope_id(BaseTypes::ToProtoString(source.scope_->GetId()));
   for (const auto& [_, child_scope] : source.all_child_scopes_) {
     if (child_scope != nullptr) {
-      SerializeTo(*child_scope, *target.add_child_scopes());
+      target.add_child_scope_ids(BaseTypes::ToProtoString(child_scope->GetId()));
     }
   }
 }
 
 template <typename BaseTypes>
 Civilization<BaseTypes> ParseFrom(const proto::terra::Civilization& source,
-                                  serialize::To<Civilization<BaseTypes>>) {
+                                  serialize::To<Civilization<BaseTypes>>,
+                                  const scope::ScopeParseContext<BaseTypes>& context) {
+  using StringId = typename BaseTypes::StringId;
   Civilization<BaseTypes> result;
-  if (source.has_scope()) {
-    result.scope_ =
-        ParseFrom(source.scope(), serialize::To<typename Civilization<BaseTypes>::Scope>{});
+  const auto scope_id = ParseFrom(source.scope_id(), serialize::To<StringId>{});
+  if (auto scope_it = context.scopes_by_id.find(scope_id); scope_it != context.scopes_by_id.end()) {
+    result.scope_ = scope_it->second;
+  } else {
+    spdlog::warn("Failed to restore civilization scope {}", scope_id);
   }
 
-  for (const auto& child_scope_proto : source.child_scopes()) {
-    typename Civilization<BaseTypes>::ScopePtr child_scope{
-        ParseFrom(child_scope_proto, serialize::To<typename Civilization<BaseTypes>::Scope>{})};
-    auto add_result = result.AddChildScope(child_scope);
-    if (!add_result) {
-      spdlog::warn("Failed to restore child scope {} for civilization {}", child_scope->GetId(),
+  for (const auto& child_scope_id_proto : source.child_scope_ids()) {
+    const auto child_scope_id = ParseFrom(child_scope_id_proto, serialize::To<StringId>{});
+    auto child_scope_it = context.scopes_by_id.find(child_scope_id);
+    if (child_scope_it == context.scopes_by_id.end()) {
+      spdlog::warn("Failed to restore child scope {} for civilization {}", child_scope_id,
                    result.GetId());
+      continue;
+    }
+    auto add_result = result.AddChildScope(child_scope_it->second);
+    if (!add_result) {
+      spdlog::warn("Failed to restore child scope {} for civilization {}",
+                   child_scope_it->second->GetId(), result.GetId());
     }
   }
 

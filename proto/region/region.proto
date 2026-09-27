@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "region/cell.proto";
-import "scope/scope.proto";
 import "geometry/surface_shape.proto";
 
 package hs.proto.region;
@@ -16,5 +15,5 @@ message Region {
   Surface surface = 2;
   string city_id = 3;
   int32 unique_id_counter = 4;
-  hs.proto.scope.Scope scope = 5;
+  string scope_id = 5;
 }

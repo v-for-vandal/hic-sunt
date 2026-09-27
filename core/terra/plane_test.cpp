@@ -10,6 +10,26 @@ namespace hs::terra {
 using namespace ::hs::geometry::literals;
 
 using StdPlane = Plane<>;
+using StdScope = scope::Scope<>;
+using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
+
+namespace {
+
+scope::ScopeParseContext<StdBaseTypes> MakeScopeContext(StdPlane& source) {
+  scope::ScopeParseContext<StdBaseTypes> context;
+  source.VisitScopes([&context](const auto& scope_ptr) {
+    proto::scope::Scope proto_scope;
+    SerializeTo(*scope_ptr, proto_scope);
+    StdScopePtr parsed_scope{ParseFrom(proto_scope, serialize::To<StdScope>{})};
+    context.scopes_by_id.try_emplace(parsed_scope->GetId(), parsed_scope);
+  });
+  for (auto& [_, scope_ptr] : context.scopes_by_id) {
+    scope_ptr->RestoreTagLinks(context.scopes_by_id);
+  }
+  return context;
+}
+
+}  // namespace
 
 TEST(StdPlane, VisitScopesVisitsOwnScopeThenAllRegionAndCellScopes) {
   StdPlane plane(ControlObjectPtr{}, "plane.alpha",
@@ -50,7 +70,8 @@ TEST(StdPlane, Serialize) {
   proto::terra::Plane proto_read_plane;
   ASSERT_TRUE(proto_read_plane.ParseFromString(storage));
 
-  auto parse_plane = ParseFrom(proto_read_plane, serialize::To<StdPlane>{});
+  auto context = MakeScopeContext(ref_plane);
+  auto parse_plane = ParseFrom(proto_read_plane, serialize::To<StdPlane>{}, context);
 
   EXPECT_EQ(ref_plane, parse_plane);
   EXPECT_EQ(ref_plane.GetSurfaceObject().data_size(), parse_plane.GetSurfaceObject().data_size());
