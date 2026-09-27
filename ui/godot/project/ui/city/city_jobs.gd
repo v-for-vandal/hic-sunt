@@ -49,7 +49,7 @@ func _update_region() -> void:
 		return
 		
 	# TODO: This will not permit displaying cities of other civs
-	var city : City = CurrentGame.get_current_player_civ().find_city_by_id(city_id_opt)
+	var city := CurrentGame.get_current_player_civ().find_city_by_id(city_id_opt)
 	
 	if city == null:
 		push_error("Can't fetch city with id: ", city_id_opt)
