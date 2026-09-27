@@ -2,8 +2,6 @@
 
 namespace hs::types {
 
-
-
 ScopeTypeFilter ToScopeTypeFilter(const proto::types::ScopeTypeFilter &scope_type_filter) {
   ScopeTypeFilter result;
 

@@ -4,9 +4,9 @@
 #include <render/render.pb.h>
 #include <ruleset/biome.pb.h>
 #include <ruleset/effect.pb.h>
+#include <ruleset/improvements.pb.h>
 #include <ruleset/jobs.pb.h>
 #include <ruleset/projects.pb.h>
-#include <ruleset/improvements.pb.h>
 #include <ruleset/resources.pb.h>
 #include <ruleset/variables.pb.h>
 

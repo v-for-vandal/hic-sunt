@@ -63,7 +63,7 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
    * Please note that CivilizationPtr is non-nullable. If such civilization doesn't exist, a new
    * detached scope will be returned.
    */
-  CivilizationPtr GetCivilization(const StringId& id) const noexcept;
+  CivilizationPtr GetCivilization(const StringId &id) const noexcept;
   auto &GetCivilizations() noexcept { return civilizations_; }
   const auto &GetCivilizations() const noexcept { return civilizations_; }
 
@@ -73,7 +73,7 @@ class World : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   // Creates next integer, always unique
   auto GetNextId() const { return control_object_->GetNextId(); }
 
-  void VisitScopes(this auto&& self, auto&& visitor);
+  void VisitScopes(this auto &&self, auto &&visitor);
 
   bool operator==(const World &other) const;
   bool operator!=(const World &other) const { return !(*this == other); }

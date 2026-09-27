@@ -76,8 +76,8 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
   const Surface &GetSurfaceObject() const { return surface_; }
 
   RegionPtr GetRegionById(const StringId &region_id) const;
-  const auto& GetRegions() const noexcept { return region_index_; }
-  auto& GetRegions() noexcept { return region_index_; }
+  const auto &GetRegions() const noexcept { return region_index_; }
+  auto &GetRegions() noexcept { return region_index_; }
   bool HasRegion(const StringId &region_id) const { return region_index_.contains(region_id); }
   void SetRegion(QRSCoords coords, Region region);
   RegionPtr GetRegion(QRSCoords coords) const;
@@ -101,7 +101,7 @@ class Plane : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE
 
   int GetExternalRadius() const { return external_region_radius_; }
 
-  void VisitScopes(this auto&& self, auto&& visitor);
+  void VisitScopes(this auto &&self, auto &&visitor);
 
  private:
   friend void SerializeTo<BaseTypes>(const Plane &source, proto::terra::Plane &target);

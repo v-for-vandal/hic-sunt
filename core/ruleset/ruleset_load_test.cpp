@@ -12,7 +12,7 @@ using StdRuleSet = RuleSet<StdBaseTypes>;
 
 namespace {
 
-std::filesystem::path MakeTempDir(const std::string& name) {
+std::filesystem::path MakeTempDir(const std::string &name) {
   const auto root = std::filesystem::temp_directory_path() /
                     std::filesystem::path("hic_sunt_ruleset_tests") / name;
   std::filesystem::remove_all(root);
@@ -20,7 +20,7 @@ std::filesystem::path MakeTempDir(const std::string& name) {
   return root;
 }
 
-void WriteTextFile(const std::filesystem::path& path, const std::string& content) {
+void WriteTextFile(const std::filesystem::path &path, const std::string &content) {
   std::filesystem::create_directories(path.parent_path());
   std::ofstream out(path);
   out << content;
@@ -135,8 +135,7 @@ TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
   const auto count_definition = definitions->FindNumericVariable("job/job.one/count");
   ASSERT_TRUE(count_definition.has_value());
   EXPECT_EQ(count_definition->minimum, 0);
-  EXPECT_EQ(count_definition->maximum,
-            std::numeric_limits<StdBaseTypes::NumericValue>::max());
+  EXPECT_EQ(count_definition->maximum, std::numeric_limits<StdBaseTypes::NumericValue>::max());
   EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
   EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
   EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);

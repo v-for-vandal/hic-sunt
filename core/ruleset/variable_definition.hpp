@@ -1,6 +1,7 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <ruleset/variables.pb.h>
 #include <spdlog/spdlog.h>
 
 #include <core/types/error_code.hpp>
@@ -9,7 +10,6 @@
 #include <core/utils/non_null_ptr.hpp>
 #include <expected>
 #include <limits>
-#include <ruleset/variables.pb.h>
 #include <variant>
 
 #include "core/types/variable_type.hpp"
@@ -51,11 +51,10 @@ class VariableDefinitions {
  public:
   using StringId = typename BaseTypes::StringId;
   using VariableType = types::VariableType;
-  using ParsedVariableDefinition =
-      std::variant<NumericVariableDefinition<BaseTypes>, StringVariableDefinition<BaseTypes>,
-                   ErrorCode>;
+  using ParsedVariableDefinition = std::variant<NumericVariableDefinition<BaseTypes>,
+                                                StringVariableDefinition<BaseTypes>, ErrorCode>;
 
-  static ParsedVariableDefinition ParseFromProto(const proto::ruleset::Variable &definition);
+  static ParsedVariableDefinition ParseFromProto(const proto::ruleset::Variable& definition);
 
   bool IsEmpty() const noexcept {
     return string_definitions_.empty() && numeric_definitions_.empty();
@@ -92,7 +91,8 @@ class VariableDefinitions {
   std::expected<StringVariableDefinition<BaseTypes>, ErrorCode> FindStringVariable(
       const StringId& id) const;
 
-  std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode> FindVariable(const StringId& id) const;
+  std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode> FindVariable(
+      const StringId& id) const;
 
   const auto& GetNumericDefinitions() const noexcept { return numeric_definitions_; }
 

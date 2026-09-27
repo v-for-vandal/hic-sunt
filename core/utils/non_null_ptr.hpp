@@ -67,9 +67,7 @@ class NonNullSharedPtr {
     return *this;
   }
 
-  T* get() const noexcept {
-      return value.get();
-  }
+  T* get() const noexcept { return value.get(); }
 
   template <typename U>
     requires(kCompatibleSharedPtr<U>)
@@ -124,8 +122,15 @@ class NonNullSharedPtr {
 
   bool operator!=(const NonNullSharedPtr<T>& other) const noexcept = default;
 
-  constexpr bool operator==(nullptr_t) const noexcept __attribute__((warning("NonNull ptr is never equal to null"))) { return false; }
-  constexpr bool operator!=(nullptr_t) const noexcept __attribute__((warning("NonNull ptr is never equal to null"))) { return true;; }
+  constexpr bool operator==(nullptr_t) const noexcept
+      __attribute__((warning("NonNull ptr is never equal to null"))) {
+    return false;
+  }
+  constexpr bool operator!=(nullptr_t) const noexcept
+      __attribute__((warning("NonNull ptr is never equal to null"))) {
+    return true;
+    ;
+  }
 
   bool IsEmpty() const noexcept { return value == nullptr; }
 

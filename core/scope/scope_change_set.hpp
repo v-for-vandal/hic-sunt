@@ -18,7 +18,8 @@ class ScopeChangeSet {
   using VariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<BaseTypes>;
 
   explicit ScopeChangeSet(const ScopePtr& target_scope)
-      : target_scope_(target_scope), variable_definitions_(target_scope->GetVariableDefinitions()) {}
+      : target_scope_(target_scope),
+        variable_definitions_(target_scope->GetVariableDefinitions()) {}
 
   std::expected<void, ErrorCode> SetNumericModifier(const StringId& variable, const StringId& key,
                                                     NumericValue add, NumericValue mult);

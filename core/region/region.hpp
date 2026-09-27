@@ -89,7 +89,7 @@ class Region : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOP
   bool HasDataString(QRSCoords coords, const StringId &key) const noexcept;
   */
 
-  void VisitScopes(this auto&& self, auto&& visitor);
+  void VisitScopes(this auto &&self, auto &&visitor);
 
   bool operator==(const Region &other) const;
   bool operator!=(const Region &other) const = default;

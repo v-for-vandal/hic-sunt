@@ -2,9 +2,8 @@
 
 #include <gtest/gtest.h>
 
-#include <core/utils/serialize.hpp>
-
 #include <algorithm>
+#include <core/utils/serialize.hpp>
 
 namespace hs::terra {
 
@@ -13,9 +12,9 @@ using namespace ::hs::geometry::literals;
 using StdPlane = Plane<>;
 
 TEST(StdPlane, VisitScopesVisitsOwnScopeThenAllRegionAndCellScopes) {
-  StdPlane plane(
-      ControlObjectPtr{}, "plane.alpha",
-      StdPlane::QRSBox(StdPlane::QRSCoords(-1_q, -1_r), StdPlane::QRSCoords(1_q, 1_r)), 1);
+  StdPlane plane(ControlObjectPtr{}, "plane.alpha",
+                 StdPlane::QRSBox(StdPlane::QRSCoords(-1_q, -1_r), StdPlane::QRSCoords(1_q, 1_r)),
+                 1);
 
   std::vector<std::string> scope_ids;
   plane.VisitScopes([&scope_ids](const auto& scope_ptr) {
@@ -32,7 +31,8 @@ TEST(StdPlane, VisitScopesVisitsOwnScopeThenAllRegionAndCellScopes) {
 
   ASSERT_EQ(scope_ids.size(), 1 + region_count + cell_count);
   EXPECT_EQ(scope_ids.front(), plane.GetScope()->GetId());
-  EXPECT_EQ(std::count(scope_ids.begin(), scope_ids.end(), std::string{plane.GetScope()->GetId()}), 1);
+  EXPECT_EQ(std::count(scope_ids.begin(), scope_ids.end(), std::string{plane.GetScope()->GetId()}),
+            1);
 }
 
 TEST(StdPlane, Serialize) {

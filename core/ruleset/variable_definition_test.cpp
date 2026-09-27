@@ -93,8 +93,7 @@ TEST(StdVariableDefinitions, ParseNumericVariableLoadsAllowedScopesFromFilter) {
   variable.mutable_numeric();
   variable.mutable_allowed_scopes()->add_scope_type_sets(
       proto::types::ScopeTypeSet::SCOPE_TYPE_SET_GEO);
-  variable.mutable_allowed_scopes()->add_scope_types(
-      proto::types::ScopeType::SCOPE_TYPE_CITY);
+  variable.mutable_allowed_scopes()->add_scope_types(proto::types::ScopeType::SCOPE_TYPE_CITY);
 
   const ParsedVariableDefinition parsed = StdVariableDefinitions::ParseFromProto(variable);
   const auto *definition = std::get_if<NumericVariableDefinition<StdBaseTypes>>(&parsed);

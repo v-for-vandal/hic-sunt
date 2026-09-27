@@ -1,11 +1,11 @@
 #include "civilization.hpp"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
+#include <core/scope/scope_ut.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/scope_type.hpp>
-#include <core/scope/scope_ut.hpp>
 
 namespace hs::terra {
 
@@ -17,7 +17,7 @@ using StdScopePtr = scope::ScopePtr<StdBaseTypes>;
 namespace {
 
 StdScopePtr MakeScope(std::string_view id, ScopeType type) {
-    return scope::test::MakeSimpleScope(type, id);
+  return scope::test::MakeSimpleScope(type, id);
 }
 
 }  // namespace
@@ -150,7 +150,8 @@ TEST(StdCivilization, GetChildScopeReturnsAdHocScopeForMissingObject) {
 TEST(StdCivilization, VisitScopesVisitsOwnScopeThenChildScopes) {
   StdCivilization civilization{"civ.test"};
   auto city_scope = civilization.CreateChildScope(ScopeType::SCOPE_TYPE_CITY, "city.alpha");
-  auto character_scope = civilization.CreateChildScope(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, "character.alpha");
+  auto character_scope =
+      civilization.CreateChildScope(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, "character.alpha");
 
   ASSERT_TRUE(city_scope.has_value());
   ASSERT_TRUE(character_scope.has_value());
@@ -164,9 +165,8 @@ TEST(StdCivilization, VisitScopesVisitsOwnScopeThenChildScopes) {
   ASSERT_EQ(scope_ids.size(), 3);
   EXPECT_EQ(scope_ids.front(), civilization.GetScope()->GetId());
   EXPECT_THAT(scope_ids, ::testing::UnorderedElementsAre(
-                              std::string{civilization.GetScope()->GetId()},
-                              std::string{"city.alpha"},
-                              std::string{"character.alpha"}));
+                             std::string{civilization.GetScope()->GetId()},
+                             std::string{"city.alpha"}, std::string{"character.alpha"}));
 }
 
 }  // namespace hs::terra

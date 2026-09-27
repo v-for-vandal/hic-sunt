@@ -127,12 +127,12 @@ Dictionary RegionObject::get_cell_info(Vector2i coords) const {
     return {};
   }
 
-  //auto& cell = region_->GetSurface().GetCell(qrs_coords);
+  // auto& cell = region_->GetSurface().GetCell(qrs_coords);
 
   // Fill result
   Dictionary result;
-  //result["feature"] = cell.GetFeature();
-  //result["improvement"] = convert_to_dictionary(cell.GetImprovement());
+  // result["feature"] = cell.GetFeature();
+  // result["improvement"] = convert_to_dictionary(cell.GetImprovement());
   /* TODO: RM
   result["biome"] = cell.GetBiome();
   result["height"] = cell.GetHeight();
@@ -206,7 +206,7 @@ double RegionObject::get_height(Vector2i coords) const {
 #endif
 
 bool RegionObject::set_feature(Vector2i coords, String feature) const {
-    // Method is not working and is disabled
+  // Method is not working and is disabled
   return false;
 
   if (!region_) {
@@ -218,7 +218,7 @@ bool RegionObject::set_feature(Vector2i coords, String feature) const {
     return false;
   }
 
-  //auto success = region_->SetFeature(qrs_coords, feature);
+  // auto success = region_->SetFeature(qrs_coords, feature);
   auto success = true;
 
   if (success) {
@@ -229,8 +229,8 @@ bool RegionObject::set_feature(Vector2i coords, String feature) const {
 }
 
 bool RegionObject::set_improvement(Vector2i coords, String improvement) const {
-    return false;
-    # if 0
+  return false;
+#if 0
   if (!region_) {
     return false;
   }
@@ -247,7 +247,7 @@ bool RegionObject::set_improvement(Vector2i coords, String improvement) const {
   }
 
   return success;
-  #endif
+#endif
 }
 
 Dictionary RegionObject::get_info() const {
@@ -324,7 +324,7 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
   Dictionary result;
   return result;
 
-  #if 0
+#if 0
   auto surface = region_->GetSurface();
   const auto& ruleset = ruleset_object->GetRuleSet();
 
@@ -363,7 +363,7 @@ Dictionary RegionObject::get_jobs(Ref<RulesetObject> ruleset_object) const {
   }
 
   return result;
-  #endif
+#endif
 }
 
 /*

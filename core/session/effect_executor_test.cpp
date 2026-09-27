@@ -13,10 +13,10 @@ namespace hs::session {
 
 namespace {
 
-proto::ruleset::effect::Effect MakeEffectWithSelector(
-    std::string id, types::ScopeType scope_type, std::string possible,
-    std::string effect_code, std::string selector_class = {},
-    std::string selector_scope_id = {}) {
+proto::ruleset::effect::Effect MakeEffectWithSelector(std::string id, types::ScopeType scope_type,
+                                                      std::string possible, std::string effect_code,
+                                                      std::string selector_class = {},
+                                                      std::string selector_scope_id = {}) {
   proto::ruleset::effect::Effect effect;
   effect.set_id(std::move(id));
   effect.set_scope_type(scope_type);
@@ -124,28 +124,23 @@ TEST(StdEffectExecutor, HandlingRuntimeError) {
 
 TEST(StdEffectExecutor, AppliesEffectOnlyToScopesMatchingSelectorClass) {
   StdSession session;
-  auto matching_scope = hs::scope::test::MakeSeededScope(
-      ScopeType::SCOPE_TYPE_REGION, "matching.region");
-  auto non_matching_scope = hs::scope::test::MakeSeededScope(
-      ScopeType::SCOPE_TYPE_REGION, "non_matching.region");
+  auto matching_scope =
+      hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION, "matching.region");
+  auto non_matching_scope =
+      hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION, "non_matching.region");
   ASSERT_TRUE(session.AddScope(matching_scope));
   ASSERT_TRUE(session.AddScope(non_matching_scope));
 
-  ASSERT_TRUE(matching_scope->SetStringModifier(
-      "core.class", "seed", "forest", 1.0, 10));
-  ASSERT_TRUE(non_matching_scope->SetStringModifier(
-      "core.class", "seed", "desert", 1.0, 10));
-  ASSERT_TRUE(matching_scope->SetNumericModifier("numeric_var", "seed", 3.0,
-                                                 0.0, 10));
-  ASSERT_TRUE(non_matching_scope->SetNumericModifier("numeric_var", "seed",
-                                                     5.0, 0.0, 10));
+  ASSERT_TRUE(matching_scope->SetStringModifier("core.class", "seed", "forest", 1.0, 10));
+  ASSERT_TRUE(non_matching_scope->SetStringModifier("core.class", "seed", "desert", 1.0, 10));
+  ASSERT_TRUE(matching_scope->SetNumericModifier("numeric_var", "seed", 3.0, 0.0, 10));
+  ASSERT_TRUE(non_matching_scope->SetNumericModifier("numeric_var", "seed", 5.0, 0.0, 10));
 
-  auto definition = std::make_shared<StdEffectDefinition>(MakeEffectWithSelector(
-      "effect.id", ScopeType::SCOPE_TYPE_REGION,
-      "return VAR(numeric_var) >= 0 and VAR(core.class) == 'forest'",
-      "target:set_numeric_modifier('numeric_var', 4.0, 0.0)", "forest"));
-  session.GetEffects().push_back(
-      std::make_shared<EffectInstance<StdBaseTypes>>(definition));
+  auto definition = std::make_shared<StdEffectDefinition>(
+      MakeEffectWithSelector("effect.id", ScopeType::SCOPE_TYPE_REGION,
+                             "return VAR(numeric_var) >= 0 and VAR(core.class) == 'forest'",
+                             "target:set_numeric_modifier('numeric_var', 4.0, 0.0)", "forest"));
+  session.GetEffects().push_back(std::make_shared<EffectInstance<StdBaseTypes>>(definition));
 
   StdEffectExecutor executor;
   executor.Execute(session, 10);
@@ -161,24 +156,19 @@ TEST(StdEffectExecutor, AppliesEffectOnlyToScopesMatchingSelectorClass) {
 
 TEST(StdEffectExecutor, AppliesEffectOnlyToScopeMatchingSelectorScopeId) {
   StdSession session;
-  auto target_scope = hs::scope::test::MakeSeededScope(
-      ScopeType::SCOPE_TYPE_REGION, "target.region");
-  auto other_scope = hs::scope::test::MakeSeededScope(
-      ScopeType::SCOPE_TYPE_REGION, "other.region");
+  auto target_scope =
+      hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION, "target.region");
+  auto other_scope = hs::scope::test::MakeSeededScope(ScopeType::SCOPE_TYPE_REGION, "other.region");
   ASSERT_TRUE(session.AddScope(target_scope));
   ASSERT_TRUE(session.AddScope(other_scope));
 
-  ASSERT_TRUE(target_scope->SetNumericModifier("numeric_var", "seed", 3.0,
-                                               0.0, 10));
-  ASSERT_TRUE(other_scope->SetNumericModifier("numeric_var", "seed", 5.0,
-                                              0.0, 10));
+  ASSERT_TRUE(target_scope->SetNumericModifier("numeric_var", "seed", 3.0, 0.0, 10));
+  ASSERT_TRUE(other_scope->SetNumericModifier("numeric_var", "seed", 5.0, 0.0, 10));
 
   auto definition = std::make_shared<StdEffectDefinition>(MakeEffectWithSelector(
       "effect.id", ScopeType::SCOPE_TYPE_REGION, "return VAR(numeric_var) >= 0",
-      "target:set_numeric_modifier('numeric_var', 4.0, 0.0)", {},
-      "target.region"));
-  session.GetEffects().push_back(
-      std::make_shared<EffectInstance<StdBaseTypes>>(definition));
+      "target:set_numeric_modifier('numeric_var', 4.0, 0.0)", {}, "target.region"));
+  session.GetEffects().push_back(std::make_shared<EffectInstance<StdBaseTypes>>(definition));
 
   StdEffectExecutor executor;
   executor.Execute(session, 10);
