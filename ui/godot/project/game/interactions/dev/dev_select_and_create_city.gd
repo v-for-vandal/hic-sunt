@@ -11,7 +11,6 @@ func on_ui_event(event: UiEventBus.UIEvent) -> void:
 	if event is UiEventBus.RegionUIActionEvent:
 		if event.action_type == UiEventBus.ActionType.PRIMARY:
 			# TODO: Check that we can build here
-			var can_build := true
 
 			# get current region
 			var region: RegionObject = event.surface.get_region()

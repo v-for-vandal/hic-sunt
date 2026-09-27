@@ -10,8 +10,7 @@ func _clear() -> void:
 	
 	
 func _clear_widgets() -> void:
-	var children = $%JobsView.get_children()
-	for child in children:
+	for child: Node in $%JobsView.get_children():
 		$%JobsView.remove_child(child)
 		child.queue_free()
 		
@@ -25,7 +24,7 @@ func _add_job_widget(job_id: String, job_count: int) -> void:
 	name_label.text = job_id
 	$%JobsView.add_child(name_label)
 	
-	var value_label = Label.new()
+	var value_label := Label.new()
 	value_label.set_text(str(job_count))
 	$%JobsView.add_child(value_label)
 	
@@ -49,7 +48,7 @@ func _update_region() -> void:
 		return
 		
 	# TODO: This will not permit displaying cities of other civs
-	var city := CurrentGame.get_current_player_civ().find_city_by_id(city_id_opt)
+	var city := CurrentGame.game.get_current_player_civ().find_city_by_id(city_id_opt)
 	
 	if city == null:
 		push_error("Can't fetch city with id: ", city_id_opt)
@@ -57,7 +56,7 @@ func _update_region() -> void:
 		
 	_set_jobs(_region_object.get_jobs(CurrentGame.get_current_player_ruleset()))
 	
-func _on_region_changed(area: Rect2i, flags: int) -> void:
+func _on_region_changed(_area: Rect2i, _flags: int) -> void:
 	_update_region()
 	
 func _connect_region_object(region_object: RegionObject) -> void:

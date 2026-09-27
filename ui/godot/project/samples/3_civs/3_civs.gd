@@ -46,7 +46,7 @@ func _fill_world_with_tundra(plane: WorldPlane) -> void:
 	plane.foreach_surface(region_lambda)
 
 
-func _fill_region_with_tundra(region: RegionObject, region_coords: Vector2i) -> void:
+func _fill_region_with_tundra(region: RegionObject, _region_coords: Vector2i) -> void:
 	var region_scope := region.get_scope()
 	region_scope.add_numeric_modifier(Modifiers.GEOGRAPHY_HEIGHT, SAMPLE_MODIFIER, 100.0, 0.0)
 	region_scope.add_numeric_modifier(Modifiers.ECOSYSTEM_TEMPERATURE, SAMPLE_MODIFIER, -5.0, 0.0)

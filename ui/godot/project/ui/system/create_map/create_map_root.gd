@@ -107,7 +107,7 @@ func _on_back_button_pressed() -> void:
 	transition_back.emit()
 
 
-func _on_world_builder_report_progress(message: String, progress: int) -> void:
+func _on_world_builder_report_progress(_message: String, progress: int) -> void:
 	print("Received pogress signal ", progress)
 	$%GenerationProgressBar.value = progress
 
@@ -150,7 +150,6 @@ func on_ui_event(event: UiEventBus.UIEvent) -> void:
 					var region := plane.plane_object.get_region(event.qr_coords)
 					%InfoContainer.set_region(region, event.qr_coords)
 				elif event.surface.surface_type == GameTileSurface.SurfaceType.REGION_SURFACE:
-					var region: RegionObject = event.surface.get_region()
 					%InfoContainer.set_cell(event.qr_coords)
 			event.accept()
 			return

@@ -9,7 +9,7 @@ func _ready() -> void:
 	var root_container := $%RootContainer
 	print("Self: ", self)
 	print("Children: ", children)
-	print("Root container: ", $%RootContainer)
+	print("Root container: ", root_container)
 	print("get_node Root container", self.get_node("RootContainer"))
 	print("get_node as unique Root container", self.get_node("%RootContainer"))
 	assert($%RootContainer != null, "Something wrong, child is missing")

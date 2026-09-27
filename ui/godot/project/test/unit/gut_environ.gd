@@ -65,7 +65,7 @@ func do_test_equal_by_serialization(target: Object) -> void:
 	var serialized :Variant = target.serialize_to_variant()
 
 	# now, load new object from variant
-	var new_object = (target as Object).get_script().new()
+	var new_object: Object = (target as Object).get_script().new()
 	new_object.parse_from_variant(serialized)
 
 	# save it again

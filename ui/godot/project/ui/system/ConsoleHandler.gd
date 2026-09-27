@@ -73,7 +73,7 @@ func _reload_ruleset() -> void:
 	CurrentGame.replace_ruleset(new_ruleset)
 	Console.print("Ruleset replaced")
 	
-func _create_city(city_name: String = "") -> void:
+func _create_city(_city_name: String = "") -> void:
 	var new_create_city_interaction := DevSelectAndCreateCityInteraction.new()
 	CurrentGame.event_bus.set_main_interaction(new_create_city_interaction)
 	Console.print("Click on the cell to create city")

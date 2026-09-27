@@ -39,7 +39,7 @@ func _on_info_button_toggled(toggled_on: bool) -> void:
 func on_region_selected(region: RegionObject) -> void:
 	$Outliner.on_region_selected(region)
 	
-func on_region_deselected(region: RegionObject) -> void:
+func on_region_deselected(_region: RegionObject) -> void:
 	pass
 
 func on_world_cell_clicked_forward(world_object: WorldObject, qr: Vector2i) -> void:

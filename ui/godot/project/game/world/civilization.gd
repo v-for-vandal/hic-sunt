@@ -152,7 +152,7 @@ func parse_from_variant(data : Dictionary) -> void:
 		_cities_by_id[city_id] = city;
 		_cities_by_region_id[city.get_region_id()] = city
 
-func _load_from_scope(civ_scope: ScopeObject):
+func _load_from_scope(civ_scope: ScopeObject) -> void:
 	_cities_by_id.clear()
 	self._id = civ_scope.get_id()
 	
