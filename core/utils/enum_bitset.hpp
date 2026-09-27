@@ -27,15 +27,13 @@ class EnumBitset : public std::bitset<N> {
   }
   constexpr void reset(E value) { Base::reset(static_cast<size_t>(value)); }
 
-  static constexpr EnumBitset Make() {
-    return {};
-  }
+  static constexpr EnumBitset Make() { return {}; }
 
   template <typename... Values>
   static constexpr EnumBitset Make(Values... values) {
-      auto result = EnumBitset{};
-      (result.set(values),...);
-      return result;
+    auto result = EnumBitset{};
+    (result.set(values), ...);
+    return result;
   }
 };
 

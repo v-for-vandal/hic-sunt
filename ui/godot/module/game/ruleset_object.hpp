@@ -51,8 +51,7 @@ class RulesetObject : public RefCounted {
   TypedArray<StringName> get_all_effects() const;
   static Dictionary convert_biome_type(const hs::proto::ruleset::Biome& biome_type);
   static Dictionary convert_render(const hs::proto::render::AtlasRender& render);
-  static Dictionary convert_improvement(
-      const hs::proto::ruleset::Improvement& improvement_type);
+  static Dictionary convert_improvement(const hs::proto::ruleset::Improvement& improvement_type);
   static Dictionary convert_job(const hs::proto::ruleset::Job& job);
   static Dictionary convert_project(const hs::proto::ruleset::Project& project);
   static Dictionary load(TypedArray<String> folder_path);

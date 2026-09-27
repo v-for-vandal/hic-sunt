@@ -1,5 +1,3 @@
-#include "session.hpp"
-
 #include <gtest/gtest.h>
 
 #include <core/geometry/box.hpp>
@@ -8,6 +6,8 @@
 #include <core/scope/scope_ut.hpp>
 #include <core/terra/world.hpp>
 #include <fstream>
+
+#include "session.hpp"
 
 namespace hs::session {
 
@@ -132,7 +132,8 @@ TEST(StdSessionCreateImprovementScope, SetsCoreClassModifierAndClassTag) {
   // Without parent, improvement_scope has no definitions. add it to some region
   using WorldType = std::decay_t<decltype(*(session.GetWorld()))>;
   auto region_ptr = session.GetWorld()->GetPlane("plane.id")->GetRegions().begin()->second;
-  ASSERT_TRUE(improvement_scope->SetParent(region_ptr->GetSurface().GetCell(WorldType::QRSCoords::MakeCoords(0,0)).GetScope()));
+  ASSERT_TRUE(improvement_scope->SetParent(
+      region_ptr->GetSurface().GetCell(WorldType::QRSCoords::MakeCoords(0, 0)).GetScope()));
 
   auto class_value = improvement_scope->GetStringValue("core.class");
   ASSERT_TRUE(class_value.has_value());
@@ -141,7 +142,7 @@ TEST(StdSessionCreateImprovementScope, SetsCoreClassModifierAndClassTag) {
   std::vector<scope::test::StringExplanation> explanations;
   improvement_scope->ExplainStringVariable(
       "core.class", [&explanations](const auto& scope_id, const auto& variable,
-                                      const auto& modifier, const auto& value, auto level) {
+                                    const auto& modifier, const auto& value, auto level) {
         explanations.push_back(scope::test::StringExplanation{
             .scope_id = scope_id,
             .variable = variable,

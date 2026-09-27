@@ -1,7 +1,7 @@
 #include "region.hpp"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <core/scope/scope_ut.hpp>
 #include <core/types/std_base_types.hpp>
@@ -97,8 +97,10 @@ TEST(StdRegion, CellScopeParent) {
 
 TEST(StdRegion, CellVisitScopesVisitsOwnScopeThenImprovements) {
   StdRegionCell cell;
-  auto improvement_a = scope::test::MakeSimpleScope(ScopeType::SCOPE_TYPE_IMPROVEMENT, "improvement.alpha");
-  auto improvement_b = scope::test::MakeSimpleScope(ScopeType::SCOPE_TYPE_IMPROVEMENT, "improvement.beta");
+  auto improvement_a =
+      scope::test::MakeSimpleScope(ScopeType::SCOPE_TYPE_IMPROVEMENT, "improvement.alpha");
+  auto improvement_b =
+      scope::test::MakeSimpleScope(ScopeType::SCOPE_TYPE_IMPROVEMENT, "improvement.beta");
 
   ASSERT_TRUE(cell.AddImprovement(1, improvement_a).has_value());
   ASSERT_TRUE(cell.AddImprovement(2, improvement_b).has_value());
@@ -107,10 +109,9 @@ TEST(StdRegion, CellVisitScopesVisitsOwnScopeThenImprovements) {
 
   ASSERT_EQ(scope_ids.size(), 3);
   EXPECT_EQ(scope_ids.front(), cell.GetScope()->GetId());
-  EXPECT_THAT(scope_ids, ::testing::UnorderedElementsAre(
-                              std::string{cell.GetScope()->GetId()},
-                              std::string{"improvement.alpha"},
-                              std::string{"improvement.beta"}));
+  EXPECT_THAT(scope_ids, ::testing::UnorderedElementsAre(std::string{cell.GetScope()->GetId()},
+                                                         std::string{"improvement.alpha"},
+                                                         std::string{"improvement.beta"}));
 }
 
 TEST(StdRegion, VisitScopesVisitsOwnScopeThenAllCellScopes) {
@@ -127,7 +128,8 @@ TEST(StdRegion, VisitScopesVisitsOwnScopeThenAllCellScopes) {
 
   ASSERT_EQ(scope_ids.size(), expected_cell_count + 1);
   EXPECT_EQ(scope_ids.front(), region.GetScope()->GetId());
-  EXPECT_EQ(std::count(scope_ids.begin(), scope_ids.end(), std::string{region.GetScope()->GetId()}), 1);
+  EXPECT_EQ(std::count(scope_ids.begin(), scope_ids.end(), std::string{region.GetScope()->GetId()}),
+            1);
 }
 
 TEST(StdRegion, TopNStringValues) {

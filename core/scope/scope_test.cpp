@@ -60,7 +60,8 @@ TEST(StdScope, InheritanceIncludesTagScopes) {
 
 TEST(StdScope, GraphTraversalSkipsAlreadyVisitedTagScopes) {
   StdScopePtr world_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_WORLD, "world");
-  StdScopePtr plane_class_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_PLANE_CLASS, "plane_class");
+  StdScopePtr plane_class_scope =
+      test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_PLANE_CLASS, "plane_class");
   StdScopePtr scope("test", types::ScopeType::SCOPE_TYPE_PLANE);
 
   ASSERT_TRUE(scope->SetParent(world_scope));
@@ -74,17 +75,17 @@ TEST(StdScope, GraphTraversalSkipsAlreadyVisitedTagScopes) {
   EXPECT_EQ(*result, 4.0);  // shared scope contributes only once
 
   std::vector<test::NumericExplanation> explanations;
-  scope->ExplainNumericVariable("numeric_var",
-                                [&explanations](const auto& scope_id, const auto&, const auto& modifier,
-                                                auto add, auto mult) {
-                                  explanations.push_back(test::NumericExplanation{
-                                      .scope_id = scope_id,
-                                      .variable = "",
-                                      .modifier = modifier,
-                                      .add = add,
-                                      .mult = mult,
-                                  });
-                                });
+  scope->ExplainNumericVariable(
+      "numeric_var", [&explanations](const auto& scope_id, const auto&, const auto& modifier,
+                                     auto add, auto mult) {
+        explanations.push_back(test::NumericExplanation{
+            .scope_id = scope_id,
+            .variable = "",
+            .modifier = modifier,
+            .add = add,
+            .mult = mult,
+        });
+      });
 
   ASSERT_EQ(explanations.size(), 1u);
   EXPECT_EQ(explanations[0].scope_id, "world");

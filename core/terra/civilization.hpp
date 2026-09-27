@@ -17,8 +17,7 @@ namespace hs::terra {
  * Instead, we have here methods that simplify working with scopes.
  */
 template <typename BaseTypes = StdBaseTypes>
-class Civilization
-    : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_CIV> {
+class Civilization : public scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_CIV> {
  public:
   using Base = scope::TypedScopedObject<BaseTypes, types::ScopeType::SCOPE_TYPE_CIV>;
   using Scope = scope::Scope<BaseTypes>;
@@ -41,7 +40,8 @@ class Civilization
   std::expected<ScopePtr, ErrorCode> CreateChildScope(ScopeType scope_type, const StringId& id);
   bool HasChildScope(ScopeType scope_type, const StringId& id) const;
 
-  std::expected<ScopePtr, ErrorCode> GetOrCreateChildScope(ScopeType scope_type, const StringId& id);
+  std::expected<ScopePtr, ErrorCode> GetOrCreateChildScope(ScopeType scope_type,
+                                                           const StringId& id);
   // This method will return default-initialized ScopePtr if no such id is present. Remember that
   // ScopePtr is non-nullable and will always contain data. It is very hard to check ScopePtr for
   // 'validness' - it is better to check HasScope before calling this method.
@@ -60,7 +60,8 @@ class Civilization
    * ERR_SCOPE_ALREADY_EXISTS is returned
 
    Note: bad idea, has no access to modification time and ruleset
-  std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(StringId civ_id, StringId improvement_class);
+  std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(StringId civ_id, StringId
+  improvement_class);
   */
 
  private:

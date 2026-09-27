@@ -56,20 +56,20 @@ Variant ScopeObject::get_variant_value(const StringName& variable) {
   ERR_FAIL_NULL_SCOPE(Variant{});
 
   if (scope_->IsStringVariable(variable)) {
-      auto value = scope_->GetStringValue(variable);
-      if (!value) {
-          return StringName{};
-      }
-      return *value;
+    auto value = scope_->GetStringValue(variable);
+    if (!value) {
+      return StringName{};
+    }
+    return *value;
   }
 
   if (scope_->IsNumericVariable(variable)) {
-      auto value = scope_->GetNumericValue(variable);
-      if (!value) {
-        return 0.0;
-      }
+    auto value = scope_->GetNumericValue(variable);
+    if (!value) {
+      return 0.0;
+    }
 
-      return *value;
+    return *value;
   }
 
   return Variant{};

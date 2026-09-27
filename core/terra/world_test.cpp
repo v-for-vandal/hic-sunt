@@ -1,7 +1,7 @@
 #include "world.hpp"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <core/types/scope_type.hpp>
 #include <core/utils/serialize.hpp>
@@ -18,8 +18,8 @@ TEST(World, Serialize) {}
 TEST(StdWorld, VisitScopesVisitsOwnScopeThenNestedScopes) {
   StdWorld world;
   auto plane = world.AddPlane(
-      "plane.alpha",
-      StdWorld::QRSBox(StdWorld::QRSCoords(0_q, 0_r), StdWorld::QRSCoords(0_q, 0_r)), 1, 2);
+      "plane.alpha", StdWorld::QRSBox(StdWorld::QRSCoords(0_q, 0_r), StdWorld::QRSCoords(0_q, 0_r)),
+      1, 2);
   auto civilization = world.GetOrCreateCivilization("civ.alpha");
   auto city_scope = civilization->CreateChildScope(ScopeType::SCOPE_TYPE_CITY, "city.alpha");
 

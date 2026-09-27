@@ -72,22 +72,24 @@ class Scope {
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
 
   [[nodiscard]] std::expected<void, ErrorCode> SetParent(const std::shared_ptr<Scope>& parent) {
-     if(parent) {
-        if( !hs::types::CanLinkScopes(scope_type_, parent->scope_type_)) {
-            spdlog::warn("Scope of type {} can not be child of scope of type {}",
-                scope_type_, parent->scope_type_);
-            return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
-        }
-     }
-      parent_ = parent;
+    if (parent) {
+      if (!hs::types::CanLinkScopes(scope_type_, parent->scope_type_)) {
+        spdlog::warn("Scope of type {} can not be child of scope of type {}", scope_type_,
+                     parent->scope_type_);
+        return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+      }
+    }
+    parent_ = parent;
 
-      return {};
+    return {};
   }
 
   // Every scope except SCOPE_TYPE_WORLD should have a parent. Scopes without parent are valid,
   // for example that could be temporary scopes to show effects and so on. However, generally
   // they should not participate in effects calculation
-  bool IsOrphaned() const noexcept { return parent_ == nullptr && scope_type_ != types::ScopeType::SCOPE_TYPE_WORLD; }
+  bool IsOrphaned() const noexcept {
+    return parent_ == nullptr && scope_type_ != types::ScopeType::SCOPE_TYPE_WORLD;
+  }
 
   // You can and should do it only on one root scope. All other scopes will
   // fetch it automatically
@@ -149,15 +151,14 @@ class Scope {
  private:
   using VisitedScopes = absl::flat_hash_set<const Scope*>;
 
-  void FillNumericModifiers(const NumericVariableDefinition& variable_definition,
-                            NumericValue& add, NumericValue& mult,
-                            VisitedScopes& visited) const;
+  void FillNumericModifiers(const NumericVariableDefinition& variable_definition, NumericValue& add,
+                            NumericValue& mult, VisitedScopes& visited) const;
 
   void FillStringModifiers(const StringVariableDefinition& variable_definition, StringId& value,
                            NumericValue& level, VisitedScopes& visited);
 
-  size_t DoGetModificationTime(
-      const VariableDefinitionBase& variable_definition, VisitedScopes& visited) const;
+  size_t DoGetModificationTime(const VariableDefinitionBase& variable_definition,
+                               VisitedScopes& visited) const;
 
   template <typename CollectFn>
   void DoExplainNumericVariable(const StringId& variable, CollectFn&& collect_fn,
