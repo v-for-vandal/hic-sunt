@@ -37,6 +37,8 @@ fmt_dep = dependency('fmt', version: '>=9.1')
 
 spdlog_dep = dependency('spdlog')
 
+rapidyaml_dep = dependency('rapidyaml')
+
 #abseil = dependency('abseil-cpp', modules:['absl_flat_hash_set'])
 abseil = dependency('absl_flat_hash_set')
 

@@ -4,6 +4,8 @@ _core_ruleset_lib_dependencies = [
     # lua related things
     sol2_dep,
     lua_dep,
+    # yaml ruleset files
+    rapidyaml_dep,
     # our libs
     core_types_lib_dep,
     hs_proto_lib_dep,

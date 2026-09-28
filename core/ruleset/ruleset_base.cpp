@@ -1,22 +1,120 @@
 #include "ruleset_base.hpp"
 
+#include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
+#include <google/protobuf/util/json_util.h>
 #include <ruleset/effect.pb.h>
 #include <ruleset/improvements.pb.h>
 #include <ruleset/variables.pb.h>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
+#include <c4/std/string.hpp>
 #include <fstream>
+#include <ryml.hpp>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace hs::ruleset {
 
 namespace {
 
-template <typename Proto>
-bool ReadFromFile(const std::filesystem::path& path, Proto& proto_object) {
+bool IsRulesetFileExtension(const std::filesystem::path& path) {
+  const auto extension = path.extension().string();
+  return extension == ".txt" || extension == ".yaml" || extension == ".yml";
+}
+
+bool IsYamlFileExtension(const std::filesystem::path& path) {
+  const auto extension = path.extension().string();
+  return extension == ".yaml" || extension == ".yml";
+}
+
+std::filesystem::path WithoutExtension(std::filesystem::path path) {
+  path.replace_extension();
+  return path;
+}
+
+std::string RymlSubstringToString(c4::csubstr value) { return std::string(value.str, value.len); }
+
+class RymlError final : public std::runtime_error {
+ public:
+  using std::runtime_error::runtime_error;
+};
+
+[[noreturn]] void OnRymlBasicError(c4::csubstr message, const ryml::ErrorDataBasic& /*error_data*/,
+                                   void* /*user_data*/) {
+  throw RymlError(RymlSubstringToString(message));
+}
+
+[[noreturn]] void OnRymlParseError(c4::csubstr message, const ryml::ErrorDataParse& error_data,
+                                   void* /*user_data*/) {
+  throw RymlError(
+      fmt::format("{} at line {}", RymlSubstringToString(message), error_data.ymlloc.line + 1));
+}
+
+[[noreturn]] void OnRymlVisitError(c4::csubstr message, const ryml::ErrorDataVisit& /*error_data*/,
+                                   void* /*user_data*/) {
+  throw RymlError(RymlSubstringToString(message));
+}
+
+ryml::Callbacks MakeRymlCallbacks() {
+  ryml::Callbacks callbacks;
+  callbacks.set_error_basic(&OnRymlBasicError);
+  callbacks.set_error_parse(&OnRymlParseError);
+  callbacks.set_error_visit(&OnRymlVisitError);
+  return callbacks;
+}
+
+bool ValidateRymlNode(const ryml::Tree& tree, ryml::id_type node, std::string& error) {
+  if (tree.has_anchor(node)) {
+    error = "YAML anchors are not supported in ruleset files";
+    return false;
+  }
+  if (tree.is_ref(node)) {
+    error = "YAML aliases are not supported in ruleset files";
+    return false;
+  }
+  if (tree.has_key_tag(node) || tree.has_val_tag(node)) {
+    error = "YAML tags are not supported in ruleset files";
+    return false;
+  }
+
+  if (tree.is_stream(node)) {
+    if (tree.num_children(node) > 1) {
+      error = "multiple YAML documents are not supported";
+      return false;
+    }
+  }
+
+  std::unordered_set<std::string> keys;
+  for (auto child = tree.first_child(node); child != ryml::NONE; child = tree.next_sibling(child)) {
+    if (tree.is_map(node)) {
+      if (!tree.has_key(child)) {
+        error = "YAML mapping keys must be scalars in ruleset files";
+        return false;
+      }
+      const auto key = RymlSubstringToString(tree.key(child));
+      if (!keys.insert(key).second) {
+        error = fmt::format("duplicate YAML mapping key: {}", key);
+        return false;
+      }
+    }
+    if (!ValidateRymlNode(tree, child, error)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool ReadTextProtoFromFile(const std::filesystem::path& path,
+                           google::protobuf::Message& proto_object) {
   std::ifstream f(path);
   if (!f.is_open()) {
     spdlog::warn("Can't open ruleset file {}", path.string());
@@ -30,6 +128,65 @@ bool ReadFromFile(const std::filesystem::path& path, Proto& proto_object) {
   }
 
   return true;
+}
+
+bool ReadYamlProtoFromFile(const std::filesystem::path& path,
+                           google::protobuf::Message& proto_object) {
+  std::ifstream input(path);
+  if (!input.is_open()) {
+    spdlog::warn("Can't open ruleset file {}", path.string());
+    return false;
+  }
+
+  std::stringstream buffer;
+  buffer << input.rdbuf();
+  const std::string yaml = buffer.str();
+  const std::string filename = path.string();
+
+  ryml::Tree tree(MakeRymlCallbacks());
+  try {
+    ryml::parse_in_arena(c4::to_csubstr(filename), c4::to_csubstr(yaml), &tree);
+  } catch (const RymlError& ex) {
+    spdlog::warn("Can't parse ruleset YAML file {}: {}", path.string(), ex.what());
+    return false;
+  }
+
+  std::string error;
+  if (!ValidateRymlNode(tree, tree.root_id(), error)) {
+    spdlog::warn("Can't parse ruleset YAML file {}: {}", path.string(), error);
+    return false;
+  }
+
+  ryml::id_type json_root = tree.root_id();
+  if (tree.is_stream(json_root) && tree.num_children(json_root) == 1) {
+    json_root = tree.first_child(json_root);
+  }
+
+  std::string json;
+  try {
+    json = ryml::emitrs_json<std::string>(tree, json_root);
+  } catch (const RymlError& ex) {
+    spdlog::warn("Can't convert ruleset YAML file {} to JSON: {}", path.string(), ex.what());
+    return false;
+  }
+
+  google::protobuf::util::JsonParseOptions options;
+  const auto status = google::protobuf::util::JsonStringToMessage(json, &proto_object, options);
+  if (!status.ok()) {
+    spdlog::warn("Can't parse ruleset YAML file {} as protobuf JSON: {}", path.string(),
+                 status.ToString());
+    return false;
+  }
+
+  return true;
+}
+
+template <typename Proto>
+bool ReadFromFile(const std::filesystem::path& path, Proto& proto_object) {
+  if (IsYamlFileExtension(path)) {
+    return ReadYamlProtoFromFile(path, proto_object);
+  }
+  return ReadTextProtoFromFile(path, proto_object);
 }
 
 std::vector<std::filesystem::path> FilterValidRuleRoots(
@@ -63,14 +220,49 @@ std::vector<std::filesystem::path> CollectRuleFiles(const std::vector<std::files
       if (!entry.is_regular_file()) {
         continue;
       }
-      if (entry.path().extension() != ".txt") {
+      if (!IsRulesetFileExtension(entry.path())) {
         continue;
       }
       local_files.push_back(entry.path());
     }
 
-    std::sort(local_files.begin(), local_files.end());
-    result.insert(result.end(), local_files.begin(), local_files.end());
+    std::sort(
+        local_files.begin(), local_files.end(), [&rules_root](const auto& lhs, const auto& rhs) {
+          const auto lhs_order_key = WithoutExtension(std::filesystem::relative(lhs, rules_root));
+          const auto rhs_order_key = WithoutExtension(std::filesystem::relative(rhs, rules_root));
+          if (lhs_order_key != rhs_order_key) {
+            return lhs_order_key < rhs_order_key;
+          }
+          return lhs.extension() < rhs.extension();
+        });
+
+    std::vector<std::filesystem::path> filtered_files;
+    for (std::size_t idx = 0; idx < local_files.size();) {
+      const auto conflict_parent = local_files[idx].parent_path();
+      const auto conflict_stem = local_files[idx].stem();
+      std::size_t end = idx + 1;
+      while (end < local_files.size() && local_files[end].parent_path() == conflict_parent &&
+             local_files[end].stem() == conflict_stem) {
+        end++;
+      }
+
+      if (end - idx == 1) {
+        filtered_files.push_back(local_files[idx]);
+      } else {
+        std::vector<std::string> paths;
+        paths.reserve(end - idx);
+        for (std::size_t conflict_idx = idx; conflict_idx < end; ++conflict_idx) {
+          paths.push_back(local_files[conflict_idx].string());
+        }
+        spdlog::warn(
+            "Ruleset files with the same name but different extensions are not allowed "
+            "in one directory and will be ignored: {}",
+            paths);
+      }
+      idx = end;
+    }
+
+    result.insert(result.end(), filtered_files.begin(), filtered_files.end());
   }
 
   return result;
