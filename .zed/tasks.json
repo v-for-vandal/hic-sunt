@@ -1,0 +1,18 @@
+[
+  {
+    "label": "Godot MCP: status for current worktree",
+    "command": "python3",
+    "args": ["tools/godot-mcp-worktree-wrapper.py", "--status"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "hide": "never"
+  },
+  {
+    "label": "Godot MCP: print project path",
+    "command": "python3",
+    "args": ["tools/godot-mcp-worktree-wrapper.py", "--project-path"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "hide": "on_success"
+  }
+]
