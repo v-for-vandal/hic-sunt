@@ -43,3 +43,7 @@ subprojects/.wraplock
 *.png~
 *.kra~
 *.kate-swp
+
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
