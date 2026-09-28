@@ -1,8 +1,17 @@
 # Ruleset files
 
-Ruleset data is loaded from one or more ruleset root directories passed to `RuleSet::Load`.
-Each root may contain the known ruleset subdirectories, such as `improvements`, `biomes`,
-`resources`, `jobs`, `rendering`, `projects`, `variables`, and `effects`.
+Rulesets are stored in directories and are loaded in the order given in
+game settings or via command flags.
+
+Each folder must have a predefined folder structure:
+* 'improvements/' - stores improvements
+* 'biomes/' - stores biomes
+* 'resources' - stores resources
+* 'rendering' - currently not used
+* 'jobs' - stores jobs
+* 'projects' - stores city and empire projects
+* 'effects' - stores effects
+* 'variables' - stores variables
 
 ## Supported formats
 
@@ -22,11 +31,9 @@ not as textproto-style `{ key, value }` entries.
 
 YAML anchors, aliases, and custom tags are intentionally not supported.
 
-YAML scalars are converted to JSON before protobuf parsing. Quoted YAML scalars become JSON
-strings, while plain `true`, `false`, `null`, and numeric-looking scalars become the matching
-JSON scalar types. The final parse is performed by protobuf C++ JSON transcoding. That parser
-currently enables legacy syntax internally, so it may accept some non-canonical scalar forms,
-such as quoted booleans for protobuf `bool` fields.
+Due to underlying yaml -> json -> protobuf transcoding, there are some quirks,
+e.g. you can use string literal "true" in place of bool. Please don't do this,
+we will get rid of it as soon as we can.
 
 ## File order
 
@@ -48,7 +55,7 @@ Example order inside `projects`:
 nested/01_nested.yaml
 ```
 
-Roots are processed in the order provided to `RuleSet::Load`. All accepted files from the
+Roots are processed in the given order. All accepted files from the
 first root are applied before files from the second root, and so on.
 
 ## Override rules
