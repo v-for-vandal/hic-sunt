@@ -5,8 +5,7 @@ _core_ruleset_lib_dependencies = [
     sol2_dep,
     lua_dep,
     # yaml ruleset files
-    yaml_cpp_dep,
-    nlohmann_json_dep,
+    rapidyaml_dep,
     # our libs
     core_types_lib_dep,
     hs_proto_lib_dep,

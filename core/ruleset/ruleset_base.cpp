@@ -9,15 +9,13 @@
 #include <ruleset/improvements.pb.h>
 #include <ruleset/variables.pb.h>
 #include <spdlog/spdlog.h>
-#include <yaml-cpp/anchor.h>
-#include <yaml-cpp/eventhandler.h>
-#include <yaml-cpp/parser.h>
-#include <yaml-cpp/yaml.h>
 
 #include <algorithm>
-#include <cctype>
+#include <c4/std/string.hpp>
 #include <fstream>
-#include <nlohmann/json.hpp>
+#include <ryml.hpp>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -41,125 +39,77 @@ std::filesystem::path WithoutExtension(std::filesystem::path path) {
   return path;
 }
 
-class SafeYamlEventHandler final : public YAML::EventHandler {
+std::string RymlSubstringToString(c4::csubstr value) { return std::string(value.str, value.len); }
+
+class RymlError final : public std::runtime_error {
  public:
-  explicit SafeYamlEventHandler(const std::filesystem::path& path) : path_(path) {}
-
-  bool IsValid() const { return error_.empty(); }
-  const std::string& GetError() const { return error_; }
-
-  void OnDocumentStart(const YAML::Mark& mark) override {
-    document_count_++;
-    if (document_count_ > 1) {
-      Reject(mark, "multiple YAML documents are not supported");
-    }
-  }
-  void OnDocumentEnd() override {}
-
-  void OnNull(const YAML::Mark& mark, YAML::anchor_t anchor) override { CheckAnchor(mark, anchor); }
-
-  void OnAlias(const YAML::Mark& mark, YAML::anchor_t /*anchor*/) override {
-    Reject(mark, "YAML aliases are not supported in ruleset files");
-  }
-
-  void OnScalar(const YAML::Mark& mark, const std::string& tag, YAML::anchor_t anchor,
-                const std::string& /*value*/) override {
-    CheckAnchor(mark, anchor);
-    CheckTag(mark, tag);
-  }
-
-  void OnSequenceStart(const YAML::Mark& mark, const std::string& tag, YAML::anchor_t anchor,
-                       YAML::EmitterStyle::value /*style*/) override {
-    CheckAnchor(mark, anchor);
-    CheckTag(mark, tag);
-  }
-  void OnSequenceEnd() override {}
-
-  void OnMapStart(const YAML::Mark& mark, const std::string& tag, YAML::anchor_t anchor,
-                  YAML::EmitterStyle::value /*style*/) override {
-    CheckAnchor(mark, anchor);
-    CheckTag(mark, tag);
-  }
-  void OnMapEnd() override {}
-
- private:
-  void CheckAnchor(const YAML::Mark& mark, YAML::anchor_t anchor) {
-    if (anchor != YAML::NullAnchor) {
-      Reject(mark, "YAML anchors are not supported in ruleset files");
-    }
-  }
-
-  void CheckTag(const YAML::Mark& mark, const std::string& tag) {
-    if (!tag.empty() && tag != "?" && tag != "!") {
-      Reject(mark, fmt::format("YAML tags are not supported in ruleset files: {}", tag));
-    }
-  }
-
-  void Reject(const YAML::Mark& mark, const std::string& message) {
-    if (!error_.empty()) {
-      return;
-    }
-    error_ = fmt::format("{} at {}:{}", message, path_.string(), mark.line + 1);
-  }
-
-  std::filesystem::path path_;
-  int document_count_ = 0;
-  std::string error_;
+  using std::runtime_error::runtime_error;
 };
 
-bool ValidateSafeYamlSyntax(const std::filesystem::path& path, std::istream& input) {
-  try {
-    YAML::Parser parser(input);
-    SafeYamlEventHandler handler(path);
-    while (parser) {
-      parser.HandleNextDocument(handler);
-      if (!handler.IsValid()) {
-        spdlog::warn("Can't parse ruleset YAML file {}: {}", path.string(), handler.GetError());
+[[noreturn]] void OnRymlBasicError(c4::csubstr message, const ryml::ErrorDataBasic& /*error_data*/,
+                                   void* /*user_data*/) {
+  throw RymlError(RymlSubstringToString(message));
+}
+
+[[noreturn]] void OnRymlParseError(c4::csubstr message, const ryml::ErrorDataParse& error_data,
+                                   void* /*user_data*/) {
+  throw RymlError(
+      fmt::format("{} at line {}", RymlSubstringToString(message), error_data.ymlloc.line + 1));
+}
+
+[[noreturn]] void OnRymlVisitError(c4::csubstr message, const ryml::ErrorDataVisit& /*error_data*/,
+                                   void* /*user_data*/) {
+  throw RymlError(RymlSubstringToString(message));
+}
+
+ryml::Callbacks MakeRymlCallbacks() {
+  ryml::Callbacks callbacks;
+  callbacks.set_error_basic(&OnRymlBasicError);
+  callbacks.set_error_parse(&OnRymlParseError);
+  callbacks.set_error_visit(&OnRymlVisitError);
+  return callbacks;
+}
+
+bool ValidateRymlNode(const ryml::Tree& tree, ryml::id_type node, std::string& error) {
+  if (tree.has_anchor(node)) {
+    error = "YAML anchors are not supported in ruleset files";
+    return false;
+  }
+  if (tree.is_ref(node)) {
+    error = "YAML aliases are not supported in ruleset files";
+    return false;
+  }
+  if (tree.has_key_tag(node) || tree.has_val_tag(node)) {
+    error = "YAML tags are not supported in ruleset files";
+    return false;
+  }
+
+  if (tree.is_stream(node)) {
+    if (tree.num_children(node) > 1) {
+      error = "multiple YAML documents are not supported";
+      return false;
+    }
+  }
+
+  std::unordered_set<std::string> keys;
+  for (auto child = tree.first_child(node); child != ryml::NONE; child = tree.next_sibling(child)) {
+    if (tree.is_map(node)) {
+      if (!tree.has_key(child)) {
+        error = "YAML mapping keys must be scalars in ruleset files";
+        return false;
+      }
+      const auto key = RymlSubstringToString(tree.key(child));
+      if (!keys.insert(key).second) {
+        error = fmt::format("duplicate YAML mapping key: {}", key);
         return false;
       }
     }
-  } catch (const YAML::Exception& ex) {
-    spdlog::warn("Can't parse ruleset YAML file {}: {}", path.string(), ex.what());
-    return false;
+    if (!ValidateRymlNode(tree, child, error)) {
+      return false;
+    }
   }
+
   return true;
-}
-
-nlohmann::json ScalarYamlToJson(const YAML::Node& node) {
-  const std::string scalar = node.Scalar();
-
-  if (node.Tag() == "!") {
-    return scalar;
-  }
-  if (scalar == "null" || scalar == "~") {
-    return nullptr;
-  }
-  if (scalar == "true") {
-    return true;
-  }
-  if (scalar == "false") {
-    return false;
-  }
-
-  try {
-    std::size_t parsed_chars = 0;
-    const auto int_value = std::stoll(scalar, &parsed_chars, 10);
-    if (parsed_chars == scalar.size()) {
-      return int_value;
-    }
-  } catch (const std::exception&) {
-  }
-
-  try {
-    std::size_t parsed_chars = 0;
-    const auto double_value = std::stod(scalar, &parsed_chars);
-    if (parsed_chars == scalar.size()) {
-      return double_value;
-    }
-  } catch (const std::exception&) {
-  }
-
-  return scalar;
 }
 
 std::string JoinStrings(const std::vector<std::string>& values, std::string_view separator) {
@@ -171,62 +121,6 @@ std::string JoinStrings(const std::vector<std::string>& values, std::string_view
     result += values[idx];
   }
   return result;
-}
-
-bool YamlToJson(const YAML::Node& node, nlohmann::json& target, std::string& error) {
-  if (!node.Tag().empty() && node.Tag() != "?" && node.Tag() != "!") {
-    error = fmt::format("YAML tags are not supported in ruleset files: {}", node.Tag());
-    return false;
-  }
-
-  switch (node.Type()) {
-    case YAML::NodeType::Null:
-      target = nullptr;
-      return true;
-    case YAML::NodeType::Scalar:
-      target = ScalarYamlToJson(node);
-      return true;
-    case YAML::NodeType::Sequence: {
-      target = nlohmann::json::array();
-      for (const auto& item : node) {
-        nlohmann::json json_item;
-        if (!YamlToJson(item, json_item, error)) {
-          return false;
-        }
-        target.push_back(std::move(json_item));
-      }
-      return true;
-    }
-    case YAML::NodeType::Map: {
-      target = nlohmann::json::object();
-      std::unordered_set<std::string> keys;
-      for (const auto& item : node) {
-        if (!item.first.IsScalar()) {
-          error = "YAML mapping keys must be scalars in ruleset files";
-          return false;
-        }
-
-        const std::string key = item.first.Scalar();
-        if (!keys.insert(key).second) {
-          error = fmt::format("duplicate YAML mapping key: {}", key);
-          return false;
-        }
-
-        nlohmann::json value;
-        if (!YamlToJson(item.second, value, error)) {
-          return false;
-        }
-        target[key] = std::move(value);
-      }
-      return true;
-    }
-    case YAML::NodeType::Undefined:
-      error = "undefined YAML node is not supported in ruleset files";
-      return false;
-  }
-
-  error = "unsupported YAML node type";
-  return false;
 }
 
 bool ReadTextProtoFromFile(const std::filesystem::path& path,
@@ -248,33 +142,46 @@ bool ReadTextProtoFromFile(const std::filesystem::path& path,
 
 bool ReadYamlProtoFromFile(const std::filesystem::path& path,
                            google::protobuf::Message& proto_object) {
-  std::ifstream validation_input(path);
-  if (!validation_input.is_open()) {
+  std::ifstream input(path);
+  if (!input.is_open()) {
     spdlog::warn("Can't open ruleset file {}", path.string());
     return false;
   }
-  if (!ValidateSafeYamlSyntax(path, validation_input)) {
-    return false;
-  }
 
-  YAML::Node yaml_root;
+  std::stringstream buffer;
+  buffer << input.rdbuf();
+  const std::string yaml = buffer.str();
+  const std::string filename = path.string();
+
+  ryml::Tree tree(MakeRymlCallbacks());
   try {
-    yaml_root = YAML::LoadFile(path.string());
-  } catch (const YAML::Exception& ex) {
+    ryml::parse_in_arena(c4::to_csubstr(filename), c4::to_csubstr(yaml), &tree);
+  } catch (const RymlError& ex) {
     spdlog::warn("Can't parse ruleset YAML file {}: {}", path.string(), ex.what());
     return false;
   }
 
-  nlohmann::json json;
   std::string error;
-  if (!YamlToJson(yaml_root, json, error)) {
-    spdlog::warn("Can't convert ruleset YAML file {} to JSON: {}", path.string(), error);
+  if (!ValidateRymlNode(tree, tree.root_id(), error)) {
+    spdlog::warn("Can't parse ruleset YAML file {}: {}", path.string(), error);
+    return false;
+  }
+
+  ryml::id_type json_root = tree.root_id();
+  if (tree.is_stream(json_root) && tree.num_children(json_root) == 1) {
+    json_root = tree.first_child(json_root);
+  }
+
+  std::string json;
+  try {
+    json = ryml::emitrs_json<std::string>(tree, json_root);
+  } catch (const RymlError& ex) {
+    spdlog::warn("Can't convert ruleset YAML file {} to JSON: {}", path.string(), ex.what());
     return false;
   }
 
   google::protobuf::util::JsonParseOptions options;
-  const auto status =
-      google::protobuf::util::JsonStringToMessage(json.dump(), &proto_object, options);
+  const auto status = google::protobuf::util::JsonStringToMessage(json, &proto_object, options);
   if (!status.ok()) {
     spdlog::warn("Can't parse ruleset YAML file {} as protobuf JSON: {}", path.string(),
                  status.ToString());
