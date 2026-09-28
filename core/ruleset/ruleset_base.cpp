@@ -1,6 +1,7 @@
 #include "ruleset_base.hpp"
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
@@ -110,17 +111,6 @@ bool ValidateRymlNode(const ryml::Tree& tree, ryml::id_type node, std::string& e
   }
 
   return true;
-}
-
-std::string JoinStrings(const std::vector<std::string>& values, std::string_view separator) {
-  std::string result;
-  for (std::size_t idx = 0; idx < values.size(); ++idx) {
-    if (idx != 0) {
-      result += separator;
-    }
-    result += values[idx];
-  }
-  return result;
 }
 
 bool ReadTextProtoFromFile(const std::filesystem::path& path,
@@ -267,7 +257,7 @@ std::vector<std::filesystem::path> CollectRuleFiles(const std::vector<std::files
         spdlog::warn(
             "Ruleset files with the same name but different extensions are not allowed "
             "in one directory and will be ignored: {}",
-            JoinStrings(paths, ", "));
+            paths);
       }
       idx = end;
     }
