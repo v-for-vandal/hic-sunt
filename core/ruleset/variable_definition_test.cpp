@@ -135,4 +135,149 @@ TEST(StdVariableDefinitions, ParseVariableWithoutTypeReturnsError) {
   EXPECT_EQ(*error, ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
 }
 
+TEST(StdVariableDefinitions, ParameterizedNumericVariableMatchesConcreteId) {
+  StdVariableDefinitions definitions;
+  NumericVariableDefinition<StdBaseTypes> definition;
+  definition.minimum = 0;
+  definition.maximum = 10;
+
+  const auto normalized_id = definitions.AddParameterizedNumericDefinition(
+      "job/{job}/produces/{resource}",
+      {
+          {.name = "job", .values = {"job.one", "job.two"}},
+          {.name = "resource", .values = {"resource.wood", "resource.food"}},
+      },
+      definition);
+  ASSERT_TRUE(normalized_id.has_value());
+  EXPECT_EQ(*normalized_id, "job/{}/produces/{}");
+
+  EXPECT_TRUE(definitions.IsNumericVariable("job/@job.one/produces/@resource.wood"));
+  EXPECT_FALSE(definitions.IsNumericVariable("job/job.one/produces/resource.wood"));
+
+  const auto found = definitions.FindNumericVariable("job/@job.one/produces/@resource.wood");
+  ASSERT_TRUE(found.has_value());
+  EXPECT_EQ(found->id, "job/@job.one/produces/@resource.wood");
+  EXPECT_EQ(found->minimum, 0);
+  EXPECT_EQ(found->maximum, 10);
+
+  const auto missing_value =
+      definitions.FindNumericVariable("job/@job.one/produces/@resource.stone");
+  ASSERT_FALSE(missing_value.has_value());
+  EXPECT_EQ(missing_value.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+}
+
+TEST(StdVariableDefinitions, ParameterizedNumericVariableQueriesByWildcard) {
+  StdVariableDefinitions definitions;
+  ASSERT_TRUE(definitions
+                  .AddParameterizedNumericDefinition(
+                      "job/{job}/consumes/{resource}",
+                      {
+                          {.name = "job", .values = {"job.one", "job.two"}},
+                          {.name = "resource", .values = {"resource.wood", "resource.food"}},
+                      },
+                      {})
+                  .has_value());
+
+  const auto resources = definitions.FindParameterizedNumericVariables("job/@job.one/consumes/@*");
+  ASSERT_TRUE(resources.has_value());
+  ASSERT_EQ(resources->size(), 2u);
+  EXPECT_EQ((*resources)[0].normalized_id, "job/{}/consumes/{}");
+  EXPECT_EQ((*resources)[0].variable_id, "job/@job.one/consumes/@resource.wood");
+  ASSERT_EQ((*resources)[0].parameters.size(), 2u);
+  EXPECT_EQ((*resources)[0].parameters[0].name, "job");
+  EXPECT_EQ((*resources)[0].parameters[0].value, "job.one");
+  EXPECT_EQ((*resources)[0].parameters[1].name, "resource");
+  EXPECT_EQ((*resources)[0].parameters[1].value, "resource.wood");
+  EXPECT_EQ((*resources)[1].variable_id, "job/@job.one/consumes/@resource.food");
+
+  const auto jobs = definitions.FindParameterizedNumericVariables("job/@*/consumes/@resource.wood");
+  ASSERT_TRUE(jobs.has_value());
+  ASSERT_EQ(jobs->size(), 2u);
+  EXPECT_EQ((*jobs)[0].variable_id, "job/@job.one/consumes/@resource.wood");
+  EXPECT_EQ((*jobs)[1].variable_id, "job/@job.two/consumes/@resource.wood");
+}
+
+TEST(StdVariableDefinitions, ParameterizedVariableRejectsInvalidConcreteReferenceAndQuery) {
+  StdVariableDefinitions definitions;
+  ASSERT_TRUE(
+      definitions
+          .AddParameterizedNumericDefinition("job/{job}/consumes/{resource}",
+                                             {
+                                                 {.name = "job", .values = {"job.one"}},
+                                                 {.name = "resource", .values = {"resource.wood"}},
+                                             },
+                                             {})
+          .has_value());
+
+  const auto wildcard_in_concrete_id =
+      definitions.FindNumericVariable("job/@*/consumes/@resource.wood");
+  ASSERT_FALSE(wildcard_in_concrete_id.has_value());
+  EXPECT_EQ(wildcard_in_concrete_id.error(), ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
+
+  const auto empty_parameter_value =
+      definitions.FindParameterizedNumericVariables("job/@/consumes/@*");
+  ASSERT_FALSE(empty_parameter_value.has_value());
+  EXPECT_EQ(empty_parameter_value.error(), ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
+}
+
+TEST(StdVariableDefinitions, ParameterizedStringVariableMatchesConcreteIdAndQuery) {
+  StdVariableDefinitions definitions;
+  StringVariableDefinition<StdBaseTypes> definition;
+  definition.default_value = "default.label";
+
+  const auto normalized_id = definitions.AddParameterizedStringDefinition(
+      "label/{thing}",
+      {
+          {.name = "thing", .values = {"thing.one", "thing.two"}},
+      },
+      definition);
+  ASSERT_TRUE(normalized_id.has_value());
+  EXPECT_EQ(*normalized_id, "label/{}");
+
+  const auto found = definitions.FindStringVariable("label/@thing.one");
+  ASSERT_TRUE(found.has_value());
+  EXPECT_EQ(found->id, "label/@thing.one");
+  EXPECT_EQ(found->default_value, "default.label");
+
+  const auto instances = definitions.FindParameterizedStringVariables("label/@*");
+  ASSERT_TRUE(instances.has_value());
+  ASSERT_EQ(instances->size(), 2u);
+  EXPECT_EQ((*instances)[0].variable_id, "label/@thing.one");
+  EXPECT_EQ((*instances)[1].variable_id, "label/@thing.two");
+}
+
+TEST(StdVariableDefinitions, ParameterizedVariableRejectsInvalidPatternAndValues) {
+  StdVariableDefinitions definitions;
+
+  const auto invalid_partial_segment = definitions.AddParameterizedNumericDefinition(
+      "job{job}/produces/{resource}",
+      {
+          {.name = "job", .values = {"job.one"}},
+          {.name = "resource", .values = {"resource.wood"}},
+      },
+      {});
+  ASSERT_FALSE(invalid_partial_segment.has_value());
+  EXPECT_EQ(invalid_partial_segment.error(), ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
+
+  const auto invalid_parameter_value = definitions.AddParameterizedNumericDefinition(
+      "job/{job}/produces/{resource}",
+      {
+          {.name = "job", .values = {"job/one"}},
+          {.name = "resource", .values = {"resource.wood"}},
+      },
+      {});
+  ASSERT_FALSE(invalid_parameter_value.has_value());
+  EXPECT_EQ(invalid_parameter_value.error(), ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
+
+  const auto invalid_static_segment = definitions.AddParameterizedNumericDefinition(
+      "job/{job}/@produces/{resource}",
+      {
+          {.name = "job", .values = {"job.one"}},
+          {.name = "resource", .values = {"resource.wood"}},
+      },
+      {});
+  ASSERT_FALSE(invalid_static_segment.has_value());
+  EXPECT_EQ(invalid_static_segment.error(), ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
+}
+
 }  // namespace hs::ruleset

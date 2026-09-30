@@ -62,10 +62,13 @@ bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection& errors
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
+  std::vector<StringId> job_ids;
+  job_ids.reserve(jobs_.jobs_size());
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto& job = jobs_.jobs(idx);
     const auto job_id = BaseTypes::StringIdFromStdString(job.id());
     jobs_by_type_.try_emplace(job_id, idx);
+    job_ids.push_back(job_id);
 
     spdlog::debug("Working with job {}", job_id);
 
@@ -88,42 +91,45 @@ bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
     spdlog::debug("Is this variable numeric? {}",
                   GetVariableDefinitions()->IsNumericVariable(
                       BaseTypes::StringIdFromStdString(count_variable_id)));
+  }
 
-    for (const auto& [resource_id, resource_idx] : resources_by_id_) {
-      (void)resource_idx;
+  std::vector<StringId> resource_ids;
+  resource_ids.reserve(resources_.resources_size());
+  for (const auto& resource : resources_.resources()) {
+    resource_ids.push_back(BaseTypes::StringIdFromStdString(resource.id()));
+  }
 
-      NumericVariableDefinition<BaseTypes> produces_definition;
-      produces_definition.allowed_scopes.reset();
-      produces_definition.allowed_scopes |=
-          types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
-      produces_definition.minimum = 0;
+  NumericVariableDefinition<BaseTypes> resource_flow_definition;
+  resource_flow_definition.allowed_scopes.reset();
+  resource_flow_definition.allowed_scopes |=
+      types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
+  resource_flow_definition.minimum = 0;
 
-      const auto produces_variable_id = BaseTypes::StringIdFromStdString(
-          fmt::format("job/{}/produces/{}", job.id(), resource_id));
-      add_result = parsed_variable_definitions_->AddNumericDefinition(produces_variable_id,
-                                                                      produces_definition);
-      if (!add_result) {
-        AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition", produces_variable_id));
-        return false;
-      }
+  const std::vector<ParameterDomain<BaseTypes>> resource_flow_parameters = {
+      ParameterDomain<BaseTypes>{
+          .name = BaseTypes::StringIdFromStdString("job"),
+          .values = job_ids,
+      },
+      ParameterDomain<BaseTypes>{
+          .name = BaseTypes::StringIdFromStdString("resource"),
+          .values = resource_ids,
+      },
+  };
 
-      NumericVariableDefinition<BaseTypes> consumes_definition;
-      consumes_definition.allowed_scopes.reset();
-      consumes_definition.allowed_scopes |=
-          types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
-      consumes_definition.minimum = 0;
+  auto produces_result = parsed_variable_definitions_->AddParameterizedNumericDefinition(
+      BaseTypes::StringIdFromStdString("job/{job}/produces/{resource}"), resource_flow_parameters,
+      resource_flow_definition);
+  if (!produces_result) {
+    AddError(errors, "Variable job/{}/produces/{} has conflicting type definition");
+    return false;
+  }
 
-      const auto consumes_variable_id = BaseTypes::StringIdFromStdString(
-          fmt::format("job/{}/consumes/{}", job.id(), resource_id));
-      add_result = parsed_variable_definitions_->AddNumericDefinition(consumes_variable_id,
-                                                                      consumes_definition);
-      if (!add_result) {
-        AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition", consumes_variable_id));
-        return false;
-      }
-    }
+  auto consumes_result = parsed_variable_definitions_->AddParameterizedNumericDefinition(
+      BaseTypes::StringIdFromStdString("job/{job}/consumes/{resource}"), resource_flow_parameters,
+      resource_flow_definition);
+  if (!consumes_result) {
+    AddError(errors, "Variable job/{}/consumes/{} has conflicting type definition");
+    return false;
   }
 
   return true;

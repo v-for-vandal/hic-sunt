@@ -3,6 +3,7 @@
 #include <core/utils/serialize.hpp>
 #include <memory>
 #include <string>
+#include <string_view>
 
 namespace hs {
 
@@ -10,6 +11,7 @@ class StdBaseTypes {
  public:
   // TODO: use boost flyweight ?
   using StringId = std::string;
+  using StringIdView = std::string_view;
   using String = std::string;
   using NumericValue = double;
 
@@ -18,6 +20,8 @@ class StdBaseTypes {
 
   static StringId StringIdFromStdString(const std::string& data) noexcept { return data; }
   static StringId StringIdFromStdString(std::string&& data) noexcept { return std::move(data); }
+  static StringId StringIdFromStringView(StringIdView data) { return StringId(data); }
+  static StringIdView ToStringIdView(const StringId& data) noexcept { return data; }
 
   static bool IsNullToken(const auto& string) noexcept { return string.size() == 0; }
 

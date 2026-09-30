@@ -11,7 +11,9 @@
 #include <expected>
 #include <limits>
 #include <variant>
+#include <vector>
 
+#include "core/ruleset/parameterized_variable_definition.hpp"
 #include "core/types/variable_type.hpp"
 
 namespace hs::ruleset {
@@ -47,22 +49,36 @@ class StringVariableDefinition : public VariableDefinitionBase<BaseTypes> {
 };
 
 template <typename BaseTypes = StdBaseTypes>
+using ParameterizedNumericVariableDefinition =
+    ParameterizedVariableDefinition<BaseTypes, NumericVariableDefinition<BaseTypes>>;
+
+template <typename BaseTypes = StdBaseTypes>
+using ParameterizedStringVariableDefinition =
+    ParameterizedVariableDefinition<BaseTypes, StringVariableDefinition<BaseTypes>>;
+
+template <typename BaseTypes = StdBaseTypes>
 class VariableDefinitions {
  public:
   using StringId = typename BaseTypes::StringId;
   using VariableType = types::VariableType;
   using ParsedVariableDefinition = std::variant<NumericVariableDefinition<BaseTypes>,
                                                 StringVariableDefinition<BaseTypes>, ErrorCode>;
+  using ParameterizedNumericDefinition = ParameterizedNumericVariableDefinition<BaseTypes>;
+  using ParameterizedStringDefinition = ParameterizedStringVariableDefinition<BaseTypes>;
+  using ParameterizedInstance = ParameterizedVariableInstance<BaseTypes>;
 
   static ParsedVariableDefinition ParseFromProto(const proto::ruleset::Variable& definition);
 
   bool IsEmpty() const noexcept {
-    return string_definitions_.empty() && numeric_definitions_.empty();
+    return string_definitions_.empty() && numeric_definitions_.empty() &&
+           parameterized_numeric_definitions_.empty() && parameterized_string_definitions_.empty();
   }
 
   void Clear() {
     numeric_definitions_.clear();
     string_definitions_.clear();
+    parameterized_numeric_definitions_.clear();
+    parameterized_string_definitions_.clear();
   }
 
   std::expected<void, ErrorCode> AddNumericDefinition(
@@ -71,12 +87,20 @@ class VariableDefinitions {
   std::expected<void, ErrorCode> AddStringDefinition(
       const StringId& id, StringVariableDefinition<BaseTypes> definition);
 
+  std::expected<StringId, ErrorCode> AddParameterizedNumericDefinition(
+      const StringId& pattern, std::vector<ParameterDomain<BaseTypes>> parameters,
+      NumericVariableDefinition<BaseTypes> definition);
+
+  std::expected<StringId, ErrorCode> AddParameterizedStringDefinition(
+      const StringId& pattern, std::vector<ParameterDomain<BaseTypes>> parameters,
+      StringVariableDefinition<BaseTypes> definition);
+
   bool IsNumericVariable(const StringId& id) const noexcept {
-    return numeric_definitions_.contains(id);
+    return GetVariableType(id) == VariableType::kNumeric;
   }
 
   bool IsStringVariable(const StringId& id) const noexcept {
-    return string_definitions_.contains(id);
+    return GetVariableType(id) == VariableType::kString;
   }
 
   bool IsVariable(const StringId& id) const noexcept {
@@ -94,13 +118,49 @@ class VariableDefinitions {
   std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode> FindVariable(
       const StringId& id) const;
 
+  std::expected<std::vector<ParameterizedInstance>, ErrorCode> FindParameterizedNumericVariables(
+      const StringId& query) const;
+
+  std::expected<std::vector<ParameterizedInstance>, ErrorCode> FindParameterizedStringVariables(
+      const StringId& query) const;
+
   const auto& GetNumericDefinitions() const noexcept { return numeric_definitions_; }
 
   const auto& GetStringDefinitions() const noexcept { return string_definitions_; }
 
+  const auto& GetParameterizedNumericDefinitions() const noexcept {
+    return parameterized_numeric_definitions_;
+  }
+
+  const auto& GetParameterizedStringDefinitions() const noexcept {
+    return parameterized_string_definitions_;
+  }
+
  private:
+  template <typename ConcreteDefinition>
+  using ParameterizedDefinitionsMap =
+      absl::flat_hash_map<StringId, ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>>;
+
+  template <typename ConcreteDefinition>
+  std::expected<StringId, ErrorCode> AddParameterizedDefinition(
+      const StringId& pattern, std::vector<ParameterDomain<BaseTypes>> parameters,
+      ConcreteDefinition definition, ParameterizedDefinitionsMap<ConcreteDefinition>& target);
+
+  template <typename ConcreteDefinition>
+  std::expected<ConcreteDefinition, ErrorCode> FindParameterizedVariable(
+      const StringId& id, const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const;
+
+  template <typename ConcreteDefinition>
+  auto FindParameterizedVariables(
+      const StringId& query, const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions)
+      const -> std::expected<std::vector<ParameterizedInstance>, ErrorCode>;
+
   absl::flat_hash_map<StringId, NumericVariableDefinition<BaseTypes>> numeric_definitions_;
   absl::flat_hash_map<StringId, StringVariableDefinition<BaseTypes>> string_definitions_;
+  ParameterizedDefinitionsMap<NumericVariableDefinition<BaseTypes>>
+      parameterized_numeric_definitions_;
+  ParameterizedDefinitionsMap<StringVariableDefinition<BaseTypes>>
+      parameterized_string_definitions_;
 };
 
 template <typename BaseTypes>

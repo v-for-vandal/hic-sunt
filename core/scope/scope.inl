@@ -135,6 +135,58 @@ bool Scope<BaseTypes>::IsNumericVariable(const StringId& variable) const {
 }
 
 template <typename BaseTypes>
+auto Scope<BaseTypes>::FindParameterizedNumericValues(const StringId& query)
+    -> std::expected<std::vector<ParameterizedNumericValue>, ErrorCode> {
+  const auto instances = GetVariableDefinitions()->FindParameterizedNumericVariables(query);
+  if (!instances) {
+    return std::unexpected(instances.error());
+  }
+
+  std::vector<ParameterizedNumericValue> result;
+  result.reserve(instances->size());
+  for (const auto& instance : *instances) {
+    auto value = GetNumericValue(instance.variable_id);
+    if (!value) {
+      return std::unexpected(value.error());
+    }
+    result.push_back(ParameterizedNumericValue{
+        .normalized_id = instance.normalized_id,
+        .variable_id = instance.variable_id,
+        .parameters = instance.parameters,
+        .value = *value,
+    });
+  }
+
+  return result;
+}
+
+template <typename BaseTypes>
+auto Scope<BaseTypes>::FindParameterizedStringValues(const StringId& query)
+    -> std::expected<std::vector<ParameterizedStringValue>, ErrorCode> {
+  const auto instances = GetVariableDefinitions()->FindParameterizedStringVariables(query);
+  if (!instances) {
+    return std::unexpected(instances.error());
+  }
+
+  std::vector<ParameterizedStringValue> result;
+  result.reserve(instances->size());
+  for (const auto& instance : *instances) {
+    auto value = GetStringValue(instance.variable_id);
+    if (!value) {
+      return std::unexpected(value.error());
+    }
+    result.push_back(ParameterizedStringValue{
+        .normalized_id = instance.normalized_id,
+        .variable_id = instance.variable_id,
+        .parameters = instance.parameters,
+        .value = *value,
+    });
+  }
+
+  return result;
+}
+
+template <typename BaseTypes>
 std::expected<void, ErrorCode> Scope<BaseTypes>::SetNumericModifier(const StringId& variable,
                                                                     const StringId& key,
                                                                     NumericValue add,

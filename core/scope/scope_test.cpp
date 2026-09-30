@@ -12,6 +12,7 @@ using StdScope = Scope<StdBaseTypes>;
 using StdScopePtr = ScopePtr<StdBaseTypes>;
 using StdVariableDefinitions = hs::ruleset::VariableDefinitions<StdBaseTypes>;
 using StdVariableDefinitionsPtr = hs::ruleset::VariableDefinitionsPtr<StdBaseTypes>;
+using StdVariableDefinitionsConstPtr = hs::ruleset::VariableDefinitionsConstPtr<StdBaseTypes>;
 
 TEST(StdScope, Create) {
   StdScope stack_scope;
@@ -106,6 +107,40 @@ TEST(StdScope, AddTagLinkRejectsDuplicateScopeId) {
   auto result = scope->AddTagLink("tag_b", tag_scope_b);
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
+}
+
+TEST(StdScope, ParameterizedNumericValuesCanBeSetByConcreteIdAndQueried) {
+  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+  hs::ruleset::NumericVariableDefinition<StdBaseTypes> definition;
+  definition.minimum = 0;
+  ASSERT_TRUE(mutable_definitions
+                  ->AddParameterizedNumericDefinition(
+                      "job/{job}/produces/{resource}",
+                      {
+                          {.name = "job", .values = {"job.one", "job.two"}},
+                          {.name = "resource", .values = {"resource.wood", "resource.food"}},
+                      },
+                      definition)
+                  .has_value());
+  StdVariableDefinitionsConstPtr definitions{
+      std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
+
+  StdScopePtr scope("scope", types::ScopeType::SCOPE_TYPE_WORLD);
+  scope->SetVariableDefinitions(definitions);
+
+  ASSERT_TRUE(scope->SetNumericModifier("job/@job.one/produces/@resource.wood", "base", 2, 0));
+
+  const auto concrete_value = scope->GetNumericValue("job/@job.one/produces/@resource.wood");
+  ASSERT_TRUE(concrete_value.has_value());
+  EXPECT_EQ(*concrete_value, 2);
+
+  const auto values = scope->FindParameterizedNumericValues("job/@job.one/produces/@*");
+  ASSERT_TRUE(values.has_value());
+  ASSERT_EQ(values->size(), 2u);
+  EXPECT_EQ((*values)[0].variable_id, "job/@job.one/produces/@resource.wood");
+  EXPECT_EQ((*values)[0].value, 2);
+  EXPECT_EQ((*values)[1].variable_id, "job/@job.one/produces/@resource.food");
+  EXPECT_EQ((*values)[1].value, 0);
 }
 
 }  // namespace hs::scope

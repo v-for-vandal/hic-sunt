@@ -9,6 +9,7 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
 #include <expected>
+#include <vector>
 
 #include "core/ruleset/variable_definition.hpp"
 #include "core/types/error_code.hpp"
@@ -53,6 +54,21 @@ class Scope {
   using VariableDefinitionBase = hs::ruleset::VariableDefinitionBase<BaseTypes>;
   using NumericVariableDefinition = hs::ruleset::NumericVariableDefinition<BaseTypes>;
   using StringVariableDefinition = hs::ruleset::StringVariableDefinition<BaseTypes>;
+  using ParameterBinding = hs::ruleset::ParameterBinding<BaseTypes>;
+
+  struct ParameterizedNumericValue {
+    StringId normalized_id;
+    StringId variable_id;
+    std::vector<ParameterBinding> parameters;
+    NumericValue value{0};
+  };
+
+  struct ParameterizedStringValue {
+    StringId normalized_id;
+    StringId variable_id;
+    std::vector<ParameterBinding> parameters;
+    StringId value{};
+  };
 
   /** \brief Create new scope with given id and given variable definitions
    *
@@ -152,6 +168,12 @@ class Scope {
 
   bool IsStringVariable(const StringId& variable) const;
   bool IsNumericVariable(const StringId& variable) const;
+
+  std::expected<std::vector<ParameterizedNumericValue>, ErrorCode> FindParameterizedNumericValues(
+      const StringId& query);
+
+  std::expected<std::vector<ParameterizedStringValue>, ErrorCode> FindParameterizedStringValues(
+      const StringId& query);
 
   void ClearCache();
 
