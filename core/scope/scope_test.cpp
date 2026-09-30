@@ -109,7 +109,85 @@ TEST(StdScope, AddTagLinkRejectsDuplicateScopeId) {
   EXPECT_EQ(result.error(), ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
 }
 
-TEST(StdScope, ParameterizedNumericValuesCanBeSetByConcreteIdAndQueried) {
+TEST(StdScope, OpenParameterizedNumericQueryReturnsOnlyMaterializedValuesFromGraph) {
+  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+  hs::ruleset::NumericVariableDefinition<StdBaseTypes> definition;
+  ASSERT_TRUE(definition.default_variable.SetModifier("default", 5, 0, 0));
+  ASSERT_TRUE(mutable_definitions
+                  ->AddParameterizedNumericDefinition(
+                      "job/{job}/consumes/{resource}",
+                      {
+                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("job"),
+                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("resource"),
+                      },
+                      definition)
+                  .has_value());
+  StdVariableDefinitionsConstPtr definitions{
+      std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
+
+  StdScopePtr parent("parent", types::ScopeType::SCOPE_TYPE_PLANE);
+  parent->SetVariableDefinitions(definitions);
+  StdScopePtr child("child", types::ScopeType::SCOPE_TYPE_REGION);
+  ASSERT_TRUE(child->SetParent(parent));
+
+  const auto default_value = child->GetNumericValue("job/@job.unknown/consumes/@resource.wood");
+  ASSERT_TRUE(default_value.has_value());
+  EXPECT_EQ(*default_value, 5);
+
+  auto empty_query = child->GetNumericQuery("job/@*/consumes/@resource.wood");
+  ASSERT_TRUE(empty_query.has_value());
+  EXPECT_TRUE(empty_query->empty());
+
+  const auto wildcard_modifier =
+      parent->SetNumericModifier("job/@*/consumes/@resource.wood", "base", 3, 0, 42);
+  ASSERT_FALSE(wildcard_modifier.has_value());
+  EXPECT_EQ(wildcard_modifier.error(), ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
+
+  ASSERT_TRUE(
+      parent->SetNumericModifier("job/@job.farmer/consumes/@resource.wood", "base", 3, 0, 42));
+
+  const auto values = child->GetNumericQuery("job/@*/consumes/@resource.wood");
+  ASSERT_TRUE(values.has_value());
+  ASSERT_EQ(values->size(), 1u);
+  EXPECT_EQ((*values)[0].first, "job/@job.farmer/consumes/@resource.wood");
+  EXPECT_EQ((*values)[0].second, 8);
+
+  const auto modification_time = child->GetModificationTime("job/@*/consumes/@resource.wood");
+  ASSERT_TRUE(modification_time.has_value());
+  EXPECT_EQ(*modification_time, 42u);
+}
+
+TEST(StdScope, OpenParameterizedStringConcreteUsesDefaultVariable) {
+  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+  hs::ruleset::StringVariableDefinition<StdBaseTypes> definition;
+  ASSERT_TRUE(definition.default_variable.SetModifier("default", "label.default", 0, 0));
+  ASSERT_TRUE(mutable_definitions
+                  ->AddParameterizedStringDefinition(
+                      "label/{thing}",
+                      {
+                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("thing"),
+                      },
+                      definition)
+                  .has_value());
+  StdVariableDefinitionsConstPtr definitions{
+      std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
+
+  StdScopePtr scope("scope", types::ScopeType::SCOPE_TYPE_WORLD);
+  scope->SetVariableDefinitions(definitions);
+
+  const auto value = scope->GetStringValue("label/@thing.any");
+  ASSERT_TRUE(value.has_value());
+  EXPECT_EQ(*value, "label.default");
+
+  ASSERT_TRUE(scope->SetStringModifier("label/@thing.any", "override", "label.override", 1));
+  const auto query = scope->GetStringQuery("label/@*");
+  ASSERT_TRUE(query.has_value());
+  ASSERT_EQ(query->size(), 1u);
+  EXPECT_EQ((*query)[0].first, "label/@thing.any");
+  EXPECT_EQ((*query)[0].second, "label.override");
+}
+
+TEST(StdScope, ParameterizedNumericQueryReturnsMaterializedConcreteValues) {
   auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
   hs::ruleset::NumericVariableDefinition<StdBaseTypes> definition;
   definition.minimum = 0;
@@ -134,13 +212,11 @@ TEST(StdScope, ParameterizedNumericValuesCanBeSetByConcreteIdAndQueried) {
   ASSERT_TRUE(concrete_value.has_value());
   EXPECT_EQ(*concrete_value, 2);
 
-  const auto values = scope->FindParameterizedNumericValues("job/@job.one/produces/@*");
+  const auto values = scope->GetNumericQuery("job/@job.one/produces/@*");
   ASSERT_TRUE(values.has_value());
-  ASSERT_EQ(values->size(), 2u);
-  EXPECT_EQ((*values)[0].variable_id, "job/@job.one/produces/@resource.wood");
-  EXPECT_EQ((*values)[0].value, 2);
-  EXPECT_EQ((*values)[1].variable_id, "job/@job.one/produces/@resource.food");
-  EXPECT_EQ((*values)[1].value, 0);
+  ASSERT_EQ(values->size(), 1u);
+  EXPECT_EQ((*values)[0].first, "job/@job.one/produces/@resource.wood");
+  EXPECT_EQ((*values)[0].second, 2);
 }
 
 }  // namespace hs::scope

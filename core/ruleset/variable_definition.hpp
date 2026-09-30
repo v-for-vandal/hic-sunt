@@ -8,6 +8,8 @@
 #include <core/types/scope_type.hpp>
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
+#include <core/variables/numeric_variable.hpp>
+#include <core/variables/string_variable.hpp>
 #include <expected>
 #include <limits>
 #include <variant>
@@ -35,7 +37,11 @@ template <typename BaseTypes = StdBaseTypes>
 class NumericVariableDefinition : public VariableDefinitionBase<BaseTypes> {
  public:
   using NumericValue = typename BaseTypes::NumericValue;
+  using NumericVariable = hs::variables::NumericVariable<BaseTypes>;
 
+  // TODO: Codex: Пусть это будет свойством именно
+  // ParameterizedVariableDefinition
+  NumericVariable default_variable{};
   NumericValue maximum = std::numeric_limits<NumericValue>::max();
   NumericValue minimum = std::numeric_limits<NumericValue>::lowest();
 };
@@ -44,8 +50,11 @@ template <typename BaseTypes = StdBaseTypes>
 class StringVariableDefinition : public VariableDefinitionBase<BaseTypes> {
  public:
   using StringId = typename BaseTypes::StringId;
+  using StringVariable = hs::variables::StringVariable<BaseTypes>;
 
-  StringId default_value{};
+  // TODO: Codex: Пусть это будет свойством именно
+  // ParameterizedVariableDefinition
+  StringVariable default_variable{};
 };
 
 template <typename BaseTypes = StdBaseTypes>
@@ -108,15 +117,31 @@ class VariableDefinitions {
   }
 
   VariableType GetVariableType(const StringId& id) const noexcept;
+  VariableType GetVariableType(const ParsedVariableQuery<BaseTypes>& query) const noexcept;
 
   std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode> FindNumericVariable(
       const StringId& id) const;
 
+  std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode> FindNumericVariable(
+      const ParsedVariableQuery<BaseTypes>& query) const;
+
   std::expected<StringVariableDefinition<BaseTypes>, ErrorCode> FindStringVariable(
       const StringId& id) const;
 
+  std::expected<StringVariableDefinition<BaseTypes>, ErrorCode> FindStringVariable(
+      const ParsedVariableQuery<BaseTypes>& query) const;
+
+  std::expected<ParameterizedNumericDefinition, ErrorCode> FindParameterizedNumericDefinition(
+      const ParsedVariableQuery<BaseTypes>& query) const;
+
+  std::expected<ParameterizedStringDefinition, ErrorCode> FindParameterizedStringDefinition(
+      const ParsedVariableQuery<BaseTypes>& query) const;
+
   std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode> FindVariable(
       const StringId& id) const;
+
+  std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode> FindVariable(
+      const ParsedVariableQuery<BaseTypes>& query) const;
 
   std::expected<std::vector<ParameterizedInstance>, ErrorCode> FindParameterizedNumericVariables(
       const StringId& query) const;
@@ -149,6 +174,17 @@ class VariableDefinitions {
   template <typename ConcreteDefinition>
   std::expected<ConcreteDefinition, ErrorCode> FindParameterizedVariable(
       const StringId& id, const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const;
+
+  template <typename ConcreteDefinition>
+  std::expected<ConcreteDefinition, ErrorCode> FindParameterizedVariable(
+      const ParsedVariableQuery<BaseTypes>& query,
+      const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const;
+
+  template <typename ConcreteDefinition>
+  std::expected<ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>, ErrorCode>
+  FindParameterizedDefinition(
+      const ParsedVariableQuery<BaseTypes>& query,
+      const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const;
 
   template <typename ConcreteDefinition>
   auto FindParameterizedVariables(

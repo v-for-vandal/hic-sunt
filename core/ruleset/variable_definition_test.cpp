@@ -166,6 +166,29 @@ TEST(StdVariableDefinitions, ParameterizedNumericVariableMatchesConcreteId) {
   EXPECT_EQ(missing_value.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
+TEST(StdVariableDefinitions, OpenParameterizedNumericVariableMatchesUnknownConcreteId) {
+  StdVariableDefinitions definitions;
+  NumericVariableDefinition<StdBaseTypes> definition;
+  definition.minimum = 0;
+
+  const auto normalized_id = definitions.AddParameterizedNumericDefinition(
+      "job/{job}/consumes/{resource}",
+      {
+          OpenParameterDomain<StdBaseTypes>("job"),
+          OpenParameterDomain<StdBaseTypes>("resource"),
+      },
+      definition);
+  ASSERT_TRUE(normalized_id.has_value());
+  EXPECT_EQ(*normalized_id, "job/{}/consumes/{}");
+
+  const auto found = definitions.FindNumericVariable("job/@new.job/consumes/@new.resource");
+  ASSERT_TRUE(found.has_value());
+  EXPECT_EQ(found->id, "job/@new.job/consumes/@new.resource");
+
+  const auto invalid = definitions.FindNumericVariable("job/@bad/value/consumes/@new.resource");
+  ASSERT_FALSE(invalid.has_value());
+}
+
 TEST(StdVariableDefinitions, ParameterizedNumericVariableQueriesByWildcard) {
   StdVariableDefinitions definitions;
   ASSERT_TRUE(definitions
@@ -223,7 +246,7 @@ TEST(StdVariableDefinitions, ParameterizedVariableRejectsInvalidConcreteReferenc
 TEST(StdVariableDefinitions, ParameterizedStringVariableMatchesConcreteIdAndQuery) {
   StdVariableDefinitions definitions;
   StringVariableDefinition<StdBaseTypes> definition;
-  definition.default_value = "default.label";
+  ASSERT_TRUE(definition.default_variable.SetModifier("default", "default.label", 0, 0));
 
   const auto normalized_id = definitions.AddParameterizedStringDefinition(
       "label/{thing}",
@@ -237,7 +260,10 @@ TEST(StdVariableDefinitions, ParameterizedStringVariableMatchesConcreteIdAndQuer
   const auto found = definitions.FindStringVariable("label/@thing.one");
   ASSERT_TRUE(found.has_value());
   EXPECT_EQ(found->id, "label/@thing.one");
-  EXPECT_EQ(found->default_value, "default.label");
+  std::string default_value;
+  double default_level = 0;
+  found->default_variable.CalculateModifiers(default_value, default_level);
+  EXPECT_EQ(default_value, "default.label");
 
   const auto instances = definitions.FindParameterizedStringVariables("label/@*");
   ASSERT_TRUE(instances.has_value());

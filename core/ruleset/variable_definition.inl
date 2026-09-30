@@ -32,7 +32,9 @@ VariableDefinitions<BaseTypes>::ParseFromProto(const proto::ruleset::Variable& d
     StringVariableDefinition<BaseTypes> string_definition;
     const auto& string_ = definition.string();
     if (!string_.default_().empty()) {
-      string_definition.default_value = BaseTypes::StringIdFromStdString(string_.default_());
+      [[maybe_unused]] const auto default_result = string_definition.default_variable.SetModifier(
+          BaseTypes::StringIdFromStdString("default"),
+          BaseTypes::StringIdFromStdString(string_.default_()), 0, 0);
     }
     apply_allowed_scopes(string_definition);
     return string_definition;
@@ -139,15 +141,47 @@ VariableDefinitions<BaseTypes>::GetVariableType(const StringId& id) const noexce
   if (string_definitions_.contains(id)) {
     return VariableType::kString;
   }
-
-  const auto normalized = details::NormalizeConcreteOrQueryId<BaseTypes>(id, false);
-  if (!normalized) {
-    return VariableType::kMissing;
-  }
-  if (parameterized_numeric_definitions_.contains(*normalized)) {
+  if (parameterized_numeric_definitions_.contains(id)) {
     return VariableType::kNumeric;
   }
-  if (parameterized_string_definitions_.contains(*normalized)) {
+  if (parameterized_string_definitions_.contains(id)) {
+    return VariableType::kString;
+  }
+
+  const auto parsed = ParseVariableQuery<BaseTypes>(id, false);
+  if (!parsed || !parsed->is_parameterized || parsed->has_wildcard) {
+    return VariableType::kMissing;
+  }
+  if (parameterized_numeric_definitions_.contains(parsed->normalized_id)) {
+    return VariableType::kNumeric;
+  }
+  if (parameterized_string_definitions_.contains(parsed->normalized_id)) {
+    return VariableType::kString;
+  }
+  return VariableType::kMissing;
+}
+
+template <typename BaseTypes>
+typename VariableDefinitions<BaseTypes>::VariableType
+VariableDefinitions<BaseTypes>::GetVariableType(
+    const ParsedVariableQuery<BaseTypes>& query) const noexcept {
+  if (!query.is_parameterized) {
+    if (numeric_definitions_.contains(query.raw_id)) {
+      return VariableType::kNumeric;
+    }
+    if (string_definitions_.contains(query.raw_id)) {
+      return VariableType::kString;
+    }
+    return VariableType::kMissing;
+  }
+
+  if (query.has_wildcard) {
+    return VariableType::kMissing;
+  }
+  if (parameterized_numeric_definitions_.contains(query.normalized_id)) {
+    return VariableType::kNumeric;
+  }
+  if (parameterized_string_definitions_.contains(query.normalized_id)) {
     return VariableType::kString;
   }
   return VariableType::kMissing;
@@ -156,12 +190,28 @@ VariableDefinitions<BaseTypes>::GetVariableType(const StringId& id) const noexce
 template <typename BaseTypes>
 std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode>
 VariableDefinitions<BaseTypes>::FindNumericVariable(const StringId& id) const {
-  const auto fit = numeric_definitions_.find(id);
-  if (fit != numeric_definitions_.end()) {
-    return fit->second;
+  auto parsed = ParseVariableQuery<BaseTypes>(id, false);
+  if (!parsed) {
+    return std::unexpected(parsed.error());
+  }
+  return FindNumericVariable(*parsed);
+}
+
+template <typename BaseTypes>
+std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode>
+VariableDefinitions<BaseTypes>::FindNumericVariable(
+    const ParsedVariableQuery<BaseTypes>& query) const {
+  if (!query.is_parameterized) {
+    const auto fit = numeric_definitions_.find(query.raw_id);
+    if (fit != numeric_definitions_.end()) {
+      return fit->second;
+    }
+
+    spdlog::error("Variable {} is unknown or is not numeric", query.raw_id);
+    return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  auto parameterized = FindParameterizedVariable(id, parameterized_numeric_definitions_);
+  auto parameterized = FindParameterizedVariable(query, parameterized_numeric_definitions_);
   if (parameterized) {
     return *parameterized;
   }
@@ -169,19 +219,35 @@ VariableDefinitions<BaseTypes>::FindNumericVariable(const StringId& id) const {
     return std::unexpected(parameterized.error());
   }
 
-  spdlog::error("Variable {} is unknown or is not numeric", id);
+  spdlog::error("Variable {} is unknown or is not numeric", query.raw_id);
   return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
 template <typename BaseTypes>
 std::expected<StringVariableDefinition<BaseTypes>, ErrorCode>
 VariableDefinitions<BaseTypes>::FindStringVariable(const StringId& id) const {
-  const auto fit = string_definitions_.find(id);
-  if (fit != string_definitions_.end()) {
-    return fit->second;
+  auto parsed = ParseVariableQuery<BaseTypes>(id, false);
+  if (!parsed) {
+    return std::unexpected(parsed.error());
+  }
+  return FindStringVariable(*parsed);
+}
+
+template <typename BaseTypes>
+std::expected<StringVariableDefinition<BaseTypes>, ErrorCode>
+VariableDefinitions<BaseTypes>::FindStringVariable(
+    const ParsedVariableQuery<BaseTypes>& query) const {
+  if (!query.is_parameterized) {
+    const auto fit = string_definitions_.find(query.raw_id);
+    if (fit != string_definitions_.end()) {
+      return fit->second;
+    }
+
+    spdlog::error("Variable {} is unknown or is not string", query.raw_id);
+    return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  auto parameterized = FindParameterizedVariable(id, parameterized_string_definitions_);
+  auto parameterized = FindParameterizedVariable(query, parameterized_string_definitions_);
   if (parameterized) {
     return *parameterized;
   }
@@ -189,7 +255,7 @@ VariableDefinitions<BaseTypes>::FindStringVariable(const StringId& id) const {
     return std::unexpected(parameterized.error());
   }
 
-  spdlog::error("Variable {} is unknown or is not string", id);
+  spdlog::error("Variable {} is unknown or is not string", query.raw_id);
   return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
@@ -198,30 +264,96 @@ template <typename ConcreteDefinition>
 std::expected<ConcreteDefinition, ErrorCode>
 VariableDefinitions<BaseTypes>::FindParameterizedVariable(
     const StringId& id, const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const {
-  const auto normalized = details::NormalizeConcreteOrQueryId<BaseTypes>(id, false);
-  if (!normalized) {
-    return std::unexpected(normalized.error());
+  auto parsed = ParseVariableQuery<BaseTypes>(id, false);
+  if (!parsed) {
+    return std::unexpected(parsed.error());
+  }
+  return FindParameterizedVariable(*parsed, definitions);
+}
+
+template <typename BaseTypes>
+template <typename ConcreteDefinition>
+std::expected<ConcreteDefinition, ErrorCode>
+VariableDefinitions<BaseTypes>::FindParameterizedVariable(
+    const ParsedVariableQuery<BaseTypes>& query,
+    const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const {
+  if (query.has_wildcard) {
+    return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
   }
 
-  const auto fit = definitions.find(*normalized);
-  if (fit == definitions.end()) {
+  auto parameterized_definition = FindParameterizedDefinition(query, definitions);
+  if (!parameterized_definition) {
+    return std::unexpected(parameterized_definition.error());
+  }
+
+  auto definition = parameterized_definition->concrete_definition;
+  const auto concrete_id = details::BuildConcreteVariableId(*parameterized_definition, query);
+  if (!concrete_id) {
+    return std::unexpected(concrete_id.error());
+  }
+  definition.id = *concrete_id;
+  return definition;
+}
+
+template <typename BaseTypes>
+template <typename ConcreteDefinition>
+std::expected<ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>, ErrorCode>
+VariableDefinitions<BaseTypes>::FindParameterizedDefinition(
+    const ParsedVariableQuery<BaseTypes>& query,
+    const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const {
+  if (!query.is_parameterized) {
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  auto validation = details::ValidateConcreteParameterBindings(id, fit->second);
-  if (!validation) {
-    return std::unexpected(validation.error());
+  const auto fit = definitions.find(query.normalized_id);
+  if (fit == definitions.end()) {
+    return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+  }
+  if (query.arguments.size() != fit->second.parameters.size()) {
+    return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  auto definition = fit->second.concrete_definition;
-  definition.id = id;
-  return definition;
+  for (size_t idx = 0; idx < query.arguments.size(); ++idx) {
+    const auto& argument = query.arguments[idx];
+    const auto& parameter = fit->second.parameters[idx];
+    if (argument.kind == ParsedVariableQueryArgumentKind::kConcrete &&
+        parameter.kind == ParameterDomainKind::kFixed &&
+        !parameter.allowed_values.contains(argument.value)) {
+      return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+    }
+  }
+
+  return fit->second;
+}
+
+template <typename BaseTypes>
+std::expected<typename VariableDefinitions<BaseTypes>::ParameterizedNumericDefinition, ErrorCode>
+VariableDefinitions<BaseTypes>::FindParameterizedNumericDefinition(
+    const ParsedVariableQuery<BaseTypes>& query) const {
+  return FindParameterizedDefinition(query, parameterized_numeric_definitions_);
+}
+
+template <typename BaseTypes>
+std::expected<typename VariableDefinitions<BaseTypes>::ParameterizedStringDefinition, ErrorCode>
+VariableDefinitions<BaseTypes>::FindParameterizedStringDefinition(
+    const ParsedVariableQuery<BaseTypes>& query) const {
+  return FindParameterizedDefinition(query, parameterized_string_definitions_);
 }
 
 template <typename BaseTypes>
 std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode>
 VariableDefinitions<BaseTypes>::FindVariable(const StringId& id) const {
-  const auto numeric = FindNumericVariable(id);
+  auto parsed = ParseVariableQuery<BaseTypes>(id, false);
+  if (!parsed) {
+    return std::unexpected(parsed.error());
+  }
+  return FindVariable(*parsed);
+}
+
+template <typename BaseTypes>
+std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode>
+VariableDefinitions<BaseTypes>::FindVariable(const ParsedVariableQuery<BaseTypes>& query) const {
+  const auto numeric = FindNumericVariable(query);
   if (numeric) {
     return numeric;
   }
@@ -229,7 +361,7 @@ VariableDefinitions<BaseTypes>::FindVariable(const StringId& id) const {
     return std::unexpected(numeric.error());
   }
 
-  const auto string_ = FindStringVariable(id);
+  const auto string_ = FindStringVariable(query);
   if (string_) {
     return string_;
   }
@@ -237,7 +369,7 @@ VariableDefinitions<BaseTypes>::FindVariable(const StringId& id) const {
     return std::unexpected(string_.error());
   }
 
-  spdlog::error("Variable {} is unknown", id);
+  spdlog::error("Variable {} is unknown", query.raw_id);
   return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
@@ -260,17 +392,20 @@ template <typename ConcreteDefinition>
 auto VariableDefinitions<BaseTypes>::FindParameterizedVariables(
     const StringId& query, const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const
     -> std::expected<std::vector<ParameterizedInstance>, ErrorCode> {
-  const auto normalized = details::NormalizeConcreteOrQueryId<BaseTypes>(query, true);
-  if (!normalized) {
-    return std::unexpected(normalized.error());
+  const auto parsed = ParseVariableQuery<BaseTypes>(query, true);
+  if (!parsed) {
+    return std::unexpected(parsed.error());
+  }
+  if (!parsed->is_parameterized) {
+    return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  const auto fit = definitions.find(*normalized);
+  const auto fit = definitions.find(parsed->normalized_id);
   if (fit == definitions.end()) {
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  return details::GenerateParameterizedInstances(query, fit->second);
+  return details::GenerateParameterizedInstances(*parsed, fit->second);
 }
 
 }  // namespace hs::ruleset

@@ -8,6 +8,7 @@
 #include <ranges>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "parameterized_variable_definition.hpp"
 
@@ -152,45 +153,81 @@ std::basic_string<CharT> JoinNormalizedPath(const std::vector<NormalizedSegment<
 }
 
 template <typename BaseTypes, typename View>
-std::expected<typename BaseTypes::StringId, ErrorCode> NormalizeConcreteOrQueryView(
-    View id, bool allow_wildcard) {
+std::expected<ParsedVariableQuery<BaseTypes>, ErrorCode> ParseVariableQueryView(
+    const typename BaseTypes::StringId& raw_id, View id, bool allow_wildcard) {
   using CharT = ViewCharT<View>;
+  const std::basic_string_view<CharT> id_view{id.data(), id.size()};
 
-  const auto segments = SplitPath(id);
+  ParsedVariableQuery<BaseTypes> result;
+  result.raw_id = raw_id;
+
+  if (!ContainsAsciiChar(id_view, kParameterMarker)) {
+    result.normalized_id = raw_id;
+    return result;
+  }
+
+  const auto segments = SplitPath(id_view);
   std::vector<NormalizedSegment<CharT>> normalized_segments;
   normalized_segments.reserve(segments.size());
 
-  bool has_parameter = false;
   for (const auto segment : segments) {
     if (!IsParameterizedSegment(segment)) {
       normalized_segments.push_back(NormalizedSegment<CharT>{.text = segment});
       continue;
     }
 
-    has_parameter = true;
+    result.is_parameterized = true;
+    normalized_segments.push_back(NormalizedSegment<CharT>{.is_placeholder = true});
+
     if (IsWildcardParameterizedSegment(segment)) {
       if (!allow_wildcard) {
         return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
       }
-    } else if (!IsValidConcreteParameterValue(segment.substr(1))) {
+      result.has_wildcard = true;
+      result.arguments.push_back(ParsedVariableQueryArgument<BaseTypes>{
+          .kind = ParsedVariableQueryArgumentKind::kWildcard,
+      });
+      continue;
+    }
+
+    const auto value = segment.substr(1);
+    if (!IsValidConcreteParameterValue(value)) {
       return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
     }
-    normalized_segments.push_back(NormalizedSegment<CharT>{.is_placeholder = true});
+    result.arguments.push_back(ParsedVariableQueryArgument<BaseTypes>{
+        .kind = ParsedVariableQueryArgumentKind::kConcrete,
+        .value = StringIdFromView<BaseTypes>(value),
+    });
   }
 
-  if (!has_parameter) {
+  if (result.is_parameterized) {
+    const auto normalized = JoinNormalizedPath(normalized_segments);
+    result.normalized_id = StringIdFromString<BaseTypes>(normalized);
+  } else {
+    result.normalized_id = raw_id;
+  }
+
+  return result;
+}
+
+template <typename BaseTypes, typename View>
+std::expected<typename BaseTypes::StringId, ErrorCode> NormalizeConcreteOrQueryView(
+    const typename BaseTypes::StringId& raw_id, View id, bool allow_wildcard) {
+  auto parsed = ParseVariableQueryView<BaseTypes>(raw_id, id, allow_wildcard);
+  if (!parsed) {
+    return std::unexpected(parsed.error());
+  }
+  if (!parsed->is_parameterized) {
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
-
-  const auto normalized = JoinNormalizedPath(normalized_segments);
-  return StringIdFromString<BaseTypes>(normalized);
+  return parsed->normalized_id;
 }
 
 template <typename BaseTypes>
 std::expected<typename BaseTypes::StringId, ErrorCode> NormalizeConcreteOrQueryId(
     const typename BaseTypes::StringId& id, bool allow_wildcard) {
   const auto view_holder = MakeStringIdView<BaseTypes>(id);
-  return NormalizeConcreteOrQueryView<BaseTypes>(GetView(view_holder), allow_wildcard);
+  return NormalizeConcreteOrQueryView<BaseTypes>(id, GetView(view_holder), allow_wildcard);
 }
 
 template <typename BaseTypes, typename ConcreteDefinition>
@@ -265,6 +302,16 @@ ParseParameterizedDefinition(const typename BaseTypes::StringId& pattern,
 
     typename ParameterizedDefinition::Parameter parameter;
     parameter.name = parameter_name;
+    parameter.kind = fit->second.kind;
+
+    if (parameter.kind == ParameterDomainKind::kOpen) {
+      if (!fit->second.values.empty()) {
+        return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
+      }
+      result.parameters.push_back(std::move(parameter));
+      continue;
+    }
+
     parameter.values.reserve(fit->second.values.size());
     parameter.allowed_values.reserve(fit->second.values.size());
     for (const auto& value : fit->second.values) {
@@ -284,46 +331,38 @@ ParseParameterizedDefinition(const typename BaseTypes::StringId& pattern,
 
 template <typename BaseTypes, typename ConcreteDefinition>
 std::expected<void, ErrorCode> ValidateConcreteParameterBindings(
-    const typename BaseTypes::StringId& id,
+    const ParsedVariableQuery<BaseTypes>& query,
     const ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>& definition) {
-  const auto id_view_holder = MakeStringIdView<BaseTypes>(id);
-  const auto pattern_view_holder = MakeStringIdView<BaseTypes>(definition.pattern);
-  const auto id_segments = SplitPath(GetView(id_view_holder));
-  const auto pattern_segments = SplitPath(GetView(pattern_view_holder));
-  if (id_segments.size() != pattern_segments.size()) {
+  if (!query.is_parameterized || query.has_wildcard || query.normalized_id != definition.id ||
+      query.arguments.size() != definition.parameters.size()) {
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  size_t parameter_index = 0;
-  for (size_t idx = 0; idx < pattern_segments.size(); ++idx) {
-    const auto pattern_segment = pattern_segments[idx];
-    const auto id_segment = id_segments[idx];
-
-    if (!IsPlaceholderSegment(pattern_segment)) {
-      if (pattern_segment != id_segment) {
-        return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
-      }
-      continue;
+  for (size_t idx = 0; idx < definition.parameters.size(); ++idx) {
+    const auto& argument = query.arguments[idx];
+    if (argument.kind != ParsedVariableQueryArgumentKind::kConcrete) {
+      return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
     }
 
-    if (parameter_index >= definition.parameters.size() || !IsParameterizedSegment(id_segment) ||
-        IsWildcardParameterizedSegment(id_segment)) {
+    const auto& parameter = definition.parameters[idx];
+    if (parameter.kind == ParameterDomainKind::kFixed &&
+        !parameter.allowed_values.contains(argument.value)) {
       return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
     }
-
-    const auto parameter_value = StringIdFromView<BaseTypes>(id_segment.substr(1));
-    const auto& parameter = definition.parameters[parameter_index];
-    if (!parameter.allowed_values.contains(parameter_value)) {
-      return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
-    }
-    ++parameter_index;
-  }
-
-  if (parameter_index != definition.parameters.size()) {
-    return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
   return {};
+}
+
+template <typename BaseTypes, typename ConcreteDefinition>
+std::expected<void, ErrorCode> ValidateConcreteParameterBindings(
+    const typename BaseTypes::StringId& id,
+    const ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>& definition) {
+  auto query = hs::ruleset::ParseVariableQuery<BaseTypes>(id, false);
+  if (!query) {
+    return std::unexpected(query.error());
+  }
+  return ValidateConcreteParameterBindings(*query, definition);
 }
 
 template <typename BaseTypes, typename ConcreteDefinition>
@@ -359,53 +398,52 @@ typename BaseTypes::StringId BuildConcreteVariableId(
 }
 
 template <typename BaseTypes, typename ConcreteDefinition>
+std::expected<typename BaseTypes::StringId, ErrorCode> BuildConcreteVariableId(
+    const ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>& definition,
+    const ParsedVariableQuery<BaseTypes>& query) {
+  auto validation = ValidateConcreteParameterBindings(query, definition);
+  if (!validation) {
+    return std::unexpected(validation.error());
+  }
+
+  std::vector<typename BaseTypes::StringId> values;
+  values.reserve(query.arguments.size());
+  for (const auto& argument : query.arguments) {
+    values.push_back(argument.value);
+  }
+  return BuildConcreteVariableId(definition, values);
+}
+
+template <typename BaseTypes, typename ConcreteDefinition>
 std::expected<std::vector<ParameterizedVariableInstance<BaseTypes>>, ErrorCode>
 GenerateParameterizedInstances(
-    const typename BaseTypes::StringId& query,
+    const ParsedVariableQuery<BaseTypes>& query,
     const ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>& definition) {
   using StringId = typename BaseTypes::StringId;
 
-  const auto query_view_holder = MakeStringIdView<BaseTypes>(query);
-  const auto pattern_view_holder = MakeStringIdView<BaseTypes>(definition.pattern);
-  const auto query_segments = SplitPath(GetView(query_view_holder));
-  const auto pattern_segments = SplitPath(GetView(pattern_view_holder));
-  if (query_segments.size() != pattern_segments.size()) {
+  if (!query.is_parameterized || query.normalized_id != definition.id ||
+      query.arguments.size() != definition.parameters.size()) {
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
   std::vector<std::vector<StringId>> choices;
   choices.reserve(definition.parameters.size());
-  size_t parameter_index = 0;
-  for (size_t idx = 0; idx < pattern_segments.size(); ++idx) {
-    const auto pattern_segment = pattern_segments[idx];
-    const auto query_segment = query_segments[idx];
-
-    if (!IsPlaceholderSegment(pattern_segment)) {
-      if (pattern_segment != query_segment) {
-        return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+  for (size_t idx = 0; idx < definition.parameters.size(); ++idx) {
+    const auto& argument = query.arguments[idx];
+    const auto& parameter = definition.parameters[idx];
+    if (argument.kind == ParsedVariableQueryArgumentKind::kWildcard) {
+      if (parameter.kind == ParameterDomainKind::kOpen) {
+        return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
       }
+      choices.push_back(parameter.values);
       continue;
     }
 
-    if (parameter_index >= definition.parameters.size() || !IsParameterizedSegment(query_segment)) {
+    if (parameter.kind == ParameterDomainKind::kFixed &&
+        !parameter.allowed_values.contains(argument.value)) {
       return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
     }
-
-    const auto& parameter = definition.parameters[parameter_index];
-    if (IsWildcardParameterizedSegment(query_segment)) {
-      choices.push_back(parameter.values);
-    } else {
-      const auto value = StringIdFromView<BaseTypes>(query_segment.substr(1));
-      if (!parameter.allowed_values.contains(value)) {
-        return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
-      }
-      choices.push_back({value});
-    }
-    ++parameter_index;
-  }
-
-  if (parameter_index != definition.parameters.size()) {
-    return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+    choices.push_back({argument.value});
   }
 
   std::vector<ParameterizedVariableInstance<BaseTypes>> result;
@@ -438,4 +476,51 @@ GenerateParameterizedInstances(
   return result;
 }
 
+template <typename BaseTypes, typename ConcreteDefinition>
+std::expected<std::vector<ParameterizedVariableInstance<BaseTypes>>, ErrorCode>
+GenerateParameterizedInstances(
+    const typename BaseTypes::StringId& query,
+    const ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>& definition) {
+  auto parsed = hs::ruleset::ParseVariableQuery<BaseTypes>(query, true);
+  if (!parsed) {
+    return std::unexpected(parsed.error());
+  }
+  return GenerateParameterizedInstances(*parsed, definition);
+}
+
+template <typename BaseTypes>
+bool QueryMatchesConcreteId(const ParsedVariableQuery<BaseTypes>& query,
+                            const ParsedVariableQuery<BaseTypes>& concrete_id) {
+  if (!query.is_parameterized || !concrete_id.is_parameterized || concrete_id.has_wildcard ||
+      query.normalized_id != concrete_id.normalized_id ||
+      query.arguments.size() != concrete_id.arguments.size()) {
+    return false;
+  }
+
+  for (size_t idx = 0; idx < query.arguments.size(); ++idx) {
+    const auto& query_argument = query.arguments[idx];
+    if (query_argument.kind == ParsedVariableQueryArgumentKind::kWildcard) {
+      continue;
+    }
+    if (concrete_id.arguments[idx].kind != ParsedVariableQueryArgumentKind::kConcrete ||
+        concrete_id.arguments[idx].value != query_argument.value) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 }  // namespace hs::ruleset::details
+
+namespace hs::ruleset {
+
+template <typename BaseTypes>
+std::expected<ParsedVariableQuery<BaseTypes>, ErrorCode> ParseVariableQuery(
+    const typename BaseTypes::StringId& id, bool allow_wildcard) {
+  const auto view_holder = details::MakeStringIdView<BaseTypes>(id);
+  return details::ParseVariableQueryView<BaseTypes>(id, details::GetView(view_holder),
+                                                    allow_wildcard);
+}
+
+}  // namespace hs::ruleset
