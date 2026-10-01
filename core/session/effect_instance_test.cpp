@@ -76,6 +76,31 @@ TEST(StdEffectInstance, CheckPossibleRejectsNonBooleanResult) {
   EXPECT_EQ(result.error(), ErrorCode::ERR_EFFECT_LUA_RUNTIME_ERROR);
 }
 
+TEST(StdEffectInstance, WildcardParameterizedVarBindsLuaDictionary) {
+  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+  ASSERT_TRUE(
+      mutable_definitions->AddParameterizedNumericDefinition("job/{}/consumes/{}", {}).has_value());
+  hs::ruleset::VariableDefinitionsConstPtr<StdBaseTypes> definitions{
+      std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
+
+  StdScopePtr scope("scope", types::ScopeType::SCOPE_TYPE_WORLD);
+  scope->SetVariableDefinitions(definitions);
+  ASSERT_TRUE(scope->SetNumericModifier("job/@job.farmer/consumes/@resource.wood", "seed", 2, 0));
+  ASSERT_TRUE(scope->SetNumericModifier("job/@job.baker/consumes/@resource.wood", "seed", 5, 0));
+  ASSERT_TRUE(scope->SetNumericModifier("job/@job.farmer/consumes/@resource.food", "seed", 100, 0));
+
+  auto definition = hs::ruleset::test::MakeEffectDefinition(
+      "effect.id",
+      "local total = 0; for id,value in pairs(VAR(job/@*/consumes/@resource.wood)) do total = "
+      "total + value end; return total == 7",
+      "return");
+
+  StdEffectInstance instance(definition);
+  auto result = instance.CheckPossible(scope, 10000);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(*result);
+}
+
 TEST(StdEffectInstance, ExecuteReturnsChangeSetWithAppliedChanges) {
   auto definition = hs::ruleset::test::MakeEffectDefinition(
       "effect.id", "return true",

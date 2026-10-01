@@ -1,29 +1,29 @@
 #pragma once
 
-#include "effect.hpp"
+#include <spdlog/spdlog.h>
 
 #include <cctype>
+#include <sol/sol.hpp>
 #include <utility>
 
-#include <sol/sol.hpp>
-#include <spdlog/spdlog.h>
+#include "effect.hpp"
 
 namespace hs::ruleset {
 
 namespace details {
 
-inline bool IsValidEffectIdentifierChar(char ch) {
+inline bool IsValidEffectReferenceChar(char ch) {
   const unsigned char uchar = static_cast<unsigned char>(ch);
-  return std::isalnum(uchar) != 0 || ch == '_' || ch == '.';
+  return std::isalnum(uchar) != 0 || ch == '_' || ch == '.' || ch == '/' || ch == '@' || ch == '*';
 }
 
-inline bool IsValidEffectIdentifier(const std::string& token) {
+inline bool IsValidEffectReference(const std::string& token) {
   if (token.empty()) {
     return false;
   }
 
   for (char ch : token) {
-    if (!IsValidEffectIdentifierChar(ch)) {
+    if (!IsValidEffectReferenceChar(ch)) {
       return false;
     }
   }
@@ -33,49 +33,44 @@ inline bool IsValidEffectIdentifier(const std::string& token) {
 
 inline std::string TrimAsciiWhitespace(const std::string& input) {
   size_t begin = 0;
-  while (begin < input.size() &&
-         std::isspace(static_cast<unsigned char>(input[begin])) != 0) {
+  while (begin < input.size() && std::isspace(static_cast<unsigned char>(input[begin])) != 0) {
     ++begin;
   }
 
   size_t end = input.size();
-  while (end > begin &&
-         std::isspace(static_cast<unsigned char>(input[end - 1])) != 0) {
+  while (end > begin && std::isspace(static_cast<unsigned char>(input[end - 1])) != 0) {
     --end;
   }
 
   return input.substr(begin, end - begin);
 }
 
-inline std::expected<std::string, ErrorCode> ParseVarArgument(
-    const std::string& raw_argument) {
+inline std::expected<std::string, ErrorCode> ParseVarArgument(const std::string& raw_argument) {
   const std::string trimmed = TrimAsciiWhitespace(raw_argument);
   if (trimmed.empty()) {
     return std::unexpected(ErrorCode::ERR_INVALID_EFFECT_VARIABLE_REFERENCE);
   }
 
   if (trimmed.front() == '"' || trimmed.back() == '"') {
-    if (trimmed.size() < 2 || trimmed.front() != '"' ||
-        trimmed.back() != '"') {
+    if (trimmed.size() < 2 || trimmed.front() != '"' || trimmed.back() != '"') {
       return std::unexpected(ErrorCode::ERR_INVALID_EFFECT_VARIABLE_REFERENCE);
     }
 
     const std::string inner = trimmed.substr(1, trimmed.size() - 2);
-    if (!IsValidEffectIdentifier(inner)) {
+    if (!IsValidEffectReference(inner)) {
       return std::unexpected(ErrorCode::ERR_INVALID_EFFECT_VARIABLE_REFERENCE);
     }
     return inner;
   }
 
-  if (!IsValidEffectIdentifier(trimmed)) {
+  if (!IsValidEffectReference(trimmed)) {
     return std::unexpected(ErrorCode::ERR_INVALID_EFFECT_VARIABLE_REFERENCE);
   }
 
   return trimmed;
 }
 
-inline bool StartsWithAt(const std::string& source, size_t pos,
-                         const char* needle) {
+inline bool StartsWithAt(const std::string& source, size_t pos, const char* needle) {
   for (size_t idx = 0; needle[idx] != '\0'; ++idx) {
     if (pos + idx >= source.size() || source[pos + idx] != needle[idx]) {
       return false;
@@ -119,26 +114,23 @@ inline size_t FindBlockCommentEnd(const std::string& source, size_t pos) {
 
 }  // namespace details
 
-
 template <typename BaseTypes>
 int EffectDefinition<BaseTypes>::GetMaxOperations() const noexcept {
-    // Later, we can add it to proto object. For now, constant will suffice
-    return 10000;
+  // Later, we can add it to proto object. For now, constant will suffice
+  return 10000;
 }
 
 template <typename BaseTypes>
 EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
-    : data_(std::move(data)),
-      id_(BaseTypes::StringIdFromStdString(data_.id())) {
+    : data_(std::move(data)), id_(BaseTypes::StringIdFromStdString(data_.id())) {
   size_t next_var_index = 0;
   std::vector<std::string> possible_errors;
   std::vector<std::string> effect_errors;
   if (data_.has_possible()) {
     auto possible_processed = PreprocessCode(data_.possible(), next_var_index);
     if (!possible_processed) {
-      lua_errors_.push_back(fmt::format(
-          "preprocessing \"possible\" failed with code {}",
-          possible_processed.error()));
+      lua_errors_.push_back(fmt::format("preprocessing \"possible\" failed with code {}",
+                                        possible_processed.error()));
       is_broken_ = true;
     } else {
       possible_processed->code =
@@ -146,20 +138,17 @@ EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
       possible_code_ = std::move(*possible_processed);
       AppendDependencies(dependencies_, possible_code_->dependencies);
       AppendLuaVariables(lua_variables_, possible_code_->lua_variables);
-      possible_errors =
-          ValidateLuaCode(id_, kPossibleFunctionName, possible_code_->code);
+      possible_errors = ValidateLuaCode(id_, kPossibleFunctionName, possible_code_->code);
     }
   }
 
   auto effect_processed = PreprocessCode(data_.effect(), next_var_index);
   if (!effect_processed) {
-    lua_errors_.push_back(fmt::format(
-        "preprocessing \"effect\" failed with code {}",
-        effect_processed.error()));
+    lua_errors_.push_back(
+        fmt::format("preprocessing \"effect\" failed with code {}", effect_processed.error()));
     is_broken_ = true;
   } else {
-    effect_processed->code =
-        WrapCodeInFunction(kEffectFunctionName, effect_processed->code);
+    effect_processed->code = WrapCodeInFunction(kEffectFunctionName, effect_processed->code);
     effect_code_ = std::move(*effect_processed);
 
     AppendDependencies(dependencies_, effect_code_.dependencies);
@@ -168,27 +157,23 @@ EffectDefinition<BaseTypes>::EffectDefinition(ProtoEffect data)
   }
 
   lua_errors_.reserve(lua_errors_.size() + possible_errors.size() + effect_errors.size());
-  lua_errors_.insert(lua_errors_.end(),
-                     std::make_move_iterator(possible_errors.begin()),
+  lua_errors_.insert(lua_errors_.end(), std::make_move_iterator(possible_errors.begin()),
                      std::make_move_iterator(possible_errors.end()));
-  lua_errors_.insert(lua_errors_.end(),
-                     std::make_move_iterator(effect_errors.begin()),
+  lua_errors_.insert(lua_errors_.end(), std::make_move_iterator(effect_errors.begin()),
                      std::make_move_iterator(effect_errors.end()));
 
   is_broken_ |= !lua_errors_.empty();
 }
 
 template <typename BaseTypes>
-std::string EffectDefinition<BaseTypes>::WrapCodeInFunction(
-    std::string_view function_name, const std::string& code) {
-  return "function " + std::string(function_name) + "(target)\n" + code +
-         "\nend";
+std::string EffectDefinition<BaseTypes>::WrapCodeInFunction(std::string_view function_name,
+                                                            const std::string& code) {
+  return "function " + std::string(function_name) + "(target)\n" + code + "\nend";
 }
 
 template <typename BaseTypes>
 std::vector<std::string> EffectDefinition<BaseTypes>::ValidateLuaCode(
-    const StringId& effect_id, std::string_view chunk_name,
-    const std::string& wrapped_code) {
+    const StringId& effect_id, std::string_view chunk_name, const std::string& wrapped_code) {
   std::vector<std::string> errors;
 
   if (wrapped_code.empty()) {
@@ -196,15 +181,13 @@ std::vector<std::string> EffectDefinition<BaseTypes>::ValidateLuaCode(
   }
 
   sol::state lua;
-  lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table,
-                     sol::lib::string);
+  lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::string);
 
   sol::load_result loaded = lua.load(wrapped_code);
   if (!loaded.valid()) {
     const auto error = loaded.get<sol::error>();
-    auto message = fmt::format(
-        "Failed to validate lua chunk {} for effect {}: {}", chunk_name,
-        effect_id, error.what());
+    auto message = fmt::format("Failed to validate lua chunk {} for effect {}: {}", chunk_name,
+                               effect_id, error.what());
     spdlog::warn(message);
     errors.push_back(std::move(message));
     return errors;
@@ -227,19 +210,19 @@ std::vector<std::string> EffectDefinition<BaseTypes>::ValidateLuaCode(
 
 template <typename BaseTypes>
 void EffectDefinition<BaseTypes>::AppendDependencies(
-    std::vector<StringId>& target, const std::vector<StringId>& source) {
+    std::vector<ParsedVariableQuery>& target, const std::vector<ParsedVariableQuery>& source) {
   target.insert(target.end(), source.begin(), source.end());
 }
 
 template <typename BaseTypes>
-void EffectDefinition<BaseTypes>::AppendLuaVariables(
-    std::vector<LuaVariable>& target, const std::vector<LuaVariable>& source) {
+void EffectDefinition<BaseTypes>::AppendLuaVariables(std::vector<LuaVariable>& target,
+                                                     const std::vector<LuaVariable>& source) {
   target.insert(target.end(), source.begin(), source.end());
 }
 
 template <typename BaseTypes>
-auto EffectDefinition<BaseTypes>::PreprocessCode(
-    const proto::ruleset::effect::Code& code, size_t& next_var_index)
+auto EffectDefinition<BaseTypes>::PreprocessCode(const proto::ruleset::effect::Code& code,
+                                                 size_t& next_var_index)
     -> std::expected<Code, ErrorCode> {
   std::string source;
   if (code.has_lua()) {
@@ -279,18 +262,24 @@ auto EffectDefinition<BaseTypes>::PreprocessCode(
         return std::unexpected(ErrorCode::ERR_INVALID_EFFECT_VARIABLE_REFERENCE);
       }
 
-      auto parsed_argument = details::ParseVarArgument(
-          source.substr(argument_begin, argument_end - argument_begin));
+      auto parsed_argument =
+          details::ParseVarArgument(source.substr(argument_begin, argument_end - argument_begin));
       if (!parsed_argument) {
         return std::unexpected(parsed_argument.error());
       }
 
+      auto parsed_query =
+          ParseVariableQuery<BaseTypes>(BaseTypes::StringIdFromStdString(*parsed_argument), true);
+      if (!parsed_query) {
+        return std::unexpected(ErrorCode::ERR_INVALID_EFFECT_VARIABLE_REFERENCE);
+      }
+
       const std::string lua_name = "__var_" + std::to_string(next_var_index++);
       result.code += lua_name;
-      result.dependencies.push_back(BaseTypes::StringIdFromStdString(*parsed_argument));
+      result.dependencies.push_back(*parsed_query);
       result.lua_variables.push_back(LuaVariable{
           .lua_name = lua_name,
-          .variable_id = BaseTypes::StringIdFromStdString(*parsed_argument),
+          .parsed_query = std::move(*parsed_query),
       });
       pos = argument_end + 1;
       continue;
@@ -300,8 +289,13 @@ auto EffectDefinition<BaseTypes>::PreprocessCode(
     ++pos;
   }
 
-  for(const auto& explicit_dependency: code.dependencies() ) {
-      result.dependencies.push_back(BaseTypes::StringIdFromStdString(explicit_dependency));
+  for (const auto& explicit_dependency : code.dependencies()) {
+    auto parsed_dependency =
+        ParseVariableQuery<BaseTypes>(BaseTypes::StringIdFromStdString(explicit_dependency), true);
+    if (!parsed_dependency) {
+      return std::unexpected(ErrorCode::ERR_INVALID_EFFECT_VARIABLE_REFERENCE);
+    }
+    result.dependencies.push_back(std::move(*parsed_dependency));
   }
 
   return result;

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <string_view>
+#include <type_traits>
+#include <variant>
 
 #include "ruleset.hpp"
 #include "spdlog/spdlog.h"
@@ -34,8 +37,8 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
   success &= LoadResources(errors);
   success &= LoadJobs(errors);
   success &= LoadProjects(errors);
-  success &= LoadEffects(errors);
   success &= LoadVariableDefinitions(errors);
+  success &= LoadEffects(errors);
 
   return success;
 }
@@ -52,9 +55,12 @@ bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection& err
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection& errors) {
+  resource_ids_.reserve(resources_.resources_size());
   for (int idx = 0; idx < resources_.resources_size(); ++idx) {
     const auto& resource = resources_.resources(idx);
-    resources_by_id_.try_emplace(BaseTypes::StringIdFromStdString(resource.id()), idx);
+    const auto resource_id = BaseTypes::StringIdFromStdString(resource.id());
+    resources_by_id_.try_emplace(resource_id, idx);
+    resource_ids_.push_back(resource_id);
   }
 
   return true;
@@ -62,10 +68,12 @@ bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection& errors
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
+  job_ids_.reserve(jobs_.jobs_size());
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto& job = jobs_.jobs(idx);
     const auto job_id = BaseTypes::StringIdFromStdString(job.id());
     jobs_by_type_.try_emplace(job_id, idx);
+    job_ids_.push_back(job_id);
 
     spdlog::debug("Working with job {}", job_id);
 
@@ -88,42 +96,6 @@ bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
     spdlog::debug("Is this variable numeric? {}",
                   GetVariableDefinitions()->IsNumericVariable(
                       BaseTypes::StringIdFromStdString(count_variable_id)));
-
-    for (const auto& [resource_id, resource_idx] : resources_by_id_) {
-      (void)resource_idx;
-
-      NumericVariableDefinition<BaseTypes> produces_definition;
-      produces_definition.allowed_scopes.reset();
-      produces_definition.allowed_scopes |=
-          types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
-      produces_definition.minimum = 0;
-
-      const auto produces_variable_id = BaseTypes::StringIdFromStdString(
-          fmt::format("job/{}/produces/{}", job.id(), resource_id));
-      add_result = parsed_variable_definitions_->AddNumericDefinition(produces_variable_id,
-                                                                      produces_definition);
-      if (!add_result) {
-        AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition", produces_variable_id));
-        return false;
-      }
-
-      NumericVariableDefinition<BaseTypes> consumes_definition;
-      consumes_definition.allowed_scopes.reset();
-      consumes_definition.allowed_scopes |=
-          types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
-      consumes_definition.minimum = 0;
-
-      const auto consumes_variable_id = BaseTypes::StringIdFromStdString(
-          fmt::format("job/{}/consumes/{}", job.id(), resource_id));
-      add_result = parsed_variable_definitions_->AddNumericDefinition(consumes_variable_id,
-                                                                      consumes_definition);
-      if (!add_result) {
-        AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition", consumes_variable_id));
-        return false;
-      }
-    }
   }
 
   return true;
@@ -186,34 +158,49 @@ bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadVariableDefinitions(ErrorsCollection& errors) {
+  if (!parsed_variable_definitions_->SetFixedParameterDomainValues(FixedParameterDomain::kJob,
+                                                                   job_ids_)) {
+    AddError(errors, "Failed to register job parameter domain values");
+    return false;
+  }
+  if (!parsed_variable_definitions_->SetFixedParameterDomainValues(FixedParameterDomain::kResource,
+                                                                   resource_ids_)) {
+    AddError(errors, "Failed to register resource parameter domain values");
+    return false;
+  }
+
+  const auto add_error = [&errors](const auto& definition) {
+    AddError(errors,
+             fmt::format("Variable {} has undefined type or invalid definition", definition.id()));
+  };
+
   for (int idx = 0; idx < RuleSetBase::GetVariableDefinitions().variables_size(); ++idx) {
     const auto& definition = RuleSetBase::GetVariableDefinitions().variables(idx);
     const auto parsed_definition = VariableDefinitions<BaseTypes>::ParseFromProto(definition);
     const auto variable_id = BaseTypes::StringIdFromStdString(definition.id());
 
-    if (const auto* numeric_definition =
-            std::get_if<NumericVariableDefinition<BaseTypes>>(&parsed_definition)) {
-      auto add_result =
-          parsed_variable_definitions_->AddNumericDefinition(variable_id, *numeric_definition);
-      if (!add_result) {
-        AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition", definition.id()));
-        return false;
-      }
-    } else if (const auto* string_definition =
-                   std::get_if<StringVariableDefinition<BaseTypes>>(&parsed_definition)) {
-      auto add_result =
-          parsed_variable_definitions_->AddStringDefinition(variable_id, *string_definition);
-      if (!add_result) {
-        AddError(errors,
-                 fmt::format("Variable {} has conflicting type definition", definition.id()));
-        return false;
-      }
-    } else {
-      AddError(
-          errors,
-          fmt::format("Variable {} has undefined type. It is neither numeric, nor string, nor bool",
-                      definition.id()));
+    const auto added = std::visit(
+        [&](const auto& parsed) -> std::expected<StringId, ErrorCode> {
+          using ParsedT = std::decay_t<decltype(parsed)>;
+          if constexpr (std::is_same_v<ParsedT, NumericVariableDefinition<BaseTypes>>) {
+            return parsed_variable_definitions_->AddNumericDefinition(variable_id, parsed);
+          } else if constexpr (std::is_same_v<ParsedT, StringVariableDefinition<BaseTypes>>) {
+            return parsed_variable_definitions_->AddStringDefinition(variable_id, parsed);
+          } else if constexpr (std::is_same_v<ParsedT,
+                                              ParameterizedNumericVariableDefinition<BaseTypes>>) {
+            return parsed_variable_definitions_->AddParameterizedNumericDefinition(parsed);
+          } else if constexpr (std::is_same_v<ParsedT,
+                                              ParameterizedStringVariableDefinition<BaseTypes>>) {
+            return parsed_variable_definitions_->AddParameterizedStringDefinition(parsed);
+          } else {
+            return std::unexpected(parsed);
+          }
+        },
+        parsed_definition);
+
+    if (!added) {
+      add_error(definition);
+      return false;
     }
   }
 
@@ -227,6 +214,8 @@ void RuleSet<BaseTypes>::Clear() {
   resources_by_id_.clear();
   jobs_by_type_.clear();
   projects_by_type_.clear();
+  resource_ids_.clear();
+  job_ids_.clear();
   parsed_variable_definitions_->Clear();
   effect_definitions_.clear();
 }

@@ -5,6 +5,7 @@
 #include <sol/forward.hpp>
 #include <sol/sol.hpp>
 #include <string>
+#include <string_view>
 #include <ui/godot/module/types/godot_serialize.hpp>
 #include <ui/godot/module/utils/fmt.hpp>
 #include <ui/godot/module/utils/to_string.hpp>
@@ -15,6 +16,18 @@ class GodotBaseTypes {
  public:
   using StringId = ::godot::StringName;
 
+  class StringIdView {
+   public:
+    explicit StringIdView(const StringId& value)
+        : storage_(value), view_(storage_.ptr(), storage_.length()) {}
+
+    std::u32string_view view() const noexcept { return view_; }
+
+   private:
+    ::godot::String storage_;
+    std::u32string_view view_;
+  };
+
   using String = ::godot::String;
 
   using NumericValue = float;
@@ -24,6 +37,16 @@ class GodotBaseTypes {
   static StringId StringIdFromStdString(const std::string& data) noexcept {
     return utils::to_string_name(data);
   }
+
+  static StringId StringIdFromStringView(std::u32string_view data) {
+    ::godot::String string;
+    for (const char32_t ch : data) {
+      string += ch;
+    }
+    return StringId(string);
+  }
+
+  static StringIdView ToStringIdView(const StringId& data) { return StringIdView(data); }
 
   // This method should only be used to serialize godod Strings
   // into protobuf. For general conversion to std::string see

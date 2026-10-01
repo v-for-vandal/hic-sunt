@@ -5,16 +5,15 @@
 namespace hs::scope {
 
 template <typename BaseTypes>
-std::expected<void, ErrorCode>
-ScopeChangeSet<BaseTypes>::ValidateNumericVariable(const StringId& variable,
-                                                   const StringId& key) const {
+std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::ValidateNumericVariable(
+    const StringId& variable, const StringId& key) const {
   if (BaseTypes::IsNullToken(key)) {
     return std::unexpected(ErrorCode::ERR_EMPTY_MODIFIER_KEY);
   }
 
   const auto variable_definition = variable_definitions_->FindNumericVariable(variable);
   if (!variable_definition) {
-    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    return std::unexpected(variable_definition.error());
   }
 
   if (!variable_definition->allowed_scopes[target_scope_->GetType()]) {
@@ -25,16 +24,15 @@ ScopeChangeSet<BaseTypes>::ValidateNumericVariable(const StringId& variable,
 }
 
 template <typename BaseTypes>
-std::expected<void, ErrorCode>
-ScopeChangeSet<BaseTypes>::ValidateStringVariable(const StringId& variable,
-                                                  const StringId& key) const {
+std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::ValidateStringVariable(
+    const StringId& variable, const StringId& key) const {
   if (BaseTypes::IsNullToken(key)) {
     return std::unexpected(ErrorCode::ERR_EMPTY_MODIFIER_KEY);
   }
 
   const auto variable_definition = variable_definitions_->FindStringVariable(variable);
   if (!variable_definition) {
-    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    return std::unexpected(variable_definition.error());
   }
 
   if (!variable_definition->allowed_scopes[target_scope_->GetType()]) {
@@ -46,8 +44,7 @@ ScopeChangeSet<BaseTypes>::ValidateStringVariable(const StringId& variable,
 
 template <typename BaseTypes>
 std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::SetNumericModifier(
-    const StringId& variable, const StringId& key, NumericValue add,
-    NumericValue mult) {
+    const StringId& variable, const StringId& key, NumericValue add, NumericValue mult) {
   auto validation_result = ValidateNumericVariable(variable, key);
   if (!validation_result) {
     return validation_result;
@@ -66,8 +63,7 @@ std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::SetNumericModifier(
 
 template <typename BaseTypes>
 std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::ChangeNumericModifier(
-    const StringId& variable, const StringId& key, NumericValue add,
-    NumericValue mult) {
+    const StringId& variable, const StringId& key, NumericValue add, NumericValue mult) {
   auto validation_result = ValidateNumericVariable(variable, key);
   if (!validation_result) {
     return validation_result;
@@ -86,8 +82,7 @@ std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::ChangeNumericModifier(
 
 template <typename BaseTypes>
 std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::SetStringModifier(
-    const StringId& variable, const StringId& key, const StringId& value,
-    NumericValue level) {
+    const StringId& variable, const StringId& key, const StringId& value, NumericValue level) {
   auto validation_result = ValidateStringVariable(variable, key);
   if (!validation_result) {
     return validation_result;
@@ -105,32 +100,22 @@ std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::SetStringModifier(
 }
 
 template <typename BaseTypes>
-std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::Apply(
-    size_t modification_time) const {
+std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::Apply(size_t modification_time) const {
   for (const auto& operation : operations_) {
     std::expected<void, ErrorCode> result;
 
     switch (operation.kind) {
       case OperationKind::kSetNumericModifier:
-        result = target_scope_->SetNumericModifier(operation.variable,
-                                                  operation.key,
-                                                  operation.add,
-                                                  operation.mult,
-                                                  modification_time);
+        result = target_scope_->SetNumericModifier(operation.variable, operation.key, operation.add,
+                                                   operation.mult, modification_time);
         break;
       case OperationKind::kChangeNumericModifier:
-        result = target_scope_->ChangeNumericModifier(operation.variable,
-                                                     operation.key,
-                                                     operation.add,
-                                                     operation.mult,
-                                                     modification_time);
+        result = target_scope_->ChangeNumericModifier(
+            operation.variable, operation.key, operation.add, operation.mult, modification_time);
         break;
       case OperationKind::kSetStringModifier:
-        result = target_scope_->SetStringModifier(operation.variable,
-                                                 operation.key,
-                                                 operation.value,
-                                                 operation.level,
-                                                 modification_time);
+        result = target_scope_->SetStringModifier(
+            operation.variable, operation.key, operation.value, operation.level, modification_time);
         break;
     }
 

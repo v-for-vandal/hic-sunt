@@ -1,0 +1,14 @@
+variables:
+  - id: "job/{job}/produces/{resource}"
+    numeric:
+      minimum: 0
+    allowedScopes:
+      scopeTypeSets:
+        - SCOPE_TYPE_SET_JOBS
+
+  - id: "job/{job}/consumes/{resource}"
+    numeric:
+      minimum: 0
+    allowedScopes:
+      scopeTypeSets:
+        - SCOPE_TYPE_SET_JOBS

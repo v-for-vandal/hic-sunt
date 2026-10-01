@@ -9,6 +9,8 @@
 #include <core/types/std_base_types.hpp>
 #include <core/utils/non_null_ptr.hpp>
 #include <expected>
+#include <utility>
+#include <vector>
 
 #include "core/ruleset/variable_definition.hpp"
 #include "core/types/error_code.hpp"
@@ -53,6 +55,10 @@ class Scope {
   using VariableDefinitionBase = hs::ruleset::VariableDefinitionBase<BaseTypes>;
   using NumericVariableDefinition = hs::ruleset::NumericVariableDefinition<BaseTypes>;
   using StringVariableDefinition = hs::ruleset::StringVariableDefinition<BaseTypes>;
+  using ParameterBinding = hs::ruleset::ParameterBinding<BaseTypes>;
+  using ParsedVariableQuery = hs::ruleset::ParsedVariableQuery<BaseTypes>;
+  using NumericQueryResult = std::pair<StringId, NumericValue>;
+  using StringQueryResult = std::pair<StringId, StringId>;
 
   /** \brief Create new scope with given id and given variable definitions
    *
@@ -105,8 +111,18 @@ class Scope {
   // const VariableDefinitions *Definitions() const;
 
   std::expected<NumericValue, ErrorCode> GetNumericValue(const StringId& variable);
+  std::expected<NumericValue, ErrorCode> GetNumericValue(const ParsedVariableQuery& variable);
 
   std::expected<StringId, ErrorCode> GetStringValue(const StringId& variable);
+  std::expected<StringId, ErrorCode> GetStringValue(const ParsedVariableQuery& variable);
+
+  std::expected<std::vector<NumericQueryResult>, ErrorCode> GetNumericQuery(const StringId& query);
+  std::expected<std::vector<NumericQueryResult>, ErrorCode> GetNumericQuery(
+      const ParsedVariableQuery& query);
+
+  std::expected<std::vector<StringQueryResult>, ErrorCode> GetStringQuery(const StringId& query);
+  std::expected<std::vector<StringQueryResult>, ErrorCode> GetStringQuery(
+      const ParsedVariableQuery& query);
 
   /*! \brief Sets modifier for given variable to given value(s)
    *
@@ -142,6 +158,7 @@ class Scope {
 
   // Returns abstract token that represents when this variable was last modified
   std::expected<size_t, ErrorCode> GetModificationTime(const StringId& variable) const;
+  std::expected<size_t, ErrorCode> GetModificationTime(const ParsedVariableQuery& variable) const;
 
   std::expected<void, ErrorCode> AddTagLink(const StringId& tag_name, const ScopePtr& tag_scope);
   void RestoreTagLinks(const absl::flat_hash_map<StringId, ScopePtr>& scopes_by_id);
@@ -151,21 +168,74 @@ class Scope {
   void ExplainAllVariables(auto&& collect_fn);
 
   bool IsStringVariable(const StringId& variable) const;
+  bool IsStringVariable(const ParsedVariableQuery& variable) const;
   bool IsNumericVariable(const StringId& variable) const;
+  bool IsNumericVariable(const ParsedVariableQuery& variable) const;
 
   void ClearCache();
 
  private:
   using VisitedScopes = absl::flat_hash_set<const Scope*>;
 
-  void FillNumericModifiers(const NumericVariableDefinition& variable_definition, NumericValue& add,
-                            NumericValue& mult, VisitedScopes& visited) const;
+  struct NumericQueryAccumulator {
+    NumericValue add{0};
+    NumericValue mult{0};
+  };
 
-  void FillStringModifiers(const StringVariableDefinition& variable_definition, StringId& value,
-                           NumericValue& level, VisitedScopes& visited);
+  struct StringQueryAccumulator {
+    StringId value{};
+    NumericValue level{0};
+    // Null key marks the definition default value. Real modifiers cannot use a
+    // null key, so they win ties against defaults.
+    StringId key{};
+  };
+
+  auto CalculateNumericValue(const NumericVariableDefinition& variable_definition,
+                             const ParsedVariableQuery& variable_query) const -> NumericValue;
+
+  auto CalculateStringValue(const StringVariableDefinition& variable_definition,
+                            const ParsedVariableQuery& variable_query) -> StringId;
+
+  void FillNumericModifiers(const StringId& variable, NumericQueryAccumulator& accumulator,
+                            VisitedScopes& visited) const;
+
+  void FillNumericModifiers(const StringId& variable, const StringId& normalized_variable,
+                            NumericQueryAccumulator& accumulator, VisitedScopes& visited) const;
+
+  void FillStringModifiers(const StringId& variable, StringQueryAccumulator& accumulator,
+                           VisitedScopes& visited);
+
+  void FillStringModifiers(const StringId& variable, const StringId& normalized_variable,
+                           StringQueryAccumulator& accumulator, VisitedScopes& visited);
 
   size_t DoGetModificationTime(const VariableDefinitionBase& variable_definition,
                                VisitedScopes& visited) const;
+
+  size_t DoGetModificationTime(const StringId& variable, VisitedScopes& visited) const;
+
+  void DoCollectNumericMaterializedIds(const ParsedVariableQuery& query,
+                                       absl::flat_hash_set<StringId>& ids,
+                                       VisitedScopes& visited) const;
+
+  void DoCollectStringMaterializedIds(const ParsedVariableQuery& query,
+                                      absl::flat_hash_set<StringId>& ids,
+                                      VisitedScopes& visited) const;
+
+  void DoCollectNumericQueryResults(const ParsedVariableQuery& query,
+                                    NumericQueryAccumulator& default_accumulator,
+                                    absl::flat_hash_map<StringId, NumericQueryAccumulator>& result,
+                                    VisitedScopes& visited) const;
+
+  void DoCollectStringQueryResults(const ParsedVariableQuery& query,
+                                   StringQueryAccumulator& default_accumulator,
+                                   absl::flat_hash_map<StringId, StringQueryAccumulator>& result,
+                                   VisitedScopes& visited) const;
+
+  std::expected<void, ErrorCode> ValidateNumericModifierTarget(const StringId& variable,
+                                                               const StringId& key) const;
+
+  std::expected<void, ErrorCode> ValidateStringModifierTarget(const StringId& variable,
+                                                              const StringId& key) const;
 
   template <typename CollectFn>
   void DoExplainNumericVariable(const StringId& variable, CollectFn&& collect_fn,

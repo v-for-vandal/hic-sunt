@@ -83,6 +83,24 @@ TEST(StdScopeChangeSet, RejectsIncorrectStringVariableType) {
   EXPECT_EQ(result.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
 }
 
+TEST(StdScopeChangeSet, RejectsMissingNumericVariableAsMissing) {
+  auto scope = test::MakeSimpleScope();
+  StdScopeChangeSet changes(scope);
+
+  auto result = changes.SetNumericModifier("missing_var", "key", 1.0, 2.0);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+}
+
+TEST(StdScopeChangeSet, RejectsMissingStringVariableAsMissing) {
+  auto scope = test::MakeSimpleScope();
+  StdScopeChangeSet changes(scope);
+
+  auto result = changes.SetStringModifier("missing_var", "key", "value", 1.0);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+}
+
 TEST(StdScopeChangeSet, RejectsNumericVariableForDisallowedScopeType) {
   auto scope = MakeScopeWithDefinitions(types::ScopeType::SCOPE_TYPE_CITY,
                                         MakeRestrictedVariableDefinitions());

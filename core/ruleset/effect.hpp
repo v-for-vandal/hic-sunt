@@ -2,6 +2,7 @@
 
 #include <ruleset/effect.pb.h>
 
+#include <core/ruleset/parameterized_variable_definition.hpp>
 #include <core/types/error_code.hpp>
 #include <core/types/scope_type.hpp>
 #include <core/types/std_base_types.hpp>
@@ -19,15 +20,16 @@ class EffectDefinition {
  public:
   using StringId = typename BaseTypes::StringId;
   using ProtoEffect = proto::ruleset::effect::Effect;
+  using ParsedVariableQuery = hs::ruleset::ParsedVariableQuery<BaseTypes>;
 
   struct LuaVariable {
     std::string lua_name;
-    StringId variable_id;
+    ParsedVariableQuery parsed_query;
   };
 
   struct Code {
     std::string code;
-    std::vector<StringId> dependencies;
+    std::vector<ParsedVariableQuery> dependencies;
     std::vector<LuaVariable> lua_variables;
   };
 
@@ -42,7 +44,7 @@ class EffectDefinition {
   const Code& GetEffectCode() const noexcept { return effect_code_; }
   std::optional<Code> GePossibleCode() const noexcept { return possible_code_; }
   const ProtoEffect& GetData() const noexcept { return data_; }
-  const std::vector<StringId>& GetDependencies() const noexcept { return dependencies_; }
+  const std::vector<ParsedVariableQuery>& GetDependencies() const noexcept { return dependencies_; }
   const std::vector<LuaVariable>& GetLuaVariables() const noexcept { return lua_variables_; }
 
   bool IsBroken() const noexcept { return is_broken_; }
@@ -58,8 +60,8 @@ class EffectDefinition {
                                                   std::string_view chunk_name,
                                                   const std::string& wrapped_code);
 
-  static void AppendDependencies(std::vector<StringId>& target,
-                                 const std::vector<StringId>& source);
+  static void AppendDependencies(std::vector<ParsedVariableQuery>& target,
+                                 const std::vector<ParsedVariableQuery>& source);
   static void AppendLuaVariables(std::vector<LuaVariable>& target,
                                  const std::vector<LuaVariable>& source);
 
@@ -67,7 +69,7 @@ class EffectDefinition {
   StringId id_{};
   Code effect_code_;
   std::optional<Code> possible_code_;
-  std::vector<StringId> dependencies_;
+  std::vector<ParsedVariableQuery> dependencies_;
   std::vector<LuaVariable> lua_variables_;
   bool is_broken_{false};
   std::vector<std::string> lua_errors_;

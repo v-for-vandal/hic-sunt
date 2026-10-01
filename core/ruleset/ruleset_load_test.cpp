@@ -161,7 +161,7 @@ TEST(StdRuleSet, LoadYamlRejectsAnchorsAndAliases) {
   EXPECT_EQ(ruleset.GetResources().resources(0).id(), "resource.good");
 }
 
-TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
+TEST(StdRuleSet, LoadParameterizedJobVariablesFromVariableDefinitions) {
   const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
@@ -170,12 +170,13 @@ TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
 
   const auto& definitions = ruleset.GetVariableDefinitions();
   EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/count"));
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.wood"));
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.tools"));
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/produces/resource.food"));
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.wood"));
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.tools"));
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/consumes/resource.food"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.wood"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.tools"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.food"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/consumes/@resource.wood"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/consumes/@resource.tools"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/consumes/@resource.food"));
+  EXPECT_FALSE(definitions->IsNumericVariable("job/job.one/produces/resource.wood"));
 
   const auto count_definition = definitions->FindNumericVariable("job/job.one/count");
   ASSERT_TRUE(count_definition.has_value());
@@ -186,7 +187,7 @@ TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
   EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
 
   const auto produces_definition =
-      definitions->FindNumericVariable("job/job.one/produces/resource.food");
+      definitions->FindNumericVariable("job/@job.one/produces/@resource.food");
   ASSERT_TRUE(produces_definition.has_value());
   EXPECT_EQ(produces_definition->minimum, 0);
   EXPECT_TRUE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
@@ -194,12 +195,20 @@ TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
   EXPECT_FALSE(produces_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
 
   const auto consumes_definition =
-      definitions->FindNumericVariable("job/job.one/consumes/resource.food");
+      definitions->FindNumericVariable("job/@job.one/consumes/@resource.food");
   ASSERT_TRUE(consumes_definition.has_value());
   EXPECT_EQ(consumes_definition->minimum, 0);
   EXPECT_TRUE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
   EXPECT_TRUE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
   EXPECT_FALSE(consumes_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
+
+  const auto consumed_resources =
+      definitions->FindParameterizedNumericVariables("job/@job.one/consumes/@*");
+  ASSERT_TRUE(consumed_resources.has_value());
+  ASSERT_EQ(consumed_resources->size(), 3u);
+  EXPECT_EQ((*consumed_resources)[0].variable_id, "job/@job.one/consumes/@resource.wood");
+  EXPECT_EQ((*consumed_resources)[1].variable_id, "job/@job.one/consumes/@resource.tools");
+  EXPECT_EQ((*consumed_resources)[2].variable_id, "job/@job.one/consumes/@resource.food");
 }
 
 TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {

@@ -33,17 +33,34 @@ TEST(StdEffectDefinition, StoresIdAndProcessedCode) {
             "__var_2\nend");
 
   ASSERT_EQ(effect.GetDependencies().size(), 3u);
-  EXPECT_EQ(effect.GetDependencies()[0], "possible.dep");
-  EXPECT_EQ(effect.GetDependencies()[1], "foo.bar");
-  EXPECT_EQ(effect.GetDependencies()[2], "baz_qux");
+  EXPECT_EQ(effect.GetDependencies()[0].raw_id, "possible.dep");
+  EXPECT_EQ(effect.GetDependencies()[1].raw_id, "foo.bar");
+  EXPECT_EQ(effect.GetDependencies()[2].raw_id, "baz_qux");
 
   ASSERT_EQ(effect.GetLuaVariables().size(), 3u);
   EXPECT_EQ(effect.GetLuaVariables()[0].lua_name, "__var_0");
-  EXPECT_EQ(effect.GetLuaVariables()[0].variable_id, "possible.dep");
+  EXPECT_EQ(effect.GetLuaVariables()[0].parsed_query.raw_id, "possible.dep");
   EXPECT_EQ(effect.GetLuaVariables()[1].lua_name, "__var_1");
-  EXPECT_EQ(effect.GetLuaVariables()[1].variable_id, "foo.bar");
+  EXPECT_EQ(effect.GetLuaVariables()[1].parsed_query.raw_id, "foo.bar");
   EXPECT_EQ(effect.GetLuaVariables()[2].lua_name, "__var_2");
-  EXPECT_EQ(effect.GetLuaVariables()[2].variable_id, "baz_qux");
+  EXPECT_EQ(effect.GetLuaVariables()[2].parsed_query.raw_id, "baz_qux");
+}
+
+TEST(StdEffectDefinition, ParsesParameterizedWildcardVar) {
+  StdEffectDefinition effect(
+      MakeEffect("sample.effect", "return true", "return VAR(job/@*/consumes/@resource.wood)"));
+
+  EXPECT_FALSE(effect.IsBroken());
+  EXPECT_EQ(effect.GetEffectCode().code, "function __hic_sunt_effect(target)\nreturn __var_0\nend");
+  ASSERT_EQ(effect.GetLuaVariables().size(), 1u);
+  const auto& query = effect.GetLuaVariables()[0].parsed_query;
+  EXPECT_EQ(query.raw_id, "job/@*/consumes/@resource.wood");
+  EXPECT_EQ(query.normalized_id, "job/{}/consumes/{}");
+  EXPECT_TRUE(query.is_parameterized);
+  EXPECT_TRUE(query.has_wildcard);
+  ASSERT_EQ(query.arguments.size(), 2u);
+  EXPECT_EQ(query.arguments[0].kind, ParsedVariableQueryArgumentKind::kWildcard);
+  EXPECT_EQ(query.arguments[1].value, "resource.wood");
 }
 
 TEST(StdEffectDefinition, ReportsNotBrokenForValidLua) {
@@ -69,7 +86,7 @@ TEST(StdEffectDefinition, IgnoresVarInsideDoubleQuotedStrings) {
             "function __hic_sunt_effect(target)\nreturn \"VAR(fake.value)\", "
             "__var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
-  EXPECT_EQ(effect.GetDependencies()[0], "real_value");
+  EXPECT_EQ(effect.GetDependencies()[0].raw_id, "real_value");
 }
 
 TEST(StdEffectDefinition, IgnoresVarInsideSingleQuotedStrings) {
@@ -80,7 +97,7 @@ TEST(StdEffectDefinition, IgnoresVarInsideSingleQuotedStrings) {
             "function __hic_sunt_effect(target)\nreturn 'VAR(fake.value)', "
             "__var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
-  EXPECT_EQ(effect.GetDependencies()[0], "real_value");
+  EXPECT_EQ(effect.GetDependencies()[0].raw_id, "real_value");
 }
 
 TEST(StdEffectDefinition, IgnoresVarInsideLineComments) {
@@ -91,7 +108,7 @@ TEST(StdEffectDefinition, IgnoresVarInsideLineComments) {
             "function __hic_sunt_effect(target)\n-- VAR(fake.value)\nreturn "
             "__var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
-  EXPECT_EQ(effect.GetDependencies()[0], "real_value");
+  EXPECT_EQ(effect.GetDependencies()[0].raw_id, "real_value");
 }
 
 TEST(StdEffectDefinition, IgnoresVarInsideBlockComments) {
@@ -102,7 +119,7 @@ TEST(StdEffectDefinition, IgnoresVarInsideBlockComments) {
             "function __hic_sunt_effect(target)\n--[[ VAR(fake.value) "
             "]]\nreturn __var_0\nend");
   ASSERT_EQ(effect.GetDependencies().size(), 1u);
-  EXPECT_EQ(effect.GetDependencies()[0], "real_value");
+  EXPECT_EQ(effect.GetDependencies()[0].raw_id, "real_value");
 }
 
 TEST(StdEffectDefinition, RejectsInvalidIdentifierCharacters) {
