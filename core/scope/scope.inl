@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/utils/serialize.hpp>
+#include <stdexcept>
 
 #include "core/ruleset/variable_definition.hpp"
 #include "core/types/error_code.hpp"
@@ -326,22 +327,6 @@ void Scope<BaseTypes>::ClearCache() {
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::RestoreTagLinks(
-    const absl::flat_hash_map<StringId, ScopePtr>& scopes_by_id) {
-  tag_scopes_.clear();
-  tag_scopes_.reserve(pending_tag_scope_ids_.size());
-  for (const auto& scope_id : pending_tag_scope_ids_) {
-    auto fit = scopes_by_id.find(scope_id);
-    if (fit == scopes_by_id.end()) {
-      spdlog::warn("Can not restore tag link from scope {} to missing scope {}", id_, scope_id);
-      continue;
-    }
-    tag_scopes_.push_back(fit->second);
-  }
-  pending_tag_scope_ids_.clear();
-}
-
-template <typename BaseTypes>
 void SerializeTo(const Scope<BaseTypes>& source, proto::scope::Scope& target) {
   target.Clear();
   target.set_id(BaseTypes::ToProtoString(source.id_));
@@ -372,17 +357,16 @@ void SerializeTo(const Scope<BaseTypes>& source, proto::scope::Scope& target) {
   }
 
   for (const auto& tag_scope : source.tag_scopes_) {
-    if (tag_scope != nullptr) {
-      target.add_tag_scope_ids(BaseTypes::ToProtoString(tag_scope->GetId()));
-    }
+    target.add_tag_scope_ids(BaseTypes::ToProtoString(tag_scope->GetId()));
   }
-  for (const auto& tag_scope_id : source.pending_tag_scope_ids_) {
-    target.add_tag_scope_ids(BaseTypes::ToProtoString(tag_scope_id));
+  if (source.parent_ != nullptr) {
+    target.set_parent_scope_id(BaseTypes::ToProtoString(source.parent_->GetId()));
   }
 }
 
 template <typename BaseTypes>
-Scope<BaseTypes> ParseFrom(const proto::scope::Scope& scope, serialize::To<Scope<BaseTypes>>) {
+Scope<BaseTypes> ParseFrom(const proto::scope::Scope& scope, serialize::To<Scope<BaseTypes>>,
+                           const ScopeParseContext<BaseTypes>& context) {
   using StringId = typename BaseTypes::StringId;
   Scope<BaseTypes> result;
   result.id_ = ParseFrom(scope.id(), serialize::To<StringId>{});
@@ -417,9 +401,15 @@ Scope<BaseTypes> ParseFrom(const proto::scope::Scope& scope, serialize::To<Scope
     }
   }
 
-  result.pending_tag_scope_ids_.reserve(scope.tag_scope_ids_size());
-  for (const auto& tag_scope_id : scope.tag_scope_ids()) {
-    result.pending_tag_scope_ids_.push_back(ParseFrom(tag_scope_id, serialize::To<StringId>{}));
+  result.tag_scopes_.reserve(scope.tag_scope_ids_size());
+  for (const auto& tag_scope_id_proto : scope.tag_scope_ids()) {
+    auto tag_scope_id = ParseFrom(tag_scope_id_proto, serialize::To<StringId>{});
+    auto fit = context.scopes_by_id.find(tag_scope_id);
+    if (fit == context.scopes_by_id.end()) {
+      throw std::runtime_error(
+          fmt::format("Missing tag scope {} for scope {}", tag_scope_id, result.id_));
+    }
+    result.tag_scopes_.push_back(fit->second);
   }
 
   return result;

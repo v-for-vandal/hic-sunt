@@ -33,12 +33,10 @@ TEST(StdScopeSerialize, RoundTripPreservesModifiersAndTagLinks) {
   proto::scope::Scope proto_scope;
   SerializeTo(source, proto_scope);
 
-  auto parsed = ParseFrom(proto_scope, serialize::To<StdScope>{});
+  ScopeParseContext<StdBaseTypes> context;
+  context.scopes_by_id.try_emplace(tag_scope->GetId(), tag_scope);
+  auto parsed = ParseFrom(proto_scope, serialize::To<StdScope>{}, context);
   parsed.SetVariableDefinitions(definitions);
-
-  absl::flat_hash_map<std::string, ScopePtr<StdBaseTypes>> scopes_by_id;
-  scopes_by_id[tag_scope->GetId()] = tag_scope;
-  parsed.RestoreTagLinks(scopes_by_id);
 
   ASSERT_EQ(parsed.GetId(), source.GetId());
   ASSERT_EQ(parsed.GetType(), source.GetType());

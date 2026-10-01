@@ -19,12 +19,9 @@ scope::ScopeParseContext<StdBaseTypes> MakeScopeContext(StdCivilization& source)
   source.VisitScopes([&context](const auto& scope_ptr) {
     proto::scope::Scope proto_scope;
     SerializeTo(*scope_ptr, proto_scope);
-    StdScopePtr parsed_scope{ParseFrom(proto_scope, serialize::To<StdScope>{})};
+    StdScopePtr parsed_scope{ParseFrom(proto_scope, serialize::To<StdScope>{}, context)};
     context.scopes_by_id.try_emplace(parsed_scope->GetId(), parsed_scope);
   });
-  for (auto& [_, scope_ptr] : context.scopes_by_id) {
-    scope_ptr->RestoreTagLinks(context.scopes_by_id);
-  }
   return context;
 }
 
