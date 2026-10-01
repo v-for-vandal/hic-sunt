@@ -1,0 +1,10 @@
+improvements:
+  - id: core.improv.logging_1
+    jobs:
+      core.job.woodcutter: 1
+  - id: core.bld.palace
+    cost:
+      amounts:
+        core.res.stone: 10
+        core.res.wood: 10
+        core.res.workforce: 2

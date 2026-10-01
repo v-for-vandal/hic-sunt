@@ -33,11 +33,11 @@ hic_sunt_godot = shared_library('hic_sunt_godot',
 
 godot_module_tests = executable('unit_tests',
   sources: [
-    'test_main.cpp',
+    test_main_cpp,
     'region/region_test.cpp',
     hs_proto_generated_headers,
     ],
-  dependencies : [common_deps, gtest_dep, godot_dep, sol2_dep, lua_dep],
+  dependencies : [common_deps, gtest_dep, godot_dep, sol2_dep, lua_dep, test_utils_lib_dep],
   link_with: [hic_sunt_godot],
   include_directories: root_include,
   )

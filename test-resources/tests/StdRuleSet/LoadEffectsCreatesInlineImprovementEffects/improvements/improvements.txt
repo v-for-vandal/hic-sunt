@@ -1,0 +1,5 @@
+improvements {
+  id: "mill"
+  class_effect { lua: "return VAR(mill.class.dep)" }
+  instance_effect { lua: "return VAR(mill.instance.dep)" }
+}

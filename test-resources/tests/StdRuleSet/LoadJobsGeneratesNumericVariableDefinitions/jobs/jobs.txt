@@ -1,0 +1,5 @@
+jobs {
+  id: "job.one"
+  input { key: "resource.wood" value: 2 }
+  output { key: "resource.tools" value: 1 }
+}

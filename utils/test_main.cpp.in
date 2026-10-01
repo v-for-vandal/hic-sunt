@@ -1,0 +1,37 @@
+#include <gtest/gtest.h>
+#include <spdlog/spdlog.h>
+
+#include <cstdlib>
+#include <string>
+
+namespace {
+
+constexpr const char* kDefaultTestResourcesDir = @DEFAULT_TEST_RESOURCES_DIR@;
+
+void SetEnvIfMissing(const char* name, const char* value) {
+  const char* current = std::getenv(name);
+  if (current != nullptr && std::string(current).size() > 0) {
+    return;
+  }
+
+#ifdef _WIN32
+  if (_putenv_s(name, value) != 0) {
+    return;
+  }
+#else
+  if (setenv(name, value, 0) != 0) {
+    return;
+  }
+#endif
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  SetEnvIfMissing("TEST_RESOURCES_DIR", kDefaultTestResourcesDir);
+
+  ::testing::InitGoogleTest(&argc, argv);
+  spdlog::set_level(spdlog::level::trace);
+
+  return RUN_ALL_TESTS();
+}

@@ -61,7 +61,7 @@ core_session_ut_lib_dep = declare_dependency(
 core_session_tests = executable(
     'unit_tests',
     sources: [
-        'test_main.cpp',
+        test_main_cpp,
         'effect_executor_test.cpp',
         'effect_instance_test.cpp',
         'session_test.cpp',
@@ -69,7 +69,7 @@ core_session_tests = executable(
         'create_improvement_scope_test.cpp',
         'create_city_scope_test.cpp',
     ],
-    dependencies: [core_session_ut_lib_dep, sol2_dep, lua_dep],
+    dependencies: [core_session_ut_lib_dep, sol2_dep, lua_dep, test_utils_lib_dep],
 )
 
 test('core.session', core_session_tests, env: environment(test_env))

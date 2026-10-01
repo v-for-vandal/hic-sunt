@@ -1,0 +1,4 @@
+variables:
+  - id: variable.string_bool
+    boolean: {}
+    immutable: "true"
