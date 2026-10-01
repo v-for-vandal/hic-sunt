@@ -29,6 +29,46 @@ TEST(StdScope, NumericVariable) {
   EXPECT_EQ(*result, 3.0);  // add=1.0 * (1 + mult=2.0)
 }
 
+TEST(StdScope, ValueLookupsPreserveMissingAndIncorrectTypeErrors) {
+  auto scope = test::MakeSimpleScope();
+
+  const auto missing_numeric = scope->GetNumericValue("missing_var");
+  ASSERT_FALSE(missing_numeric.has_value());
+  EXPECT_EQ(missing_numeric.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+
+  const auto string_as_numeric = scope->GetNumericValue("string_var");
+  ASSERT_FALSE(string_as_numeric.has_value());
+  EXPECT_EQ(string_as_numeric.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+
+  const auto missing_string = scope->GetStringValue("missing_var");
+  ASSERT_FALSE(missing_string.has_value());
+  EXPECT_EQ(missing_string.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+
+  const auto numeric_as_string = scope->GetStringValue("numeric_var");
+  ASSERT_FALSE(numeric_as_string.has_value());
+  EXPECT_EQ(numeric_as_string.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+}
+
+TEST(StdScope, ScalarQueriesPreserveMissingAndIncorrectTypeErrors) {
+  auto scope = test::MakeSimpleScope();
+
+  const auto missing_numeric = scope->GetNumericQuery("missing_var");
+  ASSERT_FALSE(missing_numeric.has_value());
+  EXPECT_EQ(missing_numeric.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+
+  const auto string_as_numeric = scope->GetNumericQuery("string_var");
+  ASSERT_FALSE(string_as_numeric.has_value());
+  EXPECT_EQ(string_as_numeric.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+
+  const auto missing_string = scope->GetStringQuery("missing_var");
+  ASSERT_FALSE(missing_string.has_value());
+  EXPECT_EQ(missing_string.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+
+  const auto numeric_as_string = scope->GetStringQuery("numeric_var");
+  ASSERT_FALSE(numeric_as_string.has_value());
+  EXPECT_EQ(numeric_as_string.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+}
+
 TEST(StdScope, InheritanceParent) {
   StdScopePtr parent_scope = test::MakeSimpleScope(types::ScopeType::SCOPE_TYPE_WORLD);
   StdScopePtr scope("test", types::ScopeType::SCOPE_TYPE_PLANE);

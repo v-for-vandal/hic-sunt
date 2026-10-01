@@ -13,10 +13,7 @@ std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::ValidateNumericVariabl
 
   const auto variable_definition = variable_definitions_->FindNumericVariable(variable);
   if (!variable_definition) {
-    if (variable_definition.error() == ErrorCode::ERR_INVALID_VARIABLE_REFERENCE) {
-      return std::unexpected(variable_definition.error());
-    }
-    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    return std::unexpected(variable_definition.error());
   }
 
   if (!variable_definition->allowed_scopes[target_scope_->GetType()]) {
@@ -35,10 +32,7 @@ std::expected<void, ErrorCode> ScopeChangeSet<BaseTypes>::ValidateStringVariable
 
   const auto variable_definition = variable_definitions_->FindStringVariable(variable);
   if (!variable_definition) {
-    if (variable_definition.error() == ErrorCode::ERR_INVALID_VARIABLE_REFERENCE) {
-      return std::unexpected(variable_definition.error());
-    }
-    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    return std::unexpected(variable_definition.error());
   }
 
   if (!variable_definition->allowed_scopes[target_scope_->GetType()]) {

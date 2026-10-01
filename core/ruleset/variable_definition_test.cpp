@@ -65,6 +65,56 @@ TEST(StdVariableDefinitions, MissingLookupsReturnUnexpected) {
   EXPECT_EQ(string_.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
+TEST(StdVariableDefinitions, LookupsReturnIncorrectTypeForExistingOppositeType) {
+  StdVariableDefinitions definitions;
+  ASSERT_TRUE(definitions.AddNumericDefinition("numeric_var", {}));
+  ASSERT_TRUE(definitions.AddStringDefinition("string_var", {}));
+
+  const auto numeric_as_string = definitions.FindStringVariable("numeric_var");
+  ASSERT_FALSE(numeric_as_string.has_value());
+  EXPECT_EQ(numeric_as_string.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+
+  const auto string_as_numeric = definitions.FindNumericVariable("string_var");
+  ASSERT_FALSE(string_as_numeric.has_value());
+  EXPECT_EQ(string_as_numeric.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+
+  const auto found_string = definitions.FindVariable("string_var");
+  ASSERT_TRUE(found_string.has_value());
+  EXPECT_EQ(found_string->id, "string_var");
+}
+
+TEST(StdVariableDefinitions, ParameterizedLookupsReturnIncorrectTypeForExistingOppositeType) {
+  StdVariableDefinitions definitions;
+  ASSERT_TRUE(definitions.AddParameterizedNumericDefinition("numeric/{}", {}).has_value());
+  ASSERT_TRUE(definitions.AddParameterizedStringDefinition("string/{}", {}).has_value());
+
+  const auto numeric_as_string = definitions.FindStringVariable("numeric/@value");
+  ASSERT_FALSE(numeric_as_string.has_value());
+  EXPECT_EQ(numeric_as_string.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+
+  const auto string_as_numeric = definitions.FindNumericVariable("string/@value");
+  ASSERT_FALSE(string_as_numeric.has_value());
+  EXPECT_EQ(string_as_numeric.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+
+  const auto normalized_numeric_as_string = definitions.FindStringVariable("numeric/{}");
+  ASSERT_FALSE(normalized_numeric_as_string.has_value());
+  EXPECT_EQ(normalized_numeric_as_string.error(), ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+
+  const auto missing = definitions.FindNumericVariable("missing/@value");
+  ASSERT_FALSE(missing.has_value());
+  EXPECT_EQ(missing.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+}
+
+TEST(StdVariableDefinitions, ParameterizedLookupWithInvalidFixedValueReturnsMissing) {
+  StdVariableDefinitions definitions;
+  ASSERT_TRUE(definitions.SetFixedParameterDomainValues(FixedParameterDomain::kJob, {"job.one"}));
+  ASSERT_TRUE(definitions.AddParameterizedNumericDefinition("job/{job}/count", {}).has_value());
+
+  const auto missing = definitions.FindNumericVariable("job/@job.two/count");
+  ASSERT_FALSE(missing.has_value());
+  EXPECT_EQ(missing.error(), ErrorCode::ERR_NO_SUCH_VARIABLE);
+}
+
 TEST(StdVariableDefinitions, ParseStringVariableDefaultsAllowedScopesToAllScopeTypes) {
   proto::ruleset::Variable variable;
   variable.set_id("var.one");

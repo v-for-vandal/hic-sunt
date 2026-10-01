@@ -195,6 +195,12 @@ class VariableDefinitions {
       const ParameterizedDefinitionsMap<ConcreteDefinition>& definitions) const;
 
   template <typename ConcreteDefinition>
+  std::expected<bool, ErrorCode> HasVariableOfType(
+      const ParsedVariableQuery<BaseTypes>& query,
+      const absl::flat_hash_map<StringId, ConcreteDefinition>& definitions,
+      const ParameterizedDefinitionsMap<ConcreteDefinition>& parameterized_definitions) const;
+
+  template <typename ConcreteDefinition>
   std::expected<ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>, ErrorCode>
   FindParameterizedDefinition(
       const ParsedVariableQuery<BaseTypes>& query,

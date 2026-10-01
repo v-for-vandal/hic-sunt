@@ -150,11 +150,6 @@ auto Scope<BaseTypes>::GetNumericValue(const ParsedVariableQuery& variable)
 
   auto vardef = GetVariableDefinitions()->FindNumericVariable(variable);
   if (!vardef) {
-    if (vardef.error() == ErrorCode::ERR_NO_SUCH_VARIABLE) {
-      spdlog::warn("variable {} must be numeric, but it is missing or has another type",
-                   variable.raw_id);
-      return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
-    }
     return std::unexpected(vardef.error());
   }
 
@@ -180,11 +175,6 @@ auto Scope<BaseTypes>::GetStringValue(const ParsedVariableQuery& variable)
 
   auto vardef = GetVariableDefinitions()->FindStringVariable(variable);
   if (!vardef) {
-    if (vardef.error() == ErrorCode::ERR_NO_SUCH_VARIABLE) {
-      spdlog::warn("variable {} must be string, but it is missing or has another type",
-                   variable.raw_id);
-      return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
-    }
     return std::unexpected(vardef.error());
   }
 
@@ -231,9 +221,6 @@ auto Scope<BaseTypes>::GetNumericQuery(const ParsedVariableQuery& query)
   if (!query.has_wildcard) {
     auto variable_definition = GetVariableDefinitions()->FindNumericVariable(query);
     if (!variable_definition) {
-      if (variable_definition.error() == ErrorCode::ERR_NO_SUCH_VARIABLE) {
-        return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
-      }
       return std::unexpected(variable_definition.error());
     }
     return std::vector<NumericQueryResult>{
@@ -285,9 +272,6 @@ auto Scope<BaseTypes>::GetStringQuery(const ParsedVariableQuery& query)
   if (!query.has_wildcard) {
     auto variable_definition = GetVariableDefinitions()->FindStringVariable(query);
     if (!variable_definition) {
-      if (variable_definition.error() == ErrorCode::ERR_NO_SUCH_VARIABLE) {
-        return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
-      }
       return std::unexpected(variable_definition.error());
     }
     return std::vector<StringQueryResult>{
@@ -344,10 +328,7 @@ std::expected<void, ErrorCode> Scope<BaseTypes>::ValidateNumericModifierTarget(
 
   const auto variable_definition = definitions->FindNumericVariable(variable);
   if (!variable_definition) {
-    if (variable_definition.error() == ErrorCode::ERR_INVALID_VARIABLE_REFERENCE) {
-      return std::unexpected(variable_definition.error());
-    }
-    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    return std::unexpected(variable_definition.error());
   }
 
   if (!variable_definition->allowed_scopes[scope_type_]) {
@@ -379,10 +360,7 @@ std::expected<void, ErrorCode> Scope<BaseTypes>::ValidateStringModifierTarget(
 
   const auto variable_definition = definitions->FindStringVariable(variable);
   if (!variable_definition) {
-    if (variable_definition.error() == ErrorCode::ERR_INVALID_VARIABLE_REFERENCE) {
-      return std::unexpected(variable_definition.error());
-    }
-    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    return std::unexpected(variable_definition.error());
   }
 
   if (!variable_definition->allowed_scopes[scope_type_]) {

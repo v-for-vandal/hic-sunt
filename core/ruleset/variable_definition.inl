@@ -303,6 +303,30 @@ VariableDefinitions<BaseTypes>::GetVariableType(
 }
 
 template <typename BaseTypes>
+template <typename ConcreteDefinition>
+std::expected<bool, ErrorCode> VariableDefinitions<BaseTypes>::HasVariableOfType(
+    const ParsedVariableQuery<BaseTypes>& query,
+    const absl::flat_hash_map<StringId, ConcreteDefinition>& definitions,
+    const ParameterizedDefinitionsMap<ConcreteDefinition>& parameterized_definitions) const {
+  if (!query.is_parameterized) {
+    return definitions.contains(query.raw_id) || parameterized_definitions.contains(query.raw_id);
+  }
+
+  if (query.has_wildcard) {
+    return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
+  }
+
+  auto parameterized_definition = FindParameterizedDefinition(query, parameterized_definitions);
+  if (parameterized_definition) {
+    return true;
+  }
+  if (parameterized_definition.error() == ErrorCode::ERR_NO_SUCH_VARIABLE) {
+    return false;
+  }
+  return std::unexpected(parameterized_definition.error());
+}
+
+template <typename BaseTypes>
 std::expected<NumericVariableDefinition<BaseTypes>, ErrorCode>
 VariableDefinitions<BaseTypes>::FindNumericVariable(const StringId& id) const {
   auto parsed = ParseVariableQuery<BaseTypes>(id, false);
@@ -327,7 +351,17 @@ VariableDefinitions<BaseTypes>::FindNumericVariable(
       return static_cast<const NumericVariableDefinition<BaseTypes>&>(parameterized_fit->second);
     }
 
-    spdlog::error("Variable {} is unknown or is not numeric", query.raw_id);
+    const auto has_string =
+        HasVariableOfType(query, string_definitions_, parameterized_string_definitions_);
+    if (!has_string) {
+      return std::unexpected(has_string.error());
+    }
+    if (*has_string) {
+      spdlog::error("Variable {} is not numeric", query.raw_id);
+      return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    }
+
+    spdlog::error("Variable {} is unknown", query.raw_id);
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
@@ -339,7 +373,17 @@ VariableDefinitions<BaseTypes>::FindNumericVariable(
     return std::unexpected(parameterized.error());
   }
 
-  spdlog::error("Variable {} is unknown or is not numeric", query.raw_id);
+  const auto has_string =
+      HasVariableOfType(query, string_definitions_, parameterized_string_definitions_);
+  if (!has_string) {
+    return std::unexpected(has_string.error());
+  }
+  if (*has_string) {
+    spdlog::error("Variable {} is not numeric", query.raw_id);
+    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+  }
+
+  spdlog::error("Variable {} is unknown", query.raw_id);
   return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
@@ -368,7 +412,17 @@ VariableDefinitions<BaseTypes>::FindStringVariable(
       return static_cast<const StringVariableDefinition<BaseTypes>&>(parameterized_fit->second);
     }
 
-    spdlog::error("Variable {} is unknown or is not string", query.raw_id);
+    const auto has_numeric =
+        HasVariableOfType(query, numeric_definitions_, parameterized_numeric_definitions_);
+    if (!has_numeric) {
+      return std::unexpected(has_numeric.error());
+    }
+    if (*has_numeric) {
+      spdlog::error("Variable {} is not string", query.raw_id);
+      return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+    }
+
+    spdlog::error("Variable {} is unknown", query.raw_id);
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
@@ -380,7 +434,17 @@ VariableDefinitions<BaseTypes>::FindStringVariable(
     return std::unexpected(parameterized.error());
   }
 
-  spdlog::error("Variable {} is unknown or is not string", query.raw_id);
+  const auto has_numeric =
+      HasVariableOfType(query, numeric_definitions_, parameterized_numeric_definitions_);
+  if (!has_numeric) {
+    return std::unexpected(has_numeric.error());
+  }
+  if (*has_numeric) {
+    spdlog::error("Variable {} is not string", query.raw_id);
+    return std::unexpected(ErrorCode::ERR_INCORRECT_VARIABLE_TYPE);
+  }
+
+  spdlog::error("Variable {} is unknown", query.raw_id);
   return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
 }
 
@@ -479,20 +543,24 @@ VariableDefinitions<BaseTypes>::FindVariable(const StringId& id) const {
 template <typename BaseTypes>
 std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode>
 VariableDefinitions<BaseTypes>::FindVariable(const ParsedVariableQuery<BaseTypes>& query) const {
-  const auto numeric = FindNumericVariable(query);
-  if (numeric) {
-    return numeric;
-  }
-  if (numeric.error() != ErrorCode::ERR_NO_SUCH_VARIABLE) {
-    return std::unexpected(numeric.error());
+  if (query.has_wildcard) {
+    return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
   }
 
-  const auto string_ = FindStringVariable(query);
-  if (string_) {
-    return string_;
+  const auto variable_type = GetVariableType(query);
+  if (variable_type == VariableType::kNumeric) {
+    auto numeric = FindNumericVariable(query);
+    if (!numeric) {
+      return std::unexpected(numeric.error());
+    }
+    return *numeric;
   }
-  if (string_.error() != ErrorCode::ERR_NO_SUCH_VARIABLE) {
-    return std::unexpected(string_.error());
+  if (variable_type == VariableType::kString) {
+    auto string_ = FindStringVariable(query);
+    if (!string_) {
+      return std::unexpected(string_.error());
+    }
+    return *string_;
   }
 
   spdlog::error("Variable {} is unknown", query.raw_id);
