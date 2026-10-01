@@ -27,79 +27,108 @@ void Scope<BaseTypes>::SetVariableDefinitions(const VariableDefinitionsConstPtr&
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::FillNumericModifiers(const NumericVariableDefinition& variable_definition,
-                                            NumericValue& add, NumericValue& mult,
+void Scope<BaseTypes>::FillNumericModifiers(const StringId& variable,
+                                            NumericQueryAccumulator& accumulator,
+                                            VisitedScopes& visited) const {
+  FillNumericModifiers(variable, variable, accumulator, visited);
+}
+
+template <typename BaseTypes>
+void Scope<BaseTypes>::FillNumericModifiers(const StringId& variable,
+                                            const StringId& normalized_variable,
+                                            NumericQueryAccumulator& accumulator,
                                             VisitedScopes& visited) const {
   if (!visited.insert(this).second) {
     return;
   }
 
-  if (auto it = numeric_variables_.find(variable_definition.id); it != numeric_variables_.end()) {
-    it->second.CalculateModifiers(add, mult);
+  if (variable != normalized_variable) {
+    if (auto it = numeric_variables_.find(normalized_variable); it != numeric_variables_.end()) {
+      it->second.CalculateModifiers(accumulator.add, accumulator.mult);
+    }
+  }
+
+  if (auto it = numeric_variables_.find(variable); it != numeric_variables_.end()) {
+    it->second.CalculateModifiers(accumulator.add, accumulator.mult);
   }
 
   if (parent_ != nullptr) {
-    parent_->FillNumericModifiers(variable_definition, add, mult, visited);
+    parent_->FillNumericModifiers(variable, normalized_variable, accumulator, visited);
   }
 
   for (const auto& tag_scope : tag_scopes_) {
     if (tag_scope != nullptr) {
-      tag_scope->FillNumericModifiers(variable_definition, add, mult, visited);
+      tag_scope->FillNumericModifiers(variable, normalized_variable, accumulator, visited);
     }
   }
 }
 
 template <typename BaseTypes>
-void Scope<BaseTypes>::FillStringModifiers(const StringVariableDefinition& variable_definition,
-                                           StringId& value, NumericValue& level,
+void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
+                                           StringQueryAccumulator& accumulator,
+                                           VisitedScopes& visited) {
+  FillStringModifiers(variable, variable, accumulator, visited);
+}
+
+template <typename BaseTypes>
+void Scope<BaseTypes>::FillStringModifiers(const StringId& variable,
+                                           const StringId& normalized_variable,
+                                           StringQueryAccumulator& accumulator,
                                            VisitedScopes& visited) {
   if (!visited.insert(this).second) {
     return;
   }
 
-  if (auto fit = string_variables_.find(variable_definition.id); fit != string_variables_.end()) {
-    fit->second.CalculateModifiers(value, level);
+  if (variable != normalized_variable) {
+    if (auto fit = string_variables_.find(normalized_variable); fit != string_variables_.end()) {
+      fit->second.MergeModifiers(accumulator.value, accumulator.level, accumulator.key);
+    }
+  }
+
+  if (auto fit = string_variables_.find(variable); fit != string_variables_.end()) {
+    fit->second.MergeModifiers(accumulator.value, accumulator.level, accumulator.key);
   }
 
   // get parent value
   if (parent_ != nullptr) {
-    parent_->FillStringModifiers(variable_definition, value, level, visited);
+    parent_->FillStringModifiers(variable, normalized_variable, accumulator, visited);
   }
 
   for (const auto& tag_scope : tag_scopes_) {
-    tag_scope->FillStringModifiers(variable_definition, value, level, visited);
+    tag_scope->FillStringModifiers(variable, normalized_variable, accumulator, visited);
   }
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::CalculateNumericValue(
-    const NumericVariableDefinition& variable_definition) const -> NumericValue {
-  NumericValue add{0};
-  NumericValue mult{0};
-  variable_definition.default_variable.CalculateModifiers(add, mult);
+auto Scope<BaseTypes>::CalculateNumericValue(const NumericVariableDefinition& variable_definition,
+                                             const ParsedVariableQuery& variable_query) const
+    -> NumericValue {
+  NumericQueryAccumulator accumulator;
+  const auto& normalized_id =
+      variable_query.is_parameterized ? variable_query.normalized_id : variable_definition.id;
 
   VisitedScopes visited;
-  FillNumericModifiers(variable_definition, add, mult, visited);
+  FillNumericModifiers(variable_definition.id, normalized_id, accumulator, visited);
 
-  mult = 1 + mult;
-  mult = std::max<NumericValue>(mult, 0);
+  accumulator.mult = 1 + accumulator.mult;
+  accumulator.mult = std::max<NumericValue>(accumulator.mult, 0);
 
-  auto value = add * mult;
+  auto value = accumulator.add * accumulator.mult;
   value = std::clamp(value, variable_definition.minimum, variable_definition.maximum);
   return value;
 }
 
 template <typename BaseTypes>
-auto Scope<BaseTypes>::CalculateStringValue(const StringVariableDefinition& variable_definition)
-    -> StringId {
-  NumericValue level{0};
-  StringId result;
-  variable_definition.default_variable.CalculateModifiers(result, level);
+auto Scope<BaseTypes>::CalculateStringValue(const StringVariableDefinition& variable_definition,
+                                            const ParsedVariableQuery& variable_query) -> StringId {
+  StringQueryAccumulator accumulator{.value = variable_definition.default_value};
+  const auto& normalized_id =
+      variable_query.is_parameterized ? variable_query.normalized_id : variable_definition.id;
 
   VisitedScopes visited;
-  FillStringModifiers(variable_definition, result, level, visited);
+  FillStringModifiers(variable_definition.id, normalized_id, accumulator, visited);
 
-  return result;
+  return accumulator.value;
 }
 
 template <typename BaseTypes>
@@ -129,7 +158,7 @@ auto Scope<BaseTypes>::GetNumericValue(const ParsedVariableQuery& variable)
     return std::unexpected(vardef.error());
   }
 
-  return CalculateNumericValue(*vardef);
+  return CalculateNumericValue(*vardef, variable);
 }
 
 template <typename BaseTypes>
@@ -159,7 +188,7 @@ auto Scope<BaseTypes>::GetStringValue(const ParsedVariableQuery& variable)
     return std::unexpected(vardef.error());
   }
 
-  return CalculateStringValue(*vardef);
+  return CalculateStringValue(*vardef, variable);
 }
 
 template <typename BaseTypes>
@@ -208,7 +237,7 @@ auto Scope<BaseTypes>::GetNumericQuery(const ParsedVariableQuery& query)
       return std::unexpected(variable_definition.error());
     }
     return std::vector<NumericQueryResult>{
-        {variable_definition->id, CalculateNumericValue(*variable_definition)}};
+        {variable_definition->id, CalculateNumericValue(*variable_definition, query)}};
   }
 
   if (!query.is_parameterized) {
@@ -221,23 +250,20 @@ auto Scope<BaseTypes>::GetNumericQuery(const ParsedVariableQuery& query)
     return std::unexpected(parameterized_definition.error());
   }
 
-  NumericValue default_add{0};
-  NumericValue default_mult{0};
-  parameterized_definition->concrete_definition.default_variable.CalculateModifiers(default_add,
-                                                                                    default_mult);
-
+  NumericQueryAccumulator default_accumulator;
   absl::flat_hash_map<StringId, NumericQueryAccumulator> values;
   VisitedScopes visited;
-  DoCollectNumericQueryResults(query, default_add, default_mult, values, visited);
+  DoCollectNumericQueryResults(query, default_accumulator, values, visited);
 
   std::vector<NumericQueryResult> result;
   result.reserve(values.size());
-  for (const auto& [id, modifiers] : values) {
+  for (auto [id, modifiers] : values) {
+    modifiers.add += default_accumulator.add;
+    modifiers.mult += default_accumulator.mult;
     auto mult = 1 + modifiers.mult;
     mult = std::max<NumericValue>(mult, 0);
     auto value = modifiers.add * mult;
-    value = std::clamp(value, parameterized_definition->concrete_definition.minimum,
-                       parameterized_definition->concrete_definition.maximum);
+    value = std::clamp(value, parameterized_definition->minimum, parameterized_definition->maximum);
     result.emplace_back(id, value);
   }
   return result;
@@ -265,7 +291,7 @@ auto Scope<BaseTypes>::GetStringQuery(const ParsedVariableQuery& query)
       return std::unexpected(variable_definition.error());
     }
     return std::vector<StringQueryResult>{
-        {variable_definition->id, CalculateStringValue(*variable_definition)}};
+        {variable_definition->id, CalculateStringValue(*variable_definition, query)}};
   }
 
   if (!query.is_parameterized) {
@@ -278,18 +304,19 @@ auto Scope<BaseTypes>::GetStringQuery(const ParsedVariableQuery& query)
     return std::unexpected(parameterized_definition.error());
   }
 
-  NumericValue default_level{0};
-  StringId default_value;
-  parameterized_definition->concrete_definition.default_variable.CalculateModifiers(default_value,
-                                                                                    default_level);
-
+  StringQueryAccumulator default_accumulator{.value = parameterized_definition->default_value};
   absl::flat_hash_map<StringId, StringQueryAccumulator> values;
   VisitedScopes visited;
-  DoCollectStringQueryResults(query, default_value, default_level, values, visited);
+  DoCollectStringQueryResults(query, default_accumulator, values, visited);
 
   std::vector<StringQueryResult> result;
   result.reserve(values.size());
-  for (const auto& [id, accumulator] : values) {
+  for (auto [id, accumulator] : values) {
+    if ((default_accumulator.level > accumulator.level) ||
+        (default_accumulator.level == accumulator.level &&
+         default_accumulator.key > accumulator.key)) {
+      accumulator = default_accumulator;
+    }
     result.emplace_back(id, accumulator.value);
   }
   return result;
@@ -424,7 +451,13 @@ std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(
     }
 
     VisitedScopes visited;
-    return DoGetModificationTime(*vardef, visited);
+    size_t modification_time = DoGetModificationTime(*vardef, visited);
+    if (variable.is_parameterized && variable.normalized_id != vardef->id) {
+      VisitedScopes normalized_visited;
+      modification_time = std::max(
+          modification_time, DoGetModificationTime(variable.normalized_id, normalized_visited));
+    }
+    return modification_time;
   }
 
   if (!variable.is_parameterized) {
@@ -443,7 +476,8 @@ std::expected<size_t, ErrorCode> Scope<BaseTypes>::GetModificationTime(
     return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
   }
 
-  size_t modification_time = 0;
+  VisitedScopes normalized_visited;
+  size_t modification_time = DoGetModificationTime(variable.normalized_id, normalized_visited);
   for (const auto& id : ids) {
     VisitedScopes visited;
     modification_time = std::max(modification_time, DoGetModificationTime(id, visited));
@@ -561,63 +595,66 @@ void Scope<BaseTypes>::DoCollectStringMaterializedIds(const ParsedVariableQuery&
 
 template <typename BaseTypes>
 void Scope<BaseTypes>::DoCollectNumericQueryResults(
-    const ParsedVariableQuery& query, NumericValue default_add, NumericValue default_mult,
+    const ParsedVariableQuery& query, NumericQueryAccumulator& default_accumulator,
     absl::flat_hash_map<StringId, NumericQueryAccumulator>& result, VisitedScopes& visited) const {
   if (!visited.insert(this).second) {
     return;
   }
 
   for (const auto& [variable_id, variable] : numeric_variables_) {
+    if (variable_id == query.normalized_id) {
+      variable.CalculateModifiers(default_accumulator.add, default_accumulator.mult);
+      continue;
+    }
+
     const auto parsed = ruleset::ParseVariableQuery<BaseTypes>(variable_id, false);
     if (!parsed || !ruleset::details::QueryMatchesConcreteId(query, *parsed)) {
       continue;
     }
 
-    auto [it, inserted] = result.try_emplace(variable_id);
-    if (inserted) {
-      it->second.add = default_add;
-      it->second.mult = default_mult;
-    }
+    auto [it, _] = result.try_emplace(variable_id);
     variable.CalculateModifiers(it->second.add, it->second.mult);
   }
 
   if (parent_ != nullptr) {
-    parent_->DoCollectNumericQueryResults(query, default_add, default_mult, result, visited);
+    parent_->DoCollectNumericQueryResults(query, default_accumulator, result, visited);
   }
 
   for (const auto& tag_scope : tag_scopes_) {
-    tag_scope->DoCollectNumericQueryResults(query, default_add, default_mult, result, visited);
+    tag_scope->DoCollectNumericQueryResults(query, default_accumulator, result, visited);
   }
 }
 
 template <typename BaseTypes>
 void Scope<BaseTypes>::DoCollectStringQueryResults(
-    const ParsedVariableQuery& query, const StringId& default_value, NumericValue default_level,
+    const ParsedVariableQuery& query, StringQueryAccumulator& default_accumulator,
     absl::flat_hash_map<StringId, StringQueryAccumulator>& result, VisitedScopes& visited) const {
   if (!visited.insert(this).second) {
     return;
   }
 
   for (const auto& [variable_id, variable] : string_variables_) {
+    if (variable_id == query.normalized_id) {
+      variable.MergeModifiers(default_accumulator.value, default_accumulator.level,
+                              default_accumulator.key);
+      continue;
+    }
+
     const auto parsed = ruleset::ParseVariableQuery<BaseTypes>(variable_id, false);
     if (!parsed || !ruleset::details::QueryMatchesConcreteId(query, *parsed)) {
       continue;
     }
 
-    auto [it, inserted] = result.try_emplace(variable_id);
-    if (inserted) {
-      it->second.value = default_value;
-      it->second.level = default_level;
-    }
-    variable.CalculateModifiers(it->second.value, it->second.level);
+    auto [it, _] = result.try_emplace(variable_id);
+    variable.MergeModifiers(it->second.value, it->second.level, it->second.key);
   }
 
   if (parent_ != nullptr) {
-    parent_->DoCollectStringQueryResults(query, default_value, default_level, result, visited);
+    parent_->DoCollectStringQueryResults(query, default_accumulator, result, visited);
   }
 
   for (const auto& tag_scope : tag_scopes_) {
-    tag_scope->DoCollectStringQueryResults(query, default_value, default_level, result, visited);
+    tag_scope->DoCollectStringQueryResults(query, default_accumulator, result, visited);
   }
 }
 

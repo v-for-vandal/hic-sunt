@@ -78,15 +78,8 @@ TEST(StdEffectInstance, CheckPossibleRejectsNonBooleanResult) {
 
 TEST(StdEffectInstance, WildcardParameterizedVarBindsLuaDictionary) {
   auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
-  ASSERT_TRUE(mutable_definitions
-                  ->AddParameterizedNumericDefinition(
-                      "job/{job}/consumes/{resource}",
-                      {
-                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("job"),
-                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("resource"),
-                      },
-                      {})
-                  .has_value());
+  ASSERT_TRUE(
+      mutable_definitions->AddParameterizedNumericDefinition("job/{}/consumes/{}", {}).has_value());
   hs::ruleset::VariableDefinitionsConstPtr<StdBaseTypes> definitions{
       std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
 

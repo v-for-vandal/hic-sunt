@@ -112,16 +112,9 @@ TEST(StdScope, AddTagLinkRejectsDuplicateScopeId) {
 TEST(StdScope, OpenParameterizedNumericQueryReturnsOnlyMaterializedValuesFromGraph) {
   auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
   hs::ruleset::NumericVariableDefinition<StdBaseTypes> definition;
-  ASSERT_TRUE(definition.default_variable.SetModifier("default", 5, 0, 0));
-  ASSERT_TRUE(mutable_definitions
-                  ->AddParameterizedNumericDefinition(
-                      "job/{job}/consumes/{resource}",
-                      {
-                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("job"),
-                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("resource"),
-                      },
-                      definition)
-                  .has_value());
+  ASSERT_TRUE(
+      mutable_definitions->AddParameterizedNumericDefinition("job/{}/consumes/{}", definition)
+          .has_value());
   StdVariableDefinitionsConstPtr definitions{
       std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
 
@@ -129,6 +122,8 @@ TEST(StdScope, OpenParameterizedNumericQueryReturnsOnlyMaterializedValuesFromGra
   parent->SetVariableDefinitions(definitions);
   StdScopePtr child("child", types::ScopeType::SCOPE_TYPE_REGION);
   ASSERT_TRUE(child->SetParent(parent));
+
+  ASSERT_TRUE(parent->SetNumericModifier("job/{}/consumes/{}", "default", 5, 0, 1));
 
   const auto default_value = child->GetNumericValue("job/@job.unknown/consumes/@resource.wood");
   ASSERT_TRUE(default_value.has_value());
@@ -157,18 +152,12 @@ TEST(StdScope, OpenParameterizedNumericQueryReturnsOnlyMaterializedValuesFromGra
   EXPECT_EQ(*modification_time, 42u);
 }
 
-TEST(StdScope, OpenParameterizedStringConcreteUsesDefaultVariable) {
+TEST(StdScope, OpenParameterizedStringConcreteUsesDefaultValueAndNormalizedModifiers) {
   auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
   hs::ruleset::StringVariableDefinition<StdBaseTypes> definition;
-  ASSERT_TRUE(definition.default_variable.SetModifier("default", "label.default", 0, 0));
-  ASSERT_TRUE(mutable_definitions
-                  ->AddParameterizedStringDefinition(
-                      "label/{thing}",
-                      {
-                          hs::ruleset::OpenParameterDomain<StdBaseTypes>("thing"),
-                      },
-                      definition)
-                  .has_value());
+  definition.default_value = "label.default";
+  ASSERT_TRUE(
+      mutable_definitions->AddParameterizedStringDefinition("label/{}", definition).has_value());
   StdVariableDefinitionsConstPtr definitions{
       std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
 
@@ -179,7 +168,17 @@ TEST(StdScope, OpenParameterizedStringConcreteUsesDefaultVariable) {
   ASSERT_TRUE(value.has_value());
   EXPECT_EQ(*value, "label.default");
 
-  ASSERT_TRUE(scope->SetStringModifier("label/@thing.any", "override", "label.override", 1));
+  ASSERT_TRUE(scope->SetStringModifier("label/@thing.any", "same_level", "label.same_level", 0));
+  const auto same_level_value = scope->GetStringValue("label/@thing.any");
+  ASSERT_TRUE(same_level_value.has_value());
+  EXPECT_EQ(*same_level_value, "label.same_level");
+
+  ASSERT_TRUE(scope->SetStringModifier("label/{}", "default", "label.normalized", 1));
+  const auto normalized_value = scope->GetStringValue("label/@thing.any");
+  ASSERT_TRUE(normalized_value.has_value());
+  EXPECT_EQ(*normalized_value, "label.normalized");
+
+  ASSERT_TRUE(scope->SetStringModifier("label/@thing.any", "override", "label.override", 2));
   const auto query = scope->GetStringQuery("label/@*");
   ASSERT_TRUE(query.has_value());
   ASSERT_EQ(query->size(), 1u);
@@ -187,18 +186,42 @@ TEST(StdScope, OpenParameterizedStringConcreteUsesDefaultVariable) {
   EXPECT_EQ((*query)[0].second, "label.override");
 }
 
+TEST(StdScope, OpenParameterizedStringQueryMergesNormalizedAndConcreteModifiersByLevel) {
+  auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
+  hs::ruleset::StringVariableDefinition<StdBaseTypes> definition;
+  definition.default_value = "label.default";
+  ASSERT_TRUE(
+      mutable_definitions->AddParameterizedStringDefinition("label/{}", definition).has_value());
+  StdVariableDefinitionsConstPtr definitions{
+      std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};
+
+  StdScopePtr scope("scope", types::ScopeType::SCOPE_TYPE_WORLD);
+  scope->SetVariableDefinitions(definitions);
+
+  ASSERT_TRUE(scope->SetStringModifier("label/{}", "normalized", "label.normalized", 10));
+  ASSERT_TRUE(scope->SetStringModifier("label/@thing.any", "concrete", "label.concrete", 1));
+
+  const auto scalar = scope->GetStringValue("label/@thing.any");
+  ASSERT_TRUE(scalar.has_value());
+  EXPECT_EQ(*scalar, "label.normalized");
+
+  const auto query = scope->GetStringQuery("label/@*");
+  ASSERT_TRUE(query.has_value());
+  ASSERT_EQ(query->size(), 1u);
+  EXPECT_EQ((*query)[0].first, "label/@thing.any");
+  EXPECT_EQ((*query)[0].second, "label.normalized");
+}
+
 TEST(StdScope, ParameterizedNumericQueryReturnsMaterializedConcreteValues) {
   auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
   hs::ruleset::NumericVariableDefinition<StdBaseTypes> definition;
   definition.minimum = 0;
+  ASSERT_TRUE(mutable_definitions->SetFixedParameterDomainValues(
+      hs::ruleset::FixedParameterDomain::kJob, {"job.one", "job.two"}));
+  ASSERT_TRUE(mutable_definitions->SetFixedParameterDomainValues(
+      hs::ruleset::FixedParameterDomain::kResource, {"resource.wood", "resource.food"}));
   ASSERT_TRUE(mutable_definitions
-                  ->AddParameterizedNumericDefinition(
-                      "job/{job}/produces/{resource}",
-                      {
-                          {.name = "job", .values = {"job.one", "job.two"}},
-                          {.name = "resource", .values = {"resource.wood", "resource.food"}},
-                      },
-                      definition)
+                  ->AddParameterizedNumericDefinition("job/{job}/produces/{resource}", definition)
                   .has_value());
   StdVariableDefinitionsConstPtr definitions{
       std::static_pointer_cast<const StdVariableDefinitions>(mutable_definitions)};

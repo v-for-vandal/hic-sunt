@@ -37,11 +37,7 @@ template <typename BaseTypes = StdBaseTypes>
 class NumericVariableDefinition : public VariableDefinitionBase<BaseTypes> {
  public:
   using NumericValue = typename BaseTypes::NumericValue;
-  using NumericVariable = hs::variables::NumericVariable<BaseTypes>;
 
-  // TODO: Codex: Пусть это будет свойством именно
-  // ParameterizedVariableDefinition
-  NumericVariable default_variable{};
   NumericValue maximum = std::numeric_limits<NumericValue>::max();
   NumericValue minimum = std::numeric_limits<NumericValue>::lowest();
 };
@@ -50,11 +46,8 @@ template <typename BaseTypes = StdBaseTypes>
 class StringVariableDefinition : public VariableDefinitionBase<BaseTypes> {
  public:
   using StringId = typename BaseTypes::StringId;
-  using StringVariable = hs::variables::StringVariable<BaseTypes>;
 
-  // TODO: Codex: Пусть это будет свойством именно
-  // ParameterizedVariableDefinition
-  StringVariable default_variable{};
+  StringId default_value{};
 };
 
 template <typename BaseTypes = StdBaseTypes>
@@ -70,10 +63,11 @@ class VariableDefinitions {
  public:
   using StringId = typename BaseTypes::StringId;
   using VariableType = types::VariableType;
-  using ParsedVariableDefinition = std::variant<NumericVariableDefinition<BaseTypes>,
-                                                StringVariableDefinition<BaseTypes>, ErrorCode>;
   using ParameterizedNumericDefinition = ParameterizedNumericVariableDefinition<BaseTypes>;
   using ParameterizedStringDefinition = ParameterizedStringVariableDefinition<BaseTypes>;
+  using ParsedVariableDefinition =
+      std::variant<NumericVariableDefinition<BaseTypes>, StringVariableDefinition<BaseTypes>,
+                   ParameterizedNumericDefinition, ParameterizedStringDefinition, ErrorCode>;
   using ParameterizedInstance = ParameterizedVariableInstance<BaseTypes>;
 
   static ParsedVariableDefinition ParseFromProto(const proto::ruleset::Variable& definition);
@@ -88,21 +82,29 @@ class VariableDefinitions {
     string_definitions_.clear();
     parameterized_numeric_definitions_.clear();
     parameterized_string_definitions_.clear();
+    fixed_parameter_domain_values_.clear();
   }
 
-  std::expected<void, ErrorCode> AddNumericDefinition(
+  std::expected<StringId, ErrorCode> AddNumericDefinition(
       const StringId& id, NumericVariableDefinition<BaseTypes> definition);
 
-  std::expected<void, ErrorCode> AddStringDefinition(
+  std::expected<StringId, ErrorCode> AddStringDefinition(
       const StringId& id, StringVariableDefinition<BaseTypes> definition);
 
   std::expected<StringId, ErrorCode> AddParameterizedNumericDefinition(
-      const StringId& pattern, std::vector<ParameterDomain<BaseTypes>> parameters,
-      NumericVariableDefinition<BaseTypes> definition);
+      const StringId& pattern, NumericVariableDefinition<BaseTypes> definition);
+
+  std::expected<StringId, ErrorCode> AddParameterizedNumericDefinition(
+      ParameterizedNumericDefinition definition);
 
   std::expected<StringId, ErrorCode> AddParameterizedStringDefinition(
-      const StringId& pattern, std::vector<ParameterDomain<BaseTypes>> parameters,
-      StringVariableDefinition<BaseTypes> definition);
+      const StringId& pattern, StringVariableDefinition<BaseTypes> definition);
+
+  std::expected<StringId, ErrorCode> AddParameterizedStringDefinition(
+      ParameterizedStringDefinition definition);
+
+  std::expected<void, ErrorCode> SetFixedParameterDomainValues(FixedParameterDomain domain,
+                                                               std::vector<StringId> values);
 
   bool IsNumericVariable(const StringId& id) const noexcept {
     return GetVariableType(id) == VariableType::kNumeric;
@@ -143,6 +145,9 @@ class VariableDefinitions {
   std::expected<VariableDefinitionBase<BaseTypes>, ErrorCode> FindVariable(
       const ParsedVariableQuery<BaseTypes>& query) const;
 
+  // Expands fixed-domain parameterized definitions into concrete ids. Runtime
+  // Scope queries use materialized ids instead; these helpers are for ruleset-level
+  // validation/tests and fixed-domain introspection.
   std::expected<std::vector<ParameterizedInstance>, ErrorCode> FindParameterizedNumericVariables(
       const StringId& query) const;
 
@@ -168,8 +173,17 @@ class VariableDefinitions {
 
   template <typename ConcreteDefinition>
   std::expected<StringId, ErrorCode> AddParameterizedDefinition(
-      const StringId& pattern, std::vector<ParameterDomain<BaseTypes>> parameters,
-      ConcreteDefinition definition, ParameterizedDefinitionsMap<ConcreteDefinition>& target);
+      const StringId& pattern, ConcreteDefinition definition,
+      ParameterizedDefinitionsMap<ConcreteDefinition>& target);
+
+  template <typename ConcreteDefinition>
+  std::expected<StringId, ErrorCode> AddParameterizedDefinition(
+      ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition> definition,
+      ParameterizedDefinitionsMap<ConcreteDefinition>& target);
+
+  template <typename ConcreteDefinition>
+  std::expected<void, ErrorCode> FillFixedParameterValues(
+      ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>& definition) const;
 
   template <typename ConcreteDefinition>
   std::expected<ConcreteDefinition, ErrorCode> FindParameterizedVariable(
@@ -197,6 +211,9 @@ class VariableDefinitions {
       parameterized_numeric_definitions_;
   ParameterizedDefinitionsMap<StringVariableDefinition<BaseTypes>>
       parameterized_string_definitions_;
+  absl::flat_hash_map<FixedParameterDomain,
+                      std::shared_ptr<const FixedParameterDomainValues<BaseTypes>>>
+      fixed_parameter_domain_values_;
 };
 
 template <typename BaseTypes>

@@ -185,18 +185,28 @@ class Scope {
   struct StringQueryAccumulator {
     StringId value{};
     NumericValue level{0};
+    // Null key marks the definition default value. Real modifiers cannot use a
+    // null key, so they win ties against defaults.
+    StringId key{};
   };
 
-  auto CalculateNumericValue(const NumericVariableDefinition& variable_definition) const
-      -> NumericValue;
+  auto CalculateNumericValue(const NumericVariableDefinition& variable_definition,
+                             const ParsedVariableQuery& variable_query) const -> NumericValue;
 
-  auto CalculateStringValue(const StringVariableDefinition& variable_definition) -> StringId;
+  auto CalculateStringValue(const StringVariableDefinition& variable_definition,
+                            const ParsedVariableQuery& variable_query) -> StringId;
 
-  void FillNumericModifiers(const NumericVariableDefinition& variable_definition, NumericValue& add,
-                            NumericValue& mult, VisitedScopes& visited) const;
+  void FillNumericModifiers(const StringId& variable, NumericQueryAccumulator& accumulator,
+                            VisitedScopes& visited) const;
 
-  void FillStringModifiers(const StringVariableDefinition& variable_definition, StringId& value,
-                           NumericValue& level, VisitedScopes& visited);
+  void FillNumericModifiers(const StringId& variable, const StringId& normalized_variable,
+                            NumericQueryAccumulator& accumulator, VisitedScopes& visited) const;
+
+  void FillStringModifiers(const StringId& variable, StringQueryAccumulator& accumulator,
+                           VisitedScopes& visited);
+
+  void FillStringModifiers(const StringId& variable, const StringId& normalized_variable,
+                           StringQueryAccumulator& accumulator, VisitedScopes& visited);
 
   size_t DoGetModificationTime(const VariableDefinitionBase& variable_definition,
                                VisitedScopes& visited) const;
@@ -211,13 +221,13 @@ class Scope {
                                       absl::flat_hash_set<StringId>& ids,
                                       VisitedScopes& visited) const;
 
-  void DoCollectNumericQueryResults(const ParsedVariableQuery& query, NumericValue default_add,
-                                    NumericValue default_mult,
+  void DoCollectNumericQueryResults(const ParsedVariableQuery& query,
+                                    NumericQueryAccumulator& default_accumulator,
                                     absl::flat_hash_map<StringId, NumericQueryAccumulator>& result,
                                     VisitedScopes& visited) const;
 
-  void DoCollectStringQueryResults(const ParsedVariableQuery& query, const StringId& default_value,
-                                   NumericValue default_level,
+  void DoCollectStringQueryResults(const ParsedVariableQuery& query,
+                                   StringQueryAccumulator& default_accumulator,
                                    absl::flat_hash_map<StringId, StringQueryAccumulator>& result,
                                    VisitedScopes& visited) const;
 

@@ -70,6 +70,8 @@ class RuleSet : public RuleSetBase {
   absl::flat_hash_map<StringId, size_t> resources_by_id_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
+  std::vector<StringId> resource_ids_;
+  std::vector<StringId> job_ids_;
 
   VariableDefinitionsPtr<BaseTypes> parsed_variable_definitions_;
   std::vector<ConstEffectDefinitionPtr<BaseTypes>> effect_definitions_;

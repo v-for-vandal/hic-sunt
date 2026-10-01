@@ -33,9 +33,17 @@ void StringVariable<BaseTypes>::CalculateModifiers(StringId& value, NumericValue
 
   value = modifiers_.begin()->second.value;
   level = modifiers_.begin()->second.level;
-  StringId current_key = modifiers_.begin()->first;
+  StringId key = modifiers_.begin()->first;
+  MergeModifiers(value, level, key);
+}
+
+template <typename BaseTypes>
+void StringVariable<BaseTypes>::MergeModifiers(StringId& value, NumericValue& level,
+                                               StringId& current_key) const {
   for (const auto& [key, modifier] : modifiers_) {
-    // High level wins. If levels are equal, compare keys.
+    // High level wins. If levels are equal, compare keys. Real modifier keys
+    // cannot be null, so any level-0 modifier wins over a default value that
+    // uses a null key as sentinel.
     if ((modifier.level > level) || (modifier.level == level && key > current_key)) {
       level = modifier.level;
       value = modifier.value;

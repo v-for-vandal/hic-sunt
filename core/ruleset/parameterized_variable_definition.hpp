@@ -5,6 +5,7 @@
 #include <core/types/error_code.hpp>
 #include <core/types/std_base_types.hpp>
 #include <expected>
+#include <memory>
 #include <vector>
 
 namespace hs::ruleset {
@@ -14,33 +15,10 @@ enum class ParameterDomainKind {
   kOpen,
 };
 
-template <typename BaseTypes = StdBaseTypes>
-struct ParameterDomain {
-  using StringId = typename BaseTypes::StringId;
-
-  StringId name;
-  ParameterDomainKind kind{ParameterDomainKind::kFixed};
-  std::vector<StringId> values;
+enum class FixedParameterDomain {
+  kJob,
+  kResource,
 };
-
-template <typename BaseTypes = StdBaseTypes>
-ParameterDomain<BaseTypes> FixedParameterDomain(typename BaseTypes::StringId name,
-                                                std::vector<typename BaseTypes::StringId> values) {
-  return ParameterDomain<BaseTypes>{
-      .name = std::move(name),
-      .kind = ParameterDomainKind::kFixed,
-      .values = std::move(values),
-  };
-}
-
-template <typename BaseTypes = StdBaseTypes>
-ParameterDomain<BaseTypes> OpenParameterDomain(typename BaseTypes::StringId name) {
-  return ParameterDomain<BaseTypes>{
-      .name = std::move(name),
-      .kind = ParameterDomainKind::kOpen,
-      .values = {},
-  };
-}
 
 template <typename BaseTypes = StdBaseTypes>
 struct ParameterBinding {
@@ -48,6 +26,14 @@ struct ParameterBinding {
 
   StringId name;
   StringId value;
+};
+
+template <typename BaseTypes = StdBaseTypes>
+struct FixedParameterDomainValues {
+  using StringId = typename BaseTypes::StringId;
+
+  std::vector<StringId> ordered_values;
+  absl::flat_hash_set<StringId> allowed_values;
 };
 
 enum class ParsedVariableQueryArgumentKind {
@@ -84,20 +70,31 @@ struct ParameterizedVariableInstance {
 };
 
 template <typename BaseTypes, typename ConcreteDefinition>
-class ParameterizedVariableDefinition {
+class ParameterizedVariableDefinition : public ConcreteDefinition {
  public:
   using StringId = typename BaseTypes::StringId;
 
   struct Parameter {
+    // Parameter name from the source pattern segment, e.g. "job" in
+    // "job/{job}/consumes/{resource}". Empty for open "{}" segments.
     StringId name;
+    // Fixed parameters refer to one of the built-in fixed domains below; open
+    // parameters accept any valid concrete parameter id, e.g. "relation/{}".
     ParameterDomainKind kind{ParameterDomainKind::kFixed};
-    std::vector<StringId> values;
-    absl::flat_hash_set<StringId> allowed_values;
+    // Built-in domain used when `kind == kFixed`, e.g. `kJob` for "{job}".
+    FixedParameterDomain fixed_domain{FixedParameterDomain::kJob};
+    // Shared fixed-domain values registered by VariableDefinitions via
+    // SetFixedParameterDomainValues(). Reused by all parameters with the same
+    // fixed domain: ordered_values is used for wildcard expansion, and
+    // allowed_values is used for concrete id validation. Null for open
+    // parameters and for fixed domains that were not registered yet.
+    std::shared_ptr<const FixedParameterDomainValues<BaseTypes>> fixed_values;
   };
 
-  StringId id{};
+  // Original declaration pattern with named placeholders, e.g.
+  // "job/{job}/consumes/{resource}". The inherited `id` is the normalized form.
   StringId pattern{};
-  ConcreteDefinition concrete_definition{};
+  // Parameters in placeholder order. For the example above: job, then resource.
   std::vector<Parameter> parameters{};
 };
 
@@ -112,7 +109,6 @@ namespace details {
 template <typename BaseTypes, typename ConcreteDefinition>
 std::expected<ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>, ErrorCode>
 ParseParameterizedDefinition(const typename BaseTypes::StringId& pattern,
-                             std::vector<ParameterDomain<BaseTypes>> domains,
                              ConcreteDefinition definition);
 
 template <typename BaseTypes>

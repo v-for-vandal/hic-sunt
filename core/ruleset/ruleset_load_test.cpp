@@ -161,7 +161,7 @@ TEST(StdRuleSet, LoadYamlRejectsAnchorsAndAliases) {
   EXPECT_EQ(ruleset.GetResources().resources(0).id(), "resource.good");
 }
 
-TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
+TEST(StdRuleSet, LoadParameterizedJobVariablesFromVariableDefinitions) {
   const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;

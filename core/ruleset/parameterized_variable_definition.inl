@@ -106,7 +106,7 @@ typename BaseTypes::StringId StringIdFromString(const std::basic_string<CharT>& 
 
 template <typename CharT>
 bool IsPlaceholderSegment(std::basic_string_view<CharT> segment) {
-  return segment.size() >= 3 && segment.front() == AsChar<CharT>('{') &&
+  return segment.size() >= 2 && segment.front() == AsChar<CharT>('{') &&
          segment.back() == AsChar<CharT>('}');
 }
 
@@ -129,6 +129,18 @@ bool IsWildcardParameterizedSegment(std::basic_string_view<CharT> segment) {
 template <typename CharT>
 bool IsValidConcreteParameterValue(std::basic_string_view<CharT> value) {
   return !value.empty() && !EqualsAscii(value, "*") && !ContainsAsciiChar(value, kPathSeparator);
+}
+
+template <typename CharT>
+std::expected<FixedParameterDomain, ErrorCode> ParseFixedParameterDomain(
+    std::basic_string_view<CharT> name) {
+  if (EqualsAscii(name, "job")) {
+    return FixedParameterDomain::kJob;
+  }
+  if (EqualsAscii(name, "resource")) {
+    return FixedParameterDomain::kResource;
+  }
+  return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
 }
 
 template <typename CharT>
@@ -233,7 +245,6 @@ std::expected<typename BaseTypes::StringId, ErrorCode> NormalizeConcreteOrQueryI
 template <typename BaseTypes, typename ConcreteDefinition>
 std::expected<ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>, ErrorCode>
 ParseParameterizedDefinition(const typename BaseTypes::StringId& pattern,
-                             std::vector<ParameterDomain<BaseTypes>> domains,
                              ConcreteDefinition definition) {
   using StringId = typename BaseTypes::StringId;
   using ParameterizedDefinition = ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>;
@@ -245,18 +256,31 @@ ParseParameterizedDefinition(const typename BaseTypes::StringId& pattern,
 
   std::vector<NormalizedSegment<CharT>> normalized_segments;
   normalized_segments.reserve(pattern_segments.size());
-  std::vector<StringId> parameter_names;
+  std::vector<typename ParameterizedDefinition::Parameter> parameters;
   absl::flat_hash_set<StringId> seen_parameter_names;
 
   for (const auto segment : pattern_segments) {
     if (IsPlaceholderSegment(segment)) {
-      const auto parameter_name =
-          StringIdFromView<BaseTypes>(segment.substr(1, segment.size() - 2));
-      if (BaseTypes::IsNullToken(parameter_name) ||
-          !seen_parameter_names.insert(parameter_name).second) {
-        return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
+      const auto parameter_name_view = segment.substr(1, segment.size() - 2);
+      const auto parameter_name = StringIdFromView<BaseTypes>(parameter_name_view);
+
+      typename ParameterizedDefinition::Parameter parameter;
+      parameter.name = parameter_name;
+      if (parameter_name_view.empty()) {
+        parameter.kind = ParameterDomainKind::kOpen;
+      } else {
+        if (!seen_parameter_names.insert(parameter_name).second) {
+          return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
+        }
+        const auto fixed_domain = ParseFixedParameterDomain(parameter_name_view);
+        if (!fixed_domain) {
+          return std::unexpected(fixed_domain.error());
+        }
+        parameter.kind = ParameterDomainKind::kFixed;
+        parameter.fixed_domain = *fixed_domain;
       }
-      parameter_names.push_back(parameter_name);
+
+      parameters.push_back(std::move(parameter));
       normalized_segments.push_back(NormalizedSegment<CharT>{.is_placeholder = true});
       continue;
     }
@@ -267,20 +291,7 @@ ParseParameterizedDefinition(const typename BaseTypes::StringId& pattern,
     normalized_segments.push_back(NormalizedSegment<CharT>{.text = segment});
   }
 
-  if (parameter_names.empty() || parameter_names.size() > kMaxParameterizedVariableParameters) {
-    return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
-  }
-
-  absl::flat_hash_map<StringId, ParameterDomain<BaseTypes>> domains_by_name;
-  domains_by_name.reserve(domains.size());
-  for (auto& domain : domains) {
-    if (BaseTypes::IsNullToken(domain.name) ||
-        !domains_by_name.try_emplace(domain.name, std::move(domain)).second) {
-      return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
-    }
-  }
-
-  if (domains_by_name.size() != parameter_names.size()) {
+  if (parameters.empty() || parameters.size() > kMaxParameterizedVariableParameters) {
     return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
   }
 
@@ -289,42 +300,9 @@ ParseParameterizedDefinition(const typename BaseTypes::StringId& pattern,
   definition.id = normalized_id;
 
   ParameterizedDefinition result;
-  result.id = normalized_id;
+  static_cast<ConcreteDefinition&>(result) = std::move(definition);
   result.pattern = pattern;
-  result.concrete_definition = std::move(definition);
-  result.parameters.reserve(parameter_names.size());
-
-  for (const auto& parameter_name : parameter_names) {
-    auto fit = domains_by_name.find(parameter_name);
-    if (fit == domains_by_name.end()) {
-      return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
-    }
-
-    typename ParameterizedDefinition::Parameter parameter;
-    parameter.name = parameter_name;
-    parameter.kind = fit->second.kind;
-
-    if (parameter.kind == ParameterDomainKind::kOpen) {
-      if (!fit->second.values.empty()) {
-        return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
-      }
-      result.parameters.push_back(std::move(parameter));
-      continue;
-    }
-
-    parameter.values.reserve(fit->second.values.size());
-    parameter.allowed_values.reserve(fit->second.values.size());
-    for (const auto& value : fit->second.values) {
-      const auto value_view_holder = MakeStringIdView<BaseTypes>(value);
-      if (!IsValidConcreteParameterValue(GetView(value_view_holder))) {
-        return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_DEFINITION);
-      }
-      if (parameter.allowed_values.insert(value).second) {
-        parameter.values.push_back(value);
-      }
-    }
-    result.parameters.push_back(std::move(parameter));
-  }
+  result.parameters = std::move(parameters);
 
   return result;
 }
@@ -346,7 +324,8 @@ std::expected<void, ErrorCode> ValidateConcreteParameterBindings(
 
     const auto& parameter = definition.parameters[idx];
     if (parameter.kind == ParameterDomainKind::kFixed &&
-        !parameter.allowed_values.contains(argument.value)) {
+        (parameter.fixed_values == nullptr ||
+         !parameter.fixed_values->allowed_values.contains(argument.value))) {
       return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
     }
   }
@@ -435,12 +414,16 @@ GenerateParameterizedInstances(
       if (parameter.kind == ParameterDomainKind::kOpen) {
         return std::unexpected(ErrorCode::ERR_INVALID_VARIABLE_REFERENCE);
       }
-      choices.push_back(parameter.values);
+      if (parameter.fixed_values == nullptr) {
+        return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
+      }
+      choices.push_back(parameter.fixed_values->ordered_values);
       continue;
     }
 
     if (parameter.kind == ParameterDomainKind::kFixed &&
-        !parameter.allowed_values.contains(argument.value)) {
+        (parameter.fixed_values == nullptr ||
+         !parameter.fixed_values->allowed_values.contains(argument.value))) {
       return std::unexpected(ErrorCode::ERR_NO_SUCH_VARIABLE);
     }
     choices.push_back({argument.value});

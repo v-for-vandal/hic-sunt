@@ -24,6 +24,8 @@ class StringVariable : public VariableBase<BaseTypes> {
 
   void CalculateModifiers(StringId& value, NumericValue& level) const;
 
+  void MergeModifiers(StringId& value, NumericValue& level, StringId& key) const;
+
   void ExplainModifiers(auto&& output_fn) const;
 
  private:
