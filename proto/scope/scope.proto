@@ -34,4 +34,5 @@ message Scope {
   repeated NumericVariable numeric_variables = 3;
   repeated StringVariable string_variables = 4;
   repeated string tag_scope_ids = 5;
+  string parent_scope_id = 6;
 }

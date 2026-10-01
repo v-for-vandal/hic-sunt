@@ -26,7 +26,11 @@ template <typename BaseTypes>
 void SerializeTo(const Scope<BaseTypes>& source, proto::scope::Scope& to);
 
 template <typename BaseTypes>
-Scope<BaseTypes> ParseFrom(const proto::scope::Scope& from, serialize::To<Scope<BaseTypes>>);
+struct ScopeParseContext;
+
+template <typename BaseTypes>
+Scope<BaseTypes> ParseFrom(const proto::scope::Scope& from, serialize::To<Scope<BaseTypes>>,
+                           const ScopeParseContext<BaseTypes>& context);
 
 template <typename BaseTypes>
 using ScopePtr = utils::NonNullSharedPtr<Scope<BaseTypes>>;
@@ -161,7 +165,7 @@ class Scope {
   std::expected<size_t, ErrorCode> GetModificationTime(const ParsedVariableQuery& variable) const;
 
   std::expected<void, ErrorCode> AddTagLink(const StringId& tag_name, const ScopePtr& tag_scope);
-  void RestoreTagLinks(const absl::flat_hash_map<StringId, ScopePtr>& scopes_by_id);
+  const std::vector<ScopePtr>& GetTagScopes() const noexcept { return tag_scopes_; }
 
   void ExplainNumericVariable(const StringId& variable, auto&& collect_fn);
   void ExplainStringVariable(const StringId& variable, auto&& collect_fn);
@@ -261,7 +265,6 @@ class Scope {
   // All other 'parental' scopes are considered tag-scopes and are assigned
   // or removed as game progresses
   std::vector<ScopePtr> tag_scopes_;
-  std::vector<StringId> pending_tag_scope_ids_;
 
   absl::flat_hash_map<StringId, NumericVariable> numeric_variables_;
   absl::flat_hash_map<StringId, StringVariable> string_variables_;
@@ -273,7 +276,8 @@ class Scope {
 
  private:
   friend void SerializeTo<BaseTypes>(const Scope& source, proto::scope::Scope& to);
-  friend Scope ParseFrom<BaseTypes>(const proto::scope::Scope& from, serialize::To<Scope>);
+  friend Scope ParseFrom<BaseTypes>(const proto::scope::Scope& from, serialize::To<Scope>,
+                                    const ScopeParseContext<BaseTypes>& context);
 };
 
 }  // namespace hs::scope
