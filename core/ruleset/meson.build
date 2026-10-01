@@ -48,7 +48,7 @@ core_ruleset_ut_lib_dep = declare_dependency(
 core_ruleset_tests = executable(
     'unit_tests',
     sources: [
-        'test_main.cpp',
+        test_main_cpp,
         'effect_test.cpp',
         'ruleset_load_test.cpp',
         'ruleset_serialize_test.cpp',
@@ -56,6 +56,7 @@ core_ruleset_tests = executable(
     ],
     dependencies: [
         core_ruleset_ut_lib_dep,
+        test_utils_lib_dep,
     ],
 )
 

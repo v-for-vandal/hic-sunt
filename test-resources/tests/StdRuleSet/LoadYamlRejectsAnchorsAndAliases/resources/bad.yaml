@@ -1,0 +1,4 @@
+resources:
+  - &resource_anchor
+    id: resource.bad
+  - *resource_anchor

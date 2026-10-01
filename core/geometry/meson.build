@@ -19,9 +19,9 @@ core_geometry_tests = executable(
     sources: [
         'coords_test.cpp',
         'surface_test.cpp',
-        'test_main.cpp',
+        test_main_cpp,
     ],
-    dependencies: [common_deps, gtest_dep, core_geometry_lib_dep],
+    dependencies: [common_deps, gtest_dep, core_geometry_lib_dep, test_utils_lib_dep],
 )
 
 test('core.geometry', core_geometry_tests, env: environment(test_env))

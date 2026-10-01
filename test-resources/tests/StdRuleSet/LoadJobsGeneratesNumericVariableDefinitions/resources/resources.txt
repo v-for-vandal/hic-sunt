@@ -1,0 +1,3 @@
+resources { id: "resource.wood" }
+resources { id: "resource.tools" }
+resources { id: "resource.food" }

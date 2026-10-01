@@ -1,40 +1,18 @@
 #include <gtest/gtest.h>
 
 #include <core/utils/error_message.hpp>
-#include <cstdlib>
-#include <fstream>
+#include <limits>
+#include <utils/test_data.hpp>
 
 #include "ruleset.hpp"
 
 namespace hs::ruleset {
 
 using StdRuleSet = RuleSet<StdBaseTypes>;
-
-namespace {
-
-std::filesystem::path MakeTempDir(const std::string& name) {
-  const auto root = std::filesystem::temp_directory_path() /
-                    std::filesystem::path("hic_sunt_ruleset_tests") / name;
-  std::filesystem::remove_all(root);
-  std::filesystem::create_directories(root);
-  return root;
-}
-
-void WriteTextFile(const std::filesystem::path& path, const std::string& content) {
-  std::filesystem::create_directories(path.parent_path());
-  std::ofstream out(path);
-  out << content;
-}
-
-}  // namespace
+using ::hs::test::GetTestDataFolder;
 
 TEST(StdRuleSet, LoadRecursivelyMergesFilesFromDirectories) {
-  const auto root = MakeTempDir("recursive_merge");
-  WriteTextFile(root / "biomes" / "base.txt", "biomes { id: \"biome.one\" }\n");
-  WriteTextFile(root / "biomes" / "nested" / "more.txt",
-                "biome_features { id: \"feature.one\" }\n");
-  WriteTextFile(root / "resources" / "a.txt", "resources { id: \"resource.one\" }\n");
-  WriteTextFile(root / "effects" / "e.txt", "effects { id: \"effect.one\" }\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -47,10 +25,8 @@ TEST(StdRuleSet, LoadRecursivelyMergesFilesFromDirectories) {
 }
 
 TEST(StdRuleSet, LoadRespectsOrderedDirectories) {
-  const auto first = MakeTempDir("ordered_first");
-  const auto second = MakeTempDir("ordered_second");
-  WriteTextFile(first / "jobs" / "a.txt", "jobs { id: \"job.first\" }\n");
-  WriteTextFile(second / "jobs" / "b.txt", "jobs { id: \"job.second\" }\n");
+  const auto first = GetTestDataFolder("first");
+  const auto second = GetTestDataFolder("second");
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -62,12 +38,8 @@ TEST(StdRuleSet, LoadRespectsOrderedDirectories) {
 }
 
 TEST(StdRuleSet, LaterFilesOverrideObjectsWithSameId) {
-  const auto first = MakeTempDir("override_first");
-  const auto second = MakeTempDir("override_second");
-  WriteTextFile(first / "projects" / "a.txt",
-                "projects { id: \"project.one\" script: \"res://first.gd\" }\n");
-  WriteTextFile(second / "projects" / "b.txt",
-                "projects { id: \"project.one\" script: \"res://second.gd\" }\n");
+  const auto first = GetTestDataFolder("first");
+  const auto second = GetTestDataFolder("second");
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -79,11 +51,8 @@ TEST(StdRuleSet, LaterFilesOverrideObjectsWithSameId) {
 }
 
 TEST(StdRuleSet, LoadIgnoresNonDirectoryPaths) {
-  const auto root = MakeTempDir("ignore_non_directory");
+  const auto root = GetTestDataFolder();
   const auto file_path = root / "not_a_directory.txt";
-  WriteTextFile(file_path, "ignored");
-  WriteTextFile(root / "projects" / "p.txt",
-                "projects { id: \"project.one\" script: \"res://a.gd\" }\n");
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -94,9 +63,7 @@ TEST(StdRuleSet, LoadIgnoresNonDirectoryPaths) {
 }
 
 TEST(StdRuleSet, LoadIgnoresUnreadableOrInvalidFiles) {
-  const auto root = MakeTempDir("ignore_invalid_files");
-  WriteTextFile(root / "variables" / "good.txt", "variables { id: \"var.one\" string {} }\n");
-  WriteTextFile(root / "variables" / "bad.txt", "this is not protobuf text\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -107,18 +74,7 @@ TEST(StdRuleSet, LoadIgnoresUnreadableOrInvalidFiles) {
 }
 
 TEST(StdRuleSet, LoadYamlImprovementsWithMapFieldsAsDictionaries) {
-  const auto root = MakeTempDir("yaml_improvements_maps");
-  WriteTextFile(root / "improvements" / "region_improvements.yaml",
-                "improvements:\n"
-                "  - id: core.improv.logging_1\n"
-                "    jobs:\n"
-                "      core.job.woodcutter: 1\n"
-                "  - id: core.bld.palace\n"
-                "    cost:\n"
-                "      amounts:\n"
-                "        core.res.stone: 10\n"
-                "        core.res.wood: 10\n"
-                "        core.res.workforce: 2\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -141,14 +97,7 @@ TEST(StdRuleSet, LoadYamlImprovementsWithMapFieldsAsDictionaries) {
 }
 
 TEST(StdRuleSet, LoadYamlJobsWithInputOutputMapsAsDictionaries) {
-  const auto root = MakeTempDir("yaml_jobs_maps");
-  WriteTextFile(root / "jobs" / "jobs.yaml",
-                "jobs:\n"
-                "  - id: core.job.woodcutter\n"
-                "    input:\n"
-                "      core.res.food: 1\n"
-                "    output:\n"
-                "      core.res.wood: 3\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -164,13 +113,7 @@ TEST(StdRuleSet, LoadYamlJobsWithInputOutputMapsAsDictionaries) {
 }
 
 TEST(StdRuleSet, LoadMixedFormatsInLexicographicOrderByPathWithoutExtension) {
-  const auto root = MakeTempDir("mixed_format_order");
-  WriteTextFile(root / "projects" / "01_base.yaml",
-                "projects:\n"
-                "  - id: project.one\n"
-                "    script: res://first.gd\n");
-  WriteTextFile(root / "projects" / "02_override.txt",
-                "projects { id: \"project.one\" script: \"res://second.gd\" }\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -181,15 +124,7 @@ TEST(StdRuleSet, LoadMixedFormatsInLexicographicOrderByPathWithoutExtension) {
 }
 
 TEST(StdRuleSet, LoadIgnoresFilesWithSameNameAndDifferentExtensionsInOneDirectory) {
-  const auto root = MakeTempDir("same_name_different_extensions");
-  WriteTextFile(root / "projects" / "01_valid.txt",
-                "projects { id: \"project.valid\" script: \"res://valid.gd\" }\n");
-  WriteTextFile(root / "projects" / "02_conflict.txt",
-                "projects { id: \"project.conflict.txt\" script: \"res://txt.gd\" }\n");
-  WriteTextFile(root / "projects" / "02_conflict.yaml",
-                "projects:\n"
-                "  - id: project.conflict.yaml\n"
-                "    script: res://yaml.gd\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -200,23 +135,7 @@ TEST(StdRuleSet, LoadIgnoresFilesWithSameNameAndDifferentExtensionsInOneDirector
 }
 
 TEST(StdRuleSet, LoadYamlScalarsUseYamlTypesBeforeProtobufParsing) {
-  const auto root = MakeTempDir("yaml_scalar_types");
-  WriteTextFile(root / "resources" / "01_quoted_string.yaml",
-                "resources:\n"
-                "  - id: \"true\"\n");
-  WriteTextFile(root / "resources" / "02_unquoted_bool.yaml",
-                "resources:\n"
-                "  - id: true\n");
-  WriteTextFile(root / "variables" / "01_bool.yaml",
-                "variables:\n"
-                "  - id: variable.bool\n"
-                "    boolean: {}\n"
-                "    immutable: true\n");
-  WriteTextFile(root / "variables" / "02_string_bool.yaml",
-                "variables:\n"
-                "  - id: variable.string_bool\n"
-                "    boolean: {}\n"
-                "    immutable: \"true\"\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -232,15 +151,7 @@ TEST(StdRuleSet, LoadYamlScalarsUseYamlTypesBeforeProtobufParsing) {
 }
 
 TEST(StdRuleSet, LoadYamlRejectsAnchorsAndAliases) {
-  const auto root = MakeTempDir("yaml_rejects_anchors");
-  WriteTextFile(root / "resources" / "good.yaml",
-                "resources:\n"
-                "  - id: resource.good\n");
-  WriteTextFile(root / "resources" / "bad.yaml",
-                "resources:\n"
-                "  - &resource_anchor\n"
-                "    id: resource.bad\n"
-                "  - *resource_anchor\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -251,17 +162,7 @@ TEST(StdRuleSet, LoadYamlRejectsAnchorsAndAliases) {
 }
 
 TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
-  const auto root = MakeTempDir("job_variable_definitions");
-  WriteTextFile(root / "resources" / "resources.txt",
-                "resources { id: \"resource.wood\" }\n"
-                "resources { id: \"resource.tools\" }\n"
-                "resources { id: \"resource.food\" }\n");
-  WriteTextFile(root / "jobs" / "jobs.txt",
-                "jobs {\n"
-                "  id: \"job.one\"\n"
-                "  input { key: \"resource.wood\" value: 2 }\n"
-                "  output { key: \"resource.tools\" value: 1 }\n"
-                "}\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
@@ -302,13 +203,7 @@ TEST(StdRuleSet, LoadJobsGeneratesNumericVariableDefinitions) {
 }
 
 TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {
-  const auto root = MakeTempDir("inline_improvement_effects");
-  WriteTextFile(root / "improvements" / "improvements.txt",
-                "improvements {\n"
-                "  id: \"mill\"\n"
-                "  class_effect { lua: \"return VAR(mill.class.dep)\" }\n"
-                "  instance_effect { lua: \"return VAR(mill.instance.dep)\" }\n"
-                "}\n");
+  const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;

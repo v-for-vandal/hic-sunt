@@ -29,7 +29,7 @@ core_terra_lib_dep = declare_dependency(
 core_terra_tests = executable(
     'unit_tests',
     sources: [
-        'test_main.cpp',
+        test_main_cpp,
         'civilization_test.cpp',
         'civilization_serialize_test.cpp',
         'plane_test.cpp',
@@ -41,6 +41,7 @@ core_terra_tests = executable(
         gtest_dep,
         core_terra_lib_dep,
         core_scope_ut_lib_dep,
+        test_utils_lib_dep,
     ],
 )
 

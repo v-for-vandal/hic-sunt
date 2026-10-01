@@ -1,0 +1,1 @@
+projects { id: "project.one" script: "res://a.gd" }

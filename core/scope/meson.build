@@ -46,12 +46,12 @@ core_scope_ut_lib_dep = declare_dependency(
 core_scope_tests = executable(
     'unit_tests',
     sources: [
-        'test_main.cpp',
+        test_main_cpp,
         'scope_test.cpp',
         'scope_change_set_test.cpp',
         'scope_serialize_test.cpp',
     ],
-    dependencies: [core_scope_ut_lib_dep],
+    dependencies: [core_scope_ut_lib_dep, test_utils_lib_dep],
 )
 
 test('core.scope', core_scope_tests, env: environment(test_env))

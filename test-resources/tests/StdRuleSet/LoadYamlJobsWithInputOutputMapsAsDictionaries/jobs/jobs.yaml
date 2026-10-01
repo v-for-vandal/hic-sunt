@@ -1,0 +1,6 @@
+jobs:
+  - id: core.job.woodcutter
+    input:
+      core.res.food: 1
+    output:
+      core.res.wood: 3

@@ -18,13 +18,11 @@ core_utils_lib_dep = declare_dependency(
 core_utils_tests = executable(
     'unit_tests',
     sources: [
-        'test_main.cpp',
+        test_main_cpp,
         'minmax_test.cpp',
         'non_null_ptr_test.cpp',
     ],
-    dependencies: common_deps + gtest_dep,
-    link_with: [core_utils_lib],
-    include_directories: root_include,
+    dependencies: [core_utils_lib_dep, test_utils_lib_dep],
 )
 
 test('core.utils', core_utils_tests, env: environment(test_env))

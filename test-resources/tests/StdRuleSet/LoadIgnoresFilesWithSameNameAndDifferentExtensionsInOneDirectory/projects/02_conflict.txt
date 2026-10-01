@@ -1,0 +1,1 @@
+projects { id: "project.conflict.txt" script: "res://txt.gd" }

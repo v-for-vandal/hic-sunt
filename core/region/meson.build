@@ -28,7 +28,7 @@ core_region_lib_dep = declare_dependency(
 core_region_tests = executable(
     'unit_tests',
     sources: [
-        'test_main.cpp',
+        test_main_cpp,
         'cell_serialize_test.cpp',
         'region_test.cpp',
         'region_serialize_test.cpp',
@@ -40,6 +40,7 @@ core_region_tests = executable(
         core_geometry_lib_dep,
         hs_proto_lib_dep,
         core_scope_ut_lib_dep,
+        test_utils_lib_dep,
     ],
 )
 
