@@ -324,6 +324,7 @@ World<BaseTypes> ParseFrom(const proto::terra::World& source, serialize::To<Worl
   }
 
   result.InitNonpersistent();
+  context.CheckCycles();
   return result;
 }
 

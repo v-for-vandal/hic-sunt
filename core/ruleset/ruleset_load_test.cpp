@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <core/utils/error_message.hpp>
+#include <filesystem>
+#include <fstream>
 #include <limits>
 #include <utils/test_data.hpp>
 
@@ -209,6 +211,24 @@ TEST(StdRuleSet, LoadParameterizedJobVariablesFromVariableDefinitions) {
   EXPECT_EQ((*consumed_resources)[0].variable_id, "job/@job.one/consumes/@resource.wood");
   EXPECT_EQ((*consumed_resources)[1].variable_id, "job/@job.one/consumes/@resource.tools");
   EXPECT_EQ((*consumed_resources)[2].variable_id, "job/@job.one/consumes/@resource.food");
+}
+
+TEST(StdRuleSet, DumpVariablesCsvExpandsFixedParametersAndKeepsOpenParameters) {
+  const auto root = GetTestDataFolder();
+  const auto csv_path = std::filesystem::temp_directory_path() / "hic_sunt_variables.csv";
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({root}, errors));
+  ASSERT_TRUE(ruleset.DumpVariablesCsv(csv_path, errors));
+
+  std::ifstream input(csv_path);
+  ASSERT_TRUE(input.is_open());
+  std::string csv((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+
+  EXPECT_TRUE(csv.starts_with("name,type\n"));
+  EXPECT_NE(csv.find("job/@job.one/produces/@resource.wood,numeric\n"), std::string::npos);
+  EXPECT_NE(csv.find("relation/{}/score,numeric\n"), std::string::npos);
 }
 
 TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {

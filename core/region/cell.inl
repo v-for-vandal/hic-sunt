@@ -40,7 +40,11 @@ bool Cell<BaseTypes>::HasImprovement(int slot) const {
 template <typename BaseTypes>
 std::expected<void, ErrorCode> Cell<BaseTypes>::AddImprovement(int slot,
                                                                const ScopePtr& improvement) {
-  if (!improvement->IsOrphaned()) {
+  const auto& cell_scope = this->GetScope();
+  // When restoring with ParseFrom method, improvement scope is set up properly,
+  // with parent and everything, before calling AddImprovement.  In this case,
+  // we accept such scope.
+  if (!improvement->IsOrphaned() && improvement->GetParent() != cell_scope) {
     return std::unexpected(ErrorCode::ERR_IMPROVEMENT_SCOPE_ALREADY_HAS_PARENT);
   }
 
@@ -48,8 +52,16 @@ std::expected<void, ErrorCode> Cell<BaseTypes>::AddImprovement(int slot,
     return std::unexpected(ErrorCode::ERR_IMPROVEMENT_SLOT_OCCUPIED);
   }
 
-  if (auto success = improvement->SetParent(this->GetScope()); !success) {
-    return std::unexpected(success.error());
+  for (const auto& [_, existing_improvement] : improvements_) {
+    if (existing_improvement->GetId() == improvement->GetId()) {
+      return std::unexpected(ErrorCode::ERR_IMPROVEMENT_SCOPE_ALREADY_HAS_PARENT);
+    }
+  }
+
+  if (improvement->IsOrphaned()) {
+    if (auto success = improvement->SetParent(cell_scope); !success) {
+      return std::unexpected(success.error());
+    }
   }
   improvements_[slot] = improvement;
   return {};
