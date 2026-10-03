@@ -39,6 +39,8 @@ template <typename BaseTypes>
 struct ScopeParseContext {
   using StringId = typename BaseTypes::StringId;
   absl::flat_hash_map<StringId, ScopePtr<BaseTypes>> scopes_by_id;
+
+  void CheckCycles() const;
 };
 
 /** \brief Scope is a collection of variables (numeric and strings)
@@ -87,18 +89,7 @@ class Scope {
 
   const std::shared_ptr<Scope>& GetParent() const { return parent_; }
 
-  [[nodiscard]] std::expected<void, ErrorCode> SetParent(const std::shared_ptr<Scope>& parent) {
-    if (parent) {
-      if (!hs::types::CanLinkScopes(scope_type_, parent->scope_type_)) {
-        spdlog::warn("Scope of type {} can not be child of scope of type {}", scope_type_,
-                     parent->scope_type_);
-        return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
-      }
-    }
-    parent_ = parent;
-
-    return {};
-  }
+  [[nodiscard]] std::expected<void, ErrorCode> SetParent(const std::shared_ptr<Scope>& parent);
 
   // Every scope except SCOPE_TYPE_WORLD should have a parent. Scopes without parent are valid,
   // for example that could be temporary scopes to show effects and so on. However, generally

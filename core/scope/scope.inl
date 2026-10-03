@@ -10,6 +10,56 @@
 
 namespace hs::scope {
 
+namespace details {
+
+enum class ScopeGraphVisitState { kVisiting, kVisited };
+
+}  // namespace details
+
+template <typename BaseTypes>
+void ScopeParseContext<BaseTypes>::CheckCycles() const {
+  absl::flat_hash_map<StringId, details::ScopeGraphVisitState> states;
+  states.reserve(scopes_by_id.size());
+
+  auto visit = [&](this auto&& self, const ScopePtr<BaseTypes>& scope_ptr) -> void {
+    const auto scope_id = scope_ptr->GetId();
+    if (auto state_it = states.find(scope_id); state_it != states.end()) {
+      if (state_it->second == details::ScopeGraphVisitState::kVisiting) {
+        throw std::runtime_error(fmt::format("Cycle detected in scope graph at {}", scope_id));
+      }
+      return;
+    }
+
+    states.emplace(scope_id, details::ScopeGraphVisitState::kVisiting);
+
+    if (const auto& parent = scope_ptr->GetParent(); parent != nullptr) {
+      const auto parent_id = parent->GetId();
+      auto parent_it = scopes_by_id.find(parent_id);
+      if (parent_it == scopes_by_id.end()) {
+        throw std::runtime_error(
+            fmt::format("Missing parent scope {} for scope {}", parent_id, scope_id));
+      }
+      self(parent_it->second);
+    }
+
+    for (const auto& tag_scope : scope_ptr->GetTagScopes()) {
+      const auto tag_scope_id = tag_scope->GetId();
+      auto tag_scope_it = scopes_by_id.find(tag_scope_id);
+      if (tag_scope_it == scopes_by_id.end()) {
+        throw std::runtime_error(
+            fmt::format("Missing tag scope {} for scope {}", tag_scope_id, scope_id));
+      }
+      self(tag_scope_it->second);
+    }
+
+    states[scope_id] = details::ScopeGraphVisitState::kVisited;
+  };
+
+  for (const auto& [_, scope_ptr] : scopes_by_id) {
+    visit(scope_ptr);
+  }
+}
+
 template <typename BaseTypes>
 Scope<BaseTypes>::Scope(StringId id, types::ScopeType scope_type)
     : id_(id), scope_type_(scope_type) {
@@ -17,6 +67,18 @@ Scope<BaseTypes>::Scope(StringId id, types::ScopeType scope_type)
     const uint64_t address_as_uint = reinterpret_cast<uint64_t>(this);
     id_ = BaseTypes::StringIdFromStdString(fmt::format("{:x}", address_as_uint));
   }
+}
+
+template <typename BaseTypes>
+std::expected<void, ErrorCode> Scope<BaseTypes>::SetParent(const std::shared_ptr<Scope>& parent) {
+  if (parent && !hs::types::CanLinkScopes(scope_type_, parent->scope_type_)) {
+    spdlog::warn("Scope of type {} can not be child of scope of type {}", scope_type_,
+                 parent->scope_type_);
+    return std::unexpected(ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+  }
+  parent_ = parent;
+
+  return {};
 }
 
 template <typename BaseTypes>
@@ -834,6 +896,19 @@ Scope<BaseTypes> ParseFrom(const proto::scope::Scope& scope, serialize::To<Scope
     }
   }
 
+  if (!scope.parent_scope_id().empty()) {
+    const auto parent_scope_id = ParseFrom(scope.parent_scope_id(), serialize::To<StringId>{});
+    auto fit = context.scopes_by_id.find(parent_scope_id);
+    if (fit == context.scopes_by_id.end()) {
+      throw std::runtime_error(
+          fmt::format("Missing parent scope {} for scope {}", parent_scope_id, result.id_));
+    }
+    if (!result.SetParent(fit->second)) {
+      throw std::runtime_error(
+          fmt::format("Invalid parent scope {} for scope {}", parent_scope_id, result.id_));
+    }
+  }
+
   result.tag_scopes_.reserve(scope.tag_scope_ids_size());
   for (const auto& tag_scope_id_proto : scope.tag_scope_ids()) {
     auto tag_scope_id = ParseFrom(tag_scope_id_proto, serialize::To<StringId>{});
@@ -842,7 +917,10 @@ Scope<BaseTypes> ParseFrom(const proto::scope::Scope& scope, serialize::To<Scope
       throw std::runtime_error(
           fmt::format("Missing tag scope {} for scope {}", tag_scope_id, result.id_));
     }
-    result.tag_scopes_.push_back(fit->second);
+    if (!result.AddTagLink(tag_scope_id, fit->second)) {
+      throw std::runtime_error(
+          fmt::format("Invalid tag scope {} for scope {}", tag_scope_id, result.id_));
+    }
   }
 
   return result;

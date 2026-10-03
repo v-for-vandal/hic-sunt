@@ -88,6 +88,7 @@ test_env = {
 
 subdir('utils')
 subdir('core')
+subdir('tools')
 
 godot_dep = dependency('godot-cpp')
 

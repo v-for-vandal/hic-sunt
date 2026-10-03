@@ -32,6 +32,8 @@ class RuleSet : public RuleSetBase {
   // Adds data to ruleset
   bool Load(const std::vector<std::filesystem::path>& paths, ErrorsCollection& errors);
 
+  bool DumpVariablesCsv(const std::filesystem::path& file_path, ErrorsCollection& errors) const;
+
   const proto::ruleset::Improvement* FindRegionImprovementByType(
       const StringId& improvement_type_id) const;
 

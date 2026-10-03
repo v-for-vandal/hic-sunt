@@ -1,7 +1,10 @@
 #pragma once
 
+#include <algorithm>
+#include <fstream>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <variant>
 
@@ -19,6 +22,97 @@ inline void AddWarning(utils::ErrorsCollection& errors, const std::string& messa
 inline void AddError(utils::ErrorsCollection& errors, const std::string& message) {
   spdlog::error(message);
   errors.AddError({message});
+}
+
+inline std::string CsvEscape(std::string_view value) {
+  const bool must_quote = value.find_first_of(",\n\r\"") != std::string_view::npos;
+  if (!must_quote) {
+    return std::string{value};
+  }
+
+  std::string result;
+  result.reserve(value.size() + 2);
+  result.push_back('"');
+  for (const char c : value) {
+    if (c == '"') {
+      result.push_back('"');
+    }
+    result.push_back(c);
+  }
+  result.push_back('"');
+  return result;
+}
+
+template <typename BaseTypes>
+std::string BuildDumpedParameterizedVariableId(
+    const typename BaseTypes::StringId& pattern,
+    const std::vector<std::pair<ParameterDomainKind, typename BaseTypes::StringId>>&
+        parameter_values) {
+  const std::string pattern_string = BaseTypes::ToProtoString(pattern);
+  std::string result;
+  result.reserve(pattern_string.size());
+
+  size_t parameter_index = 0;
+  for (size_t pos = 0; pos < pattern_string.size();) {
+    if (pattern_string[pos] != '{') {
+      result.push_back(pattern_string[pos]);
+      ++pos;
+      continue;
+    }
+
+    const auto close_pos = pattern_string.find('}', pos);
+    if (close_pos == std::string::npos || parameter_index >= parameter_values.size()) {
+      result.append(pattern_string.substr(pos));
+      break;
+    }
+
+    const auto& [kind, value] = parameter_values[parameter_index++];
+    if (kind == ParameterDomainKind::kOpen) {
+      result.append("{}");
+    } else {
+      result.push_back('@');
+      result.append(BaseTypes::ToProtoString(value));
+    }
+    pos = close_pos + 1;
+  }
+
+  return result;
+}
+
+template <typename BaseTypes, typename ConcreteDefinition, typename CollectFn>
+void ForEachDumpedParameterizedVariable(
+    const ParameterizedVariableDefinition<BaseTypes, ConcreteDefinition>& definition,
+    CollectFn&& collect_fn) {
+  using StringId = typename BaseTypes::StringId;
+  std::vector<std::pair<ParameterDomainKind, StringId>> parameter_values;
+  parameter_values.reserve(definition.parameters.size());
+
+  auto visit = [&](this auto&& self, size_t parameter_index) -> void {
+    if (parameter_index == definition.parameters.size()) {
+      collect_fn(
+          BuildDumpedParameterizedVariableId<BaseTypes>(definition.pattern, parameter_values));
+      return;
+    }
+
+    const auto& parameter = definition.parameters[parameter_index];
+    if (parameter.kind == ParameterDomainKind::kOpen) {
+      parameter_values.emplace_back(ParameterDomainKind::kOpen, StringId{});
+      self(parameter_index + 1);
+      parameter_values.pop_back();
+      return;
+    }
+
+    if (parameter.fixed_values == nullptr) {
+      return;
+    }
+    for (const auto& value : parameter.fixed_values->ordered_values) {
+      parameter_values.emplace_back(ParameterDomainKind::kFixed, value);
+      self(parameter_index + 1);
+      parameter_values.pop_back();
+    }
+  };
+
+  visit(0);
 }
 
 }  // namespace
@@ -41,6 +135,50 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
   success &= LoadEffects(errors);
 
   return success;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::DumpVariablesCsv(const std::filesystem::path& file_path,
+                                          ErrorsCollection& errors) const {
+  struct Row {
+    std::string name;
+    std::string type;
+  };
+
+  std::vector<Row> rows;
+
+  for (const auto& [id, _] : parsed_variable_definitions_->GetNumericDefinitions()) {
+    rows.push_back({.name = BaseTypes::ToProtoString(id), .type = "numeric"});
+  }
+  for (const auto& [id, _] : parsed_variable_definitions_->GetStringDefinitions()) {
+    rows.push_back({.name = BaseTypes::ToProtoString(id), .type = "string"});
+  }
+  for (const auto& [_, definition] :
+       parsed_variable_definitions_->GetParameterizedNumericDefinitions()) {
+    ForEachDumpedParameterizedVariable<BaseTypes>(definition, [&rows](const auto& variable_id) {
+      rows.push_back({.name = BaseTypes::ToProtoString(variable_id), .type = "numeric"});
+    });
+  }
+  for (const auto& [_, definition] :
+       parsed_variable_definitions_->GetParameterizedStringDefinitions()) {
+    ForEachDumpedParameterizedVariable<BaseTypes>(definition, [&rows](const auto& variable_id) {
+      rows.push_back({.name = BaseTypes::ToProtoString(variable_id), .type = "string"});
+    });
+  }
+
+  std::ranges::sort(rows, {}, [](const Row& row) { return std::tie(row.name, row.type); });
+
+  std::ofstream out(file_path);
+  if (!out.is_open()) {
+    AddError(errors, fmt::format("Can not open variables CSV file {}", file_path.string()));
+    return false;
+  }
+
+  out << "name,type\n";
+  for (const auto& row : rows) {
+    out << CsvEscape(row.name) << ',' << CsvEscape(row.type) << '\n';
+  }
+  return true;
 }
 
 template <typename BaseTypes>
