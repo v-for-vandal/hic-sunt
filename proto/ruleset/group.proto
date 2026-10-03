@@ -1,0 +1,20 @@
+syntax = "proto3";
+import "l10n/localized_name.proto";
+import "ruleset/effect.proto";
+
+package hs.proto.ruleset;
+
+// This is a group. It is used to bulid some hierarchy for other types.
+message Group {
+  string id = 1;
+  l10n.LocalizedName name = 2;
+
+  // Other groups that this group should inherit from.
+  repeated string groups = 3;
+
+  // Please note that these inline effects are provided only for ease of maintainence.
+  // You can achive the same effect by writing effects in effect definitions file. So
+  // if you need to add some effect to some group in your mod, don't overwrite the
+  // file - just add effect externally.
+  effect.Code group_effect = 9;
+};

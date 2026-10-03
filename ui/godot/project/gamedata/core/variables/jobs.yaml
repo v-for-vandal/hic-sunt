@@ -1,0 +1,34 @@
+variables:
+  - id: "job/{job}/produces/{resource}"
+    numeric:
+      minimum: 0
+    allowedScopes:
+      scopeTypeSets:
+        - SCOPE_TYPE_SET_GEO
+        - SCOPE_TYPE_SET_CIV
+
+  - id: "job/{job}/consumes/{resource}"
+    numeric:
+      minimum: 0
+    allowedScopes:
+      scopeTypeSets:
+        - SCOPE_TYPE_SET_GEO
+        - SCOPE_TYPE_SET_CIV
+
+  - id: "produces/{resource}"
+    # This one should be used inside job and job-class, where there is no
+    # need to specify 'job' in question
+    numeric:
+      minimum: 0
+    allowedScopes:
+      scopeTypeSets:
+        - SCOPE_TYPE_SET_GEO
+        - SCOPE_TYPE_SET_CIV
+
+  - id: "consumes/{resource}"
+    numeric:
+      minimum: 0
+    allowedScopes:
+      scopeTypeSets:
+        - SCOPE_TYPE_SET_GEO
+        - SCOPE_TYPE_SET_CIV

@@ -1,0 +1,9 @@
+variables:
+  - id: "job/{job}/count"
+    numeric:
+      minimum: 0
+    allowedScopes:
+      scopeTypes:
+        - SCOPE_TYPE_IMPROVEMENT
+        - SCOPE_TYPE_IMPROVEMENT_CLASS
+
