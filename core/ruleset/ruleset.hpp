@@ -1,6 +1,7 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <ruleset/group.pb.h>
 #include <ruleset/ruleset.pb.h>
 
 #include <core/ruleset/effect.hpp>
@@ -10,6 +11,7 @@
 #include <core/utils/error_message.hpp>
 #include <core/utils/serialize.hpp>
 #include <filesystem>
+#include <optional>
 
 namespace hs::ruleset {
 
@@ -41,6 +43,12 @@ class RuleSet : public RuleSetBase {
 
   const proto::ruleset::Job* FindJobByType(const StringId& job_type_id) const;
 
+  struct GroupDefinition {
+    const proto::ruleset::Group* group;
+    types::ScopeType scope_type;
+  };
+  std::optional<GroupDefinition> FindGroupById(const StringId& group_id) const;
+
   const proto::ruleset::Project* FindProjectByType(const StringId& project_type_id) const;
 
   const VariableDefinitionsPtr<BaseTypes>& GetVariableDefinitions() const {
@@ -54,7 +62,9 @@ class RuleSet : public RuleSetBase {
   /* \brief Returns scope id for scope SCOPE_TYPE_IMPROVEMENT_CLASS for improvement id and civ id
    *
    */
-  static StringId ImprovementClassScopeId(StringId civ_id, StringId job_type_id);
+  static StringId ImprovementClassScopeId(StringId civ_id, StringId improvement_class);
+  static StringId JobClassScopeId(StringId civ_id, StringId job_class);
+  static StringId GroupScopeId(StringId civ_id, StringId group_id);
 
  private:
   friend void SerializeTo<BaseTypes>(const RuleSet& source, proto::ruleset::RuleSet& target);
@@ -64,6 +74,7 @@ class RuleSet : public RuleSetBase {
   bool LoadImprovements([[maybe_unused]] ErrorsCollection& errors);
   bool LoadResources([[maybe_unused]] ErrorsCollection& errors);
   bool LoadJobs([[maybe_unused]] ErrorsCollection& errors);
+  bool LoadGroups(ErrorsCollection& errors);
   bool LoadProjects([[maybe_unused]] ErrorsCollection& errors);
   bool LoadEffects(ErrorsCollection& errors);
   bool LoadVariableDefinitions(ErrorsCollection& errors);
@@ -71,6 +82,11 @@ class RuleSet : public RuleSetBase {
   absl::flat_hash_map<StringId, size_t> improvements_by_type_;
   absl::flat_hash_map<StringId, size_t> resources_by_id_;
   absl::flat_hash_map<StringId, size_t> jobs_by_type_;
+  struct GroupIndexEntry {
+    types::ScopeType scope_type;
+    size_t index;
+  };
+  absl::flat_hash_map<StringId, GroupIndexEntry> groups_by_id_;
   absl::flat_hash_map<StringId, size_t> projects_by_type_;
   std::vector<StringId> resource_ids_;
   std::vector<StringId> job_ids_;

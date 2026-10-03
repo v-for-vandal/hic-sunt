@@ -9,6 +9,8 @@ package hs.proto.ruleset;
 // that in game, jobs - unlike improvements - are not a real materialized
 // entity, so there is no instance_effect.
 message Job {
+  reserved 5;
+
   string id = 1;
   l10n.LocalizedName name = 2;
 
@@ -29,7 +31,7 @@ message Job {
   effect.Code class_effect = 9;
 
   // Groups that this job should inherit from
-  repeated string groups = 3;
+  repeated string groups = 10;
 };
 
 message Jobs {

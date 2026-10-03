@@ -1,0 +1,6 @@
+jobs:
+  - id: job.miller
+    input:
+      resource.grain: 3
+    output:
+      resource.flour: 5

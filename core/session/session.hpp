@@ -75,6 +75,10 @@ class Session {
   std::expected<ScopePtr, ErrorCode> CreateImprovementScope(StringId city_id,
                                                             StringId improvement_class);
 
+  // Creates an unparented and unregistered job instance for a civilization. Its civ-specific
+  // job class and groups are created and registered lazily.
+  std::expected<ScopePtr, ErrorCode> CreateJobScope(StringId civ_id, StringId job_class);
+
   // This function creates and registers new civilization with given id
   std::expected<CivilizationPtr, ErrorCode> CreateCivilizationScope(StringId civ_id);
 
@@ -106,6 +110,16 @@ class Session {
   // This function will create improvement class scope and propertly initialize it
   std::expected<ScopePtr, ErrorCode> CreateImprovementClassScope(const CivilizationPtr& civ,
                                                                  StringId improvement_class);
+  std::expected<ScopePtr, ErrorCode> CreateJobClassScope(const CivilizationPtr& civ,
+                                                         StringId job_class);
+  std::expected<void, ErrorCode> SetCoreClass(const ScopePtr& scope, StringId class_id);
+  template <typename GroupIds>
+  std::expected<void, ErrorCode> LinkToGroups(const CivilizationPtr& civ, const ScopePtr& scope,
+                                              const GroupIds& group_ids,
+                                              ScopeType expected_group_type);
+  std::expected<ScopePtr, ErrorCode> GetOrCreateGroupScope(const CivilizationPtr& civ,
+                                                           StringId group_id,
+                                                           ScopeType expected_type);
 
   RuleSetPtr ruleset_;
   WorldPtr world_;

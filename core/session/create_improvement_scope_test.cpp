@@ -6,6 +6,7 @@
 #include <core/scope/scope_ut.hpp>
 #include <core/terra/world.hpp>
 #include <fstream>
+#include <utils/test_data.hpp>
 
 #include "session.hpp"
 
@@ -18,6 +19,7 @@ using StdWorld = terra::World<StdBaseTypes>;
 using StdWorldPtr = std::shared_ptr<StdWorld>;
 using StdRuleSet = ruleset::RuleSet<StdBaseTypes>;
 using ScopeType = types::ScopeType;
+using ::hs::test::GetTestDataFolder;
 
 namespace {
 
@@ -31,22 +33,11 @@ StdWorldPtr MakeWorld() {
   return world;
 }
 
-StdSession MakePreparedSession() {
+StdSession MakePreparedSessionFromRoot(const std::filesystem::path& root) {
   StdSession session;
   auto world = MakeWorld();
   auto civ = world->GetOrCreateCivilization("civ.id");
   (void)civ;
-
-  const auto root = std::filesystem::temp_directory_path() /
-                    std::filesystem::path("hic_sunt_create_improvement_scope_test");
-  std::filesystem::remove_all(root);
-  std::filesystem::create_directories(root / "variables");
-  {
-    std::ofstream out(root / "variables" / "core.txt");
-    out << "variables { id: \"core.turn\" numeric {} }\n";
-    out << "variables { id: \"core.class\" string {} }\n";
-    out << "variables { id: \"city.tag\" string {} }\n";
-  }
 
   auto ruleset = std::make_shared<StdRuleSet>();
   utils::ErrorsCollection errors;
@@ -61,6 +52,21 @@ StdSession MakePreparedSession() {
   return session;
 }
 
+StdSession MakePreparedSession() {
+  const auto root = std::filesystem::temp_directory_path() /
+                    std::filesystem::path("hic_sunt_create_improvement_scope_test");
+  std::filesystem::remove_all(root);
+  std::filesystem::create_directories(root / "variables");
+  {
+    std::ofstream out(root / "variables" / "core.txt");
+    out << "variables { id: \"core.turn\" numeric {} }\n";
+    out << "variables { id: \"core.class\" string {} }\n";
+    out << "variables { id: \"city.tag\" string {} }\n";
+  }
+
+  return MakePreparedSessionFromRoot(root);
+}
+
 StdScopePtr CreateCityScope(StdSession& session) {
   auto result = session.CreateCityScope("civ.id");
   EXPECT_TRUE(result.has_value());
@@ -71,6 +77,17 @@ StdScopePtr CreateCityScope(StdSession& session) {
 }
 
 }  // namespace
+
+TEST(StdSessionCreateImprovementScope, RejectsMissingRuleset) {
+  StdSession session;
+  ASSERT_TRUE(session.SetWorld(MakeWorld()));
+  ASSERT_NE(session.GetWorld()->GetOrCreateCivilization("civ.id"), nullptr);
+  const auto city = CreateCityScope(session);
+
+  const auto result = session.CreateImprovementScope(city->GetId(), "farm");
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), ErrorCode::ERR_RULESET_MUST_BE_SET_FIRST);
+}
 
 TEST(StdSessionCreateImprovementScope, RejectsNullCityId) {
   auto session = MakePreparedSession();
@@ -171,6 +188,39 @@ TEST(StdSessionCreateImprovementScope, ReusesExistingImprovementClassScope) {
   auto by_type_it = session.GetScopesByType().find(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
   ASSERT_NE(by_type_it, session.GetScopesByType().end());
   EXPECT_EQ(by_type_it->second.size(), 1u);
+}
+
+TEST(StdSessionCreateImprovementScope, CreatesAndInheritsFromImprovementGroups) {
+  auto session = MakePreparedSessionFromRoot(GetTestDataFolder());
+  const auto city = CreateCityScope(session);
+
+  auto result = session.CreateImprovementScope(city->GetId(), "farm");
+  ASSERT_TRUE(result.has_value());
+  const auto improvement = *result;
+
+  const auto class_id = StdRuleSet::ImprovementClassScopeId("civ.id", "farm");
+  const auto child_group_id = StdRuleSet::GroupScopeId("civ.id", "group.child");
+  const auto base_group_id = StdRuleSet::GroupScopeId("civ.id", "group.base");
+  ASSERT_TRUE(session.GetScopesById().contains(class_id));
+  ASSERT_TRUE(session.GetScopesById().contains(child_group_id));
+  ASSERT_TRUE(session.GetScopesById().contains(base_group_id));
+
+  const auto class_scope = session.GetScopesById().at(class_id);
+  const auto child_group = session.GetScopesById().at(child_group_id);
+  const auto base_group = session.GetScopesById().at(base_group_id);
+  ASSERT_EQ(class_scope->GetTagScopes().size(), 1u);
+  EXPECT_EQ(class_scope->GetTagScopes()[0], child_group);
+  ASSERT_EQ(child_group->GetTagScopes().size(), 1u);
+  EXPECT_EQ(child_group->GetTagScopes()[0], base_group);
+  ASSERT_TRUE(base_group->SetNumericModifier("group.value", "test", 9, 0));
+
+  using WorldType = std::decay_t<decltype(*(session.GetWorld()))>;
+  auto region = session.GetWorld()->GetPlane("plane.id")->GetRegions().begin()->second;
+  ASSERT_TRUE(improvement->SetParent(
+      region->GetSurface().GetCell(WorldType::QRSCoords::MakeCoords(0, 0)).GetScope()));
+  const auto inherited_value = improvement->GetNumericValue("group.value");
+  ASSERT_TRUE(inherited_value.has_value());
+  EXPECT_EQ(*inherited_value, 9);
 }
 
 TEST(StdSessionCreateImprovementScope, SetsCoreClassModifierAndCityAndClassTags) {

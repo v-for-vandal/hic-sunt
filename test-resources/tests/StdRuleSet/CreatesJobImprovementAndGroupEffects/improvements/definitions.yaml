@@ -1,0 +1,12 @@
+improvements:
+  - id: improvement.mill
+    jobs:
+      job.miller: 2
+    groups:
+      - group.production
+    classEffect:
+      lua: return true
+improvementGroups:
+  - id: group.production
+    groupEffect:
+      lua: return true

@@ -1,0 +1,8 @@
+jobs:
+  - id: job.worker
+    groups:
+      - group.worker
+jobGroups:
+  - id: group.worker
+    groupEffect:
+      lua: return true

@@ -21,14 +21,16 @@ variables:
     numeric:
       minimum: 0
     allowedScopes:
-      scopeTypeSets:
-        - SCOPE_TYPE_SET_GEO
-        - SCOPE_TYPE_SET_CIV
+      scopeTypes:
+        - SCOPE_TYPE_JOB
+        - SCOPE_TYPE_JOB_CLASS
+        - SCOPE_TYPE_JOB_GROUP
 
   - id: "consumes/{resource}"
     numeric:
       minimum: 0
     allowedScopes:
-      scopeTypeSets:
-        - SCOPE_TYPE_SET_GEO
-        - SCOPE_TYPE_SET_CIV
+      scopeTypes:
+        - SCOPE_TYPE_JOB
+        - SCOPE_TYPE_JOB_CLASS
+        - SCOPE_TYPE_JOB_GROUP

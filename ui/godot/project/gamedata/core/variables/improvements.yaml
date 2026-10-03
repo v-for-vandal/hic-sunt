@@ -6,4 +6,5 @@ variables:
       scopeTypes:
         - SCOPE_TYPE_IMPROVEMENT
         - SCOPE_TYPE_IMPROVEMENT_CLASS
+        - SCOPE_TYPE_IMPROVEMENT_GROUP
 

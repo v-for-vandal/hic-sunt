@@ -11,8 +11,6 @@ message ResourceBill {
   map<string, int32> amounts = 1;
 }
 
-message ImprovementGroup {
-
 // This is improvement type(class, whatever). Like 'palace', or 'lumber mill'
 // Specific instance of improvement (this palace, or that lumber mill) has
 // it's own proto scheme
@@ -54,6 +52,9 @@ message Improvement {
   // if you need to add some effect to building in your mod, don't overwrite the building -
   // just add effect externally.
   effect.Code instance_effect = 9;
+
+  // Groups that this improvement class should inherit from.
+  repeated string groups = 10;
 }
 
 message Improvements {

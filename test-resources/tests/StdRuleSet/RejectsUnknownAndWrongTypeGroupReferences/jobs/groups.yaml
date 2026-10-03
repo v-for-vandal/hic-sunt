@@ -1,0 +1,6 @@
+jobs:
+  - id: job.one
+    groups:
+      - group.missing
+jobGroups:
+  - id: group.job

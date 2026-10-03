@@ -19,7 +19,7 @@ enum ScopeType {
   SCOPE_TYPE_UNIT_CLASS = 12;
   SCOPE_TYPE_JOB = 14;
   SCOPE_TYPE_JOB_CLASS = 13;
-  SCOPE_TYPE_JOB_GROUP = 13;
+  SCOPE_TYPE_JOB_GROUP = 16;
 }
 
 enum ScopeTypeSet {

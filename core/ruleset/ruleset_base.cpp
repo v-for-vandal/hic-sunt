@@ -301,6 +301,9 @@ void ApplyFile(proto::ruleset::Improvements& target, const std::filesystem::path
     UpsertRepeatedField(target.mutable_improvements(), improvement, file_path,
                         "region improvement");
   }
+  for (const auto& group : parsed.improvement_groups()) {
+    UpsertRepeatedField(target.mutable_improvement_groups(), group, file_path, "improvement group");
+  }
 }
 
 void ApplyFile(proto::ruleset::Biomes& target, const std::filesystem::path& file_path) {
@@ -336,6 +339,9 @@ void ApplyFile(proto::ruleset::Jobs& target, const std::filesystem::path& file_p
 
   for (const auto& job : parsed.jobs()) {
     UpsertRepeatedField(target.mutable_jobs(), job, file_path, "job");
+  }
+  for (const auto& group : parsed.job_groups()) {
+    UpsertRepeatedField(target.mutable_job_groups(), group, file_path, "job group");
   }
 }
 

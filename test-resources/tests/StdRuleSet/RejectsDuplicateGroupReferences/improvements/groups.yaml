@@ -1,0 +1,11 @@
+improvements:
+  - id: improvement.one
+    groups:
+      - group.child
+      - group.child
+improvementGroups:
+  - id: group.child
+    groups:
+      - group.base
+      - group.base
+  - id: group.base
