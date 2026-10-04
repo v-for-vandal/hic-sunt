@@ -127,14 +127,17 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
   }
 
   bool success = true;
-  success &= LoadImprovements(errors);
   success &= LoadResources(errors);
   success &= LoadJobs(errors);
+  success &= LoadImprovements(errors);
+  success &= ValidateGroups(errors);
   success &= LoadProjects(errors);
   success &= LoadVariableDefinitions(errors);
-  success &= LoadEffects(errors);
+  if (!success) {
+    return false;
+  }
 
-  return success;
+  return LoadEffects(errors);
 }
 
 template <typename BaseTypes>
@@ -182,61 +185,109 @@ bool RuleSet<BaseTypes>::DumpVariablesCsv(const std::filesystem::path& file_path
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection& errors) {
+bool RuleSet<BaseTypes>::LoadImprovements(ErrorsCollection& errors) {
+  bool success = true;
   for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
     const auto& improvement = improvements_.improvements(idx);
-    improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
+    if (ValidateIdentifier(improvement.id(), "improvement", errors)) {
+      improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
+    } else {
+      success = false;
+    }
+
+    for (const auto& [job_id, _] : improvement.jobs()) {
+      if (!jobs_by_type_.contains(BaseTypes::StringIdFromStdString(job_id))) {
+        AddError(errors, fmt::format("Improvement '{}' references unknown job '{}'",
+                                     improvement.id(), job_id));
+        success = false;
+      }
+    }
   }
 
-  return true;
+  for (int idx = 0; idx < improvements_.improvement_groups_size(); ++idx) {
+    success &=
+        AddGroup(improvements_.improvement_groups(idx),
+                 types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP, static_cast<size_t>(idx), errors);
+  }
+
+  return success;
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection& errors) {
+bool RuleSet<BaseTypes>::LoadResources(ErrorsCollection& errors) {
+  bool success = true;
   resource_ids_.reserve(resources_.resources_size());
   for (int idx = 0; idx < resources_.resources_size(); ++idx) {
     const auto& resource = resources_.resources(idx);
+    if (!ValidateIdentifier(resource.id(), "resource", errors)) {
+      success = false;
+      continue;
+    }
+
     const auto resource_id = BaseTypes::StringIdFromStdString(resource.id());
     resources_by_id_.try_emplace(resource_id, idx);
     resource_ids_.push_back(resource_id);
   }
 
-  return true;
+  return success;
 }
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
+  bool success = true;
   job_ids_.reserve(jobs_.jobs_size());
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto& job = jobs_.jobs(idx);
-    const auto job_id = BaseTypes::StringIdFromStdString(job.id());
-    jobs_by_type_.try_emplace(job_id, idx);
-    job_ids_.push_back(job_id);
-
-    spdlog::debug("Working with job {}", job_id);
-
-    NumericVariableDefinition<BaseTypes> count_definition;
-    count_definition.allowed_scopes.reset();
-    count_definition.allowed_scopes |=
-        types::ToScopeTypeFilter(types::ScopeTypeSet::SCOPE_TYPE_SET_JOBS);
-    count_definition.minimum = 0;
-
-    auto count_variable_id = fmt::format("job/{}/count", job.id());
-    auto add_result = parsed_variable_definitions_->AddNumericDefinition(
-        BaseTypes::StringIdFromStdString(count_variable_id), count_definition);
-    if (!add_result) {
-      AddError(errors,
-               fmt::format("Variable {} has conflicting type definition", count_variable_id));
-      return false;
+    const bool valid_job_id = ValidateIdentifier(job.id(), "job", errors);
+    if (valid_job_id) {
+      const auto job_id = BaseTypes::StringIdFromStdString(job.id());
+      jobs_by_type_.try_emplace(job_id, idx);
+      job_ids_.push_back(job_id);
+      spdlog::debug("Working with job {}", job_id);
+    } else {
+      success = false;
     }
 
-    spdlog::debug("Added variable {}", count_variable_id);
-    spdlog::debug("Is this variable numeric? {}",
-                  GetVariableDefinitions()->IsNumericVariable(
-                      BaseTypes::StringIdFromStdString(count_variable_id)));
+    const auto validate_resource_references = [&](const auto& resources,
+                                                  std::string_view reference_kind) {
+      for (const auto& [resource_id, _] : resources) {
+        if (!resources_by_id_.contains(BaseTypes::StringIdFromStdString(resource_id))) {
+          AddError(errors, fmt::format("Job '{}' references unknown {} resource '{}'", job.id(),
+                                       reference_kind, resource_id));
+          success = false;
+        }
+      }
+    };
+    validate_resource_references(job.input(), "input");
+    validate_resource_references(job.output(), "output");
   }
 
-  return true;
+  for (int idx = 0; idx < jobs_.job_groups_size(); ++idx) {
+    success &= AddGroup(jobs_.job_groups(idx), types::ScopeType::SCOPE_TYPE_JOB_GROUP,
+                        static_cast<size_t>(idx), errors);
+  }
+
+  return success;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::AddGroup(const proto::ruleset::Group& group, types::ScopeType scope_type,
+                                  size_t index, ErrorsCollection& errors) {
+  if (!ValidateIdentifier(group.id(), "group", errors)) {
+    return false;
+  }
+
+  const auto group_id = BaseTypes::StringIdFromStdString(group.id());
+  const auto [existing, inserted] =
+      groups_by_id_.try_emplace(group_id, GroupIndexEntry{scope_type, index});
+  if (inserted) {
+    return true;
+  }
+
+  AddError(errors,
+           fmt::format("Group id '{}' is not unique in the merged ruleset: it is used by {} and {}",
+                       group.id(), existing->second.scope_type, scope_type));
+  return false;
 }
 
 template <typename BaseTypes>
@@ -251,7 +302,8 @@ bool RuleSet<BaseTypes>::LoadProjects([[maybe_unused]] ErrorsCollection& errors)
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
-  effect_definitions_.reserve(GetAllEffects().size() + 2 * improvements_by_type_.size());
+  effect_definitions_.reserve(GetAllEffects().size() + 3 * improvements_by_type_.size() +
+                              2 * jobs_by_type_.size() + groups_by_id_.size());
 
   const auto add_effect_definition = [this,
                                       &errors](const proto::ruleset::effect::Effect& effect_proto) {
@@ -266,18 +318,55 @@ bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
         std::static_pointer_cast<const EffectDefinition<BaseTypes>>(definition));
   };
 
+  const auto add_core_class_dependency = [](proto::ruleset::effect::Code& code) {
+    if (std::ranges::find(code.dependencies(), "core.class") == code.dependencies().end()) {
+      code.add_dependencies("core.class");
+    }
+  };
+
+  const auto add_class_effect = [&](std::string id, types::ScopeType scope_type,
+                                    const std::string& class_id,
+                                    const proto::ruleset::effect::Code& code) {
+    proto::ruleset::effect::Effect effect_proto;
+    effect_proto.set_id(std::move(id));
+    effect_proto.set_scope_type(scope_type);
+    effect_proto.mutable_selector()->set_class_(class_id);
+    *effect_proto.mutable_effect() = code;
+    add_core_class_dependency(*effect_proto.mutable_effect());
+    add_effect_definition(effect_proto);
+  };
+
+  const auto sorted_entries = [](const auto& values) {
+    std::vector<std::pair<std::string, int32_t>> result;
+    result.reserve(values.size());
+    for (const auto& [id, value] : values) {
+      result.emplace_back(id, value);
+    }
+    std::ranges::sort(result, {}, &std::pair<std::string, int32_t>::first);
+    return result;
+  };
+
   for (const auto& effect_proto : GetAllEffects()) {
     add_effect_definition(effect_proto);
   }
 
   for (const auto& improvement : improvements_.improvements()) {
     if (improvement.has_class_effect()) {
-      proto::ruleset::effect::Effect effect_proto;
-      effect_proto.set_id(fmt::format("{}/class.effect", improvement.id()));
-      effect_proto.set_scope_type(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
-      effect_proto.mutable_selector()->set_class_(improvement.id());
-      *effect_proto.mutable_effect() = improvement.class_effect();
-      add_effect_definition(effect_proto);
+      add_class_effect(fmt::format("{}/class.effect", improvement.id()),
+                       types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement.id(),
+                       improvement.class_effect());
+    }
+
+    if (!improvement.jobs().empty()) {
+      proto::ruleset::effect::Code code;
+      std::string lua;
+      for (const auto& [job_id, amount] : sorted_entries(improvement.jobs())) {
+        lua +=
+            fmt::format("target:set_numeric_modifier('job/@{}/count', {}, 0.0);\n", job_id, amount);
+      }
+      code.set_lua(std::move(lua));
+      add_class_effect(fmt::format("{}/jobs.effect", improvement.id()),
+                       types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, improvement.id(), code);
     }
 
     if (improvement.has_instance_effect()) {
@@ -290,6 +379,41 @@ bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
       add_effect_definition(effect_proto);
     }
   }
+
+  for (const auto& job : jobs_.jobs()) {
+    if (job.has_class_effect()) {
+      add_class_effect(fmt::format("{}/class.effect", job.id()),
+                       types::ScopeType::SCOPE_TYPE_JOB_CLASS, job.id(), job.class_effect());
+    }
+
+    if (!job.input().empty() || !job.output().empty()) {
+      proto::ruleset::effect::Code code;
+      std::string lua;
+      for (const auto& [resource_id, amount] : sorted_entries(job.input())) {
+        lua += fmt::format("target:set_numeric_modifier('consumes/@{}', {}, 0.0);\n", resource_id,
+                           amount);
+      }
+      for (const auto& [resource_id, amount] : sorted_entries(job.output())) {
+        lua += fmt::format("target:set_numeric_modifier('produces/@{}', {}, 0.0);\n", resource_id,
+                           amount);
+      }
+      code.set_lua(std::move(lua));
+      add_class_effect(fmt::format("{}/resources.effect", job.id()),
+                       types::ScopeType::SCOPE_TYPE_JOB_CLASS, job.id(), code);
+    }
+  }
+
+  const auto add_group_effects = [&](const auto& groups, types::ScopeType scope_type) {
+    for (const auto& group : groups) {
+      if (group.has_group_effect()) {
+        add_class_effect(fmt::format("{}/group.effect", group.id()), scope_type, group.id(),
+                         group.group_effect());
+      }
+    }
+  };
+  add_group_effects(improvements_.improvement_groups(),
+                    types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
+  add_group_effects(jobs_.job_groups(), types::ScopeType::SCOPE_TYPE_JOB_GROUP);
 
   return true;
 }
@@ -351,6 +475,7 @@ void RuleSet<BaseTypes>::Clear() {
   improvements_by_type_.clear();
   resources_by_id_.clear();
   jobs_by_type_.clear();
+  groups_by_id_.clear();
   projects_by_type_.clear();
   resource_ids_.clear();
   job_ids_.clear();
@@ -394,6 +519,22 @@ const proto::ruleset::Job* RuleSet<BaseTypes>::FindJobByType(const StringId& job
 }
 
 template <typename BaseTypes>
+auto RuleSet<BaseTypes>::FindGroupById(const StringId& group_id) const
+    -> std::optional<GroupDefinition> {
+  const auto found = groups_by_id_.find(group_id);
+  if (found == groups_by_id_.end()) {
+    return std::nullopt;
+  }
+
+  const auto& entry = found->second;
+  if (entry.scope_type == types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP) {
+    return GroupDefinition{&improvements_.improvement_groups(static_cast<int>(entry.index)),
+                           entry.scope_type};
+  }
+  return GroupDefinition{&jobs_.job_groups(static_cast<int>(entry.index)), entry.scope_type};
+}
+
+template <typename BaseTypes>
 const proto::ruleset::Project* RuleSet<BaseTypes>::FindProjectByType(
     const StringId& project_type_id) const {
   auto fit = projects_by_type_.find(project_type_id);
@@ -410,6 +551,16 @@ auto RuleSet<BaseTypes>::ImprovementClassScopeId(StringId civ_id, StringId impro
     -> StringId {
   return BaseTypes::StringIdFromStdString(
       fmt::format("civ/{}/iclass/{}", civ_id, improvement_class));
+}
+
+template <typename BaseTypes>
+auto RuleSet<BaseTypes>::JobClassScopeId(StringId civ_id, StringId job_class) -> StringId {
+  return BaseTypes::StringIdFromStdString(fmt::format("civ/{}/jclass/{}", civ_id, job_class));
+}
+
+template <typename BaseTypes>
+auto RuleSet<BaseTypes>::GroupScopeId(StringId civ_id, StringId group_id) -> StringId {
+  return BaseTypes::StringIdFromStdString(fmt::format("civ/{}/group/{}", civ_id, group_id));
 }
 
 template <typename BaseTypes>
@@ -448,9 +599,12 @@ RuleSet<BaseTypes> ParseFrom(const proto::ruleset::RuleSet& source,
   success &= result.LoadImprovements(errors);
   success &= result.LoadResources(errors);
   success &= result.LoadJobs(errors);
+  success &= result.ValidateGroups(errors);
   success &= result.LoadProjects(errors);
-  success &= result.LoadEffects(errors);
   success &= result.LoadVariableDefinitions(errors);
+  if (success) {
+    success &= result.LoadEffects(errors);
+  }
   if (!success) {
     spdlog::warn("Failed to fully restore ruleset from serialized data");
   }

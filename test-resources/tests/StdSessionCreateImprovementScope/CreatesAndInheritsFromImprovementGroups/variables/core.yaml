@@ -1,0 +1,9 @@
+variables:
+  - id: core.turn
+    numeric: {}
+  - id: core.class
+    string: {}
+  - id: city.tag
+    string: {}
+  - id: group.value
+    numeric: {}

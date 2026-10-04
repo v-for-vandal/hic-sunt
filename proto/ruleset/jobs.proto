@@ -1,22 +1,40 @@
 syntax = "proto3";
 import "l10n/localized_name.proto";
+import "ruleset/group.proto";
+import "ruleset/effect.proto";
 
 package hs.proto.ruleset;
 
+// This is job type. It is used to describe actual jobs as a class. Please note
+// that in game, jobs - unlike improvements - are not a real materialized
+// entity, so there is no instance_effect.
 message Job {
+  reserved 5;
+
   string id = 1;
   l10n.LocalizedName name = 2;
 
-  // stratum of society - worker, specialist, etc
-  string  strata = 5;
-
   // what resources does job consume
+  // Please note that those fields are provided for convinience. Internally,
+  // they are converted into effects.
   map<string, int32> input = 3;
 
   // what is the output of this job
+  // Please note that those fields are provided for convinience. Internally,
+  // they are converted into effects.
   map<string, int32> output = 4;
+
+  // Please note that these inline effects are provided only for ease of maintainence.
+  // You can achive the same effect by writing effects in effect definitions file. So
+  // if you need to add some effect to some job in your mod, don't overwrite the
+  // job- just add effect externally.
+  effect.Code class_effect = 9;
+
+  // Groups that this job should inherit from
+  repeated string groups = 10;
 };
 
 message Jobs {
   repeated Job jobs = 1;
+  repeated Group job_groups = 2;
 }

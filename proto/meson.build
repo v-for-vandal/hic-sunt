@@ -37,6 +37,7 @@ hs_proto_schemas = [
     'terra/world.proto',
     'terra/plane.proto',
     'ruleset/ruleset.proto',
+    'ruleset/group.proto',
     'ruleset/improvements.proto',
     'ruleset/placement_rules.proto',
     'ruleset/biome.proto',

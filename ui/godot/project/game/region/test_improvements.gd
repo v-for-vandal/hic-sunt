@@ -6,7 +6,7 @@ func test_create_improvement() -> void:
 	if cell == null:
 		return
 		
-	var _IMPROVEMENT_TYPE := &"test.improv.construction_1"
+	var _IMPROVEMENT_TYPE := &"test.improv.construction.1"
 		
 	assert_true(cell.is_valid())
 	assert_true(CurrentGame.game.session.add_improvement(

@@ -1,0 +1,4 @@
+resources:
+  - id: resource.grain
+  - id: resource.flour
+  - id: resource.o.neil

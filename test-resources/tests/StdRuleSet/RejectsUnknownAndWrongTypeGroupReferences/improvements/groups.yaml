@@ -1,0 +1,6 @@
+improvements:
+  - id: improvement.one
+    groups:
+      - group.job
+improvementGroups:
+  - id: group.improvement

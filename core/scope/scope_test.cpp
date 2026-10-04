@@ -149,6 +149,34 @@ TEST(StdScope, AddTagLinkRejectsDuplicateScopeId) {
   EXPECT_EQ(result.error(), ErrorCode::ERR_SCOPE_ALREADY_EXISTS);
 }
 
+TEST(StdScope, GroupTagLinksAllowOnlyMatchingGroupTypes) {
+  StdScopePtr improvement_class("improvement.class",
+                                types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
+  StdScopePtr improvement_group("improvement.group",
+                                types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
+  StdScopePtr improvement_parent_group("improvement.parent",
+                                       types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
+  StdScopePtr job_class("job.class", types::ScopeType::SCOPE_TYPE_JOB_CLASS);
+  StdScopePtr job_group("job.group", types::ScopeType::SCOPE_TYPE_JOB_GROUP);
+  StdScopePtr job_parent_group("job.parent", types::ScopeType::SCOPE_TYPE_JOB_GROUP);
+
+  EXPECT_TRUE(improvement_class->AddTagLink("group", improvement_group).has_value());
+  EXPECT_TRUE(improvement_group->AddTagLink("parent", improvement_parent_group).has_value());
+  EXPECT_TRUE(job_class->AddTagLink("group", job_group).has_value());
+  EXPECT_TRUE(job_group->AddTagLink("parent", job_parent_group).has_value());
+
+  StdScopePtr wrong_improvement_class("wrong.improvement.class",
+                                      types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
+  auto wrong_improvement_link = wrong_improvement_class->AddTagLink("group", job_group);
+  ASSERT_FALSE(wrong_improvement_link.has_value());
+  EXPECT_EQ(wrong_improvement_link.error(), ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+
+  StdScopePtr wrong_job_class("wrong.job.class", types::ScopeType::SCOPE_TYPE_JOB_CLASS);
+  auto wrong_job_link = wrong_job_class->AddTagLink("group", improvement_group);
+  ASSERT_FALSE(wrong_job_link.has_value());
+  EXPECT_EQ(wrong_job_link.error(), ErrorCode::ERR_INCORRECT_SCOPE_TYPE);
+}
+
 TEST(StdScope, OpenParameterizedNumericQueryReturnsOnlyMaterializedValuesFromGraph) {
   auto mutable_definitions = std::make_shared<StdVariableDefinitions>();
   hs::ruleset::NumericVariableDefinition<StdBaseTypes> definition;

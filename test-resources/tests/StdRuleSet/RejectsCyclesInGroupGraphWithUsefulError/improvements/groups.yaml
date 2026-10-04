@@ -1,0 +1,7 @@
+improvementGroups:
+  - id: group.a
+    groups:
+      - group.b
+  - id: group.b
+    groups:
+      - group.a

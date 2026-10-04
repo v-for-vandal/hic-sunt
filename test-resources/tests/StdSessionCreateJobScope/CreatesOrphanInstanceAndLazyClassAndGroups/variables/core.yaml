@@ -1,0 +1,7 @@
+variables:
+  - id: core.turn
+    numeric: {}
+  - id: core.class
+    string: {}
+  - id: group.value
+    numeric: {}

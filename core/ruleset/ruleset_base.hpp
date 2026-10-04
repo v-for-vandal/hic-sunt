@@ -1,18 +1,23 @@
 #pragma once
 
+#include <google/protobuf/repeated_ptr_field.h>
 #include <render/atlas.pb.h>
 #include <render/render.pb.h>
 #include <ruleset/biome.pb.h>
 #include <ruleset/effect.pb.h>
+#include <ruleset/group.pb.h>
 #include <ruleset/improvements.pb.h>
 #include <ruleset/jobs.pb.h>
 #include <ruleset/projects.pb.h>
 #include <ruleset/resources.pb.h>
 #include <ruleset/variables.pb.h>
 
+#include <core/types/scope_type.hpp>
 #include <core/utils/error_message.hpp>
 #include <core/utils/string_token.hpp>
 #include <filesystem>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace hs::ruleset {
@@ -31,6 +36,20 @@ class RuleSetBase {
   auto& GetProjects() const { return projects_; }
   auto& GetAllEffects() const { return effects_; }
   auto& GetVariableDefinitions() const { return variable_definitions_; }
+
+ protected:
+  static bool IsValidIdentifier(std::string_view identifier);
+  static bool ValidateIdentifier(std::string_view identifier, std::string_view context,
+                                 ErrorsCollection& errors);
+  bool ValidateGroups(ErrorsCollection& errors) const;
+
+ private:
+  bool ValidateGroupReferences(std::string_view owner_kind, const std::string& owner_id,
+                               const google::protobuf::RepeatedPtrField<std::string>& group_ids,
+                               types::ScopeType expected_type, ErrorsCollection& errors) const;
+  bool ValidateGroupGraph(const google::protobuf::RepeatedPtrField<proto::ruleset::Group>& groups,
+                          std::string_view kind, types::ScopeType expected_type,
+                          ErrorsCollection& errors) const;
 
  protected:
   proto::ruleset::Improvements improvements_;

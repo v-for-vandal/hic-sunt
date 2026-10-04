@@ -1,0 +1,9 @@
+jobs:
+  - id: job.miller
+    groups:
+      - group.child
+jobGroups:
+  - id: group.base
+  - id: group.child
+    groups:
+      - group.base

@@ -11,7 +11,35 @@
 namespace hs::ruleset {
 
 using StdRuleSet = RuleSet<StdBaseTypes>;
+using ::hs::test::GetCommonTestDataFolder;
 using ::hs::test::GetTestDataFolder;
+
+namespace {
+
+bool HasErrorContaining(const utils::ErrorsCollection& errors, std::string_view text) {
+  return std::ranges::any_of(errors.errors, [text](const auto& error) {
+    return error.message.find(text) != std::string::npos;
+  });
+}
+
+const StdRuleSet::GroupDefinition FindGroup(const StdRuleSet& ruleset, std::string_view id) {
+  const auto group = ruleset.FindGroupById(std::string{id});
+  EXPECT_TRUE(group.has_value());
+  return group.value();
+}
+
+const EffectDefinition<StdBaseTypes>* FindEffect(const StdRuleSet& ruleset, std::string_view id) {
+  const auto found =
+      std::ranges::find_if(ruleset.GetAllEffectDefinitions(),
+                           [id](const auto& effect) { return effect->GetId() == id; });
+  if (found == ruleset.GetAllEffectDefinitions().end()) {
+    ADD_FAILURE() << "Missing effect " << id;
+    return nullptr;
+  }
+  return found->get();
+}
+
+}  // namespace
 
 TEST(StdRuleSet, LoadRecursivelyMergesFilesFromDirectories) {
   const auto root = GetTestDataFolder();
@@ -84,7 +112,7 @@ TEST(StdRuleSet, LoadYamlImprovementsWithMapFieldsAsDictionaries) {
 
   ASSERT_EQ(ruleset.GetRegionImprovements().improvements_size(), 2);
   const auto& logging = ruleset.GetRegionImprovements().improvements(0);
-  EXPECT_EQ(logging.id(), "core.improv.logging_1");
+  EXPECT_EQ(logging.id(), "core.improv.logging.1");
   ASSERT_TRUE(logging.jobs().contains("core.job.woodcutter"));
   EXPECT_EQ(logging.jobs().at("core.job.woodcutter"), 1);
 
@@ -164,14 +192,15 @@ TEST(StdRuleSet, LoadYamlRejectsAnchorsAndAliases) {
 }
 
 TEST(StdRuleSet, LoadParameterizedJobVariablesFromVariableDefinitions) {
+  const auto common_root = GetCommonTestDataFolder("rulesets/job-count");
   const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
-  ASSERT_TRUE(ruleset.Load({root}, errors));
+  ASSERT_TRUE(ruleset.Load({common_root, root}, errors));
 
   const auto& definitions = ruleset.GetVariableDefinitions();
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/count"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/count"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.wood"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.tools"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.food"));
@@ -180,12 +209,15 @@ TEST(StdRuleSet, LoadParameterizedJobVariablesFromVariableDefinitions) {
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/consumes/@resource.food"));
   EXPECT_FALSE(definitions->IsNumericVariable("job/job.one/produces/resource.wood"));
 
-  const auto count_definition = definitions->FindNumericVariable("job/job.one/count");
+  const auto count_definition = definitions->FindNumericVariable("job/@job.one/count");
   ASSERT_TRUE(count_definition.has_value());
   EXPECT_EQ(count_definition->minimum, 0);
   EXPECT_EQ(count_definition->maximum, std::numeric_limits<StdBaseTypes::NumericValue>::max());
-  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
-  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT]);
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS]);
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP]);
   EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
 
   const auto produces_definition =
@@ -229,6 +261,113 @@ TEST(StdRuleSet, DumpVariablesCsvExpandsFixedParametersAndKeepsOpenParameters) {
   EXPECT_TRUE(csv.starts_with("name,type\n"));
   EXPECT_NE(csv.find("job/@job.one/produces/@resource.wood,numeric\n"), std::string::npos);
   EXPECT_NE(csv.find("relation/{}/score,numeric\n"), std::string::npos);
+}
+
+TEST(StdRuleSet, GroupDefinitionsPreserveOrderedRootOverrides) {
+  const auto first = GetTestDataFolder("first");
+  const auto second = GetTestDataFolder("second");
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({first, second}, errors));
+  ASSERT_EQ(ruleset.GetRegionImprovements().improvement_groups_size(), 1);
+  EXPECT_EQ(FindGroup(ruleset, "group.shared").group->name().key(), "second");
+}
+
+TEST(StdRuleSet, RejectsGroupIdUsedByBothGroupTypesAfterMerge) {
+  const auto root = GetTestDataFolder();
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  EXPECT_FALSE(ruleset.Load({root}, errors));
+  EXPECT_TRUE(HasErrorContaining(errors, "Group id 'group.shared' is not unique"));
+}
+
+TEST(StdRuleSet, RejectsUnknownAndWrongTypeGroupReferences) {
+  const auto root = GetTestDataFolder();
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  EXPECT_FALSE(ruleset.Load({root}, errors));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Improvement 'improvement.one' references group 'group.job' of type"));
+  EXPECT_TRUE(HasErrorContaining(errors, "Job 'job.one' references unknown group 'group.missing'"));
+}
+
+TEST(StdRuleSet, RejectsDuplicateGroupReferences) {
+  const auto root = GetTestDataFolder();
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  EXPECT_FALSE(ruleset.Load({root}, errors));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Improvement 'improvement.one' contains duplicate group reference 'group.child'"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "improvement group 'group.child' contains duplicate group reference 'group.base'"));
+}
+
+TEST(StdRuleSet, RejectsCyclesInGroupGraphWithUsefulError) {
+  const auto root = GetTestDataFolder();
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  EXPECT_FALSE(ruleset.Load({root}, errors));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Cycle detected in improvement group graph: group.a -> group.b -> group.a"));
+}
+
+TEST(StdRuleSet, RejectsInvalidObjectAndReferencedIdentifiers) {
+  const auto root = GetTestDataFolder();
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  EXPECT_FALSE(ruleset.Load({root}, errors));
+  EXPECT_TRUE(
+      HasErrorContaining(errors, "Identifier 'improvement.Invalid' for improvement is invalid"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Improvement 'improvement.valid' references unknown job 'job.bad-name'"));
+  EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'job.Invalid' for job is invalid"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Job 'job.valid' references unknown input resource 'resource.bad-name'"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Job 'job.valid' references unknown output resource 'resource.bad_name'"));
+  EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'resource.Invalid' for resource is invalid"));
+  EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'group.bad_name' for group is invalid"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Identifier 'group.Bad' for group reference in Job 'job.valid' is invalid"));
+}
+
+TEST(StdRuleSet, CreatesJobImprovementAndGroupEffects) {
+  const auto root = GetTestDataFolder();
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  ASSERT_TRUE(ruleset.Load({root}, errors));
+
+  const auto improvement_jobs = FindEffect(ruleset, "improvement.mill/jobs.effect");
+  ASSERT_NE(improvement_jobs, nullptr);
+  EXPECT_EQ(improvement_jobs->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
+  EXPECT_EQ(improvement_jobs->GetData().selector().class_(), "improvement.mill");
+  EXPECT_NE(improvement_jobs->GetData().effect().lua().find("job/@job.miller/count', 2"),
+            std::string::npos);
+
+  const auto job_resources = FindEffect(ruleset, "job.miller/resources.effect");
+  ASSERT_NE(job_resources, nullptr);
+  EXPECT_EQ(job_resources->GetScopeType(), types::ScopeType::SCOPE_TYPE_JOB_CLASS);
+  EXPECT_NE(job_resources->GetData().effect().lua().find("consumes/@resource.grain', 3"),
+            std::string::npos);
+  EXPECT_NE(job_resources->GetData().effect().lua().find("produces/@resource.flour', 5"),
+            std::string::npos);
+  EXPECT_NE(job_resources->GetData().effect().lua().find("produces/@resource.o.neil', 1"),
+            std::string::npos);
+  EXPECT_FALSE(job_resources->IsBroken());
+  ASSERT_EQ(job_resources->GetDependencies().size(), 1u);
+  EXPECT_EQ(job_resources->GetDependencies()[0].raw_id, "core.class");
+
+  EXPECT_EQ(FindEffect(ruleset, "group.production/group.effect")->GetScopeType(),
+            types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
+  EXPECT_EQ(FindEffect(ruleset, "group.workers/group.effect")->GetScopeType(),
+            types::ScopeType::SCOPE_TYPE_JOB_GROUP);
 }
 
 TEST(StdRuleSet, LoadEffectsCreatesInlineImprovementEffects) {

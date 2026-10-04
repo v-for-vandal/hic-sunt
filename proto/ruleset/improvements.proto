@@ -5,6 +5,7 @@ package hs.proto.ruleset;
 import "l10n/localized_name.proto";
 import "ruleset/effect.proto";
 import "ruleset/placement_rules.proto";
+import "ruleset/group.proto";
 
 message ResourceBill {
   map<string, int32> amounts = 1;
@@ -22,7 +23,8 @@ message Improvement {
   // How much it costs to build entity
   ResourceBill cost = 6;
 
-  // TODO: RM
+  // Provided jobs. This member is for convinience only. It is internally
+  // converted into class effect.
   map<string, int32> jobs = 7;
 
   // this effect is inline. It will always be active only for this building clas
@@ -50,8 +52,12 @@ message Improvement {
   // if you need to add some effect to building in your mod, don't overwrite the building -
   // just add effect externally.
   effect.Code instance_effect = 9;
+
+  // Groups that this improvement class should inherit from.
+  repeated string groups = 10;
 }
 
 message Improvements {
   repeated Improvement improvements = 1;
+  repeated Group improvement_groups = 2;
 }

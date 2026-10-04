@@ -5,11 +5,11 @@ func test_creation() -> void:
 	assert_true(zero_region.contains(coords))
 	var result := ConstructionProject.create_construction_project(
 		test_city_id,
-		&"test.improv.construction_1",
+		&"test.improv.construction.1",
 		zero_region, coords)
 	assert_not_null(result, "Failed to create construction project")
 	
-	assert_eq(result.get_improvement_id(), &"test.improv.construction_1")
+	assert_eq(result.get_improvement_id(), &"test.improv.construction.1")
 	assert_true(result.is_possible())
 	assert_false(result.is_finished())
 	assert_eq(result._region_coords, coords )
@@ -19,7 +19,7 @@ func test_serialization() -> void:
 	assert_true(zero_region.contains(coords))
 	var target := ConstructionProject.create_construction_project(
 		test_city_id,
-		&"test.improv.construction_1",
+		&"test.improv.construction.1",
 		zero_region, coords)
 	assert_not_null(target, "Failed to create construction project")
 	do_test_equal_by_serialization(target)
@@ -29,7 +29,7 @@ func test_creation_failure_out_of_bounds() -> void:
 	assert_false(zero_region.contains(coords))
 	var result := ConstructionProject.create_construction_project(
 		test_city_id,
-		&"test.improv.construction_1",
+		&"test.improv.construction.1",
 		zero_region, coords)
 	assert_null(result, "Creating project in coords not present in region must have failed")
 	assert_push_error_count(1)
@@ -53,7 +53,7 @@ func test_progress() -> void:
 	assert_null(cell.get_improvement(0), "Should be no improvement at target coords")
 	var project := ConstructionProject.create_construction_project(
 		test_city_id,
-		&"test.improv.construction_1",
+		&"test.improv.construction.1",
 		zero_region, coords)
 	assert_not_null(project, "Failed to create construction project")
 	assert_eq(project.progress_estimate().progress, 0, "Progress should be 0%")
@@ -123,5 +123,5 @@ func test_progress() -> void:
 	assert_not_null(improvement, "Should be an improvement at target coords")
 	if improvement == null:
 		return
-	assert_true(improvement.get_string_value(WorldConstants.CLASS_VARIABLE) == &"test.improv.construction_1",
+	assert_true(improvement.get_string_value(WorldConstants.CLASS_VARIABLE) == &"test.improv.construction.1",
 		"Finished project should have set an improvement on target cell")

@@ -215,7 +215,8 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
     spdlog::warn("No such city: {}", city_id);
     return std::unexpected(ERR_NO_SUCH_CITY);
   }
-  const auto& city = city_it->second;
+  // Keep an owning copy: creating class/group scopes mutates scopes_by_id_ and may rehash it.
+  const auto city = city_it->second;
 
   const auto& civ_scope = city->GetParent();
   if (!civ_scope || civ_scope->GetType() != ScopeType::SCOPE_TYPE_CIV ||
@@ -235,8 +236,7 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
 
   ScopePtr result{scope_id, types::ScopeType::SCOPE_TYPE_IMPROVEMENT};
 
-  auto success =
-      result->SetStringModifier(kCoreClass, kCoreClass, improvement_class, 1, current_turn_);
+  auto success = SetCoreClass(result, improvement_class);
   if (!success) {
     // This one can not happen and is unrecoverable
     throw std::runtime_error(
@@ -278,6 +278,51 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementScope(StringId c
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateJobScope(StringId civ_id, StringId job_class)
+    -> std::expected<ScopePtr, ErrorCode> {
+  if (!world_) {
+    return std::unexpected(ERR_WORLD_MUST_BE_SET_FIRST);
+  }
+  if (BaseTypes::IsNullToken(civ_id) || BaseTypes::IsNullToken(job_class)) {
+    spdlog::warn("Null token passed to CreateJobScope");
+    return std::unexpected(ERR_NULL_ID);
+  }
+  if (!world_->HasCivilization(civ_id)) {
+    spdlog::warn("No such civilization: {}", civ_id);
+    return std::unexpected(ERR_NO_SUCH_CIV);
+  }
+
+  const auto civ = world_->GetCivilization(civ_id);
+  const auto class_scope_id = RuleSet::JobClassScopeId(civ_id, job_class);
+  ScopePtr class_scope;
+  if (civ->HasChildScope(ScopeType::SCOPE_TYPE_JOB_CLASS, class_scope_id)) {
+    class_scope = civ->GetChildScope(ScopeType::SCOPE_TYPE_JOB_CLASS, class_scope_id);
+  } else {
+    auto create_result = CreateJobClassScope(civ, job_class);
+    if (!create_result) {
+      return std::unexpected(create_result.error());
+    }
+    class_scope = *create_result;
+  }
+
+  const auto scope_id =
+      BaseTypes::StringIdFromStdString(fmt::format("job/{}", world_->GetNextId()));
+  ScopePtr result{scope_id, ScopeType::SCOPE_TYPE_JOB};
+  if (auto set_class_result = SetCoreClass(result, job_class); !set_class_result) {
+    throw std::runtime_error(
+        fmt::format("Failed to set class for new job scope of class {}, original error is {}",
+                    job_class, set_class_result.error()));
+  }
+
+  if (auto link_result = result->AddTagLink(kCoreClass, class_scope); !link_result) {
+    spdlog::warn("Failed to link job with its class: reason {}", link_result.error());
+    return std::unexpected(link_result.error());
+  }
+
+  return result;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCityScope(StringId civ_id)
     -> std::expected<ScopePtr, ErrorCode> {
   if (!world_) {
@@ -294,7 +339,7 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateCityScope(StringId civ_id)
 
   ScopePtr result{scope_id, types::ScopeType::SCOPE_TYPE_CITY};
 
-  auto success = result->SetStringModifier(kCoreClass, kCoreClass, "core.city", 1, current_turn_);
+  auto success = SetCoreClass(result, BaseTypes::StringIdFromStdString("core.city"));
   if (!success) {
     // This one can not happen and is unrecoverable
     throw std::runtime_error(fmt::format(
@@ -381,8 +426,39 @@ Session<BaseTypes, WorldPtr, RuleSetPtr> ParseFrom(
 }
 
 template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::SetCoreClass(const ScopePtr& scope,
+                                                            StringId class_id)
+    -> std::expected<void, ErrorCode> {
+  return scope->SetStringModifier(kCoreClass, kCoreClass, class_id, 1, current_turn_);
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+template <typename GroupIds>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::LinkToGroups(const CivilizationPtr& civ,
+                                                            const ScopePtr& scope,
+                                                            const GroupIds& group_ids,
+                                                            ScopeType expected_group_type)
+    -> std::expected<void, ErrorCode> {
+  for (const auto& group_id_proto : group_ids) {
+    const auto group_id = BaseTypes::StringIdFromStdString(group_id_proto);
+    auto group_scope = GetOrCreateGroupScope(civ, group_id, expected_group_type);
+    if (!group_scope) {
+      return std::unexpected(group_scope.error());
+    }
+    if (auto link_result = scope->AddTagLink(group_id, *group_scope); !link_result) {
+      return std::unexpected(link_result.error());
+    }
+  }
+  return {};
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
 auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementClassScope(
     const CivilizationPtr& civ, StringId improvement_class) -> std::expected<ScopePtr, ErrorCode> {
+  if (!ruleset_) {
+    return std::unexpected(ERR_RULESET_MUST_BE_SET_FIRST);
+  }
+
   const auto& civ_id = civ->GetId();
   auto improvement_class_scope_id = RuleSet::ImprovementClassScopeId(civ_id, improvement_class);
   if (civ->HasChildScope(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS,
@@ -392,12 +468,18 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementClassScope(
 
   ScopePtr result{improvement_class_scope_id, types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS};
 
-  // Lets set kCoreClass to improvement class
-  if (auto success =
-          result->SetStringModifier(kCoreClass, kCoreClass, improvement_class, 1, current_turn_);
-      !success) {
+  if (auto success = SetCoreClass(result, improvement_class); !success) {
     spdlog::warn("Failed to set core.class on scope {}", improvement_class_scope_id);
     return std::unexpected(success.error());
+  }
+
+  const auto* improvement = ruleset_->FindRegionImprovementByType(improvement_class);
+  if (improvement != nullptr) {
+    if (auto link_result = LinkToGroups(civ, result, improvement->groups(),
+                                        types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
+        !link_result) {
+      return std::unexpected(link_result.error());
+    }
   }
 
   if (auto add_success = civ->AddChildScope(result); !add_success) {
@@ -410,6 +492,96 @@ auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateImprovementClassScope(
     spdlog::warn("Failed to register newly created improvement class scope {}, reason: {}",
                  improvement_class_scope_id, add_success.error());
     return std::unexpected(add_success.error());
+  }
+
+  return result;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::CreateJobClassScope(const CivilizationPtr& civ,
+                                                                   StringId job_class)
+    -> std::expected<ScopePtr, ErrorCode> {
+  if (!ruleset_) {
+    return std::unexpected(ERR_RULESET_MUST_BE_SET_FIRST);
+  }
+
+  const auto& civ_id = civ->GetId();
+  const auto scope_id = RuleSet::JobClassScopeId(civ_id, job_class);
+  if (civ->HasChildScope(ScopeType::SCOPE_TYPE_JOB_CLASS, scope_id)) {
+    return std::unexpected(ERR_SCOPE_ALREADY_EXISTS);
+  }
+
+  ScopePtr result{scope_id, ScopeType::SCOPE_TYPE_JOB_CLASS};
+  if (auto set_class_result = SetCoreClass(result, job_class); !set_class_result) {
+    spdlog::warn("Failed to set core.class on scope {}", scope_id);
+    return std::unexpected(set_class_result.error());
+  }
+
+  const auto* job = ruleset_->FindJobByType(job_class);
+  if (job != nullptr) {
+    if (auto link_result =
+            LinkToGroups(civ, result, job->groups(), ScopeType::SCOPE_TYPE_JOB_GROUP);
+        !link_result) {
+      return std::unexpected(link_result.error());
+    }
+  }
+
+  if (auto add_result = civ->AddChildScope(result); !add_result) {
+    return std::unexpected(add_result.error());
+  }
+  if (auto add_result = AddScope(result); !add_result) {
+    spdlog::warn("Failed to register newly created job class scope {}, reason: {}", scope_id,
+                 add_result.error());
+    return std::unexpected(add_result.error());
+  }
+
+  return result;
+}
+
+template <typename BaseTypes, typename WorldPtr, typename RuleSetPtr>
+auto Session<BaseTypes, WorldPtr, RuleSetPtr>::GetOrCreateGroupScope(const CivilizationPtr& civ,
+                                                                     StringId group_id,
+                                                                     ScopeType expected_type)
+    -> std::expected<ScopePtr, ErrorCode> {
+  if (!ruleset_) {
+    return std::unexpected(ERR_RULESET_MUST_BE_SET_FIRST);
+  }
+
+  const auto group_definition = ruleset_->FindGroupById(group_id);
+  if (!group_definition || group_definition->scope_type != expected_type) {
+    spdlog::warn("Group {} does not exist or has an unexpected type", group_id);
+    return std::unexpected(ERR_INVALID_RULESET);
+  }
+
+  const auto scope_id = RuleSet::GroupScopeId(civ->GetId(), group_id);
+  if (civ->HasChildScope(expected_type, scope_id)) {
+    return civ->GetChildScope(expected_type, scope_id);
+  }
+
+  ScopePtr result{scope_id, expected_type};
+  if (auto set_class_result = SetCoreClass(result, group_id); !set_class_result) {
+    spdlog::warn("Failed to set core.class on group scope {}", scope_id);
+    return std::unexpected(set_class_result.error());
+  }
+
+  for (const auto& inherited_group_id_proto : group_definition->group->groups()) {
+    const auto inherited_group_id = BaseTypes::StringIdFromStdString(inherited_group_id_proto);
+    auto inherited_scope = GetOrCreateGroupScope(civ, inherited_group_id, expected_type);
+    if (!inherited_scope) {
+      return std::unexpected(inherited_scope.error());
+    }
+    if (auto link_result = result->AddTagLink(inherited_group_id, *inherited_scope); !link_result) {
+      return std::unexpected(link_result.error());
+    }
+  }
+
+  if (auto add_result = civ->AddChildScope(result); !add_result) {
+    return std::unexpected(add_result.error());
+  }
+  if (auto add_result = AddScope(result); !add_result) {
+    spdlog::warn("Failed to register newly created group scope {}, reason: {}", scope_id,
+                 add_result.error());
+    return std::unexpected(add_result.error());
   }
 
   return result;

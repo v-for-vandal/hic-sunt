@@ -14,16 +14,23 @@
 #include <algorithm>
 #include <c4/std/string.hpp>
 #include <fstream>
+#include <functional>
 #include <ryml.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 namespace hs::ruleset {
 
 namespace {
+
+inline void AddError(utils::ErrorsCollection& errors, const std::string& message) {
+  spdlog::error(message);
+  errors.AddError({message});
+}
 
 bool IsRulesetFileExtension(const std::filesystem::path& path) {
   const auto extension = path.extension().string();
@@ -301,6 +308,9 @@ void ApplyFile(proto::ruleset::Improvements& target, const std::filesystem::path
     UpsertRepeatedField(target.mutable_improvements(), improvement, file_path,
                         "region improvement");
   }
+  for (const auto& group : parsed.improvement_groups()) {
+    UpsertRepeatedField(target.mutable_improvement_groups(), group, file_path, "improvement group");
+  }
 }
 
 void ApplyFile(proto::ruleset::Biomes& target, const std::filesystem::path& file_path) {
@@ -336,6 +346,9 @@ void ApplyFile(proto::ruleset::Jobs& target, const std::filesystem::path& file_p
 
   for (const auto& job : parsed.jobs()) {
     UpsertRepeatedField(target.mutable_jobs(), job, file_path, "job");
+  }
+  for (const auto& group : parsed.job_groups()) {
+    UpsertRepeatedField(target.mutable_job_groups(), group, file_path, "job group");
   }
 }
 
@@ -400,6 +413,153 @@ void LoadOrderedFilesInto(Target& target, const std::vector<std::filesystem::pat
 }
 
 }  // namespace
+
+bool RuleSetBase::IsValidIdentifier(std::string_view identifier) {
+  return !identifier.empty() && std::ranges::all_of(identifier, [](char character) {
+    return (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9') ||
+           character == '.';
+  });
+}
+
+bool RuleSetBase::ValidateIdentifier(std::string_view identifier, std::string_view context,
+                                     ErrorsCollection& errors) {
+  if (IsValidIdentifier(identifier)) {
+    return true;
+  }
+
+  AddError(errors,
+           fmt::format("Identifier '{}' for {} is invalid; identifiers must contain only lowercase "
+                       "ASCII letters, digits, and '.'",
+                       identifier, context));
+  return false;
+}
+
+bool RuleSetBase::ValidateGroupReferences(
+    std::string_view owner_kind, const std::string& owner_id,
+    const google::protobuf::RepeatedPtrField<std::string>& group_ids,
+    types::ScopeType expected_type, ErrorsCollection& errors) const {
+  const auto contains_group = [](const auto& groups, std::string_view group_id) {
+    return std::ranges::any_of(groups,
+                               [group_id](const auto& group) { return group.id() == group_id; });
+  };
+  const bool expects_improvement_group =
+      expected_type == types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP;
+  const auto& expected_groups =
+      expects_improvement_group ? improvements_.improvement_groups() : jobs_.job_groups();
+  const auto& other_groups =
+      expects_improvement_group ? jobs_.job_groups() : improvements_.improvement_groups();
+  const auto other_type = expects_improvement_group
+                              ? types::ScopeType::SCOPE_TYPE_JOB_GROUP
+                              : types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP;
+
+  bool success = true;
+  std::unordered_set<std::string> unique_ids;
+  for (const auto& group_id : group_ids) {
+    if (!unique_ids.insert(group_id).second) {
+      AddError(errors, fmt::format("{} '{}' contains duplicate group reference '{}'", owner_kind,
+                                   owner_id, group_id));
+      success = false;
+    }
+
+    if (!ValidateIdentifier(
+            group_id, fmt::format("group reference in {} '{}'", owner_kind, owner_id), errors)) {
+      success = false;
+      continue;
+    }
+
+    if (contains_group(expected_groups, group_id)) {
+      continue;
+    }
+    if (contains_group(other_groups, group_id)) {
+      AddError(errors, fmt::format("{} '{}' references group '{}' of type {}, expected {}",
+                                   owner_kind, owner_id, group_id, other_type, expected_type));
+    } else {
+      AddError(errors, fmt::format("{} '{}' references unknown group '{}'", owner_kind, owner_id,
+                                   group_id));
+    }
+    success = false;
+  }
+  return success;
+}
+
+bool RuleSetBase::ValidateGroupGraph(
+    const google::protobuf::RepeatedPtrField<proto::ruleset::Group>& groups, std::string_view kind,
+    types::ScopeType expected_type, ErrorsCollection& errors) const {
+  bool success = true;
+  std::unordered_map<std::string, const proto::ruleset::Group*> by_id;
+  by_id.reserve(static_cast<size_t>(groups.size()));
+  for (const auto& group : groups) {
+    if (IsValidIdentifier(group.id())) {
+      by_id.try_emplace(group.id(), &group);
+    }
+    success &= ValidateGroupReferences(kind, group.id(), group.groups(), expected_type, errors);
+  }
+
+  enum class VisitState { kUnvisited, kVisiting, kVisited };
+  std::unordered_map<std::string, VisitState> states;
+  std::vector<std::string> path;
+
+  std::function<void(const proto::ruleset::Group&)> visit = [&](const auto& group) {
+    auto& state = states[group.id()];
+    if (state == VisitState::kVisited) {
+      return;
+    }
+    if (state == VisitState::kVisiting) {
+      const auto cycle_begin = std::ranges::find(path, group.id());
+      std::string cycle;
+      for (auto it = cycle_begin; it != path.end(); ++it) {
+        if (!cycle.empty()) {
+          cycle += " -> ";
+        }
+        cycle += *it;
+      }
+      if (!cycle.empty()) {
+        cycle += " -> ";
+      }
+      cycle += group.id();
+      AddError(errors, fmt::format("Cycle detected in {} graph: {}", kind, cycle));
+      success = false;
+      return;
+    }
+
+    state = VisitState::kVisiting;
+    path.push_back(group.id());
+    for (const auto& inherited_group_id : group.groups()) {
+      const auto inherited = by_id.find(inherited_group_id);
+      if (inherited != by_id.end()) {
+        visit(*inherited->second);
+      }
+    }
+    path.pop_back();
+    state = VisitState::kVisited;
+  };
+
+  for (const auto& group : groups) {
+    if (IsValidIdentifier(group.id())) {
+      visit(group);
+    }
+  }
+
+  return success;
+}
+
+bool RuleSetBase::ValidateGroups(ErrorsCollection& errors) const {
+  bool success = true;
+  for (const auto& improvement : improvements_.improvements()) {
+    success &= ValidateGroupReferences("Improvement", improvement.id(), improvement.groups(),
+                                       types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP, errors);
+  }
+  for (const auto& job : jobs_.jobs()) {
+    success &= ValidateGroupReferences("Job", job.id(), job.groups(),
+                                       types::ScopeType::SCOPE_TYPE_JOB_GROUP, errors);
+  }
+
+  success &= ValidateGroupGraph(improvements_.improvement_groups(), "improvement group",
+                                types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP, errors);
+  success &= ValidateGroupGraph(jobs_.job_groups(), "job group",
+                                types::ScopeType::SCOPE_TYPE_JOB_GROUP, errors);
+  return success;
+}
 
 bool RuleSetBase::Load(const std::vector<std::filesystem::path>& paths,
                        ErrorsCollection& /*errors*/) {

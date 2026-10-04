@@ -13,7 +13,7 @@ atlas_rendering : [
 	{ id: "core.biome.tropical_rainforest", atlas_coords: [1, 4] },
 	{ id: "core.biome.savanna", atlas_coords: [2, 4] },
 	{ id: "core.biome.shrubland", atlas_coords: [0, 5] },
-	{ id: "core.improv.logging_1", source_id: 2, atlas_coords: [2,0]},
-	{ id: "core.improv.quarry_1", source_id: 2, atlas_coords: [1,0]},
-	{ id: "core.improv.mine_1", source_id: 2, atlas_coords: [0,0]}
+	{ id: "core.improv.logging.1", source_id: 2, atlas_coords: [2,0]},
+	{ id: "core.improv.quarry.1", source_id: 2, atlas_coords: [1,0]},
+	{ id: "core.improv.mine.1", source_id: 2, atlas_coords: [0,0]}
 ]

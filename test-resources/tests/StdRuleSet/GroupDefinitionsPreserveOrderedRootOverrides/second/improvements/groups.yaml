@@ -1,0 +1,4 @@
+improvementGroups:
+  - id: group.shared
+    name:
+      key: second

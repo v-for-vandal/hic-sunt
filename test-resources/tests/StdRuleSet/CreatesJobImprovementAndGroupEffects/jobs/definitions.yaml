@@ -1,0 +1,15 @@
+jobs:
+  - id: job.miller
+    input:
+      resource.grain: 3
+    output:
+      resource.flour: 5
+      resource.o.neil: 1
+    groups:
+      - group.workers
+    classEffect:
+      lua: return true
+jobGroups:
+  - id: group.workers
+    groupEffect:
+      lua: return true

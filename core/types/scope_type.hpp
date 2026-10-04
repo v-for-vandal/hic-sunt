@@ -19,11 +19,13 @@ enum ScopeType {
     SCOPE_TYPE_CITY = 7;
     SCOPE_TYPE_IMPROVEMENT = 8;
     SCOPE_TYPE_IMPROVEMENT_CLASS = 11;
+    SCOPE_TYPE_IMPROVEMENT_GROUP = 15;
     SCOPE_TYPE_ARMY = 9;
     SCOPE_TYPE_UNIT = 10;
     SCOPE_TYPE_UNIT_CLASS = 12;
     SCOPE_TYPE_JOB_CLASS = 13;
     SCOPE_TYPE_JOB = 14;
+    SCOPE_TYPE_JOB_GROUP = 16;
 }
 */
 using ScopeType = proto::types::ScopeType;
@@ -57,7 +59,9 @@ constexpr ScopeTypeLinkTable BuildScopeTypeLinkTable() {
   table[ScopeType::SCOPE_TYPE_IMPROVEMENT] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_CELL);
   table[ScopeType::SCOPE_TYPE_JOB] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_IMPROVEMENT);
   table[ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_CIV);
+  table[ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_CIV);
   table[ScopeType::SCOPE_TYPE_JOB_CLASS] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_CIV);
+  table[ScopeType::SCOPE_TYPE_JOB_GROUP] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_CIV);
 
   return table;
 }
@@ -67,7 +71,13 @@ constexpr ScopeTypeLinkTable BuildScopeTypeTagLinkTable() {
   table[ScopeType::SCOPE_TYPE_PLANE] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_PLANE_CLASS);
   table[ScopeType::SCOPE_TYPE_IMPROVEMENT] =
       ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS, ScopeType::SCOPE_TYPE_CITY);
+  table[ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS] =
+      ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
+  table[ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP] =
+      ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
   table[ScopeType::SCOPE_TYPE_JOB] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_JOB_CLASS);
+  table[ScopeType::SCOPE_TYPE_JOB_CLASS] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_JOB_GROUP);
+  table[ScopeType::SCOPE_TYPE_JOB_GROUP] = ScopeTypeFilter::Make(ScopeType::SCOPE_TYPE_JOB_GROUP);
 
   return table;
 }

@@ -1,0 +1,9 @@
+improvements:
+  - id: farm
+    groups:
+      - group.child
+improvementGroups:
+  - id: group.base
+  - id: group.child
+    groups:
+      - group.base

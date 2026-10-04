@@ -1,0 +1,3 @@
+resources:
+  - id: core.res.food
+  - id: core.res.wood
