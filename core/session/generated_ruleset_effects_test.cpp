@@ -15,6 +15,7 @@ namespace {
 using StdSession = Session<StdBaseTypes>;
 using StdWorld = terra::World<StdBaseTypes>;
 using StdRuleSet = ruleset::RuleSet<StdBaseTypes>;
+using ::hs::test::GetCommonTestDataFolder;
 using ::hs::test::GetTestDataFolder;
 
 std::shared_ptr<StdWorld> MakeWorld() {
@@ -31,11 +32,12 @@ std::shared_ptr<StdWorld> MakeWorld() {
 }  // namespace
 
 TEST(StdSessionGeneratedRulesetEffects, AppliesImprovementJobsAndJobResourceFlows) {
+  const auto common_root = GetCommonTestDataFolder("rulesets/job-count");
   const auto root = GetTestDataFolder();
 
   auto ruleset = std::make_shared<StdRuleSet>();
   utils::ErrorsCollection errors;
-  ASSERT_TRUE(ruleset->Load({root}, errors));
+  ASSERT_TRUE(ruleset->Load({common_root, root}, errors));
 
   StdSession session;
   ASSERT_TRUE(session.SetWorld(MakeWorld()));
@@ -56,7 +58,7 @@ TEST(StdSessionGeneratedRulesetEffects, AppliesImprovementJobsAndJobResourceFlow
   const auto improvement_class = session.GetScopesById().at(improvement_class_id);
   const auto job_class = session.GetScopesById().at(job_class_id);
 
-  const auto job_count = improvement_class->GetNumericValue("job/job.miller/count");
+  const auto job_count = improvement_class->GetNumericValue("job/@job.miller/count");
   ASSERT_TRUE(job_count.has_value());
   EXPECT_EQ(*job_count, 2);
   const auto consumed = job_class->GetNumericValue("consumes/@resource.grain");

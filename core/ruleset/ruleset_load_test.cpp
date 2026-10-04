@@ -11,6 +11,7 @@
 namespace hs::ruleset {
 
 using StdRuleSet = RuleSet<StdBaseTypes>;
+using ::hs::test::GetCommonTestDataFolder;
 using ::hs::test::GetTestDataFolder;
 
 namespace {
@@ -191,14 +192,15 @@ TEST(StdRuleSet, LoadYamlRejectsAnchorsAndAliases) {
 }
 
 TEST(StdRuleSet, LoadParameterizedJobVariablesFromVariableDefinitions) {
+  const auto common_root = GetCommonTestDataFolder("rulesets/job-count");
   const auto root = GetTestDataFolder();
 
   StdRuleSet ruleset;
   utils::ErrorsCollection errors;
-  ASSERT_TRUE(ruleset.Load({root}, errors));
+  ASSERT_TRUE(ruleset.Load({common_root, root}, errors));
 
   const auto& definitions = ruleset.GetVariableDefinitions();
-  EXPECT_TRUE(definitions->IsNumericVariable("job/job.one/count"));
+  EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/count"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.wood"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.tools"));
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/produces/@resource.food"));
@@ -207,12 +209,14 @@ TEST(StdRuleSet, LoadParameterizedJobVariablesFromVariableDefinitions) {
   EXPECT_TRUE(definitions->IsNumericVariable("job/@job.one/consumes/@resource.food"));
   EXPECT_FALSE(definitions->IsNumericVariable("job/job.one/produces/resource.wood"));
 
-  const auto count_definition = definitions->FindNumericVariable("job/job.one/count");
+  const auto count_definition = definitions->FindNumericVariable("job/@job.one/count");
   ASSERT_TRUE(count_definition.has_value());
   EXPECT_EQ(count_definition->minimum, 0);
   EXPECT_EQ(count_definition->maximum, std::numeric_limits<StdBaseTypes::NumericValue>::max());
-  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
-  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_WORLD]);
+  EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_CITY]);
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT]);
+  EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS]);
   EXPECT_TRUE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP]);
   EXPECT_FALSE(count_definition->allowed_scopes[types::ScopeType::SCOPE_TYPE_ARMY]);
 
@@ -321,12 +325,12 @@ TEST(StdRuleSet, RejectsInvalidObjectAndReferencedIdentifiers) {
   EXPECT_TRUE(
       HasErrorContaining(errors, "Identifier 'improvement.Invalid' for improvement is invalid"));
   EXPECT_TRUE(HasErrorContaining(
-      errors, "Identifier 'job.bad-name' for job reference in improvement 'improvement.valid'"));
+      errors, "Improvement 'improvement.valid' references unknown job 'job.bad-name'"));
   EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'job.Invalid' for job is invalid"));
   EXPECT_TRUE(HasErrorContaining(
-      errors, "Identifier 'resource.bad-name' for input resource reference in job 'job.valid'"));
+      errors, "Job 'job.valid' references unknown input resource 'resource.bad-name'"));
   EXPECT_TRUE(HasErrorContaining(
-      errors, "Identifier 'resource.bad_name' for output resource reference in job 'job.valid'"));
+      errors, "Job 'job.valid' references unknown output resource 'resource.bad_name'"));
   EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'resource.Invalid' for resource is invalid"));
   EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'group.bad_name' for group is invalid"));
   EXPECT_TRUE(HasErrorContaining(
@@ -344,7 +348,7 @@ TEST(StdRuleSet, CreatesJobImprovementAndGroupEffects) {
   ASSERT_NE(improvement_jobs, nullptr);
   EXPECT_EQ(improvement_jobs->GetScopeType(), types::ScopeType::SCOPE_TYPE_IMPROVEMENT_CLASS);
   EXPECT_EQ(improvement_jobs->GetData().selector().class_(), "improvement.mill");
-  EXPECT_NE(improvement_jobs->GetData().effect().lua().find("job/job.miller/count', 2"),
+  EXPECT_NE(improvement_jobs->GetData().effect().lua().find("job/@job.miller/count', 2"),
             std::string::npos);
 
   const auto job_resources = FindEffect(ruleset, "job.miller/resources.effect");
