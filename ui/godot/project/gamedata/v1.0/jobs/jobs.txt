@@ -1,6 +1,6 @@
 jobs : [
 {
-  id: "core.job.stone_miner",
+  id: "core.job.stone.miner",
   input: []
   output: [
 	  { key : "core.res.stone", value: 1 }

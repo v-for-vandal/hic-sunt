@@ -1,6 +1,7 @@
 #pragma once
 
 #include <absl/container/flat_hash_map.h>
+#include <google/protobuf/repeated_ptr_field.h>
 #include <ruleset/group.pb.h>
 #include <ruleset/ruleset.pb.h>
 
@@ -12,6 +13,7 @@
 #include <core/utils/serialize.hpp>
 #include <filesystem>
 #include <optional>
+#include <string_view>
 
 namespace hs::ruleset {
 
@@ -71,10 +73,22 @@ class RuleSet : public RuleSetBase {
   friend RuleSet ParseFrom<BaseTypes>(const proto::ruleset::RuleSet& source,
                                       serialize::To<RuleSet>);
 
-  bool LoadImprovements([[maybe_unused]] ErrorsCollection& errors);
-  bool LoadResources([[maybe_unused]] ErrorsCollection& errors);
-  bool LoadJobs([[maybe_unused]] ErrorsCollection& errors);
-  bool LoadGroups(ErrorsCollection& errors);
+  static bool IsValidIdentifier(std::string_view identifier);
+  static bool ValidateIdentifier(std::string_view identifier, std::string_view context,
+                                 ErrorsCollection& errors);
+
+  bool LoadImprovements(ErrorsCollection& errors);
+  bool LoadResources(ErrorsCollection& errors);
+  bool LoadJobs(ErrorsCollection& errors);
+  bool AddGroup(const proto::ruleset::Group& group, types::ScopeType scope_type, size_t index,
+                ErrorsCollection& errors);
+  bool ValidateGroups(ErrorsCollection& errors) const;
+  bool ValidateGroupReferences(std::string_view owner_kind, const std::string& owner_id,
+                               const google::protobuf::RepeatedPtrField<std::string>& group_ids,
+                               types::ScopeType expected_type, ErrorsCollection& errors) const;
+  bool ValidateGroupGraph(const google::protobuf::RepeatedPtrField<proto::ruleset::Group>& groups,
+                          std::string_view kind, types::ScopeType expected_type,
+                          ErrorsCollection& errors) const;
   bool LoadProjects([[maybe_unused]] ErrorsCollection& errors);
   bool LoadEffects(ErrorsCollection& errors);
   bool LoadVariableDefinitions(ErrorsCollection& errors);

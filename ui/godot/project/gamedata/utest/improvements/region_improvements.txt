@@ -1,6 +1,6 @@
 improvements : [
 	{ 
-		id: "test.improv.construction_1",
+		id: "test.improv.construction.1",
 		cost : {
 			amounts: [
 				{ key: "core.res.stone", value: 10},
@@ -10,25 +10,25 @@ improvements : [
 		}
 	},
 	{ 
-		id: "core.improv.logging_1",
+		id: "core.improv.logging.1",
 		jobs: [
 			{ key: "core.job.woodcutter", value: 1}
 		]
 	},
 	{
-		id: "core.improv.quarry_1",
+		id: "core.improv.quarry.1",
 		jobs: [
-			{ key: "core.job.stone_miner", value: 1}
+			{ key: "core.job.stone.miner", value: 1}
 		],
 	},
 	{
-		id: "core.improv.mine_1",
+		id: "core.improv.mine.1",
 		jobs: [
 			{ key: "core.job.miner", value: 1}
 		]
 	},
 		{
-		id: "core.improv.construction_office_1",
+		id: "core.improv.construction.office.1",
 		jobs: [
 			{ key: "core.job.worker", value: 2}
 		]

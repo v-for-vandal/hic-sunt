@@ -1,0 +1,9 @@
+improvements:
+  - id: improvement.Invalid
+  - id: improvement.valid
+    jobs:
+      job.bad-name: 1
+    groups:
+      - group.bad_name
+improvementGroups:
+  - id: group.bad_name

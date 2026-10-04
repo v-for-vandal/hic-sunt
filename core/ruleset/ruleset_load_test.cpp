@@ -111,7 +111,7 @@ TEST(StdRuleSet, LoadYamlImprovementsWithMapFieldsAsDictionaries) {
 
   ASSERT_EQ(ruleset.GetRegionImprovements().improvements_size(), 2);
   const auto& logging = ruleset.GetRegionImprovements().improvements(0);
-  EXPECT_EQ(logging.id(), "core.improv.logging_1");
+  EXPECT_EQ(logging.id(), "core.improv.logging.1");
   ASSERT_TRUE(logging.jobs().contains("core.job.woodcutter"));
   EXPECT_EQ(logging.jobs().at("core.job.woodcutter"), 1);
 
@@ -312,6 +312,27 @@ TEST(StdRuleSet, RejectsCyclesInGroupGraphWithUsefulError) {
       errors, "Cycle detected in improvement group graph: group.a -> group.b -> group.a"));
 }
 
+TEST(StdRuleSet, RejectsInvalidObjectAndReferencedIdentifiers) {
+  const auto root = GetTestDataFolder();
+
+  StdRuleSet ruleset;
+  utils::ErrorsCollection errors;
+  EXPECT_FALSE(ruleset.Load({root}, errors));
+  EXPECT_TRUE(
+      HasErrorContaining(errors, "Identifier 'improvement.Invalid' for improvement is invalid"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Identifier 'job.bad-name' for job reference in improvement 'improvement.valid'"));
+  EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'job.Invalid' for job is invalid"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Identifier 'resource.bad-name' for input resource reference in job 'job.valid'"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Identifier 'resource.bad_name' for output resource reference in job 'job.valid'"));
+  EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'resource.Invalid' for resource is invalid"));
+  EXPECT_TRUE(HasErrorContaining(errors, "Identifier 'group.bad_name' for group is invalid"));
+  EXPECT_TRUE(HasErrorContaining(
+      errors, "Identifier 'group.Bad' for group reference in Job 'job.valid' is invalid"));
+}
+
 TEST(StdRuleSet, CreatesJobImprovementAndGroupEffects) {
   const auto root = GetTestDataFolder();
 
@@ -333,7 +354,7 @@ TEST(StdRuleSet, CreatesJobImprovementAndGroupEffects) {
             std::string::npos);
   EXPECT_NE(job_resources->GetData().effect().lua().find("produces/@resource.flour', 5"),
             std::string::npos);
-  EXPECT_NE(job_resources->GetData().effect().lua().find("produces/@resource.o\\'neil', 1"),
+  EXPECT_NE(job_resources->GetData().effect().lua().find("produces/@resource.o.neil', 1"),
             std::string::npos);
   EXPECT_FALSE(job_resources->IsBroken());
   ASSERT_EQ(job_resources->GetDependencies().size(), 1u);

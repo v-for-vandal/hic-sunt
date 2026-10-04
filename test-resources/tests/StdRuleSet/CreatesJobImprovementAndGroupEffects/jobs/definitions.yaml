@@ -4,7 +4,7 @@ jobs:
       resource.grain: 3
     output:
       resource.flour: 5
-      resource.o'neil: 1
+      resource.o.neil: 1
     groups:
       - group.workers
     classEffect:

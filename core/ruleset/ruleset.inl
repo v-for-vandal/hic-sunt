@@ -9,7 +9,6 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
-#include <unordered_map>
 #include <variant>
 
 #include "ruleset.hpp"
@@ -134,12 +133,14 @@ bool RuleSet<BaseTypes>::Load(const std::vector<std::filesystem::path>& paths,
   success &= LoadImprovements(errors);
   success &= LoadResources(errors);
   success &= LoadJobs(errors);
-  success &= LoadGroups(errors);
+  success &= ValidateGroups(errors);
   success &= LoadProjects(errors);
   success &= LoadVariableDefinitions(errors);
-  success &= LoadEffects(errors);
+  if (!success) {
+    return false;
+  }
 
-  return success;
+  return LoadEffects(errors);
 }
 
 template <typename BaseTypes>
@@ -187,38 +188,100 @@ bool RuleSet<BaseTypes>::DumpVariablesCsv(const std::filesystem::path& file_path
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadImprovements([[maybe_unused]] ErrorsCollection& errors) {
-  for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
-    const auto& improvement = improvements_.improvements(idx);
-    improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
-  }
-
-  return true;
+bool RuleSet<BaseTypes>::IsValidIdentifier(std::string_view identifier) {
+  return !identifier.empty() && std::ranges::all_of(identifier, [](char character) {
+    return (character >= 'a' && character <= 'z') || (character >= '0' && character <= '9') ||
+           character == '.';
+  });
 }
 
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadResources([[maybe_unused]] ErrorsCollection& errors) {
+bool RuleSet<BaseTypes>::ValidateIdentifier(std::string_view identifier, std::string_view context,
+                                            ErrorsCollection& errors) {
+  if (IsValidIdentifier(identifier)) {
+    return true;
+  }
+
+  AddError(errors,
+           fmt::format("Identifier '{}' for {} is invalid; identifiers must contain only lowercase "
+                       "ASCII letters, digits, and '.'",
+                       identifier, context));
+  return false;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadImprovements(ErrorsCollection& errors) {
+  bool success = true;
+  for (int idx = 0; idx < improvements_.improvements_size(); ++idx) {
+    const auto& improvement = improvements_.improvements(idx);
+    if (ValidateIdentifier(improvement.id(), "improvement", errors)) {
+      improvements_by_type_.try_emplace(BaseTypes::StringIdFromStdString(improvement.id()), idx);
+    } else {
+      success = false;
+    }
+
+    for (const auto& [job_id, _] : improvement.jobs()) {
+      success &= ValidateIdentifier(
+          job_id, fmt::format("job reference in improvement '{}'", improvement.id()), errors);
+    }
+  }
+
+  for (int idx = 0; idx < improvements_.improvement_groups_size(); ++idx) {
+    success &=
+        AddGroup(improvements_.improvement_groups(idx),
+                 types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP, static_cast<size_t>(idx), errors);
+  }
+
+  return success;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::LoadResources(ErrorsCollection& errors) {
+  bool success = true;
   resource_ids_.reserve(resources_.resources_size());
   for (int idx = 0; idx < resources_.resources_size(); ++idx) {
     const auto& resource = resources_.resources(idx);
+    if (!ValidateIdentifier(resource.id(), "resource", errors)) {
+      success = false;
+      continue;
+    }
+
     const auto resource_id = BaseTypes::StringIdFromStdString(resource.id());
     resources_by_id_.try_emplace(resource_id, idx);
     resource_ids_.push_back(resource_id);
   }
 
-  return true;
+  return success;
 }
 
 template <typename BaseTypes>
 bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
+  bool success = true;
   job_ids_.reserve(jobs_.jobs_size());
   for (int idx = 0; idx < jobs_.jobs_size(); ++idx) {
     const auto& job = jobs_.jobs(idx);
-    const auto job_id = BaseTypes::StringIdFromStdString(job.id());
-    jobs_by_type_.try_emplace(job_id, idx);
-    job_ids_.push_back(job_id);
+    const bool valid_job_id = ValidateIdentifier(job.id(), "job", errors);
+    if (valid_job_id) {
+      const auto job_id = BaseTypes::StringIdFromStdString(job.id());
+      jobs_by_type_.try_emplace(job_id, idx);
+      job_ids_.push_back(job_id);
+      spdlog::debug("Working with job {}", job_id);
+    } else {
+      success = false;
+    }
 
-    spdlog::debug("Working with job {}", job_id);
+    for (const auto& [resource_id, _] : job.input()) {
+      success &= ValidateIdentifier(
+          resource_id, fmt::format("input resource reference in job '{}'", job.id()), errors);
+    }
+    for (const auto& [resource_id, _] : job.output()) {
+      success &= ValidateIdentifier(
+          resource_id, fmt::format("output resource reference in job '{}'", job.id()), errors);
+    }
+
+    if (!valid_job_id) {
+      continue;
+    }
 
     NumericVariableDefinition<BaseTypes> count_definition;
     count_definition.allowed_scopes.reset();
@@ -227,13 +290,14 @@ bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
     count_definition.allowed_scopes.set(types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
     count_definition.minimum = 0;
 
-    auto count_variable_id = fmt::format("job/{}/count", job.id());
-    auto add_result = parsed_variable_definitions_->AddNumericDefinition(
+    const auto count_variable_id = fmt::format("job/{}/count", job.id());
+    const auto add_result = parsed_variable_definitions_->AddNumericDefinition(
         BaseTypes::StringIdFromStdString(count_variable_id), count_definition);
     if (!add_result) {
       AddError(errors,
                fmt::format("Variable {} has conflicting type definition", count_variable_id));
-      return false;
+      success = false;
+      continue;
     }
 
     spdlog::debug("Added variable {}", count_variable_id);
@@ -242,67 +306,60 @@ bool RuleSet<BaseTypes>::LoadJobs(ErrorsCollection& errors) {
                       BaseTypes::StringIdFromStdString(count_variable_id)));
   }
 
-  return true;
+  for (int idx = 0; idx < jobs_.job_groups_size(); ++idx) {
+    success &= AddGroup(jobs_.job_groups(idx), types::ScopeType::SCOPE_TYPE_JOB_GROUP,
+                        static_cast<size_t>(idx), errors);
+  }
+
+  return success;
 }
 
-// TODO: Давай загружать группы в соответствующих методах LoadImprovements, LoadJobs
-// Из твоих lambda-функций add_group, validate_group_graph и остальных (по мене необходимости)
-// можно сделать отдельные private методы.
 template <typename BaseTypes>
-bool RuleSet<BaseTypes>::LoadGroups(ErrorsCollection& errors) {
+bool RuleSet<BaseTypes>::AddGroup(const proto::ruleset::Group& group, types::ScopeType scope_type,
+                                  size_t index, ErrorsCollection& errors) {
+  if (!ValidateIdentifier(group.id(), "group", errors)) {
+    return false;
+  }
+
+  const auto group_id = BaseTypes::StringIdFromStdString(group.id());
+  const auto [existing, inserted] =
+      groups_by_id_.try_emplace(group_id, GroupIndexEntry{scope_type, index});
+  if (inserted) {
+    return true;
+  }
+
+  AddError(errors,
+           fmt::format("Group id '{}' is not unique in the merged ruleset: it is used by {} and {}",
+                       group.id(), existing->second.scope_type, scope_type));
+  return false;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::ValidateGroupReferences(
+    std::string_view owner_kind, const std::string& owner_id,
+    const google::protobuf::RepeatedPtrField<std::string>& group_ids,
+    types::ScopeType expected_type, ErrorsCollection& errors) const {
   bool success = true;
-
-  const auto add_group = [this, &errors, &success](const proto::ruleset::Group& group,
-                                                   types::ScopeType scope_type, size_t index) {
-    if (group.id().empty()) {
-      AddError(errors, fmt::format("{} contains a group with an empty id", scope_type));
-      success = false;
-      return;
-    }
-
-    const auto group_id = BaseTypes::StringIdFromStdString(group.id());
-    const auto [existing, inserted] =
-        groups_by_id_.try_emplace(group_id, GroupIndexEntry{scope_type, index});
-    if (!inserted) {
-      AddError(errors,
-               fmt::format("Group id '{}' is not unique in the merged ruleset: it is used by {} "
-                           "and {}",
-                           group.id(), existing->second.scope_type, scope_type));
+  absl::flat_hash_set<std::string> unique_ids;
+  for (const auto& group_id : group_ids) {
+    if (!unique_ids.insert(group_id).second) {
+      AddError(errors, fmt::format("{} '{}' contains duplicate group reference '{}'", owner_kind,
+                                   owner_id, group_id));
       success = false;
     }
-  };
 
-  for (int idx = 0; idx < improvements_.improvement_groups_size(); ++idx) {
-    add_group(improvements_.improvement_groups(idx), types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP,
-              static_cast<size_t>(idx));
-  }
-  for (int idx = 0; idx < jobs_.job_groups_size(); ++idx) {
-    add_group(jobs_.job_groups(idx), types::ScopeType::SCOPE_TYPE_JOB_GROUP,
-              static_cast<size_t>(idx));
-  }
-
-  const auto validate_unique_references = [&errors, &success](std::string_view owner_kind,
-                                                              const std::string& owner_id,
-                                                              const auto& group_ids) {
-    absl::flat_hash_set<std::string> unique_ids;
-    for (const auto& group_id : group_ids) {
-      if (!unique_ids.insert(group_id).second) {
-        AddError(errors, fmt::format("{} '{}' contains duplicate group reference '{}'", owner_kind,
-                                     owner_id, group_id));
-        success = false;
-      }
+    if (!ValidateIdentifier(
+            group_id, fmt::format("group reference in {} '{}'", owner_kind, owner_id), errors)) {
+      success = false;
+      continue;
     }
-  };
 
-  const auto validate_reference = [this, &errors, &success](
-                                      std::string_view owner_kind, const std::string& owner_id,
-                                      const std::string& group_id, types::ScopeType expected_type) {
     const auto found = FindGroupById(BaseTypes::StringIdFromStdString(group_id));
     if (!found) {
       AddError(errors, fmt::format("{} '{}' references unknown group '{}'", owner_kind, owner_id,
                                    group_id));
       success = false;
-      return;
+      continue;
     }
     if (found->scope_type != expected_type) {
       AddError(errors,
@@ -310,83 +367,88 @@ bool RuleSet<BaseTypes>::LoadGroups(ErrorsCollection& errors) {
                            owner_id, group_id, found->scope_type, expected_type));
       success = false;
     }
+  }
+  return success;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::ValidateGroupGraph(
+    const google::protobuf::RepeatedPtrField<proto::ruleset::Group>& groups, std::string_view kind,
+    types::ScopeType expected_type, ErrorsCollection& errors) const {
+  bool success = true;
+  absl::flat_hash_map<std::string, const proto::ruleset::Group*> by_id;
+  by_id.reserve(static_cast<size_t>(groups.size()));
+  for (const auto& group : groups) {
+    if (IsValidIdentifier(group.id())) {
+      by_id.try_emplace(group.id(), &group);
+    }
+    success &= ValidateGroupReferences(kind, group.id(), group.groups(), expected_type, errors);
+  }
+
+  enum class VisitState { kUnvisited, kVisiting, kVisited };
+  absl::flat_hash_map<std::string, VisitState> states;
+  std::vector<std::string> path;
+
+  std::function<void(const proto::ruleset::Group&)> visit = [&](const auto& group) {
+    auto& state = states[group.id()];
+    if (state == VisitState::kVisited) {
+      return;
+    }
+    if (state == VisitState::kVisiting) {
+      const auto cycle_begin = std::ranges::find(path, group.id());
+      std::string cycle;
+      for (auto it = cycle_begin; it != path.end(); ++it) {
+        if (!cycle.empty()) {
+          cycle += " -> ";
+        }
+        cycle += *it;
+      }
+      if (!cycle.empty()) {
+        cycle += " -> ";
+      }
+      cycle += group.id();
+      AddError(errors, fmt::format("Cycle detected in {} graph: {}", kind, cycle));
+      success = false;
+      return;
+    }
+
+    state = VisitState::kVisiting;
+    path.push_back(group.id());
+    for (const auto& inherited_group_id : group.groups()) {
+      const auto inherited = by_id.find(inherited_group_id);
+      if (inherited != by_id.end()) {
+        visit(*inherited->second);
+      }
+    }
+    path.pop_back();
+    state = VisitState::kVisited;
   };
 
-  for (const auto& improvement : improvements_.improvements()) {
-    validate_unique_references("Improvement", improvement.id(), improvement.groups());
-    for (const auto& group_id : improvement.groups()) {
-      validate_reference("Improvement", improvement.id(), group_id,
-                         types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
+  for (const auto& group : groups) {
+    if (IsValidIdentifier(group.id())) {
+      visit(group);
     }
+  }
+
+  return success;
+}
+
+template <typename BaseTypes>
+bool RuleSet<BaseTypes>::ValidateGroups(ErrorsCollection& errors) const {
+  bool success = true;
+  for (const auto& improvement : improvements_.improvements()) {
+    success &= ValidateGroupReferences("Improvement", improvement.id(), improvement.groups(),
+                                       types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP, errors);
   }
   for (const auto& job : jobs_.jobs()) {
-    validate_unique_references("Job", job.id(), job.groups());
-    for (const auto& group_id : job.groups()) {
-      validate_reference("Job", job.id(), group_id, types::ScopeType::SCOPE_TYPE_JOB_GROUP);
-    }
+    success &= ValidateGroupReferences("Job", job.id(), job.groups(),
+                                       types::ScopeType::SCOPE_TYPE_JOB_GROUP, errors);
   }
 
-  const auto validate_group_graph =
-      [&errors, &success, &validate_reference, &validate_unique_references](
-          const auto& groups, std::string_view kind, types::ScopeType expected_type) {
-        std::unordered_map<std::string, const proto::ruleset::Group*> by_id;
-        by_id.reserve(static_cast<size_t>(groups.size()));
-        for (const auto& group : groups) {
-          by_id.try_emplace(group.id(), &group);
-          validate_unique_references(kind, group.id(), group.groups());
-          for (const auto& inherited_group_id : group.groups()) {
-            validate_reference(kind, group.id(), inherited_group_id, expected_type);
-          }
-        }
-
-        enum class VisitState { kUnvisited, kVisiting, kVisited };
-        std::unordered_map<std::string, VisitState> states;
-        std::vector<std::string> path;
-
-        std::function<void(const proto::ruleset::Group&)> visit = [&](const auto& group) {
-          auto& state = states[group.id()];
-          if (state == VisitState::kVisited) {
-            return;
-          }
-          if (state == VisitState::kVisiting) {
-            const auto cycle_begin = std::ranges::find(path, group.id());
-            std::string cycle;
-            for (auto it = cycle_begin; it != path.end(); ++it) {
-              if (!cycle.empty()) {
-                cycle += " -> ";
-              }
-              cycle += *it;
-            }
-            if (!cycle.empty()) {
-              cycle += " -> ";
-            }
-            cycle += group.id();
-            AddError(errors, fmt::format("Cycle detected in {} graph: {}", kind, cycle));
-            success = false;
-            return;
-          }
-
-          state = VisitState::kVisiting;
-          path.push_back(group.id());
-          for (const auto& inherited_group_id : group.groups()) {
-            const auto inherited = by_id.find(inherited_group_id);
-            if (inherited != by_id.end()) {
-              visit(*inherited->second);
-            }
-          }
-          path.pop_back();
-          state = VisitState::kVisited;
-        };
-
-        for (const auto& group : groups) {
-          visit(group);
-        }
-      };
-
-  validate_group_graph(improvements_.improvement_groups(), "improvement group",
-                       types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP);
-  validate_group_graph(jobs_.job_groups(), "job group", types::ScopeType::SCOPE_TYPE_JOB_GROUP);
-
+  success &= ValidateGroupGraph(improvements_.improvement_groups(), "improvement group",
+                                types::ScopeType::SCOPE_TYPE_IMPROVEMENT_GROUP, errors);
+  success &= ValidateGroupGraph(jobs_.job_groups(), "job group",
+                                types::ScopeType::SCOPE_TYPE_JOB_GROUP, errors);
   return success;
 }
 
@@ -436,34 +498,6 @@ bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
     add_effect_definition(effect_proto);
   };
 
-  const auto quote_lua_string = [](std::string_view value) {
-    std::string result{"'"};
-    for (const char character : value) {
-      switch (character) {
-        case '\\':
-          result += "\\\\";
-          break;
-        case '\'':
-          result += "\\'";
-          break;
-        case '\n':
-          result += "\\n";
-          break;
-        case '\r':
-          result += "\\r";
-          break;
-        case '\t':
-          result += "\\t";
-          break;
-        default:
-          result += character;
-          break;
-      }
-    }
-    result += "'";
-    return result;
-  };
-
   const auto sorted_entries = [](const auto& values) {
     std::vector<std::pair<std::string, int32_t>> result;
     result.reserve(values.size());
@@ -489,8 +523,8 @@ bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
       proto::ruleset::effect::Code code;
       std::string lua;
       for (const auto& [job_id, amount] : sorted_entries(improvement.jobs())) {
-        const auto variable = quote_lua_string(fmt::format("job/{}/count", job_id));
-        lua += fmt::format("target:set_numeric_modifier({}, {}, 0.0);\n", variable, amount);
+        lua +=
+            fmt::format("target:set_numeric_modifier('job/{}/count', {}, 0.0);\n", job_id, amount);
       }
       code.set_lua(std::move(lua));
       add_class_effect(fmt::format("{}/jobs.effect", improvement.id()),
@@ -518,12 +552,12 @@ bool RuleSet<BaseTypes>::LoadEffects(ErrorsCollection& errors) {
       proto::ruleset::effect::Code code;
       std::string lua;
       for (const auto& [resource_id, amount] : sorted_entries(job.input())) {
-        const auto variable = quote_lua_string(fmt::format("consumes/@{}", resource_id));
-        lua += fmt::format("target:set_numeric_modifier({}, {}, 0.0);\n", variable, amount);
+        lua += fmt::format("target:set_numeric_modifier('consumes/@{}', {}, 0.0);\n", resource_id,
+                           amount);
       }
       for (const auto& [resource_id, amount] : sorted_entries(job.output())) {
-        const auto variable = quote_lua_string(fmt::format("produces/@{}", resource_id));
-        lua += fmt::format("target:set_numeric_modifier({}, {}, 0.0);\n", variable, amount);
+        lua += fmt::format("target:set_numeric_modifier('produces/@{}', {}, 0.0);\n", resource_id,
+                           amount);
       }
       code.set_lua(std::move(lua));
       add_class_effect(fmt::format("{}/resources.effect", job.id()),
@@ -727,10 +761,12 @@ RuleSet<BaseTypes> ParseFrom(const proto::ruleset::RuleSet& source,
   success &= result.LoadImprovements(errors);
   success &= result.LoadResources(errors);
   success &= result.LoadJobs(errors);
-  success &= result.LoadGroups(errors);
+  success &= result.ValidateGroups(errors);
   success &= result.LoadProjects(errors);
-  success &= result.LoadEffects(errors);
   success &= result.LoadVariableDefinitions(errors);
+  if (success) {
+    success &= result.LoadEffects(errors);
+  }
   if (!success) {
     spdlog::warn("Failed to fully restore ruleset from serialized data");
   }
